@@ -1,3 +1,5 @@
+import { API_ORIGIN } from '../api/client';
+
 /** Resolve stored upload paths for display in the browser (via Vite proxy or absolute API host). */
 export function normalizeStoredMediaPath(url?: string | null) {
   if (!url?.trim()) return '';
@@ -11,7 +13,11 @@ export function normalizeStoredMediaPath(url?: string | null) {
 
 export function mediaUrl(url?: string | null) {
   const path = normalizeStoredMediaPath(url);
-  return path;
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+  return `${API_ORIGIN}${path}`;
 }
 
 export function normalizeHexColor(raw: string, fallback = '#22A6BC') {
