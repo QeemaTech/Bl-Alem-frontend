@@ -1,13 +1,14 @@
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  BookOpen, CheckCircle2, DollarSign, Image, Layers, Save, Upload,
+  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, DollarSign, Image, Layers, Save, Upload,
 } from 'lucide-react';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { CoursePricingTypeToggle } from '../../components/ui/CoursePricingTypeToggle';
 import { Input } from '../../components/ui/Input';
 import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -124,32 +125,6 @@ function CoverUploadField({
   );
 }
 
-function ToggleField({ label, helper, checked, onChange }: {
-  label: string;
-  helper?: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="field settings-toggle-field">
-      <span>{label}</span>
-      <div className="settings-toggle-row">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={checked}
-          className={`settings-toggle ${checked ? 'active' : ''}`}
-          onClick={() => onChange(!checked)}
-        >
-          <span className="settings-toggle-thumb" />
-        </button>
-        <span className="settings-toggle-label">{checked ? 'مجاني' : 'مدفوع'}</span>
-      </div>
-      {helper ? <small className="field-helper">{helper}</small> : null}
-    </label>
-  );
-}
-
 const linesToList = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean);
 
 export default function InstructorCourseFormPage() {
@@ -179,6 +154,7 @@ export default function InstructorCourseFormPage() {
           categoryId: String(course.categoryId),
           price: String(course.price || 0),
           discountPrice: course.discountPrice ? String(course.discountPrice) : '',
+          isFree: Number(course.price || 0) === 0,
           whatYouWillLearn: (course.whatYouWillLearn || []).join('\n'),
           requirements: (course.requirements || []).join('\n'),
           targetAudience: (course.targetAudience || []).join('\n'),
@@ -539,14 +515,12 @@ export default function InstructorCourseFormPage() {
             <>
               <h2 className="course-form-section-title">التسعير</h2>
               <p className="course-form-section-desc">حدّد ما إذا كان الكورس مجانياً أو مدفوعاً.</p>
-              <div className="form-grid">
-                <ToggleField
-                  label="كورس مجاني"
-                  helper="عند التفعيل، لن يُطلب من الطالب دفع رسوم."
-                  checked={Boolean(form.isFree)}
-                  onChange={(v) => {
-                    update('isFree', v);
-                    if (v) {
+              <div className="form-grid course-pricing-grid">
+                <CoursePricingTypeToggle
+                  isFree={Boolean(form.isFree)}
+                  onChange={(free) => {
+                    update('isFree', free);
+                    if (free) {
                       update('price', '0');
                       update('discountPrice', '');
                     }
@@ -645,27 +619,40 @@ export default function InstructorCourseFormPage() {
         </Card>
 
         <div className="wizard-actions course-form-actions">
-          <Button type="button" variant="secondary" disabled={step === '1'} onClick={goPrev}>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="course-form-prev-btn"
+            disabled={step === '1'}
+            icon={<ArrowRight size={18} />}
+            onClick={goPrev}
+          >
             السابق
           </Button>
-          {step !== '4' ? (
-            <Button type="button" onClick={goNext}>التالي</Button>
-          ) : (
-            <div className="chip-row">
-              <Button
-                type="button"
-                variant="secondary"
-                loading={submitting}
-                icon={<Save size={16} />}
-                onClick={() => requestSave('stay')}
-              >
-                {isEdit ? 'حفظ التعديلات' : 'حفظ كمسودة'}
+          <div className="course-form-actions-group">
+            {step !== '4' ? (
+              <Button type="button" size="lg" icon={<ArrowLeft size={18} />} onClick={goNext}>
+                التالي
               </Button>
-              <Button type="submit" loading={submitting} icon={<Save size={16} />}>
-                حفظ والمتابعة للبناء
-              </Button>
-            </div>
-          )}
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  loading={submitting}
+                  icon={<Save size={18} />}
+                  onClick={() => requestSave('stay')}
+                >
+                  {isEdit ? 'حفظ التعديلات' : 'حفظ كمسودة'}
+                </Button>
+                <Button type="submit" size="lg" loading={submitting} icon={<Save size={18} />}>
+                  حفظ والمتابعة للبناء
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </form>
 

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, GraduationCap, Plus, Users, Wallet } from 'lucide-react';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
@@ -13,6 +14,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
+import { TableEntityLink } from '../../components/ui/TableEntityLink';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
@@ -82,6 +84,7 @@ const exportColumns = [
 ];
 
 export default function AdminInstructorsPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,9 +98,6 @@ export default function AdminInstructorsPage() {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -189,15 +189,7 @@ export default function AdminInstructorsPage() {
     setFormOpen(true);
   };
 
-  const openDetail = async (instructor: any) => {
-    setDetailLoading(true);
-    setDetailOpen(true);
-    try {
-      setSelected(await adminApi.instructor(instructor.id));
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+  const goToDetail = (instructor: any) => navigate(`/admin/instructors/${instructor.id}`);
 
   const saveInstructor = async (e: FormEvent) => {
     e.preventDefault();
@@ -247,7 +239,6 @@ export default function AdminInstructorsPage() {
     showToast('تم رفض المحاضر.', 'success');
     setRejectTarget(null);
     setRejectReason('');
-    setDetailOpen(false);
     await load();
   };
 
@@ -269,7 +260,6 @@ export default function AdminInstructorsPage() {
       await adminApi.deleteInstructor(deleteTarget.id);
       showToast('تم حذف المحاضر.', 'success');
       setDeleteTarget(null);
-      setDetailOpen(false);
       await load();
     } catch {
       showToast('لا يمكن حذف محاضر لديه دورات.', 'error');
@@ -344,10 +334,19 @@ export default function AdminInstructorsPage() {
         <Table
           loading={loading}
           data={tableRows}
+          onRowClick={(row) => goToDetail(row._raw)}
           emptyTitle="لا يوجد محاضرون"
           emptyDescription="أضف محاضراً جديداً أو انتظر طلبات التسجيل."
           columns={[
-            { key: 'fullName', header: 'الاسم' },
+            {
+              key: 'fullName',
+              header: 'الاسم',
+              render: (row) => (
+                <TableEntityLink to={`/admin/instructors/${row._raw.id}`}>
+                  {row.fullName}
+                </TableEntityLink>
+              ),
+            },
             { key: 'email', header: 'البريد' },
             { key: 'phone', header: 'الهاتف' },
             { key: 'specialization', header: 'التخصص' },
@@ -379,8 +378,8 @@ export default function AdminInstructorsPage() {
                 const instructor = row._raw;
                 const approval = instructor.instructorProfile?.approvalStatus;
                 return (
-                  <div className="card-actions">
-                    <Button variant="ghost" size="sm" onClick={() => openDetail(instructor)}>
+                  <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" onClick={() => goToDetail(instructor)}>
                       التفاصيل
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => openEdit(instructor)}>
@@ -421,65 +420,6 @@ export default function AdminInstructorsPage() {
           ]}
         />
       </Card>
-
-      <Modal
-        isOpen={detailOpen}
-        title="تفاصيل المحاضر"
-        onClose={() => { setDetailOpen(false); setSelected(null); }}
-      >
-        {detailLoading ? <p>جاري التحميل...</p> : null}
-        {selected && !detailLoading ? (
-          <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>الاسم</span><strong>{selected.fullName}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.email}</strong></div>
-            <div className="detail-row"><span>الهاتف</span><strong dir="ltr">{selected.phone || '—'}</strong></div>
-            <div className="detail-row"><span>المسمى</span><strong>{selected.instructorProfile?.title || '—'}</strong></div>
-            <div className="detail-row"><span>التخصص</span><strong>{selected.instructorProfile?.specialization || '—'}</strong></div>
-            <div className="detail-row"><span>سنوات الخبرة</span><strong>{selected.instructorProfile?.yearsOfExperience ?? '—'}</strong></div>
-            <div className="detail-row"><span>الطلاب</span><strong>{selected.instructorProfile?.totalStudents ?? 0}</strong></div>
-            <div className="detail-row"><span>الأرباح</span><strong>{fmtMoney(Number(selected.instructorProfile?.totalEarnings || 0))}</strong></div>
-            <div className="detail-row"><span>رصيد المحفظة</span><strong>{fmtMoney(Number(selected.wallet?.balance || 0))}</strong></div>
-            <div className="detail-row">
-              <span>حالة الاعتماد</span>
-              <Badge variant={approvalVariant(selected.instructorProfile?.approvalStatus)}>
-                {approvalLabels[selected.instructorProfile?.approvalStatus] || '—'}
-              </Badge>
-            </div>
-            <div className="detail-row">
-              <span>حالة الحساب</span>
-              <Badge variant={accountVariant(selected.status)}>
-                {accountLabels[selected.status] || selected.status}
-              </Badge>
-            </div>
-            {selected.instructorProfile?.rejectionReason ? (
-              <div className="detail-row"><span>سبب الرفض</span><strong>{selected.instructorProfile.rejectionReason}</strong></div>
-            ) : null}
-            {selected.instructorProfile?.bio ? (
-              <div className="detail-row"><span>نبذة</span><strong>{selected.instructorProfile.bio}</strong></div>
-            ) : null}
-            <div className="detail-row"><span>تاريخ الانضمام</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            {selected.courses?.length ? (
-              <div className="stack-sm">
-                <h4>الكورسات ({selected.courses.length})</h4>
-                {selected.courses.map((course: any) => (
-                  <div key={course.id} className="notification-card">
-                    <span>{course.titleAr}</span>
-                    <span>{course.totalStudents ?? 0} طالب</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            <div className="chip-row">
-              <Button variant="ghost" onClick={() => { setDetailOpen(false); openEdit(selected); }}>
-                تعديل
-              </Button>
-              {selected.instructorProfile?.approvalStatus === 'PENDING' ? (
-                <Button onClick={() => handleApprove(selected)}>اعتماد</Button>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
-      </Modal>
 
       <Modal
         isOpen={formOpen}

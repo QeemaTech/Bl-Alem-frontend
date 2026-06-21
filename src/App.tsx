@@ -57,6 +57,9 @@ import AdminLearningPathsPage from './pages/admin/AdminLearningPathsPage';
 import AdminInstructorsPage from './pages/admin/AdminInstructorsPage';
 import AdminStudentsPage from './pages/admin/AdminStudentsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
+import AdminStudentDetailPage from './pages/admin/AdminStudentDetailPage';
+import AdminInstructorDetailPage from './pages/admin/AdminInstructorDetailPage';
 import UnauthorizedPage from './pages/shared/UnauthorizedPage';
 import NotFoundPage from './pages/shared/NotFoundPage';
 import CertificateVerifyPage from './pages/shared/CertificateVerifyPage';
@@ -128,6 +131,9 @@ function App() {
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/categories" element={<AdminCategoriesPage />} />
           <Route path="/admin/learning-paths" element={<AdminLearningPathsPage />} />
+          <Route path="/admin/instructors/:id" element={<AdminInstructorDetailPage />} />
+          <Route path="/admin/students/:id" element={<AdminStudentDetailPage />} />
+          <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
           <Route path="/admin/instructors" element={<AdminInstructorsPage />} />
           <Route path="/admin/students" element={<AdminStudentsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />

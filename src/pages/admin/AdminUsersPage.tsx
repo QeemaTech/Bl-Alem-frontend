@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Download, Plus, Shield, UserCheck, Users } from 'lucide-react';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
@@ -13,6 +14,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
+import { TableEntityLink } from '../../components/ui/TableEntityLink';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
@@ -72,6 +74,7 @@ const exportColumns = [
 ];
 
 export default function AdminUsersPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,9 +86,6 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -175,15 +175,7 @@ export default function AdminUsersPage() {
     setFormOpen(true);
   };
 
-  const openDetail = async (user: any) => {
-    setDetailLoading(true);
-    setDetailOpen(true);
-    try {
-      setSelected(await adminApi.user(user.id));
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+  const goToDetail = (user: any) => navigate(`/admin/users/${user.id}`);
 
   const saveUser = async (e: FormEvent) => {
     e.preventDefault();
@@ -230,7 +222,6 @@ export default function AdminUsersPage() {
       await adminApi.deleteUser(deleteTarget.id);
       showToast('تم حذف المستخدم.', 'success');
       setDeleteTarget(null);
-      setDetailOpen(false);
       await load();
     } catch {
       showToast('تعذّر حذف المستخدم.', 'error');
@@ -305,10 +296,19 @@ export default function AdminUsersPage() {
         <Table
           loading={loading}
           data={tableRows}
+          onRowClick={(row) => goToDetail(row._raw)}
           emptyTitle="لا يوجد مستخدمون"
           emptyDescription="أضف مستخدماً جديداً للبدء."
           columns={[
-            { key: 'fullName', header: 'الاسم' },
+            {
+              key: 'fullName',
+              header: 'الاسم',
+              render: (row) => (
+                <TableEntityLink to={`/admin/users/${row._raw.id}`}>
+                  {row.fullName}
+                </TableEntityLink>
+              ),
+            },
             { key: 'email', header: 'البريد' },
             { key: 'phone', header: 'الهاتف' },
             {
@@ -338,8 +338,8 @@ export default function AdminUsersPage() {
               render: (row) => {
                 const user = row._raw;
                 return (
-                  <div className="card-actions">
-                    <Button variant="ghost" size="sm" onClick={() => openDetail(user)}>
+                  <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm" onClick={() => goToDetail(user)}>
                       التفاصيل
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => openEdit(user)}>
@@ -358,52 +358,6 @@ export default function AdminUsersPage() {
           ]}
         />
       </Card>
-
-      <Modal
-        isOpen={detailOpen}
-        title="تفاصيل المستخدم"
-        onClose={() => { setDetailOpen(false); setSelected(null); }}
-      >
-        {detailLoading ? <p>جاري التحميل...</p> : null}
-        {selected && !detailLoading ? (
-          <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>الاسم</span><strong>{selected.fullName}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.email}</strong></div>
-            <div className="detail-row"><span>الهاتف</span><strong dir="ltr">{selected.phone || '—'}</strong></div>
-            <div className="detail-row">
-              <span>الدور</span>
-              <Badge variant={roleVariant(selected.role)}>{roleLabels[selected.role] || selected.role}</Badge>
-            </div>
-            <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={statusVariant(selected.status)}>{statusLabels[selected.status] || selected.status}</Badge>
-            </div>
-            <div className="detail-row"><span>رصيد المحفظة</span><strong>{fmtMoney(Number(selected.wallet?.balance || 0))}</strong></div>
-            <div className="detail-row"><span>اللغة المفضلة</span><strong>{selected.preferredLanguage === 'ar' ? 'العربية' : selected.preferredLanguage}</strong></div>
-            <div className="detail-row"><span>تاريخ التسجيل</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            {selected.role === 'INSTRUCTOR' && selected.instructorProfile ? (
-              <>
-                <div className="detail-row"><span>حالة الاعتماد</span><strong>{selected.instructorProfile.approvalStatus === 'APPROVED' ? 'معتمد' : selected.instructorProfile.approvalStatus === 'PENDING' ? 'قيد المراجعة' : selected.instructorProfile.approvalStatus === 'REJECTED' ? 'مرفوض' : selected.instructorProfile.approvalStatus === 'SUSPENDED' ? 'موقوف' : selected.instructorProfile.approvalStatus}</strong></div>
-                <div className="detail-row"><span>التخصص</span><strong>{selected.instructorProfile.specialization || '—'}</strong></div>
-              </>
-            ) : null}
-            {selected.role === 'STUDENT' && selected.studentProfile?.educationLevel ? (
-              <div className="detail-row"><span>المستوى التعليمي</span><strong>{selected.studentProfile.educationLevel}</strong></div>
-            ) : null}
-            <div className="detail-row">
-              <span>الإحصائيات</span>
-              <strong>
-                {selected._count?.enrollments ?? 0} اشتراك · {selected._count?.courses ?? 0} كورس · {selected._count?.payments ?? 0} دفعة
-              </strong>
-            </div>
-            <div className="chip-row">
-              <Button variant="ghost" onClick={() => { setDetailOpen(false); openEdit(selected); }}>
-                تعديل
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </Modal>
 
       <Modal
         isOpen={formOpen}

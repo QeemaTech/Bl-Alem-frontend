@@ -29,6 +29,7 @@ interface TableProps<T> {
   compact?: boolean;
   showFooter?: boolean;
   className?: string;
+  onRowClick?: (row: T) => void;
 }
 
 const cellStyle = (col: TableColumn<Record<string, unknown>>): CSSProperties => {
@@ -93,6 +94,7 @@ export function Table<T extends Record<string, unknown>>({
   compact = false,
   showFooter = true,
   className = '',
+  onRowClick,
 }: TableProps<T>) {
   const normalizedColumns = columns as TableColumn<Record<string, unknown>>[];
   const isWide = normalizedColumns.length >= 6;
@@ -159,8 +161,22 @@ export function Table<T extends Record<string, unknown>>({
               </tr>
             </thead>
             <tbody className="data-table-body">
-              {data.map((row, index) => (
-                <tr key={resolveKey(row, index)} className="data-table-row">
+              {data.map((row, index) => {
+                const clickable = Boolean(onRowClick);
+                return (
+                <tr
+                  key={resolveKey(row, index)}
+                  className={`data-table-row ${clickable ? 'is-clickable' : ''}`.trim()}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onKeyDown={onRowClick ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onRowClick(row);
+                    }
+                  } : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  role={onRowClick ? 'button' : undefined}
+                >
                   {normalizedColumns.map((col) => (
                     <td
                       key={String(col.key)}
@@ -171,7 +187,8 @@ export function Table<T extends Record<string, unknown>>({
                     </td>
                   ))}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
