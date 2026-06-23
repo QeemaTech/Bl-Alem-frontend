@@ -9,6 +9,9 @@ interface FilterBarProps {
   onSearchChange?: (value: string) => void;
   onReset?: () => void;
   children?: ReactNode;
+  className?: string;
+  searchIconSize?: number;
+  resetVariant?: 'ghost' | 'secondary' | 'outline';
 }
 
 export function FilterBar({
@@ -17,22 +20,25 @@ export function FilterBar({
   onSearchChange,
   onReset,
   children,
+  className = '',
+  searchIconSize = 18,
+  resetVariant = 'ghost',
 }: FilterBarProps) {
   return (
-    <div className="filter-bar">
+    <div className={`filter-bar ${className}`.trim()} role="search">
       {onSearchChange ? (
         <Input
           label="بحث"
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          icon={<Search size={18} />}
+          icon={<Search size={searchIconSize} aria-hidden="true" />}
         />
       ) : null}
       {children}
       {onReset ? (
         <div className="filter-bar-actions">
-          <Button variant="ghost" size="sm" onClick={onReset} icon={<RotateCcw size={16} />}>
+          <Button variant={resetVariant} size="sm" onClick={onReset} icon={<RotateCcw size={16} aria-hidden="true" />}>
             إعادة تعيين
           </Button>
         </div>

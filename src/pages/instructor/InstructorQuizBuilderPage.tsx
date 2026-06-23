@@ -96,6 +96,11 @@ export default function InstructorQuizBuilderPage() {
 
   useEffect(() => { load(); }, [quizId]);
 
+  const sortedQuestions = useMemo(
+    () => [...(quiz?.questions || [])].sort((a: any, b: any) => a.order - b.order),
+    [quiz?.questions],
+  );
+
   const questionStats = useMemo(() => {
     const questions = quiz?.questions || [];
     const complete = questions.filter((q: any) => {
@@ -263,7 +268,7 @@ export default function InstructorQuizBuilderPage() {
     return (
       <div className="quiz-answer-list">
         {draft.answers.map((answer, index) => (
-          <div key={`${index}-${answer.textAr}`} className="quiz-answer-row">
+          <div key={`${disabled ? 'edit' : 'new'}-answer-${index}`} className="quiz-answer-row">
             <label className="quiz-answer-radio">
               <input
                 type="radio"
@@ -273,15 +278,17 @@ export default function InstructorQuizBuilderPage() {
                 onChange={() => setDraft({ ...draft, answers: setCorrectAnswer(draft.answers, index) })}
               />
             </label>
-            <Input
-              label={`الخيار ${index + 1}`}
+            <input
+              type="text"
+              className="quiz-answer-input"
               value={answer.textAr}
+              disabled={disabled}
+              placeholder={`اكتب نص الخيار ${index + 1}`}
               onChange={(e) => {
                 const answers = [...draft.answers];
                 answers[index] = { ...answers[index], textAr: e.target.value };
                 setDraft({ ...draft, answers });
               }}
-              placeholder={`اكتب نص الخيار ${index + 1}`}
             />
             {draft.answers.length > 2 ? (
               <Button
@@ -351,26 +358,20 @@ export default function InstructorQuizBuilderPage() {
         }
       />
 
-      <Card>
-        <div className="section-heading">
-          <h2 className="course-form-section-title">إعدادات الاختبار</h2>
+      <Card className="quiz-settings-card">
+        <div className="section-heading quiz-section-heading">
+          <div>
+            <h2 className="course-form-section-title">إعدادات الاختبار</h2>
+            <p className="course-form-section-desc">المدة، درجة النجاح، وربط الاختبار بدرس أو بالدورة كاملة.</p>
+          </div>
           <Badge variant={quiz.isReady ? 'success' : 'warning'}>
             {quiz.isReady ? 'جاهز للطلاب' : 'غير جاهز'}
           </Badge>
         </div>
-        <div className="form-grid">
+        <div className="quiz-settings-grid">
           <Input label="العنوان" value={quiz.titleAr || ''} onChange={(e) => setQuiz({ ...quiz, titleAr: e.target.value })} />
-          <Input label="المدة (دقيقة)" type="number" min={1} value={quiz.durationMinutes || 10} onChange={(e) => setQuiz({ ...quiz, durationMinutes: e.target.value })} />
-          <Input label="درجة النجاح (%)" type="number" min={1} max={100} value={quiz.passingScore || 60} onChange={(e) => setQuiz({ ...quiz, passingScore: e.target.value })} />
-          <Select
-            label="ربط بدرس"
-            value={quiz.lessonId ? String(quiz.lessonId) : ''}
-            onChange={(e) => setQuiz({ ...quiz, lessonId: e.target.value })}
-            options={[
-              { label: 'اختبار للدورة بالكامل', value: '' },
-              ...lessons.map((lesson: any) => ({ label: lesson.titleAr, value: String(lesson.id) })),
-            ]}
-          />
+          <Input label="المدة (دقيقة)" type="number" min={1} value={quiz.durationMinutes ?? ''} onChange={(e) => setQuiz({ ...quiz, durationMinutes: e.target.value })} />
+          <Input label="درجة النجاح (%)" type="number" min={1} max={100} value={quiz.passingScore ?? ''} onChange={(e) => setQuiz({ ...quiz, passingScore: e.target.value })} />
           <Select
             label="الحالة"
             value={quiz.status || 'ACTIVE'}
@@ -380,13 +381,102 @@ export default function InstructorQuizBuilderPage() {
               { label: 'غير فعّال', value: 'INACTIVE' },
             ]}
           />
+          <Select
+            label="ربط بدرس"
+            value={quiz.lessonId ? String(quiz.lessonId) : ''}
+            onChange={(e) => setQuiz({ ...quiz, lessonId: e.target.value })}
+            options={[
+              { label: 'اختبار للدورة بالكامل', value: '' },
+              ...lessons.map((lesson: any) => ({ label: lesson.titleAr, value: String(lesson.id) })),
+            ]}
+          />
         </div>
       </Card>
 
+      <section className="quiz-questions-section">
+        <div className="quiz-section-intro">
+          <h2>الأسئلة ({sortedQuestions.length})</h2>
+          <p>السؤال الأحدث يظهر في الأعلى. يمكنك تعديله أو حذفه من هنا.</p>
+        </div>
+
+        {sortedQuestions.length ? (
+          <div className="quiz-questions-list">
+            {sortedQuestions.map((q: any, index: number) => (
+              <Card key={q.id} className="quiz-question-card">
+                {editingQuestionId === q.id ? (
+                  <form className="quiz-question-edit-form" onSubmit={saveEditQuestion}>
+                    <div className="section-heading quiz-section-heading">
+                      <h3>تعديل السؤال {index + 1}</h3>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setEditingQuestionId(null)} icon={<X size={14} />}>
+                        إلغاء
+                      </Button>
+                    </div>
+                    <Textarea
+                      label="نص السؤال"
+                      value={editDraft.textAr}
+                      onChange={(e) => setEditDraft({ ...editDraft, textAr: e.target.value })}
+                      rows={3}
+                    />
+                    <Select
+                      label="نوع السؤال"
+                      value={editDraft.type}
+                      onChange={(e) => changeEditQuestionType(e.target.value as QuestionType)}
+                      options={[
+                        { label: 'اختيار متعدد', value: 'MULTIPLE_CHOICE' },
+                        { label: 'صح أو خطأ', value: 'TRUE_FALSE' },
+                      ]}
+                    />
+                    <div className="quiz-answers-panel">
+                      <span className="quiz-answers-panel-title">الإجابات</span>
+                      {renderAnswerEditor(editDraft, setEditDraft)}
+                    </div>
+                    {editError ? <p className="field-error">{editError}</p> : null}
+                    <div className="chip-row quiz-question-actions">
+                      <Button type="submit" loading={savingQuestion} icon={<Save size={14} />}>حفظ التعديلات</Button>
+                      <Button type="button" variant="ghost" onClick={() => setEditingQuestionId(null)}>إلغاء</Button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="section-heading quiz-section-heading">
+                      <div className="quiz-question-head">
+                        <span className="quiz-question-index">سؤال {index + 1}</span>
+                        <h3>{q.textAr}</h3>
+                      </div>
+                      <Badge variant="info">{typeLabels[q.type as QuestionType] || q.type}</Badge>
+                    </div>
+                    <div className="quiz-answer-preview">
+                      {(q.answers || []).map((a: any) => (
+                        <div key={a.id} className={`quiz-answer-preview-item ${a.isCorrect ? 'correct' : ''}`}>
+                          {a.isCorrect ? <CheckCircle2 size={16} /> : <span className="quiz-answer-dot" />}
+                          <span>{a.textAr}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="chip-row quiz-question-actions">
+                      <Button type="button" size="sm" variant="secondary" onClick={() => startEditQuestion(q)} icon={<Edit size={14} />}>
+                        تعديل السؤال
+                      </Button>
+                      <Button type="button" size="sm" variant="danger" onClick={() => setDeleteTarget({ type: 'question', item: q })} icon={<Trash2 size={14} />}>
+                        حذف
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="quiz-empty-questions-card">
+            <EmptyState title="لا توجد أسئلة بعد" description="استخدم النموذج أدناه لإضافة أول سؤال." />
+          </Card>
+        )}
+      </section>
+
       <Card className="quiz-new-question-card">
         <h2 className="course-form-section-title">إضافة سؤال جديد</h2>
-        <p className="course-form-section-desc">اكتب السؤال، اختر النوع، وأضف الإجابات في نفس النموذج.</p>
-        <form className="stack-sm" onSubmit={addNewQuestion}>
+        <p className="course-form-section-desc">السؤال الجديد يظهر في أعلى القائمة مباشرة بعد الإضافة.</p>
+        <form className="quiz-new-question-form" onSubmit={addNewQuestion}>
           <Textarea
             label="نص السؤال"
             value={newQuestion.textAr}
@@ -403,8 +493,8 @@ export default function InstructorQuizBuilderPage() {
               { label: 'صح أو خطأ', value: 'TRUE_FALSE' },
             ]}
           />
-          <div className="field">
-            <span>الإجابات</span>
+          <div className="quiz-answers-panel">
+            <span className="quiz-answers-panel-title">الإجابات</span>
             <small className="field-helper">حدّد الإجابة الصحيحة باختيار الدائرة بجانبها.</small>
             {renderAnswerEditor(newQuestion, setNewQuestion)}
           </div>
@@ -414,77 +504,6 @@ export default function InstructorQuizBuilderPage() {
           </Button>
         </form>
       </Card>
-
-      {quiz.questions?.length ? (
-        quiz.questions.map((q: any, index: number) => (
-          <Card key={q.id} className="quiz-question-card">
-            {editingQuestionId === q.id ? (
-              <form className="stack-sm" onSubmit={saveEditQuestion}>
-                <div className="section-heading">
-                  <h3>تعديل السؤال {index + 1}</h3>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setEditingQuestionId(null)} icon={<X size={14} />}>
-                    إلغاء
-                  </Button>
-                </div>
-                <Textarea
-                  label="نص السؤال"
-                  value={editDraft.textAr}
-                  onChange={(e) => setEditDraft({ ...editDraft, textAr: e.target.value })}
-                  rows={3}
-                />
-                <Select
-                  label="نوع السؤال"
-                  value={editDraft.type}
-                  onChange={(e) => changeEditQuestionType(e.target.value as QuestionType)}
-                  options={[
-                    { label: 'اختيار متعدد', value: 'MULTIPLE_CHOICE' },
-                    { label: 'صح أو خطأ', value: 'TRUE_FALSE' },
-                  ]}
-                />
-                <div className="field">
-                  <span>الإجابات</span>
-                  {renderAnswerEditor(editDraft, setEditDraft)}
-                </div>
-                {editError ? <p className="field-error">{editError}</p> : null}
-                <div className="chip-row">
-                  <Button type="submit" loading={savingQuestion} icon={<Save size={14} />}>حفظ التعديلات</Button>
-                  <Button type="button" variant="ghost" onClick={() => setEditingQuestionId(null)}>إلغاء</Button>
-                </div>
-              </form>
-            ) : (
-              <>
-                <div className="section-heading">
-                  <div>
-                    <span className="quiz-question-index">سؤال {index + 1}</span>
-                    <h3>{q.textAr}</h3>
-                  </div>
-                  <Badge variant="info">{typeLabels[q.type as QuestionType] || q.type}</Badge>
-                </div>
-                <div className="quiz-answer-preview">
-                  {(q.answers || []).map((a: any) => (
-                    <div key={a.id} className={`quiz-answer-preview-item ${a.isCorrect ? 'correct' : ''}`}>
-                      {a.isCorrect ? <CheckCircle2 size={16} /> : <span className="quiz-answer-dot" />}
-                      <span>{a.textAr}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="chip-row">
-                  <Button type="button" size="sm" variant="secondary" onClick={() => startEditQuestion(q)} icon={<Edit size={14} />}>
-                    تعديل السؤال
-                  </Button>
-                  <Button type="button" size="sm" variant="danger" onClick={() => setDeleteTarget({ type: 'question', item: q })} icon={<Trash2 size={14} />}>
-                    حذف
-                  </Button>
-                </div>
-              </>
-            )}
-          </Card>
-        ))
-      ) : (
-        <Card>
-          <EmptyState title="لا توجد أسئلة بعد" description="استخدم النموذج أعلاه لإضافة أول سؤال." />
-        </Card>
-      )}
 
       <Card className="quiz-builder-footer">
         <p>بعد إنهاء الأسئلة، احفظ الإعدادات ثم ارجع لمنشئ الكورس لإرسال الدورة للمراجعة.</p>

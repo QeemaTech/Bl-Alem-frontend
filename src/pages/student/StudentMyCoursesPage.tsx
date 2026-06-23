@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, UserRound,
+  BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, RotateCcw, Search,
 } from 'lucide-react';
 import { studentApi } from '../../api/student';
+import { MyCourseCard } from '../../components/student/MyCourseCard';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { FilterBar } from '../../components/ui/FilterBar';
-import { CourseGridSkeleton } from '../../components/ui/LoadingSkeleton';
+import { Input } from '../../components/ui/Input';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { ProgressBar } from '../../components/ui/ProgressBar';
@@ -41,9 +41,32 @@ const exportColumns = [
   { key: 'quizzes', header: 'عدد الاختبارات' },
 ];
 
+function MyCoursesPageSkeleton() {
+  return (
+    <div className="page-grid student-my-courses-page">
+      <div className="skeleton skeleton-block student-my-courses-skeleton-header" />
+      <div className="stats-grid student-my-courses-stats">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="skeleton skeleton-stat" />
+        ))}
+      </div>
+      <div className="student-my-courses-insights">
+        <div className="skeleton skeleton-block student-my-courses-skeleton-journey" />
+        <div className="skeleton skeleton-block student-my-courses-skeleton-chart" />
+      </div>
+      <div className="skeleton skeleton-block student-my-courses-skeleton-toolbar" />
+      <div className="course-list-grid student-my-courses-grid">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="skeleton skeleton-card student-my-courses-skeleton-card" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function StudentMyCoursesPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState('active');
+  const [tab, setTab] = useState('all');
   const [viewMode, setViewMode] = useState('cards');
   const [allItems, setAllItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,53 +137,29 @@ export default function StudentMyCoursesPage() {
     exportTableToExcel('كورساتي', exportColumns, tableRows.map(({ _raw, ...row }) => row));
   };
 
-  const renderCourseCard = (item: any) => {
-    const progress = Number(item.progressPercentage || 0);
-    const isCompleted = item.status === 'COMPLETED' || progress >= 100;
-    const quizCount = item.course?.quizzes?.length || 0;
-    return (
-      <Card key={item.id} className={`my-course-card enhanced ${isCompleted ? 'completed' : ''}`}>
-        <div className="course-cover">
-          {item.course?.coverImage ? (
-            <img src={item.course.coverImage} alt="" />
-          ) : (
-            <span className="course-cover-fallback"><BookOpen size={32} /></span>
-          )}
-          <Badge variant={statusVariant(item.status)} className="my-course-status-badge">
-            {statusLabels[item.status] || item.status}
-          </Badge>
-        </div>
-        <div className="my-course-card-body">
-          <span className="my-course-category">{item.course?.category?.nameAr || 'دورة'}</span>
-          <h3>{item.course?.titleAr}</h3>
-          <p><UserRound size={14} /> {item.course?.instructor?.fullName || '—'}</p>
-          <div className="my-course-meta">
-            <span>{item.course?._count?.lessons || 0} درس</span>
-            {quizCount ? <span>{quizCount} اختبار</span> : null}
-            <span>اشتركت {fmtDate(item.enrolledAt)}</span>
-          </div>
-          {quizCount && !isCompleted ? (
-            <Badge variant="info">لديك اختبارات معلّقة</Badge>
-          ) : null}
-          <ProgressBar value={progress} label="التقدم" size="md" />
-          <Button
-            fullWidth
-            variant={isCompleted ? 'secondary' : 'primary'}
-            icon={isCompleted ? <CheckCircle2 size={16} /> : <PlayCircle size={16} />}
-            onClick={() => navigate(`/student/player/${item.courseId}`)}
-          >
-            {isCompleted ? 'مراجعة الدورة' : 'استكمال'}
-          </Button>
-        </div>
-      </Card>
-    );
+  const handleReset = () => {
+    setSearch('');
+    setSort('recent');
+    setTab('all');
   };
 
-  if (loading) return <CourseGridSkeleton />;
+  const journeyMessage = useMemo(() => {
+    if (!stats.total) return 'ابدأ رحلتك بالاشتراك في دورة من الكورسات المتاحة.';
+    if (stats.avgProgress >= 100) return 'ممتاز! أكملت جميع دوراتك المسجّلة.';
+    if (stats.avgProgress >= 50) return 'أنت في منتصف الطريق — استمر في التعلّم!';
+    return 'بداية قوية — كل درس يقربك من هدفك.';
+  }, [stats]);
+
+  const emptyTitle = allItems.length ? 'لا توجد نتائج مطابقة' : 'لا توجد دورات';
+  const emptyDescription = allItems.length
+    ? 'جرّبي تغيير البحث أو الفلتر للعثور على دوراتك.'
+    : 'اشترك في دورة من صفحة الكورسات المتاحة لتظهر هنا.';
+
+  if (loading) return <MyCoursesPageSkeleton />;
 
   return (
     <div className="page-grid student-my-courses-page">
-      <div className="reports-header">
+      <div className="reports-header student-my-courses-header">
         <PageHeader
           title="كورساتي"
           subtitle="تابع الدورات التي اشتركت بها واستكمل التعلم"
@@ -175,94 +174,121 @@ export default function StudentMyCoursesPage() {
         </div>
       </div>
 
-      <Card className="student-my-courses-hero">
-        <div className="student-my-courses-hero-icon">
-          <GraduationCap size={32} />
-        </div>
-        <div className="student-my-courses-hero-body">
-          <strong>رحلتك التعليمية</strong>
-          <p>
-            {stats.total
-              ? `لديك ${stats.total} دورة — متوسط التقدم ${stats.avgProgress}%`
-              : 'ابدأ رحلتك بالاشتراك في دورة من الكورسات المتاحة.'}
-          </p>
-        </div>
-      </Card>
-
-      <div className="stats-grid">
+      <div className="stats-grid student-my-courses-stats">
         <StatCard title="إجمالي الدورات" value={String(stats.total)} icon={BookOpen} />
         <StatCard title="قيد التعلم" value={String(stats.active)} icon={PlayCircle} />
         <StatCard title="مكتملة" value={String(stats.completed)} icon={CheckCircle2} />
         <StatCard title="متوسط التقدم" value={`${stats.avgProgress}%`} icon={GraduationCap} />
       </div>
 
-      {chartData.length ? (
-        <div className="reports-charts-grid student-my-courses-charts">
-          <ReportChart title="حالة الدورات" type="pie" data={chartData} />
+      <div className="student-my-courses-insights">
+        <Card className="student-journey-card">
+          <div className="student-journey-head">
+            <span className="student-journey-icon"><GraduationCap size={22} /></span>
+            <div className="student-journey-copy">
+              <strong>رحلتك التعليمية</strong>
+              <p>{journeyMessage}</p>
+            </div>
+            <span className="student-journey-percent">{stats.avgProgress}%</span>
+          </div>
+          <ProgressBar value={stats.avgProgress} label="متوسط إكمال الدورات" size="md" />
+          {stats.total ? (
+            <p className="student-journey-foot">
+              {stats.completed} مكتملة · {stats.active} قيد التعلم · {stats.total} إجمالاً
+            </p>
+          ) : null}
+        </Card>
+
+        {chartData.length ? (
+          <div className="student-my-courses-chart-wrap">
+            <ReportChart title="حالة الدورات" type="pie" data={chartData} height={168} />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="student-my-courses-toolbar">
+        <div className="student-my-courses-toolbar-search">
+          <Input
+            label="بحث"
+            placeholder="بحث باسم الدورة أو المحاضر..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            icon={<Search size={18} />}
+          />
         </div>
-      ) : null}
-
-      <Tabs
-        variant="pills"
-        activeTab={tab}
-        onChange={setTab}
-        tabs={[
-          { id: 'active', label: `قيد التعلم (${stats.active})` },
-          { id: 'completed', label: `مكتملة (${stats.completed})` },
-          { id: 'all', label: `الكل (${stats.total})` },
-        ]}
-      />
-
-      <FilterBar
-        searchValue={search}
-        searchPlaceholder="بحث باسم الدورة أو المحاضر..."
-        onSearchChange={setSearch}
-        onReset={() => { setSearch(''); setSort('recent'); }}
-      >
-        <Select
-          label="الترتيب"
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          options={[
-            { label: 'الأحدث اشتراكاً', value: 'recent' },
-            { label: 'الأعلى تقدماً', value: 'progress' },
-            { label: 'الاسم', value: 'name' },
-          ]}
-        />
-      </FilterBar>
-
-      <Tabs
-        variant="pills"
-        activeTab={viewMode}
-        onChange={setViewMode}
-        tabs={[
-          { id: 'cards', label: `البطاقات (${filtered.length})` },
-          { id: 'table', label: `الجدول (${filtered.length})` },
-        ]}
-      />
+        <div className="student-my-courses-toolbar-sort">
+          <Select
+            label="الترتيب"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            options={[
+              { label: 'الأحدث اشتراكاً', value: 'recent' },
+              { label: 'الأعلى تقدماً', value: 'progress' },
+              { label: 'الاسم', value: 'name' },
+            ]}
+          />
+        </div>
+        <button
+          type="button"
+          className="student-my-courses-toolbar-reset"
+          onClick={handleReset}
+        >
+          <RotateCcw size={15} />
+          إعادة تعيين
+        </button>
+        <div className="student-my-courses-toolbar-tabs">
+          <Tabs
+            variant="pills"
+            activeTab={tab}
+            onChange={setTab}
+            tabs={[
+              { id: 'all', label: `الكل (${stats.total})` },
+              { id: 'active', label: `قيد التعلم (${stats.active})` },
+              { id: 'completed', label: `مكتملة (${stats.completed})` },
+            ]}
+          />
+        </div>
+        <div className="student-my-courses-toolbar-view">
+          <Tabs
+            variant="pills"
+            activeTab={viewMode}
+            onChange={setViewMode}
+            tabs={[
+              { id: 'cards', label: `البطاقات (${filtered.length})` },
+              { id: 'table', label: `الجدول (${filtered.length})` },
+            ]}
+          />
+        </div>
+      </div>
 
       {viewMode === 'cards' ? (
         filtered.length ? (
-          <div className="course-list-grid">
-            {filtered.map(renderCourseCard)}
+          <div className="course-list-grid student-my-courses-grid">
+            {filtered.map((item, index) => (
+              <MyCourseCard
+                key={item.id}
+                item={item}
+                style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+              />
+            ))}
           </div>
         ) : (
-          <Card>
+          <Card className="student-my-courses-empty">
             <EmptyState
-              title="لا توجد دورات"
-              description={allItems.length ? 'لا توجد دورات مطابقة للفلاتر.' : 'اشترك في دورة من صفحة الكورسات المتاحة لتظهر هنا.'}
+              title={emptyTitle}
+              description={emptyDescription}
               icon={BookOpen}
-              actionLabel="تصفح الكورسات"
-              onAction={() => navigate('/student/courses')}
+              actionLabel={allItems.length ? undefined : 'تصفح الكورسات'}
+              onAction={allItems.length ? undefined : () => navigate('/student/courses')}
             />
           </Card>
         )
       ) : (
-        <Card>
+        <Card className="student-my-courses-table-wrap">
           <Table
             data={tableRows}
-            emptyTitle="لا توجد دورات"
-            emptyDescription="لا توجد دورات مطابقة."
+            emptyTitle={emptyTitle}
+            emptyDescription={emptyDescription}
             columns={[
               { key: 'title', header: 'الدورة' },
               { key: 'instructor', header: 'المحاضر' },

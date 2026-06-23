@@ -19,6 +19,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { formatMoney, roundMoney } from '../../utils/formatMoney';
 import { exportTableToExcel } from '../../utils/exportExcel';
+import { mediaUrl } from '../../utils/mediaUrl';
 
 const withdrawalVariant = (status: string) => {
   if (status === 'APPROVED' || status === 'PAID') return 'success' as const;
@@ -122,9 +123,10 @@ export default function InstructorEarningsPage() {
   }, [withdrawals, data]);
 
   const openWithdrawModal = () => {
+    const withdrawable = roundMoney(data?.withdrawableBalance ?? data?.availableBalance ?? 0);
     setForm({
       ...emptyWithdrawForm,
-      amount: data?.availableBalance ? String(roundMoney(data.availableBalance)) : '',
+      amount: withdrawable ? String(withdrawable) : '',
     });
     setOpen(true);
   };
@@ -132,13 +134,18 @@ export default function InstructorEarningsPage() {
   const withdraw = async (e: FormEvent) => {
     e.preventDefault();
     const amount = roundMoney(form.amount);
-    const available = roundMoney(data?.availableBalance || 0);
+    const available = roundMoney(data?.withdrawableBalance ?? data?.availableBalance ?? 0);
+    const minAmount = roundMoney(data?.minWithdrawalAmount || 0);
     if (amount <= 0) {
       showToast('أدخل مبلغاً صالحاً.', 'error');
       return;
     }
     if (amount > available) {
       showToast('المبلغ أكبر من الرصيد المتاح.', 'error');
+      return;
+    }
+    if (minAmount > 0 && amount < minAmount) {
+      showToast(`الحد الأدنى للسحب ${formatMoney(minAmount)}.`, 'error');
       return;
     }
     setSubmitting(true);
@@ -172,7 +179,12 @@ export default function InstructorEarningsPage() {
   if (loading) return <DashboardSkeleton />;
 
   const available = roundMoney(data?.availableBalance || 0);
+  const withdrawable = roundMoney(data?.withdrawableBalance ?? available);
   const hasPending = withdrawals.some((i: any) => i.status === 'PENDING');
+  const pendingRequest = withdrawals.find((i: any) => i.status === 'PENDING');
+  const minWithdrawalAmount = roundMoney(data?.minWithdrawalAmount || 0);
+  const canOpenWithdrawModal = withdrawable >= minWithdrawalAmount;
+  const canSubmitWithdrawal = canOpenWithdrawModal && !hasPending;
 
   return (
     <div className="page-grid">
@@ -185,12 +197,37 @@ export default function InstructorEarningsPage() {
           <Button
             icon={<ArrowDownToLine size={18} />}
             onClick={openWithdrawModal}
-            disabled={available <= 0 || hasPending}
+            disabled={!canOpenWithdrawModal}
           >
             طلب سحب
           </Button>
         </div>
       </div>
+
+      {hasPending ? (
+        <Card className="withdraw-blocked-notice">
+          <Clock size={20} />
+          <div>
+            <strong>لديك طلب سحب قيد المراجعة</strong>
+            <p>
+              طلب بمبلغ {formatMoney(pendingRequest?.amount)} بانتظار موافقة الإدارة.
+              {' '}المبلغ لم يُخصم من رصيدك بعد — سيُخصم عند الاعتماد.
+            </p>
+          </div>
+        </Card>
+      ) : null}
+
+      {available > 0 && available < minWithdrawalAmount ? (
+        <Card className="withdraw-blocked-notice is-warning">
+          <Wallet size={20} />
+          <div>
+            <strong>الرصيد أقل من الحد الأدنى للسحب</strong>
+            <p>
+              الحد الأدنى {formatMoney(minWithdrawalAmount)} — رصيدك المتاح حالياً {formatMoney(available)}.
+            </p>
+          </div>
+        </Card>
+      ) : null}
 
       <div className="stats-grid">
         <StatCard
@@ -203,7 +240,15 @@ export default function InstructorEarningsPage() {
           title="الرصيد المتاح"
           value={formatMoney(data?.availableBalance)}
           icon={Wallet}
-          hint={available > 0 ? 'جاهز للسحب' : 'لا يوجد رصيد'}
+          hint={
+            hasPending
+              ? `${formatMoney(withdrawable)} قابل للسحب الآن`
+              : available >= minWithdrawalAmount
+                ? 'جاهز للسحب'
+                : available > 0
+                  ? `الحد الأدنى ${formatMoney(minWithdrawalAmount)}`
+                  : 'لا يوجد رصيد'
+          }
         />
         <StatCard
           title="الرصيد المعلق"
@@ -328,19 +373,37 @@ export default function InstructorEarningsPage() {
             <strong>{formatMoney(available)}</strong>
           </div>
           {hasPending ? (
-            <p className="field-helper">لديك طلب سحب قيد المراجعة — انتظر حتى يُعالج قبل طلب جديد.</p>
+            <p className="field-helper">
+              يمكنك سحب حتى {formatMoney(withdrawable)} — الطلب المعلق ({formatMoney(pendingRequest?.amount)}) لم يُخصم بعد.
+            </p>
+          ) : null}
+          {hasPending ? (
+            <div className="withdraw-pending-alert">
+              <strong>لا يمكن إرسال طلب جديد الآن</strong>
+              <p>
+                لديك طلب سحب بمبلغ {formatMoney(pendingRequest?.amount)} قيد المراجعة.
+                انتظر حتى تعالج الإدارة الطلب الحالي ثم أعد المحاولة.
+              </p>
+            </div>
+          ) : null}
+          {minWithdrawalAmount > 0 && !hasPending ? (
+            <p className="field-helper">الحد الأدنى للسحب: {formatMoney(minWithdrawalAmount)}</p>
+          ) : null}
+          {available > 0 && available < minWithdrawalAmount && !hasPending ? (
+            <p className="field-helper">الرصيد الحالي أقل من الحد الأدنى للسحب.</p>
           ) : null}
         </div>
         <form className="stack-sm withdraw-modal-form" onSubmit={withdraw}>
           <Input
             label="المبلغ (ر.س)"
             type="number"
-            min={1}
-            max={available}
+            min={minWithdrawalAmount || 1}
+            max={withdrawable}
             step="0.01"
             value={form.amount}
-            helper={`الحد الأقصى: ${formatMoney(available)}`}
+            helper={`الحد الأدنى: ${formatMoney(minWithdrawalAmount)} • الحد الأقصى: ${formatMoney(withdrawable)}`}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            disabled={!canSubmitWithdrawal}
             required
           />
           <Input
@@ -348,12 +411,14 @@ export default function InstructorEarningsPage() {
             value={form.bankName}
             placeholder="مثال: الراجحي"
             onChange={(e) => setForm({ ...form, bankName: e.target.value })}
+            disabled={!canSubmitWithdrawal}
             required
           />
           <Input
             label="اسم الحساب"
             value={form.accountName}
             onChange={(e) => setForm({ ...form, accountName: e.target.value })}
+            disabled={!canSubmitWithdrawal}
             required
           />
           <Input
@@ -362,6 +427,7 @@ export default function InstructorEarningsPage() {
             placeholder="SA..."
             dir="ltr"
             onChange={(e) => setForm({ ...form, iban: e.target.value.toUpperCase() })}
+            disabled={!canSubmitWithdrawal}
             required
           />
           <Textarea
@@ -369,12 +435,13 @@ export default function InstructorEarningsPage() {
             rows={2}
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            disabled={!canSubmitWithdrawal}
           />
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
               إلغاء
             </Button>
-            <Button type="submit" loading={submitting} disabled={available <= 0 || hasPending}>
+            <Button type="submit" loading={submitting} disabled={!canSubmitWithdrawal}>
               إرسال الطلب
             </Button>
           </div>
@@ -395,6 +462,14 @@ export default function InstructorEarningsPage() {
             <div className="detail-row"><span>التاريخ</span><strong>{fmtDate(selected.createdAt)}</strong></div>
             {selected.notes ? (
               <div className="detail-row"><span>ملاحظات</span><strong>{selected.notes}</strong></div>
+            ) : null}
+            {selected.transferProofImage ? (
+              <div className="withdrawal-proof-block">
+                <strong>صورة التحويل</strong>
+                <a href={mediaUrl(selected.transferProofImage)} target="_blank" rel="noreferrer">
+                  <img src={mediaUrl(selected.transferProofImage)} alt="صورة التحويل" className="withdrawal-proof-image" />
+                </a>
+              </div>
             ) : null}
           </div>
         ) : null}

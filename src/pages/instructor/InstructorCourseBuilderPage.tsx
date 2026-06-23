@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, ClipboardList, Edit, ExternalLink, FilePlus, GripVertical, Lock, Plus, Send, Trash2, Unlock, Upload } from 'lucide-react';
+import { ChevronDown, ChevronUp, ClipboardList, Edit, ExternalLink, FilePlus, GripVertical, Plus, Send, Trash2 } from 'lucide-react';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -8,12 +8,8 @@ import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
-import { Input } from '../../components/ui/Input';
-import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
-import { Select } from '../../components/ui/Select';
 import { SuccessModal } from '../../components/ui/SuccessModal';
-import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 
 const courseVariant = (status: string) => {
@@ -29,16 +25,12 @@ export default function InstructorCourseBuilderPage() {
   const { showToast } = useToast();
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState<'section' | 'editSection' | 'lesson' | 'editLesson' | 'resource' | 'quiz' | null>(null);
-  const [form, setForm] = useState<Record<string, any>>({});
   const [confirmSubmit, setConfirmSubmit] = useState(false);
-  const [confirmOpenQuiz, setConfirmOpenQuiz] = useState<{ id: number; title: string } | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [dragLessonId, setDragLessonId] = useState<number | null>(null);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [uploadingResource, setUploadingResource] = useState(false);
-  const lessonVideoInputRef = useRef<HTMLInputElement>(null);
-  const resourceFileInputRef = useRef<HTMLInputElement>(null);
+  const [dropTargetId, setDropTargetId] = useState<number | 'end' | null>(null);
+  const [dropSectionId, setDropSectionId] = useState<number | null>(null);
+  const [collapsedSections, setCollapsedSections] = useState<Set<number>>(new Set());
 
   const load = () => {
     if (!id) return;
@@ -48,107 +40,17 @@ export default function InstructorCourseBuilderPage() {
 
   useEffect(() => { load(); }, [id]);
 
-  const update = (key: string, value: any) => setForm((current) => ({ ...current, [key]: value }));
-  const close = () => { setModal(null); setForm({}); };
-
-  const saveSection = async (e: FormEvent) => {
-    e.preventDefault();
-    await instructorApi.createSection(id!, { titleAr: form.titleAr });
-    showToast('تم إضافة القسم.', 'success');
-    close();
-    load();
-  };
-
-  const saveEditSection = async (e: FormEvent) => {
-    e.preventDefault();
-    await instructorApi.updateSection(form.id, { titleAr: form.titleAr });
-    showToast('تم تحديث القسم.', 'success');
-    close();
-    load();
-  };
-
-  const saveLesson = async (e: FormEvent) => {
-    e.preventDefault();
-    await instructorApi.createLesson(id!, {
-      ...form,
-      sectionId: Number(form.sectionId),
-      duration: Number(form.duration || 0),
-      isPreview: Boolean(form.isPreview),
-      isLocked: form.isLocked !== false,
-    });
-    showToast('تم إضافة الدرس.', 'success');
-    close();
-    load();
-  };
-
-  const saveEditLesson = async (e: FormEvent) => {
-    e.preventDefault();
-    await instructorApi.updateLesson(form.id, {
-      titleAr: form.titleAr,
-      descriptionAr: form.descriptionAr,
-      videoUrl: form.videoUrl,
-      duration: Number(form.duration || 0),
-      isPreview: Boolean(form.isPreview),
-      isLocked: Boolean(form.isLocked),
-      sectionId: Number(form.sectionId),
-    });
-    showToast('تم تحديث الدرس.', 'success');
-    close();
-    load();
-  };
-
-  const uploadLessonVideo = async (file: File) => {
-    setUploadingVideo(true);
-    try {
-      const uploaded = await instructorApi.upload('video', file);
-      update('videoUrl', uploaded.url);
-      showToast('تم رفع الفيديو.', 'success');
-    } catch {
-      showToast('تعذّر رفع الفيديو.', 'error');
-    } finally {
-      setUploadingVideo(false);
-    }
-  };
-
-  const saveResource = async (e: FormEvent) => {
-    e.preventDefault();
-    await instructorApi.createResource(form.lessonId, { title: form.title, fileUrl: form.fileUrl, type: form.type });
-    showToast('تم إضافة المورد.', 'success');
-    close();
-    load();
-  };
-
-  const uploadResourceFile = async (file: File) => {
-    setUploadingResource(true);
-    try {
-      const uploaded = await instructorApi.upload('file', file);
-      update('fileUrl', uploaded.url);
-      showToast('تم رفع الملف.', 'success');
-    } catch {
-      showToast('تعذّر رفع الملف.', 'error');
-    } finally {
-      setUploadingResource(false);
-    }
-  };
-
-  const saveQuiz = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        titleAr: form.titleAr?.trim(),
-        lessonId: form.lessonId || null,
-        durationMinutes: Number(form.durationMinutes || 10),
-        passingScore: Number(form.passingScore || 60),
-      };
-      const quiz = await instructorApi.createQuiz(id!, payload);
-      showToast('تم إنشاء الاختبار.', 'success');
-      close();
-      await instructorApi.course(id!).then(setCourse);
-      setConfirmOpenQuiz({ id: quiz.id, title: quiz.titleAr || form.titleAr });
-    } catch {
-      showToast('تعذّر إنشاء الاختبار.', 'error');
-    }
-  };
+  const basePath = `/instructor/courses/${id}`;
+  const goSectionNew = () => navigate(`${basePath}/sections/new`);
+  const goSectionEdit = (sectionId: number) => navigate(`${basePath}/sections/${sectionId}/edit`);
+  const goLessonNew = (sectionId?: number) => navigate(
+    `${basePath}/lessons/new${sectionId ? `?sectionId=${sectionId}` : ''}`,
+  );
+  const goLessonEdit = (lessonId: number) => navigate(`${basePath}/lessons/${lessonId}/edit`);
+  const goResourceNew = (lessonId?: number) => navigate(
+    lessonId ? `${basePath}/lessons/${lessonId}/resources/new` : `${basePath}/resources/new`,
+  );
+  const goQuizNew = () => navigate(`${basePath}/quizzes/new`);
 
   const submitReview = async () => {
     await instructorApi.submitCourseReview(id!);
@@ -179,44 +81,65 @@ export default function InstructorCourseBuilderPage() {
     load();
   };
 
-  const handleLessonDrop = async (targetLesson: any) => {
-    if (!dragLessonId || dragLessonId === targetLesson.id) return;
-    const allLessons: any[] = [];
-    course.sections?.forEach((s: any) => {
-      (s.lessons || []).forEach((l: any) => allLessons.push({ ...l, sectionId: s.id }));
-    });
-    const dragged = allLessons.find((l) => l.id === dragLessonId);
-    if (!dragged) return;
-    const targetSection = course.sections?.find((s: any) => s.id === targetLesson.sectionId);
-    const sectionLessons = [...(targetSection?.lessons || [])].sort((a: any, b: any) => a.order - b.order);
-    const filtered = sectionLessons.filter((l: any) => l.id !== dragLessonId);
-    const targetIndex = filtered.findIndex((l: any) => l.id === targetLesson.id);
-    filtered.splice(targetIndex, 0, { ...dragged, sectionId: targetSection.id });
-    await instructorApi.reorderLessons(
-      id!,
-      filtered.map((l: any, i: number) => ({ id: l.id, order: i + 1, sectionId: targetSection.id }))
-    );
+  const handleLessonDrop = async (targetLesson: any, targetSectionId: number) => {
+    if (!dragLessonId) return;
+    if (targetLesson && dragLessonId === targetLesson.id) return;
+
+    const draggedSection = course.sections?.find((s: any) =>
+      (s.lessons || []).some((l: any) => l.id === dragLessonId));
+    const targetSection = course.sections?.find((s: any) => s.id === targetSectionId);
+    if (!draggedSection || !targetSection) return;
+
+    const sortLessons = (items: any[]) => [...items].sort((a, b) => a.order - b.order);
+    let targetLessons = sortLessons(targetSection.lessons || []).filter((l: any) => l.id !== dragLessonId);
+
+    if (targetLesson) {
+      const targetIndex = targetLessons.findIndex((l: any) => l.id === targetLesson.id);
+      targetLessons.splice(targetIndex, 0, { id: dragLessonId, sectionId: targetSection.id });
+    } else {
+      targetLessons.push({ id: dragLessonId, sectionId: targetSection.id });
+    }
+
+    const payload = targetLessons.map((l: any, i: number) => ({
+      id: l.id,
+      order: i + 1,
+      sectionId: targetSection.id,
+    }));
+
+    if (draggedSection.id !== targetSection.id) {
+      const sourceLessons = sortLessons(draggedSection.lessons || [])
+        .filter((l: any) => l.id !== dragLessonId)
+        .map((l: any, i: number) => ({ id: l.id, order: i + 1, sectionId: draggedSection.id }));
+      payload.push(...sourceLessons);
+    }
+
+    await instructorApi.reorderLessons(id!, payload);
     setDragLessonId(null);
+    setDropTargetId(null);
+    setDropSectionId(null);
     load();
   };
 
-  const openEditSection = (section: any) => {
-    setForm({ id: section.id, titleAr: section.titleAr });
-    setModal('editSection');
+  const startLessonDrag = (lessonId: number) => setDragLessonId(lessonId);
+
+  const endLessonDrag = () => {
+    setDragLessonId(null);
+    setDropTargetId(null);
+    setDropSectionId(null);
   };
 
-  const openEditLesson = (lesson: any) => {
-    setForm({
-      id: lesson.id,
-      sectionId: String(lesson.sectionId),
-      titleAr: lesson.titleAr,
-      descriptionAr: lesson.descriptionAr || '',
-      videoUrl: lesson.videoUrl || '',
-      duration: lesson.duration || 0,
-      isPreview: lesson.isPreview,
-      isLocked: lesson.isLocked,
+  const sortedLessons = (section: any) =>
+    [...(section.lessons || [])].sort((a: any, b: any) => a.order - b.order);
+
+  const isSectionOpen = (sectionId: number) => !collapsedSections.has(sectionId);
+
+  const toggleSection = (sectionId: number) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) next.delete(sectionId);
+      else next.add(sectionId);
+      return next;
     });
-    setModal('editLesson');
   };
 
   if (loading) return <DashboardSkeleton />;
@@ -235,28 +158,28 @@ export default function InstructorCourseBuilderPage() {
     return lessons.find((l: any) => l.id === lessonId)?.titleAr || 'درس مرتبط';
   };
 
-  const quizReadyCount = (quiz: any) => {
-    return (quiz.questions || []).filter((question: any) => {
+  const quizReadyCount = (quiz: any) => (
+    (quiz.questions || []).filter((question: any) => {
       const answers = (question.answers || []).filter((answer: any) => answer.textAr?.trim());
       const correct = answers.filter((answer: any) => answer.isCorrect).length;
       if (correct !== 1) return false;
       if (question.type === 'TRUE_FALSE') return answers.length === 2;
       return answers.length >= 2;
-    }).length;
-  };
+    }).length
+  );
 
   return (
     <div className="page-grid">
       <PageHeader
         title={course.titleAr}
-        subtitle="رتب السيشنات بالسحب وأضف محتوى جديد"
+        subtitle="اسحب أيقونة ⋮⋮ لترتيب الدروس داخل السيشن"
         breadcrumb={[{ label: 'كورساتي', to: '/instructor/courses' }, { label: course.titleAr }]}
         action={
           <div className="chip-row">
-            <Button type="button" size="sm" onClick={() => setModal('section')} icon={<Plus size={16} />}>إضافة سيشن</Button>
-            <Button type="button" size="sm" variant="secondary" onClick={() => setModal('lesson')} icon={<Plus size={16} />}>إضافة درس</Button>
-            <Button type="button" size="sm" variant="secondary" onClick={() => setModal('quiz')} icon={<Plus size={16} />}>إضافة اختبار</Button>
-            <Button type="button" size="sm" variant="secondary" onClick={() => setModal('resource')} icon={<FilePlus size={16} />}>مورد</Button>
+            <Button type="button" size="sm" onClick={goSectionNew} icon={<Plus size={16} />}>إضافة سيشن</Button>
+            <Button type="button" size="sm" variant="secondary" onClick={() => goLessonNew()} icon={<Plus size={16} />}>إضافة درس</Button>
+            <Button type="button" size="sm" variant="secondary" onClick={goQuizNew} icon={<Plus size={16} />}>إضافة اختبار</Button>
+            <Button type="button" size="sm" variant="secondary" onClick={() => goResourceNew()} icon={<FilePlus size={16} />}>مورد</Button>
             <Button type="button" size="sm" onClick={() => setConfirmSubmit(true)} icon={<Send size={16} />}>إرسال للمراجعة</Button>
           </div>
         }
@@ -267,32 +190,65 @@ export default function InstructorCourseBuilderPage() {
       </Card>
 
       {course.sections?.length ? (
-        course.sections.map((section: any, sectionIndex: number) => (
-          <Card key={section.id}>
-            <div className="section-heading">
-              <h3>{section.titleAr}</h3>
+        course.sections.map((section: any, sectionIndex: number) => {
+          const sectionOpen = isSectionOpen(section.id);
+          const lessonCount = sortedLessons(section).length;
+          return (
+          <Card key={section.id} className="builder-section-card">
+            <div className="section-heading builder-section-heading">
+              <button
+                type="button"
+                className="builder-section-toggle"
+                onClick={() => toggleSection(section.id)}
+                aria-expanded={sectionOpen}
+              >
+                <ChevronDown size={20} className={`builder-section-chevron ${sectionOpen ? 'open' : ''}`} />
+                <div className="builder-section-title-wrap">
+                  <h3>{section.titleAr}</h3>
+                  <span className="builder-section-meta">{lessonCount} {lessonCount === 1 ? 'درس' : 'دروس'}</span>
+                </div>
+              </button>
               <div className="chip-row">
                 <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'up')} disabled={sectionIndex === 0} icon={<ChevronUp size={16} />} />
                 <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'down')} disabled={sectionIndex === course.sections.length - 1} icon={<ChevronDown size={16} />} />
-                <Button variant="secondary" size="sm" onClick={() => openEditSection(section)} icon={<Edit size={14} />}>تعديل</Button>
+                <Button variant="secondary" size="sm" onClick={() => goSectionEdit(section.id)} icon={<Edit size={14} />}>تعديل</Button>
+                <Button variant="secondary" size="sm" onClick={() => goLessonNew(section.id)} icon={<Plus size={14} />}>درس</Button>
                 <Button variant="danger" size="sm" onClick={async () => { await instructorApi.deleteSection(section.id); load(); }} icon={<Trash2 size={15} />}>
                   حذف
                 </Button>
               </div>
             </div>
-            {section.lessons?.length ? (
-              section.lessons.map((lesson: any, lessonIndex: number) => (
-                <div
-                  key={lesson.id}
-                  className={`session-card draggable-item ${dragLessonId === lesson.id ? 'dragging' : ''}`}
-                  draggable
-                  onDragStart={() => setDragLessonId(lesson.id)}
-                  onDragEnd={() => setDragLessonId(null)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleLessonDrop(lesson)}
-                >
-                  <GripVertical size={18} color="var(--muted)" style={{ cursor: 'grab' }} />
-                  <div className="session-card-info">
+            {sectionOpen ? (
+            <div className="builder-section-body">
+            {lessonCount ? (
+              <>
+                {sortedLessons(section).map((lesson: any, lessonIndex: number) => (
+                  <div
+                    key={lesson.id}
+                    className={`session-card draggable-item ${dragLessonId === lesson.id ? 'dragging' : ''} ${dropTargetId === lesson.id ? 'drop-target' : ''}`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDropTargetId(lesson.id);
+                      setDropSectionId(section.id);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleLessonDrop(lesson, section.id);
+                    }}
+                  >
+                    <span
+                      className="lesson-drag-handle"
+                      draggable
+                      title="اسحب لإعادة الترتيب"
+                      onDragStart={(e) => {
+                        startLessonDrag(lesson.id);
+                        e.dataTransfer.effectAllowed = 'move';
+                      }}
+                      onDragEnd={endLessonDrag}
+                    >
+                      <GripVertical size={18} />
+                    </span>
+                    <div className="session-card-info">
                     <h4>{lesson.titleAr}</h4>
                     <p>فيديو ({Math.round((lesson.duration || 0) / 60)} دقيقة)</p>
                     {lesson.resources?.length ? (
@@ -316,26 +272,60 @@ export default function InstructorCourseBuilderPage() {
                   </Badge>
                   <div className="chip-row">
                     <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'up')} disabled={lessonIndex === 0} icon={<ChevronUp size={14} />} />
-                    <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'down')} disabled={lessonIndex === section.lessons.length - 1} icon={<ChevronDown size={14} />} />
-                    <Button variant="secondary" size="sm" onClick={() => openEditLesson(lesson)} icon={<Edit size={14} />}>تعديل</Button>
-                    <Button variant="ghost" size="sm" onClick={() => { setModal('resource'); setForm({ lessonId: lesson.id }); }} icon={<FilePlus size={14} />} />
+                    <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'down')} disabled={lessonIndex === sortedLessons(section).length - 1} icon={<ChevronDown size={14} />} />
+                    <Button variant="secondary" size="sm" onClick={() => goLessonEdit(lesson.id)} icon={<Edit size={14} />}>تعديل</Button>
+                    <Button variant="ghost" size="sm" onClick={() => goResourceNew(lesson.id)} icon={<FilePlus size={14} />} />
                     <Button variant="danger" size="sm" onClick={async () => { await instructorApi.deleteLesson(lesson.id); load(); }} icon={<Trash2 size={14} />} />
                   </div>
                 </div>
-              ))
+                ))}
+                <div
+                  className={`lesson-list-dropzone ${dropSectionId === section.id && dropTargetId === 'end' ? 'active' : ''}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDropTargetId('end');
+                    setDropSectionId(section.id);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleLessonDrop(null, section.id);
+                  }}
+                />
+              </>
             ) : (
-              <EmptyState title="لا توجد دروس" description="أضف دروساً لهذا القسم." />
+              <div
+                className={`lesson-list-dropzone ${dropSectionId === section.id ? 'active' : ''}`}
+                onDragOver={(e) => {
+                  if (!dragLessonId) return;
+                  e.preventDefault();
+                  setDropTargetId('end');
+                  setDropSectionId(section.id);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleLessonDrop(null, section.id);
+                }}
+              >
+                <EmptyState title="لا توجد دروس" description="أضف دروساً لهذا القسم أو اسحب درساً هنا." />
+                <Button size="sm" onClick={() => goLessonNew(section.id)} icon={<Plus size={14} />}>إضافة درس</Button>
+              </div>
             )}
+            </div>
+            ) : null}
           </Card>
-        ))
+          );
+        })
       ) : (
-        <Card><EmptyState title="لا توجد أقسام" description="ابدأ بإضافة قسم ثم دروس." /></Card>
+        <Card>
+          <EmptyState title="لا توجد أقسام" description="ابدأ بإضافة قسم ثم دروس." />
+          <Button onClick={goSectionNew} icon={<Plus size={16} />}>إضافة سيشن</Button>
+        </Card>
       )}
 
       <Card>
         <div className="section-heading">
           <h2>الاختبارات</h2>
-          <Button type="button" size="sm" variant="secondary" onClick={() => setModal('quiz')} icon={<Plus size={16} />}>
+          <Button type="button" size="sm" variant="secondary" onClick={goQuizNew} icon={<Plus size={16} />}>
             إضافة اختبار
           </Button>
         </div>
@@ -384,131 +374,6 @@ export default function InstructorCourseBuilderPage() {
           <EmptyState title="لا توجد اختبارات" description="أنشئ اختباراً مرتبطاً بالدورة أو بدرس محدد." />
         )}
       </Card>
-
-      <Modal isOpen={modal === 'section'} title="إضافة قسم" onClose={close}>
-        <form className="stack-sm" onSubmit={saveSection}>
-          <Input label="عنوان القسم" value={form.titleAr || ''} onChange={(e) => update('titleAr', e.target.value)} required />
-          <Button>حفظ</Button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={modal === 'editSection'} title="تعديل القسم" onClose={close}>
-        <form className="stack-sm" onSubmit={saveEditSection}>
-          <Input label="عنوان القسم" value={form.titleAr || ''} onChange={(e) => update('titleAr', e.target.value)} required />
-          <Button>حفظ التعديلات</Button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={modal === 'lesson'} title="إضافة درس" onClose={close}>
-        <form className="stack-sm" onSubmit={saveLesson}>
-          <Select label="القسم" value={form.sectionId || ''} onChange={(e) => update('sectionId', e.target.value)} options={(course.sections || []).map((s: any) => ({ label: s.titleAr, value: String(s.id) }))} />
-          <Input label="عنوان الدرس" value={form.titleAr || ''} onChange={(e) => update('titleAr', e.target.value)} required />
-          <Textarea label="الوصف" value={form.descriptionAr || ''} onChange={(e) => update('descriptionAr', e.target.value)} />
-          <Input label="رابط الفيديو" value={form.videoUrl || ''} onChange={(e) => update('videoUrl', e.target.value)} />
-          <label className="field">
-            <span>رفع فيديو الدرس</span>
-            <input
-              ref={lessonVideoInputRef}
-              type="file"
-              accept="video/*"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadLessonVideo(file);
-                e.target.value = '';
-              }}
-            />
-            <Button type="button" variant="secondary" loading={uploadingVideo} icon={<Upload size={14} />} onClick={() => lessonVideoInputRef.current?.click()}>
-              رفع الفيديو
-            </Button>
-          </label>
-          <Input label="المدة بالثواني" type="number" value={form.duration || ''} onChange={(e) => update('duration', e.target.value)} />
-          <label className="field"><input type="checkbox" checked={Boolean(form.isPreview)} onChange={(e) => update('isPreview', e.target.checked)} /> درس معاينة</label>
-          <label className="field"><input type="checkbox" checked={form.isLocked !== false} onChange={(e) => update('isLocked', e.target.checked)} /> مغلق {form.isLocked !== false ? <Lock size={14} /> : <Unlock size={14} />}</label>
-          <Button>حفظ الدرس</Button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={modal === 'editLesson'} title="تعديل الدرس" onClose={close}>
-        <form className="stack-sm" onSubmit={saveEditLesson}>
-          <Select label="القسم" value={form.sectionId || ''} onChange={(e) => update('sectionId', e.target.value)} options={(course.sections || []).map((s: any) => ({ label: s.titleAr, value: String(s.id) }))} />
-          <Input label="عنوان الدرس" value={form.titleAr || ''} onChange={(e) => update('titleAr', e.target.value)} required />
-          <Textarea label="الوصف" value={form.descriptionAr || ''} onChange={(e) => update('descriptionAr', e.target.value)} />
-          <Input label="رابط الفيديو" value={form.videoUrl || ''} onChange={(e) => update('videoUrl', e.target.value)} />
-          <label className="field">
-            <span>رفع فيديو الدرس</span>
-            <input
-              ref={lessonVideoInputRef}
-              type="file"
-              accept="video/*"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadLessonVideo(file);
-                e.target.value = '';
-              }}
-            />
-            <Button type="button" variant="secondary" loading={uploadingVideo} icon={<Upload size={14} />} onClick={() => lessonVideoInputRef.current?.click()}>
-              رفع الفيديو
-            </Button>
-          </label>
-          <Input label="المدة بالثواني" type="number" value={form.duration || ''} onChange={(e) => update('duration', e.target.value)} />
-          <label className="field"><input type="checkbox" checked={Boolean(form.isPreview)} onChange={(e) => update('isPreview', e.target.checked)} /> درس معاينة</label>
-          <label className="field"><input type="checkbox" checked={Boolean(form.isLocked)} onChange={(e) => update('isLocked', e.target.checked)} /> مغلق</label>
-          <Button>حفظ التعديلات</Button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={modal === 'resource'} title="إضافة مورد" onClose={close}>
-        <form className="stack-sm" onSubmit={saveResource}>
-          <Select label="الدرس" value={form.lessonId || ''} onChange={(e) => update('lessonId', e.target.value)} options={lessons.map((l: any) => ({ label: l.titleAr, value: String(l.id) }))} />
-          <Input label="عنوان المورد" value={form.title || ''} onChange={(e) => update('title', e.target.value)} required />
-          <Input label="رابط الملف" value={form.fileUrl || ''} onChange={(e) => update('fileUrl', e.target.value)} required />
-          <label className="field">
-            <span>رفع الملف</span>
-            <input
-              ref={resourceFileInputRef}
-              type="file"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadResourceFile(file);
-                e.target.value = '';
-              }}
-            />
-            <Button type="button" variant="secondary" loading={uploadingResource} icon={<Upload size={14} />} onClick={() => resourceFileInputRef.current?.click()}>
-              رفع الملف
-            </Button>
-          </label>
-          <Input label="النوع" value={form.type || 'file'} onChange={(e) => update('type', e.target.value)} />
-          <Button>إضافة المورد</Button>
-        </form>
-      </Modal>
-
-      <Modal isOpen={modal === 'quiz'} title="إضافة اختبار" onClose={close}>
-        <form className="stack-sm" onSubmit={saveQuiz}>
-          <Input label="عنوان الاختبار" value={form.titleAr || ''} onChange={(e) => update('titleAr', e.target.value)} required />
-          <Select label="مرتبط بدرس" value={form.lessonId || ''} onChange={(e) => update('lessonId', e.target.value)} options={[{ label: 'اختبار للدورة', value: '' }, ...lessons.map((l: any) => ({ label: l.titleAr, value: String(l.id) }))]} />
-          <Input label="المدة" type="number" value={form.durationMinutes || 10} onChange={(e) => update('durationMinutes', e.target.value)} />
-          <Input label="درجة النجاح" type="number" value={form.passingScore || 60} onChange={(e) => update('passingScore', e.target.value)} />
-          <Button>إنشاء الاختبار</Button>
-        </form>
-      </Modal>
-
-      <ConfirmDialog
-        isOpen={Boolean(confirmOpenQuiz)}
-        title="تم إنشاء الاختبار"
-        message={`"${confirmOpenQuiz?.title || 'الاختبار'}" جاهز. هل تريد فتح منشئ الاختبار الآن لإضافة الأسئلة؟`}
-        confirmLabel="فتح منشئ الاختبار"
-        cancelLabel="البقاء في منشئ الكورس"
-        variant="primary"
-        onConfirm={() => {
-          const quizId = confirmOpenQuiz?.id;
-          setConfirmOpenQuiz(null);
-          if (quizId) navigate(`/instructor/quizzes/${quizId}`);
-        }}
-        onCancel={() => setConfirmOpenQuiz(null)}
-      />
 
       <ConfirmDialog
         isOpen={confirmSubmit}

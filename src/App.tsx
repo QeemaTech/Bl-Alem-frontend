@@ -29,9 +29,14 @@ import InstructorDashboardPage from './pages/instructor/InstructorDashboardPage'
 import InstructorCoursesPage from './pages/instructor/InstructorCoursesPage';
 import InstructorCourseFormPage from './pages/instructor/InstructorCourseFormPage';
 import InstructorCourseBuilderPage from './pages/instructor/InstructorCourseBuilderPage';
+import InstructorSectionFormPage from './pages/instructor/InstructorSectionFormPage';
+import InstructorLessonFormPage from './pages/instructor/InstructorLessonFormPage';
+import InstructorResourceFormPage from './pages/instructor/InstructorResourceFormPage';
+import InstructorQuizCreatePage from './pages/instructor/InstructorQuizCreatePage';
 import InstructorQuizBuilderPage from './pages/instructor/InstructorQuizBuilderPage';
 import InstructorLivePage from './pages/instructor/InstructorLivePage';
 import InstructorStudentsPage from './pages/instructor/InstructorStudentsPage';
+import InstructorStudentDetailPage from './pages/instructor/InstructorStudentDetailPage';
 import InstructorReviewsPage from './pages/instructor/InstructorReviewsPage';
 import InstructorEarningsPage from './pages/instructor/InstructorEarningsPage';
 import InstructorProfilePage from './pages/instructor/InstructorProfilePage';
@@ -102,10 +107,18 @@ function App() {
           <Route path="/instructor/courses" element={<InstructorCoursesPage />} />
           <Route path="/instructor/courses/create" element={<InstructorCourseFormPage />} />
           <Route path="/instructor/courses/:id/edit" element={<InstructorCourseFormPage />} />
+          <Route path="/instructor/courses/:id/sections/new" element={<InstructorSectionFormPage />} />
+          <Route path="/instructor/courses/:id/sections/:sectionId/edit" element={<InstructorSectionFormPage />} />
+          <Route path="/instructor/courses/:id/lessons/new" element={<InstructorLessonFormPage />} />
+          <Route path="/instructor/courses/:id/lessons/:lessonId/edit" element={<InstructorLessonFormPage />} />
+          <Route path="/instructor/courses/:id/resources/new" element={<InstructorResourceFormPage />} />
+          <Route path="/instructor/courses/:id/lessons/:lessonId/resources/new" element={<InstructorResourceFormPage />} />
+          <Route path="/instructor/courses/:id/quizzes/new" element={<InstructorQuizCreatePage />} />
           <Route path="/instructor/courses/:id/builder" element={<InstructorCourseBuilderPage />} />
           <Route path="/instructor/quizzes/:quizId" element={<InstructorQuizBuilderPage />} />
           <Route path="/instructor/live" element={<InstructorLivePage />} />
           <Route path="/instructor/students" element={<InstructorStudentsPage />} />
+          <Route path="/instructor/students/:userId" element={<InstructorStudentDetailPage />} />
           <Route path="/instructor/reviews" element={<InstructorReviewsPage />} />
           <Route path="/instructor/earnings" element={<InstructorEarningsPage />} />
           <Route path="/instructor/profile" element={<InstructorProfilePage />} />

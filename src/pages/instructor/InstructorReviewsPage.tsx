@@ -14,6 +14,25 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
+const RATING_BAR_COLORS: Record<number, string> = {
+  1: '#FFFBEB',
+  2: '#FEF9C3',
+  3: '#FEF08A',
+  4: '#FDE68A',
+  5: '#FCD34D',
+};
+
+const reviewPercentage = (count: number, total: number) => (
+  total > 0 ? `${Math.round((count / total) * 100)}% من التقييمات` : undefined
+);
+
+/** Placeholder — connect to instructor reply API when available */
+async function onSubmitReply(reviewId: number, replyText: string): Promise<void> {
+  void reviewId;
+  void replyText;
+  await new Promise((resolve) => setTimeout(resolve, 600));
+}
+
 const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
   year: 'numeric',
   month: 'short',
@@ -60,6 +79,122 @@ function ratingLabel(rating: number) {
   return 'سيء';
 }
 
+interface ReviewCardProps {
+  review: any;
+  existingReply: string;
+  onDetails: () => void;
+  onReplySaved: (reviewId: number, replyText: string) => void;
+}
+
+function ReviewCard({ review, existingReply, onDetails, onReplySaved }: ReviewCardProps) {
+  const [showReplyBox, setShowReplyBox] = useState(false);
+  const [replyText, setReplyText] = useState(existingReply);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openReplyBox = () => {
+    setReplyText(existingReply);
+    setShowReplyBox(true);
+  };
+
+  const handleSubmitReply = async () => {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmitReply(review.id, trimmed);
+      onReplySaved(review.id, trimmed);
+      setShowReplyBox(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <article className="review-item">
+      <div className="review-item-avatar">
+        {(review.user?.fullName || '?').slice(0, 1)}
+      </div>
+
+      <div className="review-item-body">
+        <div className="review-item-top">
+          <div>
+            <h3>{review.user?.fullName || 'طالب'}</h3>
+            <p className="review-item-course">{review.course?.titleAr || '—'}</p>
+          </div>
+          <div className="review-item-meta">
+            <Badge variant={ratingVariant(Number(review.rating))}>
+              {ratingLabel(Number(review.rating))}
+            </Badge>
+            <Stars rating={Number(review.rating)} />
+          </div>
+        </div>
+
+        {review.comment?.trim() ? (
+          <p className="review-item-comment">{review.comment}</p>
+        ) : (
+          <p className="review-item-comment muted">بدون تعليق نصي</p>
+        )}
+
+        {existingReply && !showReplyBox ? (
+          <div className="review-reply-block">
+            <p className="review-reply-label">ردك:</p>
+            <p className="review-reply-text">{existingReply}</p>
+            <button type="button" className="review-reply-edit" onClick={openReplyBox}>
+              تعديل الرد
+            </button>
+          </div>
+        ) : null}
+
+        {showReplyBox ? (
+          <div className="review-reply-form">
+            <textarea
+              value={replyText}
+              onChange={(event) => setReplyText(event.target.value)}
+              placeholder="اكتب ردك هنا..."
+              className="input textarea review-reply-textarea"
+              rows={3}
+              disabled={isSubmitting}
+            />
+            <div className="review-reply-form-actions">
+              <Button
+                size="sm"
+                onClick={handleSubmitReply}
+                disabled={isSubmitting || !replyText.trim()}
+                loading={isSubmitting}
+              >
+                {isSubmitting ? 'جارٍ الإرسال...' : 'إرسال الرد'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowReplyBox(false)}
+                disabled={isSubmitting}
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        <time className="review-item-time" dateTime={review.createdAt}>
+          {fmtDate(review.createdAt)}
+        </time>
+      </div>
+
+      <div className="review-item-actions">
+        <Button variant="ghost" size="sm" onClick={onDetails}>
+          التفاصيل
+        </Button>
+        {!showReplyBox && !existingReply ? (
+          <Button variant="ghost" size="sm" className="review-reply-trigger" onClick={openReplyBox}>
+            رد
+          </Button>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
 export default function InstructorReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +202,7 @@ export default function InstructorReviewsPage() {
   const [ratingFilter, setRatingFilter] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [replyOverrides, setReplyOverrides] = useState<Record<number, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -111,8 +247,13 @@ export default function InstructorReviewsPage() {
     [5, 4, 3, 2, 1].map((star) => ({
       label: `${star} نجوم`,
       value: reviews.filter((r) => r.rating === star).length,
+      color: RATING_BAR_COLORS[star],
     }))
   ), [reviews]);
+
+  const getReviewReply = (review: any) => (
+    replyOverrides[review.id] ?? review.instructorReply ?? ''
+  );
 
   const handleExport = () => {
     exportTableToExcel('تقييمات-المحاضر', exportColumns, filteredReviews.map((row) => ({
@@ -139,8 +280,18 @@ export default function InstructorReviewsPage() {
       <div className="stats-grid">
         <StatCard title="عدد التقييمات" value={String(stats.total)} icon={MessageSquare} />
         <StatCard title="متوسط التقييم" value={stats.avg.toFixed(1)} icon={Star} hint="من 5 نجوم" />
-        <StatCard title="تقييم 5 نجوم" value={String(stats.fiveStar)} icon={ThumbsUp} />
-        <StatCard title="مع تعليق" value={String(stats.withComment)} icon={MessageSquare} />
+        <StatCard
+          title="تقييم 5 نجوم"
+          value={String(stats.fiveStar)}
+          icon={ThumbsUp}
+          hint={reviewPercentage(stats.fiveStar, stats.total)}
+        />
+        <StatCard
+          title="مع تعليق"
+          value={String(stats.withComment)}
+          icon={MessageSquare}
+          hint={reviewPercentage(stats.withComment, stats.total)}
+        />
       </div>
 
       {reviews.length ? (
@@ -181,42 +332,15 @@ export default function InstructorReviewsPage() {
       ) : filteredReviews.length ? (
         <div className="reviews-feed">
           {filteredReviews.map((review) => (
-            <article key={review.id} className="review-item">
-              <div className="review-item-avatar">
-                {(review.user?.fullName || '?').slice(0, 1)}
-              </div>
-
-              <div className="review-item-body">
-                <div className="review-item-top">
-                  <div>
-                    <h3>{review.user?.fullName || 'طالب'}</h3>
-                    <p className="review-item-course">{review.course?.titleAr || '—'}</p>
-                  </div>
-                  <div className="review-item-meta">
-                    <Badge variant={ratingVariant(Number(review.rating))}>
-                      {ratingLabel(Number(review.rating))}
-                    </Badge>
-                    <Stars rating={Number(review.rating)} />
-                  </div>
-                </div>
-
-                {review.comment?.trim() ? (
-                  <p className="review-item-comment">{review.comment}</p>
-                ) : (
-                  <p className="review-item-comment muted">بدون تعليق نصي</p>
-                )}
-
-                <time className="review-item-time" dateTime={review.createdAt}>
-                  {fmtDate(review.createdAt)}
-                </time>
-              </div>
-
-              <div className="review-item-actions">
-                <Button variant="ghost" size="sm" onClick={() => setSelected(review)}>
-                  التفاصيل
-                </Button>
-              </div>
-            </article>
+            <ReviewCard
+              key={review.id}
+              review={review}
+              existingReply={getReviewReply(review)}
+              onDetails={() => setSelected(review)}
+              onReplySaved={(reviewId, replyText) => {
+                setReplyOverrides((prev) => ({ ...prev, [reviewId]: replyText }));
+              }}
+            />
           ))}
         </div>
       ) : reviews.length ? (
@@ -243,6 +367,12 @@ export default function InstructorReviewsPage() {
               <strong>التعليق</strong>
               <p>{selected.comment?.trim() || '—'}</p>
             </div>
+            {getReviewReply(selected) ? (
+              <div className="review-reply-block">
+                <p className="review-reply-label">ردك</p>
+                <p className="review-reply-text">{getReviewReply(selected)}</p>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </Modal>

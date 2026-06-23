@@ -36,6 +36,37 @@ export const enrollmentLabels: Record<string, string> = {
   CANCELLED: 'ملغي',
 };
 
+export const paymentStatusLabels: Record<string, string> = {
+  PENDING: 'قيد الانتظار',
+  PAID: 'مدفوع',
+  FAILED: 'فشل',
+  REFUNDED: 'مسترد',
+};
+
+export const withdrawalStatusLabels: Record<string, string> = {
+  PENDING: 'قيد المراجعة',
+  APPROVED: 'معتمد',
+  REJECTED: 'مرفوض',
+  PAID: 'مدفوع',
+};
+
+export const subscriptionStatusLabels: Record<string, string> = {
+  ACTIVE: 'نشط',
+  CANCELLED: 'ملغي',
+  EXPIRED: 'منتهي',
+};
+
+export const ticketStatusLabels: Record<string, string> = {
+  OPEN: 'مفتوح',
+  IN_PROGRESS: 'قيد المعالجة',
+  CLOSED: 'مغلق',
+};
+
+export const walletTxLabels: Record<string, string> = {
+  CREDIT: 'إيداع',
+  DEBIT: 'سحب',
+};
+
 export const accountStatusVariant = (status: string) => {
   if (status === 'ACTIVE') return 'success' as const;
   if (status === 'PENDING') return 'pending' as const;

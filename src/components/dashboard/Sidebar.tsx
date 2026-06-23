@@ -1,9 +1,9 @@
-import { NavLink } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import { LogOut } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { BrandMark } from '../ui/BrandMark';
 import { useAuth } from '../../store/AuthContext';
+import { SidebarItem } from './SidebarItem';
 
 interface SidebarProps {
   title: string;
@@ -21,17 +21,15 @@ export function Sidebar({ title, items, isOpen, onClose, onLogout }: SidebarProp
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <BrandMark variant="sidebar" />
       <p className="sidebar-title">{title}</p>
-      <nav>
-        {items.map(({ label, path, icon: Icon }) => (
-          <NavLink
+      <nav className="sidebar-nav">
+        {items.map(({ label, path, icon }) => (
+          <SidebarItem
             key={`${label}-${path}`}
-            to={path}
-            onClick={onClose}
-            className={({ isActive }) => (isActive ? 'active' : '')}
-          >
-            <Icon size={18} />
-            {label}
-          </NavLink>
+            label={label}
+            path={path}
+            icon={icon}
+            onNavigate={onClose}
+          />
         ))}
       </nav>
       <div className="sidebar-footer">

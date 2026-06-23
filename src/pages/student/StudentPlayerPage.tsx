@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award, CheckCircle, ChevronLeft, ChevronRight, Clock, Download, FileText,
-  Lock, PlayCircle, Video,
+  PlayCircle, Video,
 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { studentApi } from '../../api/student';
@@ -14,12 +14,8 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
-
-const fmtDuration = (seconds?: number) => {
-  const mins = Math.round((seconds || 0) / 60);
-  if (mins < 60) return `${mins || 0} د`;
-  return `${Math.floor(mins / 60)} س ${mins % 60} د`;
-};
+import { buildSectionCurriculum, getCourseProgress } from './player/buildCurriculum';
+import { StudentPlayerSidebar } from './player/StudentPlayerSidebar';
 
 export default function StudentPlayerPage() {
   const { courseId } = useParams();
@@ -64,34 +60,43 @@ export default function StudentPlayerPage() {
   );
 
   const completedIds = useMemo(
-    () => new Set(
+    () => new Set<number>(
       (data?.currentProgress || [])
         .filter((item: any) => item.isCompleted)
-        .map((item: any) => item.lessonId),
+        .map((item: any) => item.lessonId as number),
     ),
     [data],
   );
 
-  const progress = lessons.length
-    ? Math.round((completedIds.size / lessons.length) * 100)
-    : Number(data?.enrollment?.progressPercentage || 0);
+  const curriculumSections = useMemo(() => {
+    const sortedSections = [...(data?.sections || [])].sort((a, b) => a.order - b.order);
+    const lastSectionId = sortedSections[sortedSections.length - 1]?.id;
+    return sortedSections.map((section) => ({
+      section,
+      items: buildSectionCurriculum(section, quizzes, {
+        includeCourseQuizzes: section.id === lastSectionId,
+      }),
+    }));
+  }, [data?.sections, quizzes]);
+
+  const progress = useMemo(() => {
+    const { percent } = getCourseProgress(
+      curriculumSections.map((entry) => ({
+        ...entry,
+        progress: { completed: 0, total: entry.items.length, percent: 0 },
+      })),
+      completedIds,
+    );
+    return percent || Number(data?.enrollment?.progressPercentage || 0);
+  }, [curriculumSections, completedIds, data?.enrollment?.progressPercentage]);
 
   const activeLesson = lessons.find((lesson: any) => lesson.id === activeLessonId);
   const activeIndex = lessons.findIndex((lesson: any) => lesson.id === activeLessonId);
   const isActiveCompleted = activeLesson ? completedIds.has(activeLesson.id) : false;
-  const lessonQuizzes = useMemo(() => {
-    const map: Record<number, any[]> = {};
-    quizzes.forEach((quiz) => {
-      if (quiz.lessonId) {
-        map[quiz.lessonId] = [...(map[quiz.lessonId] || []), quiz];
-      }
-    });
-    return map;
-  }, [quizzes]);
-  const activeLessonQuizzes = activeLesson?.id ? lessonQuizzes[activeLesson.id] || [] : [];
-  const courseQuizzes = useMemo(
-    () => quizzes.filter((quiz) => !quiz.lessonId),
-    [quizzes],
+
+  const activeLessonQuizzes = useMemo(
+    () => (activeLesson?.id ? quizzes.filter((quiz) => quiz.lessonId === activeLesson.id) : []),
+    [activeLesson?.id, quizzes],
   );
 
   const complete = async () => {
@@ -146,11 +151,11 @@ export default function StudentPlayerPage() {
           { label: 'كورساتي', to: '/student/my-courses' },
           { label: data.course.titleAr },
         ]}
-        action={
+        action={(
           <Link to="/student/my-courses">
             <Button variant="outline" size="sm">العودة لكورساتي</Button>
           </Link>
-        }
+        )}
       />
 
       <div className="stats-grid student-player-stats">
@@ -214,43 +219,57 @@ export default function StudentPlayerPage() {
               </div>
             </div>
 
-            <ProgressBar value={progress} label="تقدم الدورة" size="md" />
+            <div className="student-player-progress-wrap">
+              <ProgressBar value={progress} label="تقدم الدورة" size="md" />
+            </div>
 
-            <div className="player-actions student-player-actions">
-              <Button
-                variant="secondary"
-                disabled={activeIndex <= 0}
-                onClick={() => setActiveLessonId(lessons[activeIndex - 1]?.id)}
-                icon={<ChevronRight size={16} />}
-              >
-                السابق
-              </Button>
-              <Button
-                onClick={complete}
-                loading={completing}
-                disabled={isActiveCompleted || !activeLesson}
-                icon={<CheckCircle size={16} />}
-              >
-                {isActiveCompleted ? 'مكتمل' : 'تعليم كمكتمل'}
-              </Button>
-              {activeLessonQuizzes.length ? (
+            <div className="student-player-actions">
+              <div className="student-player-actions-row primary">
                 <Button
                   variant="secondary"
-                  icon={<PlayCircle size={16} />}
-                  disabled={!activeLessonQuizzes[0]?.isReady}
-                  onClick={() => navigate(`/student/quizzes/${activeLessonQuizzes[0].id}`)}
+                  size="sm"
+                  disabled={activeIndex <= 0}
+                  onClick={() => setActiveLessonId(lessons[activeIndex - 1]?.id)}
+                  icon={<ChevronRight size={16} />}
                 >
-                  {activeLessonQuizzes[0]?.isReady ? 'بدء اختبار الدرس' : 'الاختبار غير جاهز'}
+                  السابق
                 </Button>
+                <Button
+                  size="sm"
+                  onClick={complete}
+                  loading={completing}
+                  disabled={isActiveCompleted || !activeLesson}
+                  icon={<CheckCircle size={16} />}
+                >
+                  {isActiveCompleted ? 'مكتمل' : 'تعليم كمكتمل'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={activeIndex >= lessons.length - 1}
+                  onClick={() => setActiveLessonId(lessons[activeIndex + 1]?.id)}
+                  icon={<ChevronLeft size={16} />}
+                >
+                  التالي
+                </Button>
+              </div>
+              {activeLessonQuizzes.length ? (
+                <div className="student-player-actions-row secondary">
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    icon={<PlayCircle size={16} />}
+                    disabled={!activeLessonQuizzes[0]?.isReady}
+                    onClick={() => navigate(`/student/quizzes/${activeLessonQuizzes[0].id}`)}
+                  >
+                    {!activeLessonQuizzes[0]?.isReady
+                      ? 'الاختبار غير جاهز'
+                      : activeLessonQuizzes[0]?.isCompleted
+                        ? 'عرض نتيجة الاختبار'
+                        : 'بدء اختبار الدرس'}
+                  </Button>
+                </div>
               ) : null}
-              <Button
-                variant="secondary"
-                disabled={activeIndex >= lessons.length - 1}
-                onClick={() => setActiveLessonId(lessons[activeIndex + 1]?.id)}
-                icon={<ChevronLeft size={16} />}
-              >
-                التالي
-              </Button>
             </div>
           </Card>
 
@@ -287,36 +306,6 @@ export default function StudentPlayerPage() {
             )}
           </Card>
 
-          {courseQuizzes.length ? (
-            <Card className="student-player-resources">
-              <div className="section-heading">
-                <h3><Award size={18} /> اختبارات الدورة</h3>
-                <span className="muted-count">{courseQuizzes.length} اختبار</span>
-              </div>
-              <div className="student-quiz-list">
-                {courseQuizzes.map((quiz) => (
-                  <button
-                    key={quiz.id}
-                    type="button"
-                    className="student-quiz-list-item"
-                    disabled={!quiz.isReady}
-                    onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
-                  >
-                    <div>
-                      <strong>{quiz.titleAr}</strong>
-                      <span>
-                        {quiz.questionCount || 0} سؤال · {quiz.durationMinutes || 10} دقيقة · نجاح {quiz.passingScore || 60}%
-                      </span>
-                    </div>
-                    <Badge variant={quiz.isReady ? 'success' : 'warning'}>
-                      {quiz.isReady ? 'جاهز' : 'غير جاهز'}
-                    </Badge>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          ) : null}
-
           {progress >= 100 ? (
             <Card className="student-player-certificate-banner">
               <Award size={28} />
@@ -331,43 +320,16 @@ export default function StudentPlayerPage() {
           ) : null}
         </section>
 
-        <aside className="player-sidebar card student-player-sidebar">
-          <div className="student-player-sidebar-head">
-            <h3>{data.course.titleAr}</h3>
-            <ProgressBar value={progress} label="التقدم" size="sm" />
-          </div>
-
-          <div className="student-player-curriculum">
-            {data.sections?.map((section: any) => (
-              <div key={section.id} className="student-player-section">
-                <strong className="student-player-section-title">{section.titleAr}</strong>
-                {section.lessons?.map((lesson: any) => {
-                  const done = completedIds.has(lesson.id);
-                  const locked = lesson.isLocked && !data.enrollment;
-                  return (
-                    <button
-                      key={lesson.id}
-                      type="button"
-                      className={`lesson-nav ${lesson.id === activeLessonId ? 'active' : ''} ${locked ? 'locked' : ''} ${done ? 'done' : ''}`}
-                      onClick={() => !locked && setActiveLessonId(lesson.id)}
-                      disabled={locked}
-                    >
-                      <span>
-                        {done ? <CheckCircle size={16} /> : locked ? <Lock size={16} /> : <PlayCircle size={16} />}
-                        {lesson.titleAr}
-                      </span>
-                      <span className="lesson-nav-meta">
-                        {done ? <Badge variant="completed">مكتمل</Badge> : null}
-                        <small>{fmtDuration(lesson.duration)}</small>
-                        {lessonQuizzes[lesson.id]?.length ? <Badge variant="info">اختبار</Badge> : null}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </aside>
+        <StudentPlayerSidebar
+          courseTitle={data.course.titleAr}
+          sections={data.sections || []}
+          quizzes={quizzes}
+          activeLessonId={activeLessonId}
+          completedLessonIds={completedIds}
+          enrolled={Boolean(data.enrollment)}
+          onSelectLesson={setActiveLessonId}
+          onSelectResources={setActiveLessonId}
+        />
       </div>
     </div>
   );

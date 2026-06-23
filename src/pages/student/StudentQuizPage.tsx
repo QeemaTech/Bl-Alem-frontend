@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  AlertCircle, Award, CheckCircle2, ChevronLeft, Clock3, ListChecks, PlayCircle, RotateCcw,
+  AlertCircle, Award, CheckCircle2, ChevronLeft, Clock3, ListChecks, PlayCircle, XCircle,
 } from 'lucide-react';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
@@ -19,6 +19,52 @@ const typeLabels: Record<string, string> = {
   TRUE_FALSE: 'صح أو خطأ',
 };
 
+function QuizReviewSection({ questions }: { questions: any[] }) {
+  if (!questions.length) return null;
+
+  return (
+    <div className="student-quiz-review">
+      <h3>مراجعة الأسئلة وإجاباتك</h3>
+      <div className="student-quiz-review-list">
+        {questions.map((question: any, index: number) => (
+          <Card key={question.id} className={`student-quiz-review-question ${question.isCorrect ? 'correct' : 'wrong'}`}>
+            <div className="student-quiz-question-head">
+              <span className="student-quiz-question-index">السؤال {index + 1}</span>
+              <Badge variant={question.isCorrect ? 'success' : 'danger'}>
+                {question.isCorrect ? 'إجابة صحيحة' : 'إجابة خاطئة'}
+              </Badge>
+            </div>
+            <h4>{question.textAr}</h4>
+            <div className="student-quiz-options student-quiz-review-options">
+              {question.answers?.map((answer: any) => {
+                const isSelected = question.selectedAnswerId === answer.id;
+                const isCorrectAnswer = answer.isCorrect;
+                let optionClass = 'student-quiz-option review';
+                if (isCorrectAnswer) optionClass += ' review-correct';
+                if (isSelected && !isCorrectAnswer) optionClass += ' review-wrong';
+                if (isSelected) optionClass += ' selected';
+
+                return (
+                  <div key={answer.id} className={optionClass}>
+                    <span className="student-quiz-option-marker" />
+                    <span className="student-quiz-option-text">{answer.textAr}</span>
+                    {isSelected ? (
+                      <span className="student-quiz-review-tag yours">إجابتك</span>
+                    ) : null}
+                    {isCorrectAnswer ? (
+                      <span className="student-quiz-review-tag correct">الإجابة الصحيحة</span>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StudentQuizPage() {
   const { quizId } = useParams();
   const { showToast } = useToast();
@@ -35,6 +81,19 @@ function StudentQuizPage() {
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState('');
 
+  const applyCompletedResult = (data: any) => {
+    if (!data.result) return;
+    setResult(data.result);
+    const savedAnswers = Object.fromEntries(
+      (data.result.reviewQuestions || [])
+        .filter((question: any) => question.selectedAnswerId)
+        .map((question: any) => [question.id, question.selectedAnswerId]),
+    );
+    setAnswers(savedAnswers);
+    setPhase('result');
+    setAttempt(null);
+  };
+
   const loadQuiz = async () => {
     if (!quizId) return;
     setLoading(true);
@@ -42,7 +101,9 @@ function StudentQuizPage() {
     try {
       const data = await studentApi.quiz(quizId);
       setQuiz(data);
-      if (data.activeAttempt && data.isReady) {
+      if (data.isCompleted && data.result) {
+        applyCompletedResult(data);
+      } else if (data.activeAttempt && data.isReady) {
         setAttempt({
           attemptId: data.activeAttempt.id,
           startedAt: data.activeAttempt.startedAt,
@@ -51,10 +112,12 @@ function StudentQuizPage() {
           resumed: true,
         });
         setPhase('taking');
+        setResult(null);
       } else {
         setPhase('intro');
         setAttempt(null);
         setAnswers({});
+        setResult(null);
       }
     } catch {
       setQuiz(null);
@@ -87,9 +150,9 @@ function StudentQuizPage() {
   const answeredCount = questions.filter((q: any) => answers[q.id]).length;
   const allAnswered = questions.length > 0 && answeredCount === questions.length;
 
-  const submitQuiz = async () => {
+  const submitQuiz = async (force = false) => {
     if (!quizId || submitting || phase !== 'taking') return;
-    if (!allAnswered) {
+    if (!force && !allAnswered) {
       showToast('أجب على جميع الأسئلة قبل التسليم.', 'error');
       return;
     }
@@ -102,7 +165,8 @@ function StudentQuizPage() {
       const data = await studentApi.submitQuiz(quizId, payload);
       setResult(data);
       setPhase('result');
-      showToast('تم تسليم الاختبار.', 'success');
+      setQuiz((current: any) => (current ? { ...current, isCompleted: true, result: data } : current));
+      showToast('تم تسليم الاختبار. لا يمكن إعادته.', 'success');
     } catch {
       showToast('تعذّر تسليم الاختبار.', 'error');
     } finally {
@@ -113,12 +177,12 @@ function StudentQuizPage() {
   useEffect(() => {
     if (phase === 'taking' && timeLeft === 0 && !result && !autoSubmittedRef.current) {
       autoSubmittedRef.current = true;
-      submitQuiz();
+      submitQuiz(true);
     }
   }, [timeLeft, phase, result]);
 
   const startQuiz = async () => {
-    if (!quizId || !quiz?.isReady) return;
+    if (!quizId || !quiz?.isReady || quiz?.isCompleted) return;
     setStarting(true);
     try {
       const attemptData = await studentApi.startQuiz(quizId);
@@ -129,23 +193,16 @@ function StudentQuizPage() {
       autoSubmittedRef.current = false;
       if (attemptData.resumed) showToast('تم استئناف محاولتك السابقة.', 'info');
     } catch {
-      showToast('تعذّر بدء الاختبار.', 'error');
+      showToast('لا يمكن بدء الاختبار. ربما أنهيته مسبقاً.', 'error');
+      await loadQuiz();
     } finally {
       setStarting(false);
     }
   };
 
-  const retryQuiz = async () => {
-    setResult(null);
-    setAnswers({});
-    setAttempt(null);
-    autoSubmittedRef.current = false;
-    await startQuiz();
-  };
-
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    await submitQuiz();
+    await submitQuiz(false);
   };
 
   const selectAnswer = (questionId: number, answerId: number) => {
@@ -165,6 +222,7 @@ function StudentQuizPage() {
   ];
 
   const playerUrl = quiz?.courseId ? `/student/player/${quiz.courseId}` : '/student/my-courses';
+  const reviewQuestions = result?.reviewQuestions || [];
 
   if (loading) return <LoadingSkeleton variant="block" count={2} />;
 
@@ -183,7 +241,7 @@ function StudentQuizPage() {
         <PageHeader title="نتيجة الاختبار" breadcrumb={breadcrumb} />
         <Card className="student-quiz-result">
           <div className={`student-quiz-result-ring ${result.isPassed ? 'passed' : 'failed'}`}>
-            <Award size={36} />
+            {result.isPassed ? <Award size={36} /> : <XCircle size={36} />}
             <strong>{result.score}%</strong>
           </div>
           <Badge variant={result.isPassed ? 'success' : 'danger'}>
@@ -199,15 +257,16 @@ function StudentQuizPage() {
               وقت التسليم: {new Date(result.attempt.completedAt).toLocaleString('ar-SA')}
             </p>
           ) : null}
+          <p className="student-quiz-result-note">
+            تم تسليم الاختبار نهائياً ولا يمكن إعادته.
+          </p>
           <div className="student-quiz-result-actions">
-            <Button onClick={retryQuiz} loading={starting} icon={<RotateCcw size={16} />}>
-              إعادة المحاولة
-            </Button>
             <Link to={playerUrl}>
-              <Button variant="secondary" icon={<ChevronLeft size={16} />}>العودة للمشغل</Button>
+              <Button icon={<ChevronLeft size={16} />}>العودة للمشغل</Button>
             </Link>
           </div>
         </Card>
+        <QuizReviewSection questions={reviewQuestions} />
       </div>
     );
   }
@@ -239,14 +298,9 @@ function StudentQuizPage() {
                 <ul className="student-quiz-rules">
                   <li>بعد البدء يبدأ العد التنازلي ولا يمكن إيقافه.</li>
                   <li>أجب على جميع الأسئلة قبل التسليم.</li>
-                  <li>يمكنك إعادة المحاولة بعد معرفة النتيجة.</li>
+                  <li>بعد التسليم لا يمكن إعادة الاختبار، وستظهر لك إجاباتك للمراجعة.</li>
                 </ul>
               )}
-              {quiz.lastAttempt ? (
-                <p className="student-quiz-last-attempt">
-                  آخر محاولة: {quiz.lastAttempt.score}% — {quiz.lastAttempt.isPassed ? 'ناجح' : 'غير ناجح'}
-                </p>
-              ) : null}
             </div>
             <div className="student-quiz-intro-side">
               <Button
@@ -340,7 +394,7 @@ function StudentQuizPage() {
             </p>
             <div className="student-quiz-submit-actions">
               <Button type="submit" loading={submitting} disabled={!allAnswered} size="lg">
-                تسليم الاختبار
+                تسليم الاختبار نهائياً
               </Button>
               <Link to={playerUrl}>
                 <Button type="button" variant="ghost">العودة للمشغل</Button>

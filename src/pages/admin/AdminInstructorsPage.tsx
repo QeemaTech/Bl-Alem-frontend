@@ -19,6 +19,10 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
+function CountBadge({ value }: { value: string | number }) {
+  return <span className="admin-count-badge" aria-label={`العدد: ${value}`}>{value}</span>;
+}
+
 const approvalLabels: Record<string, string> = {
   PENDING: 'قيد المراجعة',
   APPROVED: 'معتمد',
@@ -272,10 +276,10 @@ export default function AdminInstructorsPage() {
   };
 
   return (
-    <div className="page-grid">
-      <div className="reports-header">
+    <div className="page-grid admin-list-page admin-instructors-page">
+      <div className="admin-list-header">
         <PageHeader title="المحاضرون" subtitle="إدارة حسابات المحاضرين واعتماد طلباتهم" />
-        <div className="chip-row">
+        <div className="admin-list-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
             تصدير Excel
           </Button>
@@ -285,7 +289,7 @@ export default function AdminInstructorsPage() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="admin-list-stats stats-grid">
         <StatCard title="إجمالي المحاضرين" value={String(stats.total)} icon={GraduationCap} />
         <StatCard title="قيد المراجعة" value={String(stats.pending)} icon={Users} />
         <StatCard title="معتمدون" value={String(stats.approved)} icon={GraduationCap} />
@@ -294,15 +298,18 @@ export default function AdminInstructorsPage() {
         <StatCard title="إجمالي الأرباح" value={fmtMoney(stats.earnings)} icon={Wallet} />
       </div>
 
-      <div className="reports-charts-grid">
+      <div className="admin-list-charts reports-charts-grid">
         <ReportChart title="توزيع حالات الاعتماد" type="pie" data={approvalChart} />
       </div>
 
       <FilterBar
+        className="filter-bar--modern admin-instructors-filters"
         searchValue={search}
         searchPlaceholder="بحث بالاسم، البريد، التخصص..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setApprovalFilter(''); setAccountFilter(''); }}
+        searchIconSize={20}
+        resetVariant="secondary"
       >
         <Select
           label="حالة الاعتماد"
@@ -330,32 +337,63 @@ export default function AdminInstructorsPage() {
         />
       </FilterBar>
 
-      <Card>
+      <Card className="admin-table-card">
         <Table
+          className="admin-instructors-table"
           loading={loading}
           data={tableRows}
           onRowClick={(row) => goToDetail(row._raw)}
+          hideScrollNotice
           emptyTitle="لا يوجد محاضرون"
           emptyDescription="أضف محاضراً جديداً أو انتظر طلبات التسجيل."
           columns={[
             {
               key: 'fullName',
               header: 'الاسم',
+              minWidth: 160,
               render: (row) => (
                 <TableEntityLink to={`/admin/instructors/${row._raw.id}`}>
                   {row.fullName}
                 </TableEntityLink>
               ),
             },
-            { key: 'email', header: 'البريد' },
-            { key: 'phone', header: 'الهاتف' },
-            { key: 'specialization', header: 'التخصص' },
-            { key: 'courses', header: 'الكورسات' },
-            { key: 'students', header: 'الطلاب' },
-            { key: 'earnings', header: 'الأرباح' },
+            {
+              key: 'email',
+              header: 'البريد',
+              align: 'end',
+              minWidth: 200,
+              render: (row) => <span dir="ltr" className="admin-cell-email">{row.email}</span>,
+            },
+            {
+              key: 'phone',
+              header: 'الهاتف',
+              align: 'end',
+              hideOnMobile: true,
+              render: (row) => <span dir="ltr">{row.phone}</span>,
+            },
+            { key: 'specialization', header: 'التخصص', minWidth: 180, wrap: true },
+            {
+              key: 'courses',
+              header: 'الكورسات',
+              align: 'center',
+              render: (row) => <CountBadge value={row.courses} />,
+            },
+            {
+              key: 'students',
+              header: 'الطلاب',
+              align: 'center',
+              render: (row) => <CountBadge value={row.students} />,
+            },
+            {
+              key: 'earnings',
+              header: 'الأرباح',
+              align: 'center',
+              hideOnMobile: true,
+            },
             {
               key: 'approvalStatus',
               header: 'الاعتماد',
+              align: 'center',
               render: (row) => (
                 <Badge variant={approvalVariant(String(row._raw?.instructorProfile?.approvalStatus))}>
                   {approvalLabels[String(row._raw?.instructorProfile?.approvalStatus)] || row.approvalStatus}
@@ -365,6 +403,8 @@ export default function AdminInstructorsPage() {
             {
               key: 'accountStatus',
               header: 'الحساب',
+              align: 'center',
+              hideOnMobile: true,
               render: (row) => (
                 <Badge variant={accountVariant(String(row._raw?.status))}>
                   {accountLabels[String(row._raw?.status)] || row.accountStatus}

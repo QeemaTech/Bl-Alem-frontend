@@ -1,79 +1,64 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Bell, BellOff, BookOpen, CheckCheck, CreditCard, Radio, Star, Wallet,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Bell, CheckCheck } from 'lucide-react';
 import { instructorApi } from '../../api/instructor';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { FilterBar } from '../../components/ui/FilterBar';
-import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
-import { PageHeader } from '../../components/ui/PageHeader';
-import { Select } from '../../components/ui/Select';
-import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
+import { NotificationCard } from '../../components/instructor/notifications/NotificationCard';
+import { NotificationFilters } from '../../components/instructor/notifications/NotificationFilters';
+import type { NotificationFiltersState } from '../../components/instructor/notifications/NotificationFilters';
+import { NotificationStats } from '../../components/instructor/notifications/NotificationStats';
+import {
+  IMPORTANT_TYPES,
+  NOTIFICATION_TYPE_LABELS,
+  type InstructorNotification,
+} from '../../components/instructor/notifications/types';
 
-const typeLabels: Record<string, string> = {
-  WELCOME: 'ترحيب',
-  LIVE_SESSION: 'جلسة مباشرة',
-  CERTIFICATE: 'شهادة',
-  REWARD: 'مكافأة',
-  PAYMENT: 'دفع',
-  COMMUNITY: 'مجتمع',
-  SUBSCRIPTION: 'اشتراك',
-  EARNING: 'أرباح',
-  REVIEW: 'تقييم',
-  WITHDRAWAL: 'سحب',
-  COURSE: 'كورس',
-  INSTRUCTOR_REQUEST: 'طلب محاضر',
-  COURSE_REVIEW: 'مراجعة كورس',
-  SUPPORT: 'دعم فني',
-  ADMIN: 'إداري',
+const DEFAULT_FILTERS: NotificationFiltersState = {
+  search: '',
+  readFilter: '',
+  typeFilter: '',
+  dateFilter: '',
 };
 
-const typeIcons: Record<string, LucideIcon> = {
-  LIVE_SESSION: Radio,
-  WITHDRAWAL: Wallet,
-  REVIEW: Star,
-  PAYMENT: CreditCard,
-  EARNING: CreditCard,
-  SUBSCRIPTION: CreditCard,
-  COURSE: BookOpen,
+const matchesDateFilter = (createdAt: string, filter: string) => {
+  if (!filter) return true;
+  const date = new Date(createdAt);
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  if (filter === 'today') return date >= todayStart;
+  if (filter === 'week') {
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return date >= weekAgo;
+  }
+  if (filter === 'month') {
+    const monthAgo = new Date(now);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    return date >= monthAgo;
+  }
+  return true;
 };
 
-const fmtRelative = (value: string) => {
-  const date = new Date(value);
-  const diffMs = Date.now() - date.getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'الآن';
-  if (mins < 60) return `منذ ${mins} دقيقة`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `منذ ${hours} ساعة`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `منذ ${days} يوم`;
-  return date.toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+const fmtLastUpdated = (value: Date | null) => {
+  if (!value) return '—';
+  return value.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
 };
 
 export default function InstructorNotificationsPage() {
   const { showToast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<InstructorNotification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [readFilter, setReadFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [filters, setFilters] = useState<NotificationFiltersState>(DEFAULT_FILTERS);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const load = async () => {
-    setItems(await instructorApi.notifications());
+    const data = await instructorApi.notifications();
+    setItems(data);
+    setLastUpdated(new Date());
   };
 
   useEffect(() => {
@@ -83,18 +68,21 @@ export default function InstructorNotificationsPage() {
 
   const filteredItems = useMemo(() => {
     let result = items;
-    if (readFilter === 'read') result = result.filter((i) => i.isRead);
-    if (readFilter === 'unread') result = result.filter((i) => !i.isRead);
-    if (typeFilter) result = result.filter((i) => i.type === typeFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (filters.readFilter === 'read') result = result.filter((i) => i.isRead);
+    if (filters.readFilter === 'unread') result = result.filter((i) => !i.isRead);
+    if (filters.typeFilter) result = result.filter((i) => i.type === filters.typeFilter);
+    if (filters.dateFilter) {
+      result = result.filter((i) => matchesDateFilter(i.createdAt, filters.dateFilter));
+    }
+    if (filters.search.trim()) {
+      const q = filters.search.trim().toLowerCase();
       result = result.filter((i) =>
-        [i.titleAr, i.bodyAr, typeLabels[i.type], String(i.id)]
+        [i.titleAr, i.bodyAr, NOTIFICATION_TYPE_LABELS[i.type], String(i.id)]
           .some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result;
-  }, [items, readFilter, typeFilter, search]);
+  }, [items, filters]);
 
   const stats = useMemo(() => {
     const todayStart = new Date();
@@ -102,6 +90,7 @@ export default function InstructorNotificationsPage() {
     return {
       total: items.length,
       unread: items.filter((i) => !i.isRead).length,
+      attention: items.filter((i) => !i.isRead && IMPORTANT_TYPES.has(i.type)).length,
       today: items.filter((i) => new Date(i.createdAt) >= todayStart).length,
     };
   }, [items]);
@@ -110,7 +99,7 @@ export default function InstructorNotificationsPage() {
     const types = [...new Set(items.map((i) => i.type).filter(Boolean))].sort();
     return [
       { label: 'كل الأنواع', value: '' },
-      ...types.map((type) => ({ label: typeLabels[type] || type, value: type })),
+      ...types.map((type) => ({ label: NOTIFICATION_TYPE_LABELS[type] || type, value: type })),
     ];
   }, [items]);
 
@@ -144,122 +133,81 @@ export default function InstructorNotificationsPage() {
     }
   };
 
+  const updateFilters = (patch: Partial<NotificationFiltersState>) => {
+    setFilters((current) => ({ ...current, ...patch }));
+  };
+
   return (
-    <div className="page-grid">
-      <div className="reports-header">
-        <PageHeader
-          title="إشعارات المدرب"
-          subtitle="تابع تحديثات الكورسات والأرباح والجلسات والتقييمات"
-        />
-        <div className="reports-actions">
-          <Button
-            variant="secondary"
-            icon={<CheckCheck size={16} />}
-            onClick={markAllRead}
-            loading={markingAll}
-            disabled={!stats.unread || loading}
-          >
-            تعليم الكل كمقروء
-          </Button>
+    <div className="instructor-notifications-page">
+      <header className="ntf-page-header">
+        <div className="ntf-page-header-row">
+          <div className="ntf-page-title-wrap">
+            <h1>إشعارات المدرب</h1>
+            <span className="ntf-count-badge">{stats.total}</span>
+          </div>
+          <div className="ntf-page-actions">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<CheckCheck size={16} />}
+              onClick={markAllRead}
+              loading={markingAll}
+              disabled={!stats.unread || loading}
+            >
+              تعليم الكل كمقروء
+            </Button>
+          </div>
         </div>
-      </div>
+        <div className="ntf-page-header-meta">
+          <p>تابع تحديثات الكورسات والأرباح والجلسات والتقييمات</p>
+          <span className="ntf-last-updated">
+            آخر تحديث: {fmtLastUpdated(lastUpdated)}
+          </span>
+        </div>
+      </header>
 
-      <div className="stats-grid">
-        <StatCard title="إجمالي الإشعارات" value={String(stats.total)} icon={Bell} />
-        <StatCard title="غير مقروء" value={String(stats.unread)} icon={BellOff} hint={stats.unread ? 'تحتاج متابعة' : 'لا جديد'} />
-        <StatCard title="اليوم" value={String(stats.today)} icon={Radio} />
-      </div>
+      <NotificationStats stats={stats} />
 
-      <FilterBar
-        searchValue={search}
-        searchPlaceholder="بحث في العنوان أو النص..."
-        onSearchChange={setSearch}
-        onReset={() => { setSearch(''); setReadFilter(''); setTypeFilter(''); }}
-      >
-        <Select
-          label="الحالة"
-          value={readFilter}
-          onChange={(e) => setReadFilter(e.target.value)}
-          options={[
-            { label: 'الكل', value: '' },
-            { label: 'غير مقروء', value: 'unread' },
-            { label: 'مقروء', value: 'read' },
-          ]}
-        />
-        <Select
-          label="النوع"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          options={typeOptions}
-        />
-      </FilterBar>
+      <NotificationFilters
+        filters={filters}
+        typeOptions={typeOptions}
+        onChange={updateFilters}
+        onReset={() => setFilters(DEFAULT_FILTERS)}
+      />
 
       {loading ? (
-        <LoadingSkeleton variant="row" count={5} />
+        <div className="ntf-list" aria-busy="true" aria-label="جاري التحميل">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="ntf-skeleton-row" />
+          ))}
+        </div>
       ) : filteredItems.length ? (
-        <div className="notifications-feed">
-          {filteredItems.map((item) => {
-            const Icon = typeIcons[item.type] || Bell;
-            const typeLabel = typeLabels[item.type] || 'إشعار';
-            return (
-              <article
-                key={item.id}
-                className={`notification-item ${item.isRead ? 'read' : 'unread'}`}
-              >
-                <div className={`notification-item-icon ${item.isRead ? 'read' : 'unread'}`}>
-                  <Icon size={20} />
-                </div>
-
-                <div className="notification-item-body">
-                  <div className="notification-item-top">
-                    <div className="notification-item-title-wrap">
-                      <h3>{item.titleAr}</h3>
-                      <Badge variant={item.isRead ? 'default' : 'info'}>
-                        {item.isRead ? 'مقروء' : 'جديد'}
-                      </Badge>
-                    </div>
-                    <span className="notification-item-type">{typeLabel}</span>
-                  </div>
-                  <p className="notification-item-text">{item.bodyAr}</p>
-                  <time className="notification-item-time" dateTime={item.createdAt}>
-                    {fmtRelative(item.createdAt)}
-                  </time>
-                </div>
-
-                <div className="notification-item-actions">
-                  {!item.isRead ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      loading={busyId === item.id}
-                      onClick={() => markRead(item.id)}
-                    >
-                      تعليم كمقروء
-                    </Button>
-                  ) : (
-                    <span className="notification-item-done">✓ مقروء</span>
-                  )}
-                </div>
-              </article>
-            );
-          })}
+        <div className="ntf-list">
+          {filteredItems.map((item) => (
+            <NotificationCard
+              key={item.id}
+              item={item}
+              busy={busyId === item.id}
+              onMarkRead={markRead}
+            />
+          ))}
         </div>
       ) : items.length ? (
-        <Card>
+        <div className="ntf-empty-card">
           <EmptyState
             title="لا نتائج"
             description="جرّب تغيير الفلاتر أو البحث."
             icon={Bell}
           />
-        </Card>
+        </div>
       ) : (
-        <Card>
+        <div className="ntf-empty-card">
           <EmptyState
             title="لا توجد إشعارات"
             description="ستظهر تحديثات الكورسات والأرباح والجلسات هنا."
             icon={Bell}
           />
-        </Card>
+        </div>
       )}
     </div>
   );

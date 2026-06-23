@@ -9,6 +9,26 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
+import { mediaUrl } from '../../utils/mediaUrl';
+
+const fmtReviewDate = (value?: string) => (value
+  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
+  : '');
+
+function ReviewStars({ rating }: { rating: number }) {
+  return (
+    <span className="latest-review-stars" aria-label={`${rating} من 5`}>
+      {[1, 2, 3, 4, 5].map((value) => (
+        <Star
+          key={value}
+          size={14}
+          fill={value <= rating ? 'var(--warning)' : 'none'}
+          color={value <= rating ? 'var(--warning)' : 'var(--border)'}
+        />
+      ))}
+    </span>
+  );
+}
 
 export default function InstructorDashboardPage() {
   const { showToast } = useToast();
@@ -139,14 +159,42 @@ export default function InstructorDashboardPage() {
       </div>
 
       <Card>
-        <h2>آخر التقييمات</h2>
+        <div className="latest-reviews-header">
+          <h2>آخر التقييمات</h2>
+          <Link to="/instructor/reviews"><Button variant="ghost" size="sm">عرض الكل</Button></Link>
+        </div>
         {data?.latestReviews?.length ? (
-          data.latestReviews.map((r: any) => (
-            <div key={r.id} className="notification-card">
-              <span><Star size={16} fill="var(--warning)" color="var(--warning)" /> {r.user?.fullName}</span>
-              <span>{r.rating}/5</span>
-            </div>
-          ))
+          <div className="latest-reviews-list">
+            {data.latestReviews.map((r: any) => (
+              <div key={r.id} className="latest-review-item">
+                <div className="latest-review-course-thumb">
+                  {r.course?.coverImage ? (
+                    <img src={mediaUrl(r.course.coverImage)} alt="" />
+                  ) : (
+                    <BookOpen size={18} />
+                  )}
+                </div>
+                <div className="latest-review-body">
+                  <div className="latest-review-top">
+                    <div className="latest-review-meta">
+                      <strong>{r.user?.fullName}</strong>
+                      <ReviewStars rating={r.rating} />
+                    </div>
+                    <span className="latest-review-score">{r.rating}/5</span>
+                  </div>
+                  {r.course?.titleAr ? (
+                    <Link to={`/instructor/courses/${r.course.id}/edit`} className="latest-review-course">
+                      {r.course.titleAr}
+                    </Link>
+                  ) : null}
+                  {r.comment ? (
+                    <p className="latest-review-comment">{r.comment}</p>
+                  ) : null}
+                  <span className="latest-review-date">{fmtReviewDate(r.createdAt)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <EmptyState title="لا توجد تقييمات" description="ستظهر تقييمات الطلاب هنا." />
         )}

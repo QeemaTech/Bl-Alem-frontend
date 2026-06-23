@@ -1,10 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Lock, PlayCircle, Star } from 'lucide-react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  Award, BookOpen, Lock, PlayCircle, Star, Users,
+} from 'lucide-react';
 import { studentApi } from '../../api/student';
+import { CourseReviewForm } from '../../components/student/CourseReviewForm';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { CourseCard } from '../../components/ui/CourseCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Input } from '../../components/ui/Input';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
@@ -14,12 +18,38 @@ import { Tabs } from '../../components/ui/Tabs';
 import { useToast } from '../../components/ui/Toast';
 import { mediaUrl } from '../../utils/mediaUrl';
 
+const levelLabels: Record<string, string> = {
+  BEGINNER: 'مبتدئ',
+  INTERMEDIATE: 'متوسط',
+  ADVANCED: 'متقدم',
+};
+
+const fmtReviewDate = (value?: string) => (value
+  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
+  : '');
+
+function StarDisplay({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <span className="course-review-card-stars" aria-label={`${rating} من 5`}>
+      {[1, 2, 3, 4, 5].map((value) => (
+        <Star
+          key={value}
+          size={size}
+          fill={value <= rating ? 'currentColor' : 'none'}
+          strokeWidth={value <= rating ? 0 : 2}
+        />
+      ))}
+    </span>
+  );
+}
+
 export default function StudentCourseDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showToast } = useToast();
   const [course, setCourse] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'overview');
   const [loading, setLoading] = useState(true);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -36,6 +66,11 @@ export default function StudentCourseDetailsPage() {
   };
 
   useEffect(() => { load(); }, [id]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   useEffect(() => {
     if (checkoutOpen) {
@@ -73,6 +108,7 @@ export default function StudentCourseDetailsPage() {
   }
 
   const isEnrolled = Boolean(course.enrollmentStatus);
+  const isCompleted = course.enrollmentStatus === 'COMPLETED' || Number(course.progress || 0) >= 100;
   const price = Number(course.discountPrice ?? course.price ?? 0);
   const quizzes = course.quizzes || [];
 
@@ -194,23 +230,139 @@ export default function StudentCourseDetailsPage() {
           </div>
         ) : null}
         {activeTab === 'instructor' ? (
-          <div>
-            <h3>{course.instructor?.fullName}</h3>
-            <p>{course.instructor?.instructorProfile?.bio || 'معلومات المحاضر ستظهر هنا.'}</p>
+          <div className="student-instructor-panel">
+            <div className="student-instructor-header">
+              <div className="student-instructor-avatar">
+                {course.instructor?.avatar ? (
+                  <img src={mediaUrl(course.instructor.avatar)} alt="" />
+                ) : (
+                  <span>{course.instructor?.fullName?.charAt(0) || '?'}</span>
+                )}
+              </div>
+              <div className="student-instructor-intro">
+                <h3>{course.instructor?.fullName}</h3>
+                {course.instructorStats?.title ? (
+                  <p className="student-instructor-role">{course.instructorStats.title}</p>
+                ) : null}
+                {course.instructorStats?.specialization ? (
+                  <Badge variant="info">{course.instructorStats.specialization}</Badge>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="student-instructor-stats">
+              <div className="student-instructor-stat">
+                <BookOpen size={18} />
+                <span>{course.instructorStats?.totalCourses ?? 0} كورس منشور</span>
+              </div>
+              <div className="student-instructor-stat">
+                <Users size={18} />
+                <span>{course.instructorStats?.totalStudents ?? 0} طالب</span>
+              </div>
+              {course.instructorStats?.yearsOfExperience != null ? (
+                <div className="student-instructor-stat">
+                  <Award size={18} />
+                  <span>{course.instructorStats.yearsOfExperience} سنوات خبرة</span>
+                </div>
+              ) : null}
+              <div className="student-instructor-stat">
+                <Star size={18} />
+                <span>{Number(course.ratingAverage || 0).toFixed(1)} تقييم هذه الدورة</span>
+              </div>
+            </div>
+
+            <Card className="student-instructor-bio-card">
+              <h4>نبذة عن المحاضر</h4>
+              <p>{course.instructor?.instructorProfile?.bio || 'لم يضف المحاضر نبذة بعد.'}</p>
+            </Card>
+
+            {course.instructorStats?.specialization ? (
+              <Card className="student-instructor-bio-card">
+                <h4>مجال التخصص</h4>
+                <p>{course.instructorStats.specialization}</p>
+              </Card>
+            ) : null}
+
+            <div className="student-instructor-courses">
+              <div className="section-heading">
+                <h4>كورسات أخرى للمحاضر على المنصة</h4>
+                <span>
+                  {course.instructorOtherCourses?.length ?? 0} كورس إضافي
+                </span>
+              </div>
+              {course.instructorOtherCourses?.length ? (
+                <div className="student-instructor-courses-grid">
+                  {course.instructorOtherCourses.map((item: any) => (
+                    <CourseCard
+                      key={item.id}
+                      title={item.titleAr}
+                      category={item.category?.nameAr || 'عام'}
+                      imageUrl={mediaUrl(item.coverImage)}
+                      price={Number(item.discountPrice ?? item.price ?? 0)}
+                      rating={Number(item.ratingAverage || 0)}
+                      duration={`${item._count?.lessons || 0} دروس · ${levelLabels[item.level] || item.level}`}
+                      actionLabel="عرض التفاصيل"
+                      onAction={() => navigate(`/student/courses/${item.id}`)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="لا توجد كورسات أخرى حالياً"
+                  description="هذا المحاضر لم ينشر كورسات إضافية على المنصة بعد."
+                />
+              )}
+            </div>
           </div>
         ) : null}
         {activeTab === 'reviews' ? (
           <div className="stack-sm">
+            {isCompleted ? (
+              <CourseReviewForm
+                courseId={course.id}
+                myReview={course.myReview}
+                onSuccess={() => {
+                  showToast(course.myReview ? 'تم تحديث تقييمك.' : 'شكراً لتقييمك!', 'success');
+                  load();
+                }}
+              />
+            ) : null}
+            {isEnrolled && !isCompleted ? (
+              <p className="course-review-notice">أكمل الدورة لتتمكن من التقييم.</p>
+            ) : null}
             {course.reviews?.length ? (
-              course.reviews.map((review: any) => (
-                <Card key={review.id}>
-                  <strong>{review.user?.fullName}</strong>
-                  <p>{review.rating}/5</p>
-                  <p>{review.comment}</p>
-                </Card>
-              ))
+              course.reviews.map((review: any) => {
+                const isMine = course.myReview?.id === review.id;
+                return (
+                  <Card key={review.id} className={`course-review-card ${isMine ? 'is-mine' : ''}`}>
+                    {isMine ? <Badge variant="info" className="course-review-mine-badge">تقييمك</Badge> : null}
+                    <div className="course-review-card-head">
+                      <div className="course-review-card-user">
+                        <div className="course-review-card-avatar">
+                          {review.user?.avatar ? (
+                            <img src={mediaUrl(review.user.avatar)} alt="" />
+                          ) : (
+                            <span>{review.user?.fullName?.charAt(0) || '?'}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="course-review-card-name">{review.user?.fullName}</p>
+                          <p className="course-review-card-date">{fmtReviewDate(review.createdAt)}</p>
+                        </div>
+                      </div>
+                      <StarDisplay rating={review.rating} />
+                    </div>
+                    {review.comment ? (
+                      <p className="course-review-card-comment">{review.comment}</p>
+                    ) : null}
+                  </Card>
+                );
+              })
             ) : (
-              <EmptyState title="لا توجد تقييمات" description="كن أول من يقيّم هذه الدورة بعد الاشتراك." />
+              <EmptyState
+                title="لا توجد تقييمات"
+                description={isCompleted ? 'كن أول من يقيّم هذه الدورة.' : 'لم يُضف أحد تقييماً بعد.'}
+              />
             )}
           </div>
         ) : null}

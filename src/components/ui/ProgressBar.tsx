@@ -7,7 +7,7 @@
 export function ProgressBar({ value, label, size = 'sm' }: ProgressBarProps) {
   const clamped = Math.min(100, Math.max(0, value));
   return (
-    <div>
+    <div className="progress-wrap">
       {label ? (
         <div className="progress-label">
           <span>{label}</span>

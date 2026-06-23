@@ -27,9 +27,11 @@ interface TableProps<T> {
   stickyHeader?: boolean;
   maxHeight?: string | number;
   compact?: boolean;
+  fluid?: boolean;
   showFooter?: boolean;
   className?: string;
   onRowClick?: (row: T) => void;
+  hideScrollNotice?: boolean;
 }
 
 const cellStyle = (col: TableColumn<Record<string, unknown>>): CSSProperties => {
@@ -48,6 +50,7 @@ const resolveSticky = (col: TableColumn<Record<string, unknown>>) => {
 
 const resolveMinWidth = (col: TableColumn<Record<string, unknown>>) => {
   if (col.minWidth != null) return col.minWidth;
+  if (col.width != null) return undefined;
   if (String(col.key) === 'actions') return 240;
   if (String(col.key).includes('email')) return 168;
   if (String(col.key).includes('phone')) return 128;
@@ -92,12 +95,14 @@ export function Table<T extends Record<string, unknown>>({
   stickyHeader = true,
   maxHeight,
   compact = false,
+  fluid = false,
   showFooter = true,
   className = '',
   onRowClick,
+  hideScrollNotice = false,
 }: TableProps<T>) {
   const normalizedColumns = columns as TableColumn<Record<string, unknown>>[];
-  const isWide = normalizedColumns.length >= 6;
+  const isWide = !fluid && normalizedColumns.length >= 6;
 
   const resolveKey = (row: T, index: number) => {
     if (typeof rowKey === 'function') return rowKey(row, index);
@@ -107,7 +112,7 @@ export function Table<T extends Record<string, unknown>>({
 
   if (loading) {
     return (
-      <div className={`table-shell ${compact ? 'is-compact' : ''} ${className}`.trim()}>
+      <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${className}`.trim()}>
         <div className="table-scroll-wrap">
           <div className="table-scroll">
             <div className="table-loading">
@@ -133,8 +138,8 @@ export function Table<T extends Record<string, unknown>>({
   const primaryColumn = mobileColumns[0];
 
   return (
-    <div className={`table-shell ${compact ? 'is-compact' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
-      {isWide ? (
+    <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
+      {isWide && !hideScrollNotice ? (
         <div className="table-scroll-notice" aria-hidden="true">
           <span className="table-scroll-notice-icon">↔</span>
           <span>مرّر أفقياً لعرض جميع الأعمدة</span>
@@ -146,7 +151,7 @@ export function Table<T extends Record<string, unknown>>({
           className={`table-scroll ${stickyHeader ? 'has-sticky-head' : ''} ${maxHeight ? 'is-scrollable' : ''}`.trim()}
           style={maxHeight ? { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight } : undefined}
         >
-          <table className="data-table">
+          <table className={`data-table ${fluid ? 'is-fluid' : ''}`.trim()}>
             <thead className="data-table-head">
               <tr>
                 {normalizedColumns.map((col) => (
