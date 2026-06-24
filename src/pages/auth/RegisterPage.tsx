@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, Lock, Mail, Phone, User } from 'lucide-react';
+import { GraduationCap, Lock, Mail, Phone, User } from '@/icons';
 import { BrandMark } from '../../components/ui/BrandMark';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';

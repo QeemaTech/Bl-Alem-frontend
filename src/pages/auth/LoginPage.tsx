@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, Phone } from 'lucide-react';
+import { Lock, Mail, Phone } from '@/icons';
 import { Button } from '../../components/ui/Button';
 import { BrandMark } from '../../components/ui/BrandMark';
 import { Card } from '../../components/ui/Card';

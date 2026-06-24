@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award, BookOpen, Copy, GraduationCap, KeyRound, Mail, Phone, Save,
   ShieldCheck, Upload, UserRound, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

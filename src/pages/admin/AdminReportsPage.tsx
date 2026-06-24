@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, Download, TrendingUp } from 'lucide-react';
+import { BarChart3, Download, TrendingUp } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';

@@ -1,6 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, CreditCard, Ticket, UsersRound } from 'lucide-react';
+import { BookOpen, CreditCard, Ticket, UsersRound } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

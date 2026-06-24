@@ -1,5 +1,5 @@
-﻿import { Link } from 'react-router-dom';
-import { ShieldOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShieldOff } from '@/icons';
 import { Button } from '../../components/ui/Button';
 
 export default function UnauthorizedPage() {

@@ -59,6 +59,7 @@ import AdminLiveSessionsPage from './pages/admin/AdminLiveSessionsPage';
 import AdminCoursesPage from './pages/admin/AdminCoursesPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminLearningPathsPage from './pages/admin/AdminLearningPathsPage';
+import AdminLearningPathEditorPage from './pages/admin/AdminLearningPathEditorPage';
 import AdminInstructorsPage from './pages/admin/AdminInstructorsPage';
 import AdminStudentsPage from './pages/admin/AdminStudentsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
@@ -143,6 +144,8 @@ function App() {
           <Route path="/admin/live" element={<AdminLiveSessionsPage />} />
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+          <Route path="/admin/learning-paths/new" element={<AdminLearningPathEditorPage />} />
+          <Route path="/admin/learning-paths/:id" element={<AdminLearningPathEditorPage />} />
           <Route path="/admin/learning-paths" element={<AdminLearningPathsPage />} />
           <Route path="/admin/instructors/:id" element={<AdminInstructorDetailPage />} />
           <Route path="/admin/students/:id" element={<AdminStudentDetailPage />} />

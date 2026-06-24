@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award, CheckCircle, ChevronLeft, ChevronRight, Clock, Download, FileText,
+<<<<<<< Updated upstream
   PlayCircle, Video,
 } from 'lucide-react';
+=======
+  Lock, PlayCircle, Video,
+} from '@/icons';
+>>>>>>> Stashed changes
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';

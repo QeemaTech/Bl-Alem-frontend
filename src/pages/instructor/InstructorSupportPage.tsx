@@ -1,5 +1,5 @@
-﻿import { FormEvent, useEffect, useState } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { FormEvent, useEffect, useState } from 'react';
+import { MessageSquare } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

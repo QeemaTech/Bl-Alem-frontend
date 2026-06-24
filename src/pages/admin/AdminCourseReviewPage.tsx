@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { BookOpen, Clock, Layers, Star, Users } from 'lucide-react';
+import { BookOpen, Clock, Layers, Star, Users } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

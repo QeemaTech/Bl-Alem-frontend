@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Edit, Plus, Save, Trash2, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Edit, Plus, Save, Trash2, X } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

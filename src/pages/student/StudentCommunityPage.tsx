@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   Download, LayoutGrid, MessageCircle, MessageSquare, MessagesSquare, Plus, Send,
   Table2, UserRound, Users,
-} from 'lucide-react';
+} from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

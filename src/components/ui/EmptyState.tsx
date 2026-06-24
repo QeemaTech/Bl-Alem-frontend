@@ -1,22 +1,41 @@
-﻿import type { LucideIcon } from 'lucide-react';
-import { Inbox } from 'lucide-react';
+﻿import type { MaterialIcon } from '@/icons';
+import { Inbox } from '@/icons';
+import type { ReactNode } from 'react';
 import { Button } from './Button';
 
 interface EmptyStateProps {
+  icon?: MaterialIcon;
   title: string;
   description?: string;
-  icon?: LucideIcon;
+  action?: ReactNode;
   actionLabel?: string;
   onAction?: () => void;
 }
 
-export function EmptyState({ title, description, icon: Icon = Inbox, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon = Inbox,
+  title,
+  description,
+  action,
+  actionLabel,
+  onAction,
+}: EmptyStateProps) {
+  const actionNode = action ?? (actionLabel && onAction ? (
+    <Button onClick={onAction}>{actionLabel}</Button>
+  ) : null);
+
   return (
     <div className="empty-state">
-      <div className="empty-state-icon"><Icon size={28} /></div>
+      <div className="empty-state-icon">
+        <Icon size={28} />
+      </div>
       <h3>{title}</h3>
       {description ? <p>{description}</p> : null}
-      {actionLabel && onAction ? <Button size="sm" onClick={onAction}>{actionLabel}</Button> : null}
+      {actionNode}
     </div>
   );
+}
+
+export function EmptyStateButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return <Button onClick={onClick}>{label}</Button>;
 }

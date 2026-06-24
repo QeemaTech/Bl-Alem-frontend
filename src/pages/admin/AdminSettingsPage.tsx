@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award, Globe, Mail, Palette, RefreshCw, Save, Settings2, Shield, Upload, Wallet, Wrench,
-} from 'lucide-react';
+} from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

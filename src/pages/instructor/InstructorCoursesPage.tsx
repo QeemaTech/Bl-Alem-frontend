@@ -1,6 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit, Layers, Send, Trash2 } from 'lucide-react';
+import { Edit, Layers, Send, Trash2 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

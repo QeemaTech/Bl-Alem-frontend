@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, MessageSquare, Star, ThumbsUp } from 'lucide-react';
+import { Download, MessageSquare, Star, ThumbsUp } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

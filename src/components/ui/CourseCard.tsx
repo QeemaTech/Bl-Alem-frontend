@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Clock, Star } from 'lucide-react';
+import { BookOpen, Clock, Star } from '@/icons';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Card } from './Card';

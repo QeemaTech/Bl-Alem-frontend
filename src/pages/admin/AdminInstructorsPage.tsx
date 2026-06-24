@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Download, GraduationCap, Plus, Users, Wallet } from 'lucide-react';
+import { BookOpen, Download, GraduationCap, Plus, Users, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

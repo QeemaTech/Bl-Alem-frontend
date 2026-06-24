@@ -1,4 +1,4 @@
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from '@/icons';
 import { Button } from './Button';
 import { Modal } from './Modal';
 
@@ -6,20 +6,36 @@ interface SuccessModalProps {
   isOpen: boolean;
   title: string;
   message: string;
+  onClose?: () => void;
   actionLabel?: string;
-  onAction: () => void;
+  onAction?: () => void;
 }
 
-export function SuccessModal({ isOpen, title, message, actionLabel = 'حسناً', onAction }: SuccessModalProps) {
+export function SuccessModal({
+  isOpen,
+  title,
+  message,
+  onClose = () => {},
+  actionLabel = 'حسناً',
+  onAction,
+}: SuccessModalProps) {
+  const handleAction = () => {
+    if (onAction) onAction();
+    else onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} title="" onClose={onAction}>
-      <div style={{ textAlign: 'center', padding: '8px 0' }}>
-        <div className="empty-state-icon" style={{ margin: '0 auto 20px', width: 72, height: 72 }}>
-          <CheckCircle2 size={36} color="var(--success)" />
+    <Modal
+      isOpen={isOpen}
+      title={title}
+      onClose={onClose}
+      footer={<Button onClick={handleAction}>{actionLabel}</Button>}
+    >
+      <div className="flex flex-col items-center gap-3 py-4 text-center">
+        <div className="grid h-16 w-16 place-items-center rounded-full bg-success-container text-success">
+          <CheckCircle2 size={32} />
         </div>
-        <h3 style={{ margin: '0 0 8px', fontWeight: 800, fontSize: '1.2rem' }}>{title}</h3>
-        <p style={{ margin: '0 0 24px', color: 'var(--muted)' }}>{message}</p>
-        <Button fullWidth onClick={onAction}>{actionLabel}</Button>
+        <p className="m-0 text-on-surface-variant">{message}</p>
       </div>
     </Modal>
   );

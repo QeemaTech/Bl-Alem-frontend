@@ -1,7 +1,7 @@
 import {
   Award, Bell, BookOpen, CreditCard, Gift, Headphones, LayoutDashboard,
   Radio, Route, Settings, Star, Ticket, UsersRound, Wallet, BarChart3, Tags,
-} from 'lucide-react';
+} from '@/icons';
 import DashboardLayout from './DashboardLayout';
 
 export default function AdminLayout() {

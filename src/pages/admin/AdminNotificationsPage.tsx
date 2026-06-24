@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Bell, BellOff, Download, Send } from 'lucide-react';
+import { Bell, BellOff, Download, Send } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+<<<<<<< Updated upstream
   BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, RotateCcw, Search,
 } from 'lucide-react';
+=======
+  BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, UserRound,
+} from '@/icons';
+>>>>>>> Stashed changes
 import { studentApi } from '../../api/student';
 import { MyCourseCard } from '../../components/student/MyCourseCard';
 import { Badge } from '../../components/ui/Badge';

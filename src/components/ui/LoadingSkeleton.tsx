@@ -22,9 +22,9 @@ export function LoadingSkeleton({ variant = 'card', count = 1 }: LoadingSkeleton
 export function DashboardSkeleton() {
   return (
     <div className="page-grid">
-      <div className="skeleton skeleton-block" style={{ height: 160 }} />
-      <div className="skeleton-grid-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="skeleton skeleton-block dashboard-skeleton-hero" />
+      <div className="stats-grid">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="skeleton skeleton-stat" />
         ))}
       </div>

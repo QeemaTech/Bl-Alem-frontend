@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Award, Bell, BookOpen, Calendar, Copy, Crown, Gift, GraduationCap, Headphones,
   MessageCircle, PlayCircle, Radio, Route, Search, Sparkles, TrendingUp, Video, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

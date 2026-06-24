@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Phone, ShieldCheck } from 'lucide-react';
+import { Phone, ShieldCheck } from '@/icons';
 import { authApi } from '../../api/auth';
 import { BrandMark } from '../../components/ui/BrandMark';
 import { Button } from '../../components/ui/Button';

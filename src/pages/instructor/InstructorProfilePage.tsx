@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Award, BookOpen, Briefcase, FileText, Mail, Phone, RefreshCw, Save,
   ShieldCheck, Upload, UserRound, UsersRound,
-} from 'lucide-react';
+} from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

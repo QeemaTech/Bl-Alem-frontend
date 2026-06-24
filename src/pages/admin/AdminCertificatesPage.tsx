@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Copy, Download, ExternalLink, Plus } from 'lucide-react';
+import { Award, Copy, Download, ExternalLink, Plus } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

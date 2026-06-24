@@ -34,8 +34,23 @@ interface TableProps<T> {
   hideScrollNotice?: boolean;
 }
 
-const cellStyle = (col: TableColumn<Record<string, unknown>>): CSSProperties => {
-  const minWidth = resolveMinWidth(col);
+const MOBILE_SECONDARY_KEYS = new Set([
+  'phone',
+  'activity',
+  'joinedAt',
+  'createdAt',
+  'updatedAt',
+  'lastLogin',
+  'lastActiveAt',
+  'iban',
+  'wallet',
+]);
+
+const cellStyle = (
+  col: TableColumn<Record<string, unknown>>,
+  isCompact: boolean,
+): CSSProperties => {
+  const minWidth = resolveMinWidth(col, isCompact);
   return {
     ...(col.width != null ? { width: col.width } : {}),
     ...(minWidth != null ? { minWidth: minWidth } : {}),
@@ -43,22 +58,42 @@ const cellStyle = (col: TableColumn<Record<string, unknown>>): CSSProperties => 
   };
 };
 
-const resolveSticky = (col: TableColumn<Record<string, unknown>>) => {
+const resolveSticky = (
+  col: TableColumn<Record<string, unknown>>,
+  index: number,
+  total: number,
+  isWide: boolean,
+) => {
   if (col.sticky) return col.sticky;
+  if (!isWide) return undefined;
+  if (index === 0) return 'start' as const;
+  if (String(col.key) === 'actions' || index === total - 1) return 'end' as const;
   return undefined;
 };
 
-const resolveMinWidth = (col: TableColumn<Record<string, unknown>>) => {
+const resolveMinWidth = (col: TableColumn<Record<string, unknown>>, isCompact: boolean) => {
   if (col.minWidth != null) return col.minWidth;
+<<<<<<< Updated upstream
   if (col.width != null) return undefined;
   if (String(col.key) === 'actions') return 240;
   if (String(col.key).includes('email')) return 168;
   if (String(col.key).includes('phone')) return 128;
   return 96;
+=======
+  if (String(col.key) === 'actions') return isCompact ? '7.5rem' : '9rem';
+  if (String(col.key).includes('email')) return isCompact ? '7rem' : '8.5rem';
+  if (String(col.key).includes('phone')) return isCompact ? '5.5rem' : '6.5rem';
+  return isCompact ? '4.5rem' : '5.5rem';
+>>>>>>> Stashed changes
 };
 
-const cellClass = (col: TableColumn<Record<string, unknown>>) => {
-  const sticky = resolveSticky(col);
+const cellClass = (
+  col: TableColumn<Record<string, unknown>>,
+  index: number,
+  total: number,
+  isWide: boolean,
+) => {
+  const sticky = resolveSticky(col, index, total, isWide);
   const parts = ['data-table-cell'];
   if (col.className) parts.push(col.className);
   if (sticky === 'start') parts.push('col-sticky-start');
@@ -102,7 +137,12 @@ export function Table<T extends Record<string, unknown>>({
   hideScrollNotice = false,
 }: TableProps<T>) {
   const normalizedColumns = columns as TableColumn<Record<string, unknown>>[];
+<<<<<<< Updated upstream
   const isWide = !fluid && normalizedColumns.length >= 6;
+=======
+  const isCompact = compact || normalizedColumns.length >= 6;
+  const isWide = normalizedColumns.length >= 8;
+>>>>>>> Stashed changes
 
   const resolveKey = (row: T, index: number) => {
     if (typeof rowKey === 'function') return rowKey(row, index);
@@ -112,7 +152,11 @@ export function Table<T extends Record<string, unknown>>({
 
   if (loading) {
     return (
+<<<<<<< Updated upstream
       <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${className}`.trim()}>
+=======
+      <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${className}`.trim()}>
+>>>>>>> Stashed changes
         <div className="table-scroll-wrap">
           <div className="table-scroll">
             <div className="table-loading">
@@ -134,14 +178,22 @@ export function Table<T extends Record<string, unknown>>({
     );
   }
 
-  const mobileColumns = normalizedColumns.filter((col) => !col.hideOnMobile);
+  const mobileColumns = normalizedColumns.filter(
+    (col) => !col.hideOnMobile && !MOBILE_SECONDARY_KEYS.has(String(col.key)),
+  );
   const primaryColumn = mobileColumns[0];
+  const columnCount = normalizedColumns.length;
 
   return (
+<<<<<<< Updated upstream
     <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
       {isWide && !hideScrollNotice ? (
+=======
+    <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
+      {isWide ? (
+>>>>>>> Stashed changes
         <div className="table-scroll-notice" aria-hidden="true">
-          <span className="table-scroll-notice-icon">↔</span>
+          <span className="table-scroll-notice-icon">⇤⇥</span>
           <span>مرّر أفقياً لعرض جميع الأعمدة</span>
         </div>
       ) : null}
@@ -154,11 +206,11 @@ export function Table<T extends Record<string, unknown>>({
           <table className={`data-table ${fluid ? 'is-fluid' : ''}`.trim()}>
             <thead className="data-table-head">
               <tr>
-                {normalizedColumns.map((col) => (
+                {normalizedColumns.map((col, index) => (
                   <th
                     key={String(col.key)}
-                    className={cellClass(col)}
-                    style={cellStyle(col)}
+                    className={cellClass(col, index, columnCount, isWide)}
+                    style={cellStyle(col, isCompact)}
                   >
                     {col.header}
                   </th>
@@ -182,11 +234,11 @@ export function Table<T extends Record<string, unknown>>({
                   tabIndex={onRowClick ? 0 : undefined}
                   role={onRowClick ? 'button' : undefined}
                 >
-                  {normalizedColumns.map((col) => (
+                  {normalizedColumns.map((col, colIndex) => (
                     <td
                       key={String(col.key)}
-                      className={cellClass(col)}
-                      style={cellStyle(col)}
+                      className={cellClass(col, colIndex, columnCount, isWide)}
+                      style={cellStyle(col, isCompact)}
                     >
                       {renderValue(col, row)}
                     </td>

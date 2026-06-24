@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowDownLeft, ArrowUpRight, Download, Gift, TrendingDown, TrendingUp, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import { studentApi } from '../../api/student';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

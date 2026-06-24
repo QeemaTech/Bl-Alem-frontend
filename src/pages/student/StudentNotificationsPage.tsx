@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Award, Bell, BellOff, BookOpen, CheckCheck, CreditCard, Gift, MessageCircle,
   Radio, Sparkles,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+} from '@/icons';
+import type { LucideIcon } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

@@ -1,12 +1,18 @@
+<<<<<<< Updated upstream
 ﻿import type { LucideIcon } from 'lucide-react';
 import { Info } from 'lucide-react';
 import { Card } from './Card';
+=======
+﻿import type { MaterialIcon } from '@/icons';
+import { cn } from '@/lib/cn';
+>>>>>>> Stashed changes
 
 interface StatCardProps {
   title: string;
   value: string;
-  hint?: string;
+  icon: MaterialIcon;
   trend?: string;
+<<<<<<< Updated upstream
   icon: LucideIcon;
   tooltip?: string;
 }
@@ -30,10 +36,29 @@ export function StatCard({ title, value, hint, trend, icon: Icon, tooltip }: Sta
             </span>
           ) : null}
         </p>
-        <strong>{value}</strong>
-        {hint ? <small>{hint}</small> : null}
-        {trend ? <small style={{ color: 'var(--success)' }}>{trend}</small> : null}
+=======
+  hint?: string;
+  trendUp?: boolean;
+  className?: string;
+}
+
+export function StatCard({ title, value, icon: Icon, trend, hint, trendUp, className }: StatCardProps) {
+  const subtitle = hint || trend;
+  return (
+    <article className={cn('stat-card card', className)}>
+      <div className="stat-icon" aria-hidden>
+        <Icon size={22} />
       </div>
-    </Card>
+      <div className="min-w-0">
+        <p>{title}</p>
+>>>>>>> Stashed changes
+        <strong>{value}</strong>
+        {subtitle ? (
+          <small style={{ color: trendUp ? 'var(--color-success)' : 'var(--color-on-surface-variant)' }}>
+            {subtitle}
+          </small>
+        ) : null}
+      </div>
+    </article>
   );
 }

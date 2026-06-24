@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Users } from 'lucide-react';
+import { BookOpen, GraduationCap, Users } from '@/icons';
 import { Outlet } from 'react-router-dom';
 import { BrandMark } from '../components/ui/BrandMark';
 import { useSiteSettings } from '../store/SiteSettingsContext';

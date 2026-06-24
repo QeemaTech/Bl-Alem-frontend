@@ -1,8 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
+<<<<<<< Updated upstream
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Award, BookOpen, Lock, PlayCircle, Star, Users,
 } from 'lucide-react';
+=======
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Lock, PlayCircle, Star } from '@/icons';
+>>>>>>> Stashed changes
 import { studentApi } from '../../api/student';
 import { CourseReviewForm } from '../../components/student/CourseReviewForm';
 import { Badge } from '../../components/ui/Badge';

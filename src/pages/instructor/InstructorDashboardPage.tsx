@@ -1,6 +1,6 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Calendar, Clock, Play, Star, TrendingUp, UsersRound, Wallet } from 'lucide-react';
+import { BookOpen, Calendar, Clock, Play, Star, TrendingUp, UsersRound, Wallet } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

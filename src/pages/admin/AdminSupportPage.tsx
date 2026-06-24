@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle2, Download, Headphones, MessageSquare, MessageSquarePlus, XCircle,
-} from 'lucide-react';
+} from '@/icons';
 import { adminApi } from '../../api/admin';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

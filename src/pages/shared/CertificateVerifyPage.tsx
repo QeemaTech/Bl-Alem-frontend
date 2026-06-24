@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Award, CheckCircle2, Download, Home, XCircle } from 'lucide-react';
+import { Award, CheckCircle2, Download, Home, XCircle } from '@/icons';
 import { certificatesApi } from '../../api/certificates';
 import { BrandMark } from '../../components/ui/BrandMark';
 import { Button } from '../../components/ui/Button';

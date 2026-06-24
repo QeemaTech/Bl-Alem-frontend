@@ -1,7 +1,7 @@
-﻿import {
+import {
   Award, Bell, BookOpen, CreditCard, Crown, Gift, Headphones, LayoutDashboard,
   MessageCircle, PlayCircle, Radio, Route, UserRound, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import DashboardLayout from './DashboardLayout';
 
 export default function StudentLayout() {

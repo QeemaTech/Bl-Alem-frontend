@@ -1,4 +1,5 @@
 ﻿import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/cn';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
@@ -17,12 +18,21 @@ export function Button({
   icon,
   children,
   disabled,
+  type = 'button',
   ...props
 }: ButtonProps) {
   const sizeClass = size === 'sm' ? 'btn-sm' : size === 'lg' ? 'btn-lg' : '';
   return (
     <button
-      className={`btn btn-${variant} ${sizeClass} ${fullWidth ? 'btn-full' : ''} ${loading ? 'btn-loading' : ''} ${className}`}
+      type={type}
+      className={cn(
+        'btn',
+        `btn-${variant}`,
+        sizeClass,
+        fullWidth && 'btn-full',
+        loading && 'btn-loading',
+        className,
+      )}
       disabled={disabled || loading}
       {...props}
     >

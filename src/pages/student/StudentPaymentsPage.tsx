@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CreditCard, Download, Receipt, TrendingUp, Wallet } from 'lucide-react';
+import { CreditCard, Download, Receipt, TrendingUp, Wallet } from '@/icons';
 import { studentApi } from '../../api/student';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

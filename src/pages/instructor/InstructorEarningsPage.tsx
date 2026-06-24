@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownToLine, Banknote, Clock, Download, TrendingUp, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

@@ -1,19 +1,28 @@
 ﻿import { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, UserRound } from 'lucide-react';
+import { Bell, ChevronDown, DarkMode, LightMode, LogOut, Menu, UserRound } from '@/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { useAuth } from '../../store/AuthContext';
+import { useTheme } from '../../store/ThemeContext';
 
 interface HeaderProps {
   title: string;
   notificationsPath?: string;
   profilePath?: string;
   onMenuClick: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Header({ title, notificationsPath, profilePath, onMenuClick }: HeaderProps) {
+export function Header({
+  title,
+  notificationsPath,
+  profilePath,
+  onMenuClick,
+}: HeaderProps) {
   const { user, logout } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -44,20 +53,30 @@ export function Header({ title, notificationsPath, profilePath, onMenuClick }: H
         <Button variant="ghost" className="menu-btn" onClick={onMenuClick} aria-label="القائمة">
           <Menu size={20} />
         </Button>
-        <div>
+        <div className="dashboard-header-title">
           <h1>{title}</h1>
           <p>مرحباً {user?.fullName || 'بك'}، تابع يومك التعليمي من هنا.</p>
         </div>
         <div className="header-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={toggleTheme}
+            aria-label={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+          >
+            {resolvedTheme === 'dark' ? <LightMode size={20} /> : <DarkMode size={20} />}
+          </button>
           {notificationsPath ? (
             <Link to={notificationsPath} className="icon-btn" aria-label="الإشعارات">
               <Bell size={20} />
             </Link>
           ) : (
-            <button className="icon-btn" aria-label="الإشعارات"><Bell size={20} /></button>
+            <button type="button" className="icon-btn" aria-label="الإشعارات">
+              <Bell size={20} />
+            </button>
           )}
           <div className="profile-dropdown" ref={dropdownRef}>
-            <button className="profile-chip" onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <button type="button" className="profile-chip" onClick={() => setDropdownOpen(!dropdownOpen)}>
               <span className="profile-chip-avatar">{initials}</span>
               <span>{user?.fullName}</span>
               <ChevronDown size={16} />
@@ -70,6 +89,7 @@ export function Header({ title, notificationsPath, profilePath, onMenuClick }: H
                   </Link>
                 ) : null}
                 <button
+                  type="button"
                   className="dropdown-item danger"
                   onClick={() => { setDropdownOpen(false); setLogoutOpen(true); }}
                 >

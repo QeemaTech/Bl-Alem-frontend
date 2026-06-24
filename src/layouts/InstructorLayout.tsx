@@ -1,7 +1,7 @@
-﻿import {
+import {
   BarChart3, Bell, BookOpen, Headphones, LayoutDashboard, MessageSquare,
   PlusCircle, Radio, UserRound, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import DashboardLayout from './DashboardLayout';
 
 export default function InstructorLayout() {
