@@ -1,5 +1,5 @@
-﻿import type { SelectHTMLAttributes } from 'react';
-import { ChevronDown } from 'lucide-react';
+import type { SelectHTMLAttributes } from 'react';
+import { ChevronDown } from '@/icons';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;

@@ -1,24 +1,32 @@
 import { NavLink } from 'react-router-dom';
-import type { LucideIcon } from 'lucide-react';
+import type { MaterialIcon } from '@/icons';
+import { cn } from '@/lib/cn';
 
 interface SidebarItemProps {
   label: string;
   path: string;
-  icon: LucideIcon;
+  icon: MaterialIcon;
   onNavigate?: () => void;
 }
 
 export function SidebarItem({ label, path, icon: Icon, onNavigate }: SidebarItemProps) {
+  const end = path.split('/').filter(Boolean).length <= 2;
+
   return (
     <NavLink
       to={path}
+      end={end}
       onClick={onNavigate}
-      className={({ isActive }) => `sidebar-item ${isActive ? 'is-active' : ''}`}
+      className={({ isActive }) => cn('sidebar-item', isActive && 'is-active')}
     >
-      <span className="sidebar-item-icon" aria-hidden="true">
-        <Icon size={18} />
-      </span>
-      <span className="sidebar-item-label">{label}</span>
+      {({ isActive }) => (
+        <>
+          <span className="sidebar-item-icon" aria-hidden="true">
+            <Icon size={22} fill={isActive ? 'currentColor' : undefined} />
+          </span>
+          <span className="sidebar-item-label">{label}</span>
+        </>
+      )}
     </NavLink>
   );
 }

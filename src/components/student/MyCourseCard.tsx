@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, CheckCircle2, PlayCircle, Star, UserRound } from 'lucide-react';
+import { BookOpen, CheckCircle2, PlayCircle, Star, UserRound } from '@/icons';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';

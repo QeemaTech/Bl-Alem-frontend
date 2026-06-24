@@ -144,7 +144,6 @@ function App() {
           <Route path="/admin/live" element={<AdminLiveSessionsPage />} />
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/categories" element={<AdminCategoriesPage />} />
-          <Route path="/admin/learning-paths/new" element={<AdminLearningPathEditorPage />} />
           <Route path="/admin/learning-paths/:id" element={<AdminLearningPathEditorPage />} />
           <Route path="/admin/learning-paths" element={<AdminLearningPathsPage />} />
           <Route path="/admin/instructors/:id" element={<AdminInstructorDetailPage />} />

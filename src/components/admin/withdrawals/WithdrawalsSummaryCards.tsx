@@ -1,5 +1,5 @@
-import { CheckCircle2, Clock, Wallet, XCircle } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { CheckCircle2, Clock, Wallet, XCircle } from '@/icons';
+import type { LucideIcon } from '@/icons';
 
 interface SummaryStat {
   total: number;

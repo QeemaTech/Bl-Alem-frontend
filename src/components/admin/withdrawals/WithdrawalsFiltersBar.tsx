@@ -1,4 +1,4 @@
-import { Download, RotateCcw } from 'lucide-react';
+import { Download, RotateCcw } from '@/icons';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';

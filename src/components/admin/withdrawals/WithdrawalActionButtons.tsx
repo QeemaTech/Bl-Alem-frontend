@@ -1,4 +1,4 @@
-import { CheckCircle2, Eye, Upload, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Upload, XCircle } from '@/icons';
 import type { WithdrawalActionType, WithdrawalItem } from './types';
 
 interface WithdrawalActionButtonsProps {

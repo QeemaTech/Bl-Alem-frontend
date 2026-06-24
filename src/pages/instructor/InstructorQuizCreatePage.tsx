@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';

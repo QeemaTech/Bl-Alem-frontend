@@ -1,5 +1,5 @@
-import { AlertCircle, Bell, BellOff, CalendarDays, TrendingUp } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { AlertCircle, Bell, BellOff, CalendarDays, TrendingUp } from '@/icons';
+import type { LucideIcon } from '@/icons';
 import { pctOfTotal } from './types';
 
 interface NotificationStatsData {

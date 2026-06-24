@@ -166,36 +166,44 @@ export default function AdminLearningPathsPage() {
 
       <Card>
         <Table
+          fluid
+          hideScrollNotice
           loading={loading}
           data={tableRows}
           onRowClick={(row) => openPath(row._raw.id)}
           emptyTitle="لا توجد مسارات"
           emptyDescription="ابدأ بإنشاء مسار تعليمي جديد."
           columns={[
-            { key: 'id', header: 'الرقم' },
-            { key: 'titleAr', header: 'المسار' },
-            { key: 'courses', header: 'الدورات' },
+            { key: 'id', header: 'الرقم', width: '4.5rem', align: 'center', className: 'col-id' },
+            { key: 'titleAr', header: 'المسار', align: 'center', className: 'col-primary' },
+            { key: 'courses', header: 'الدورات', width: '5.5rem', align: 'center' },
             {
               key: 'status',
               header: 'الحالة',
+              width: '7rem',
+              align: 'center',
+              truncate: false,
               render: (row) => <Badge variant={statusVariant(String(row._raw?.status))}>{row.status}</Badge>,
             },
-            { key: 'createdAt', header: 'التاريخ' },
+            { key: 'createdAt', header: 'التاريخ', width: '9.5rem', align: 'center' },
             {
               key: 'actions',
               header: 'الإجراءات',
+              width: '18rem',
+              align: 'end',
+              truncate: false,
               render: (row) => (
-                <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                  <Button size="sm" variant="secondary" onClick={() => openPath(row._raw.id)}>
+                <>
+                  <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); openPath(row._raw.id); }}>
                     إدارة الدورات
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => openPath(row._raw.id)}>
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); openPath(row._raw.id); }}>
                     تعديل
                   </Button>
-                  <Button size="sm" variant="danger" onClick={() => setDeleteTarget(row._raw)}>
+                  <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); setDeleteTarget(row._raw); }}>
                     حذف
                   </Button>
-                </div>
+                </>
               ),
             },
           ]}

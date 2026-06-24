@@ -1,4 +1,4 @@
-import { Banknote } from 'lucide-react';
+import { Banknote } from '@/icons';
 import { Table } from '../../ui/Table';
 import { WithdrawalActionButtons } from './WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from './WithdrawalStatusBadge';

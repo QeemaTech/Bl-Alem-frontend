@@ -23,7 +23,7 @@ import {
   TrendingUp,
   User,
   Wallet,
-} from 'lucide-react';
+} from '@/icons';
 import { ReportChart } from '../../reports/ReportChart';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';

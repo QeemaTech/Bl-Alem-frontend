@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-<<<<<<< Updated upstream
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Download, GraduationCap, TrendingUp, Users } from 'lucide-react';
-=======
 import { BookOpen, Download, GraduationCap, TrendingUp, Users } from '@/icons';
->>>>>>> Stashed changes
 import { instructorApi } from '../../api/instructor';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

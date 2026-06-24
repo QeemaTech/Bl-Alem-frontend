@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2, ChevronDown, ClipboardList, FileText, Lock, PlayCircle, Video,
-} from 'lucide-react';
+} from '@/icons';
 import { useNavigate } from 'react-router-dom';
 import {
   buildSectionCurriculum,

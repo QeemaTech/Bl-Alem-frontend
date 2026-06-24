@@ -1,4 +1,4 @@
-import { Bell, Check } from 'lucide-react';
+import { Bell, Check } from '@/icons';
 import { NotificationBadge } from './NotificationBadge';
 import {
   fmtRelativeTime,

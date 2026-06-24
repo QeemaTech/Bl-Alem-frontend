@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, BookOpen, GraduationCap, Mail, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, GraduationCap, Mail, TrendingUp } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';

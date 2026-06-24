@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Button } from '../ui/Button';
 import { Textarea } from '../ui/Textarea';

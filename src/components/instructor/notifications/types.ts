@@ -1,7 +1,7 @@
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from '@/icons';
 import {
   Bell, BookOpen, CreditCard, Radio, Settings, Star, Wallet,
-} from 'lucide-react';
+} from '@/icons';
 
 export interface InstructorNotification {
   id: number;

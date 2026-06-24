@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-<<<<<<< Updated upstream
-import { ChevronDown, ChevronUp, ClipboardList, Edit, ExternalLink, FilePlus, GripVertical, Plus, Send, Trash2 } from 'lucide-react';
-=======
-import { ChevronDown, ChevronUp, ClipboardList, Edit, ExternalLink, FilePlus, GripVertical, Lock, Plus, Send, Trash2, Unlock, Upload } from '@/icons';
->>>>>>> Stashed changes
+import { ChevronDown, ChevronUp, ClipboardList, Edit, ExternalLink, FilePlus, GripVertical, Plus, Send, Trash2 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

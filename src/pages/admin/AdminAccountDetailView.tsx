@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { UserDetailDashboard } from '../../components/admin/userDetail/UserDetailDashboard';
 import { Button } from '../../components/ui/Button';

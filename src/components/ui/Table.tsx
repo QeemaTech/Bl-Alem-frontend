@@ -46,16 +46,22 @@ const MOBILE_SECONDARY_KEYS = new Set([
   'wallet',
 ]);
 
-const cellStyle = (
-  col: TableColumn<Record<string, unknown>>,
-  isCompact: boolean,
-): CSSProperties => {
-  const minWidth = resolveMinWidth(col, isCompact);
-  return {
-    ...(col.width != null ? { width: col.width } : {}),
-    ...(minWidth != null ? { minWidth: minWidth } : {}),
-    ...(col.maxWidth != null ? { maxWidth: col.maxWidth } : {}),
-  };
+const colgroupStyle = (col: TableColumn<Record<string, unknown>>): CSSProperties => {
+  if (col.width != null) return { width: col.width };
+  return {};
+};
+
+const resolveAlign = (col: TableColumn<Record<string, unknown>>) => {
+  if (col.align) return col.align;
+  if (String(col.key) === 'actions') return 'end' as const;
+  if (String(col.key) === 'id') return 'center' as const;
+  return 'start' as const;
+};
+
+const alignClass = (align: 'start' | 'center' | 'end') => {
+  if (align === 'center') return 'col-align-center';
+  if (align === 'end') return 'col-align-end';
+  return 'col-align-start';
 };
 
 const resolveSticky = (
@@ -71,22 +77,6 @@ const resolveSticky = (
   return undefined;
 };
 
-const resolveMinWidth = (col: TableColumn<Record<string, unknown>>, isCompact: boolean) => {
-  if (col.minWidth != null) return col.minWidth;
-<<<<<<< Updated upstream
-  if (col.width != null) return undefined;
-  if (String(col.key) === 'actions') return 240;
-  if (String(col.key).includes('email')) return 168;
-  if (String(col.key).includes('phone')) return 128;
-  return 96;
-=======
-  if (String(col.key) === 'actions') return isCompact ? '7.5rem' : '9rem';
-  if (String(col.key).includes('email')) return isCompact ? '7rem' : '8.5rem';
-  if (String(col.key).includes('phone')) return isCompact ? '5.5rem' : '6.5rem';
-  return isCompact ? '4.5rem' : '5.5rem';
->>>>>>> Stashed changes
-};
-
 const cellClass = (
   col: TableColumn<Record<string, unknown>>,
   index: number,
@@ -94,30 +84,46 @@ const cellClass = (
   isWide: boolean,
 ) => {
   const sticky = resolveSticky(col, index, total, isWide);
-  const parts = ['data-table-cell'];
+  const align = resolveAlign(col);
+  const parts = ['data-table-cell', alignClass(align)];
   if (col.className) parts.push(col.className);
   if (sticky === 'start') parts.push('col-sticky-start');
   if (sticky === 'end') parts.push('col-sticky-end');
   if (String(col.key) === 'actions') parts.push('col-actions');
-  if (col.align === 'center') parts.push('col-align-center');
-  if (col.align === 'end') parts.push('col-align-end');
   if (col.truncate !== false && !col.wrap && String(col.key) !== 'actions') parts.push('col-truncate');
   if (col.wrap) parts.push('col-wrap');
   return parts.join(' ');
 };
 
-const renderValue = <T extends Record<string, unknown>>(col: TableColumn<T>, row: T) => {
+const cellInner = <T extends Record<string, unknown>>(col: TableColumn<T>, row: T) => {
   const content = col.render ? col.render(row) : String(row[col.key as keyof T] ?? '—');
+  const title = col.render ? undefined : String(row[col.key as keyof T] ?? '');
+
   if (String(col.key) === 'actions') {
-    return <div className="table-actions">{content}</div>;
+    return (
+      <div
+        className="table-actions"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        {content}
+      </div>
+    );
   }
+
   if (col.wrap) {
     return <div className="td-wrap">{content}</div>;
   }
-  if (col.truncate !== false && !col.render) {
-    return <div className="td-content" title={String(row[col.key as keyof T] ?? '')}>{content}</div>;
+
+  if (col.truncate !== false || col.className?.includes('col-primary') || /title|name/i.test(String(col.key))) {
+    return (
+      <div className="td-content" title={title}>
+        {content}
+      </div>
+    );
   }
-  return content;
+
+  return <span className="td-plain">{content}</span>;
 };
 
 export function Table<T extends Record<string, unknown>>({
@@ -137,12 +143,9 @@ export function Table<T extends Record<string, unknown>>({
   hideScrollNotice = false,
 }: TableProps<T>) {
   const normalizedColumns = columns as TableColumn<Record<string, unknown>>[];
-<<<<<<< Updated upstream
-  const isWide = !fluid && normalizedColumns.length >= 6;
-=======
   const isCompact = compact || normalizedColumns.length >= 6;
-  const isWide = normalizedColumns.length >= 8;
->>>>>>> Stashed changes
+  const isWide = !fluid && normalizedColumns.length >= 8;
+  const columnCount = normalizedColumns.length;
 
   const resolveKey = (row: T, index: number) => {
     if (typeof rowKey === 'function') return rowKey(row, index);
@@ -152,11 +155,7 @@ export function Table<T extends Record<string, unknown>>({
 
   if (loading) {
     return (
-<<<<<<< Updated upstream
-      <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${className}`.trim()}>
-=======
-      <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${className}`.trim()}>
->>>>>>> Stashed changes
+      <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${className}`.trim()}>
         <div className="table-scroll-wrap">
           <div className="table-scroll">
             <div className="table-loading">
@@ -182,16 +181,10 @@ export function Table<T extends Record<string, unknown>>({
     (col) => !col.hideOnMobile && !MOBILE_SECONDARY_KEYS.has(String(col.key)),
   );
   const primaryColumn = mobileColumns[0];
-  const columnCount = normalizedColumns.length;
 
   return (
-<<<<<<< Updated upstream
-    <div className={`table-shell ${compact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
+    <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
       {isWide && !hideScrollNotice ? (
-=======
-    <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
-      {isWide ? (
->>>>>>> Stashed changes
         <div className="table-scroll-notice" aria-hidden="true">
           <span className="table-scroll-notice-icon">⇤⇥</span>
           <span>مرّر أفقياً لعرض جميع الأعمدة</span>
@@ -204,13 +197,17 @@ export function Table<T extends Record<string, unknown>>({
           style={maxHeight ? { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight } : undefined}
         >
           <table className={`data-table ${fluid ? 'is-fluid' : ''}`.trim()}>
+            <colgroup>
+              {normalizedColumns.map((col) => (
+                <col key={String(col.key)} style={colgroupStyle(col)} />
+              ))}
+            </colgroup>
             <thead className="data-table-head">
               <tr>
                 {normalizedColumns.map((col, index) => (
                   <th
                     key={String(col.key)}
                     className={cellClass(col, index, columnCount, isWide)}
-                    style={cellStyle(col, isCompact)}
                   >
                     {col.header}
                   </th>
@@ -221,29 +218,28 @@ export function Table<T extends Record<string, unknown>>({
               {data.map((row, index) => {
                 const clickable = Boolean(onRowClick);
                 return (
-                <tr
-                  key={resolveKey(row, index)}
-                  className={`data-table-row ${clickable ? 'is-clickable' : ''}`.trim()}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={onRowClick ? (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      onRowClick(row);
-                    }
-                  } : undefined}
-                  tabIndex={onRowClick ? 0 : undefined}
-                  role={onRowClick ? 'button' : undefined}
-                >
-                  {normalizedColumns.map((col, colIndex) => (
-                    <td
-                      key={String(col.key)}
-                      className={cellClass(col, colIndex, columnCount, isWide)}
-                      style={cellStyle(col, isCompact)}
-                    >
-                      {renderValue(col, row)}
-                    </td>
-                  ))}
-                </tr>
+                  <tr
+                    key={resolveKey(row, index)}
+                    className={`data-table-row ${clickable ? 'is-clickable' : ''}`.trim()}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    onKeyDown={onRowClick ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onRowClick(row);
+                      }
+                    } : undefined}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    role={onRowClick ? 'button' : undefined}
+                  >
+                    {normalizedColumns.map((col, colIndex) => (
+                      <td
+                        key={String(col.key)}
+                        className={cellClass(col, colIndex, columnCount, isWide)}
+                      >
+                        {cellInner(col, row)}
+                      </td>
+                    ))}
+                  </tr>
                 );
               })}
             </tbody>
@@ -259,9 +255,7 @@ export function Table<T extends Record<string, unknown>>({
 
       <div className="table-mobile-cards">
         {data.map((row, index) => {
-          const primary = primaryColumn
-            ? renderValue(primaryColumn, row)
-            : null;
+          const primary = primaryColumn ? cellInner(primaryColumn, row) : null;
           const rest = mobileColumns.filter((col) => col.key !== primaryColumn?.key);
 
           return (
@@ -276,7 +270,7 @@ export function Table<T extends Record<string, unknown>>({
                 {rest.map((col) => (
                   <div key={String(col.key)} className="table-mobile-row">
                     <span className="table-mobile-row-label">{col.header}</span>
-                    <span className="table-mobile-row-value">{renderValue(col, row)}</span>
+                    <span className="table-mobile-row-value">{cellInner(col, row)}</span>
                   </div>
                 ))}
               </div>

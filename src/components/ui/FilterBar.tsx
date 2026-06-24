@@ -22,35 +22,24 @@ export function FilterBar({
   children,
   className = '',
   searchIconSize = 18,
-  resetVariant = 'ghost',
+  resetVariant = 'outline',
 }: FilterBarProps) {
   return (
-<<<<<<< Updated upstream
     <div className={`filter-bar ${className}`.trim()} role="search">
-=======
-    <div className="filter-bar" role="search">
->>>>>>> Stashed changes
       {onSearchChange ? (
         <Input
           label="بحث"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-<<<<<<< Updated upstream
-          icon={<Search size={searchIconSize} aria-hidden="true" />}
-=======
           placeholder={searchPlaceholder}
-          icon={<Search size={18} />}
->>>>>>> Stashed changes
+          icon={<Search size={searchIconSize} aria-hidden />}
+          className="filter-bar-search"
         />
       ) : null}
       {children}
       {onReset ? (
         <div className="filter-bar-actions">
-<<<<<<< Updated upstream
-          <Button variant={resetVariant} size="sm" onClick={onReset} icon={<RotateCcw size={16} aria-hidden="true" />}>
-=======
-          <Button variant="outline" size="sm" icon={<RotateCcw size={16} />} onClick={onReset}>
->>>>>>> Stashed changes
+          <Button variant={resetVariant} size="sm" onClick={onReset} icon={<RotateCcw size={16} aria-hidden />}>
             إعادة تعيين
           </Button>
         </div>

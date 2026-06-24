@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { ImagePlus, Upload, Wallet } from 'lucide-react';
-=======
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Download, Wallet, XCircle } from '@/icons';
->>>>>>> Stashed changes
+import { ImagePlus, Upload, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { WithdrawalActionButtons } from '../../components/admin/withdrawals/WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from '../../components/admin/withdrawals/WithdrawalStatusBadge';

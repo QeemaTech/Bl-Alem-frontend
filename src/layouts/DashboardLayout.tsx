@@ -50,7 +50,6 @@ export default function DashboardLayout({
         isOpen={isOpen}
         isCollapsed={isCollapsed}
         onClose={() => setIsOpen(false)}
-        onToggleCollapse={toggleCollapse}
         onLogout={handleLogout}
       />
       {isOpen ? (

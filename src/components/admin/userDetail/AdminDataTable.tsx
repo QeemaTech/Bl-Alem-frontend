@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search } from '@/icons';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { Table, type TableColumn } from '../../ui/Table';

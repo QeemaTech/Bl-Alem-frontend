@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-<<<<<<< Updated upstream
-import { Bell, CheckCheck } from 'lucide-react';
-=======
-import {
-  Bell, BellOff, BookOpen, CheckCheck, CreditCard, Radio, Star, Wallet,
-} from '@/icons';
-import type { LucideIcon } from '@/icons';
->>>>>>> Stashed changes
+import { Bell, CheckCheck } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
