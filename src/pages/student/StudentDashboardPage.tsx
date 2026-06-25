@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Award, Bell, BookOpen, Calendar, Copy, Crown, Gift, GraduationCap, Headphones,
-  MessageCircle, PlayCircle, Radio, Route, Search, Sparkles, TrendingUp, Video, Wallet,
+  MessageCircle, PlayCircle, Radio, Route, Search, Sparkles, TrendingUp, Video, Wallet, X,
 } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
@@ -49,13 +49,24 @@ export default function StudentDashboardPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [welcomeReferral, setWelcomeReferral] = useState<string | null>(() => {
+    const state = location.state as { welcomeReferral?: boolean; referralCode?: string } | null;
+    return state?.welcomeReferral && state?.referralCode ? state.referralCode : null;
+  });
 
   useEffect(() => {
     studentApi.dashboard().then(setData).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if ((location.state as { welcomeReferral?: boolean } | null)?.welcomeReferral) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -87,6 +98,13 @@ export default function StudentDashboardPage() {
 
   const firstName = user?.fullName?.split(' ')[0] || 'بك';
   const continueCourse = data?.continueLearning;
+  const referralCode = welcomeReferral || data?.rewardsSummary?.referralCode || user?.referralCode || '';
+
+  const copyReferralCode = async (code: string) => {
+    if (!code) return;
+    await navigator.clipboard.writeText(code);
+    showToast('تم نسخ كود الإحالة', 'success');
+  };
 
   return (
     <div className="page-grid student-dashboard">
@@ -94,6 +112,27 @@ export default function StudentDashboardPage() {
         title="لوحة الطالب"
         subtitle={`مرحباً ${user?.fullName || firstName}، تابع يومك التعليمي من هنا`}
       />
+
+      {welcomeReferral ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-success/30 bg-success-container/50 p-4 text-on-success-container">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-success/15 text-success">
+            <Gift size={22} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <strong className="block font-bold">مرحباً بك! كود الإحالة الخاص بك جاهز للمشاركة</strong>
+            <span dir="ltr" className="mt-1 block text-lg font-extrabold tracking-widest">{welcomeReferral}</span>
+            <span className="mt-0.5 block text-xs opacity-80">شارك الكود مع أصدقائك واحصل على مكافآت عند تسجيلهم</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" aria-label="نسخ كود الإحالة" className="icon-btn" onClick={() => copyReferralCode(welcomeReferral)}>
+              <Copy size={18} />
+            </button>
+            <button type="button" aria-label="إغلاق" className="icon-btn" onClick={() => setWelcomeReferral(null)}>
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <section className="hero-card dashboard-hero student-dashboard-hero">
         <div className="student-dashboard-hero-text">
@@ -223,17 +262,12 @@ export default function StudentDashboardPage() {
             <button
               type="button"
               className="rewards-referral-box"
-              onClick={async () => {
-                const code = data?.rewardsSummary?.referralCode || '';
-                if (!code) return;
-                await navigator.clipboard.writeText(code);
-                showToast('تم نسخ كود الإحالة', 'success');
-              }}
+              onClick={() => copyReferralCode(referralCode)}
             >
               <span>كود الإحالة — انسخ وشارك</span>
               <div className="rewards-referral-row">
-                <code>{data?.rewardsSummary?.referralCode || '—'}</code>
-                <Copy size={16} />
+                <code>{referralCode || '—'}</code>
+                <Copy size={18} />
               </div>
             </button>
             <div className="dashboard-panel-footer">

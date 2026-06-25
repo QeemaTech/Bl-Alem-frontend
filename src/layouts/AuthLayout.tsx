@@ -1,35 +1,142 @@
-import { BookOpen, GraduationCap, Users } from '@/icons';
 import { Outlet } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Award, BadgeCheck, BookOpen, LiveTv, TrendingUp } from '@/icons';
 import { BrandMark } from '../components/ui/BrandMark';
 import { useSiteSettings } from '../store/SiteSettingsContext';
+
+const features = [
+  { icon: LiveTv, title: 'دورات تفاعلية وجلسات مباشرة', desc: 'تعلّم بمرونة من نخبة المحاضرين في الوقت الذي يناسبك.' },
+  { icon: Award, title: 'شهادات معتمدة', desc: 'وثّق إنجازك بشهادات احترافية معترف بها بعد كل مسار.' },
+  { icon: BookOpen, title: 'مسارات تعليمية متكاملة', desc: 'محتوى منظّم يأخذك من الأساسيات حتى الاحتراف خطوة بخطوة.' },
+];
+
+const stats = [
+  { value: '+12K', label: 'متعلّم نشط' },
+  { value: '+450', label: 'دورة احترافية' },
+  { value: '98%', label: 'رضا المتعلمين' },
+];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: 0.1 * i, ease: [0.22, 1, 0.36, 1] as const },
+  }),
+};
 
 export default function AuthLayout() {
   const { settings } = useSiteSettings();
 
   return (
-    <main className="auth-layout">
-      <section className="auth-hero">
-        <BrandMark variant="auth" />
-        <h1>{settings.platformTagline || 'منصة تعليمية متكاملة'}</h1>
-        <p>سجّل الدخول للوصول إلى لوحة الطالب أو المحاضر حسب صلاحياتك.</p>
-        <div className="auth-hero-features">
-          <div className="auth-hero-feature">
-            <GraduationCap size={22} />
-            <span>تعلّم بمرونة مع دورات تفاعلية وجلسات مباشرة</span>
-          </div>
-          <div className="auth-hero-feature">
-            <BookOpen size={22} />
-            <span>تابع تقدمك واحصل على شهادات معتمدة</span>
-          </div>
-          <div className="auth-hero-feature">
-            <Users size={22} />
-            <span>انضم كطالب أو محاضر وابدأ رحلتك التعليمية</span>
+    <div className="grid min-h-screen grid-cols-1 bg-surface lg:grid-cols-[52%_48%] mx-auto max-w-[1600px]">
+      {/* Branding — 52% (sticky) */}
+      <aside className="relative hidden overflow-hidden p-8 text-on-primary lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:gap-8 lg:self-start xl:p-10">
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(150deg, var(--color-primary) 0%, var(--color-primary-hover) 55%, #003a42 100%)' }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute -top-24 -right-16 h-80 w-80 rounded-full blur-3xl"
+          style={{ background: 'rgba(255,255,255,0.16)' }}
+          animate={{ y: [0, 24, 0], opacity: [0.5, 0.7, 0.5] }}
+          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute -bottom-24 -left-16 h-96 w-96 rounded-full blur-3xl"
+          style={{ background: 'rgba(0,58,66,0.55)' }}
+          animate={{ y: [0, -28, 0], opacity: [0.45, 0.65, 0.45] }}
+          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.12]"
+          style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '26px 26px' }}
+        />
+
+        <motion.div className="relative z-10" initial="hidden" animate="show" custom={0} variants={fadeUp}>
+          <BrandMark variant="auth" />
+        </motion.div>
+
+        <div className="relative z-10 max-w-md">
+          <motion.h1
+            className="mb-4 text-3xl font-extrabold leading-[1.2] xl:text-4xl"
+            initial="hidden"
+            animate="show"
+            custom={1}
+            variants={fadeUp}
+          >
+            {settings.platformTagline || 'منصّة التعلّم التي تليق بطموحك'}
+          </motion.h1>
+          <motion.p
+            className="mb-7 max-w-sm text-base leading-relaxed text-white/80"
+            initial="hidden"
+            animate="show"
+            custom={2}
+            variants={fadeUp}
+          >
+            انضم إلى آلاف المتعلمين والمحاضرين وابدأ رحلتك نحو الاحتراف بتجربة تعليمية متكاملة وحديثة.
+          </motion.p>
+
+          <div className="grid gap-3">
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial="hidden"
+                animate="show"
+                custom={3 + i}
+                variants={fadeUp}
+                whileHover={{ scale: 1.02, x: -4 }}
+                className="flex items-start gap-3.5 rounded-2xl border border-white/15 p-3.5 backdrop-blur-md"
+                style={{ background: 'rgba(255,255,255,0.10)' }}
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/15">
+                  <feature.icon size={24} />
+                </span>
+                <div>
+                  <h3 className="mb-0.5 text-[0.98rem] font-bold">{feature.title}</h3>
+                  <p className="text-[0.82rem] leading-relaxed text-white/75">{feature.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
-      <section className="auth-panel">
+
+        <motion.div className="relative z-10 flex items-center gap-7" initial="hidden" animate="show" custom={6} variants={fadeUp}>
+          {stats.map((stat) => (
+            <div key={stat.label}>
+              <div className="text-2xl font-extrabold">{stat.value}</div>
+              <div className="text-[0.82rem] text-white/70">{stat.label}</div>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          aria-hidden
+          className="absolute top-28 left-10 z-10 hidden items-center gap-2 rounded-2xl bg-white/95 px-4 py-2.5 text-primary shadow-xl xl:flex"
+          animate={{ y: [0, -12, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <BadgeCheck size={20} />
+          <span className="text-sm font-bold">تعلّم موثوق</span>
+        </motion.div>
+        <motion.div
+          aria-hidden
+          className="absolute bottom-36 left-16 z-10 hidden items-center gap-2 rounded-2xl bg-white/95 px-4 py-2.5 text-primary shadow-xl xl:flex"
+          animate={{ y: [0, 14, 0] }}
+          transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <TrendingUp size={20} />
+          <span className="text-sm font-bold">تقدّم مستمر</span>
+        </motion.div>
+      </aside>
+
+      {/* Form — 48% */}
+      <main className="flex items-center justify-center px-5 py-10 sm:px-8 lg:min-h-screen lg:px-10">
         <Outlet />
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }
