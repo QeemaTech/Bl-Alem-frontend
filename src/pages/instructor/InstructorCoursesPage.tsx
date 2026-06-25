@@ -80,7 +80,7 @@ export default function InstructorCoursesPage() {
               </div>
               <Badge variant={courseVariant(course.status)}>{course.status}</Badge>
               <h3>{course.titleAr}</h3>
-              <p>{course.category?.nameAr} | {Number(course.price || 0)} ر.س</p>
+              <p>{course.category?.nameAr} | {Number(course.price || 0)} ج.م</p>
               <p>{course._count?.enrollments || 0} طالب | {Number(course.ratingAverage || 0).toFixed(1)} تقييم</p>
               <div className="card-actions">
                 <Link to={`/instructor/courses/${course.id}/edit`}>

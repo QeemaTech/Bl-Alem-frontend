@@ -1,5 +1,5 @@
 import { CheckCircle2, Clock, Wallet, XCircle } from '@/icons';
-import type { LucideIcon } from '@/icons';
+import { StatCard } from '../../ui/StatCard';
 
 interface SummaryStat {
   total: number;
@@ -13,67 +13,19 @@ interface WithdrawalsSummaryCardsProps {
   stats: SummaryStat;
 }
 
-function SummaryCard({
-  title,
-  value,
-  hint,
-  icon: Icon,
-  tone,
-}: {
-  title: string;
-  value: string;
-  hint?: string;
-  icon: LucideIcon;
-  tone: 'default' | 'pending' | 'approved' | 'paid' | 'rejected';
-}) {
-  return (
-    <article className={`wd-summary-card is-${tone}`}>
-      <span className="wd-summary-icon" aria-hidden="true">
-        <Icon size={22} />
-      </span>
-      <div className="wd-summary-body">
-        <p className="wd-summary-title">{title}</p>
-        <strong className="wd-summary-value">{value}</strong>
-        {hint ? <small className="wd-summary-hint">{hint}</small> : null}
-      </div>
-    </article>
-  );
-}
-
 export function WithdrawalsSummaryCards({ stats }: WithdrawalsSummaryCardsProps) {
   return (
-    <section className="wd-summary-grid" aria-label="ملخص السحوبات">
-      <SummaryCard
-        title="إجمالي الطلبات"
-        value={String(stats.total)}
-        icon={Wallet}
-        tone="default"
-      />
-      <SummaryCard
-        title="قيد المراجعة"
-        value={String(stats.pendingCount)}
-        icon={Clock}
-        tone="pending"
-      />
-      <SummaryCard
+    <section className="stats-grid admin-withdrawals-stats" aria-label="ملخص السحوبات">
+      <StatCard title="إجمالي الطلبات" value={String(stats.total)} icon={Wallet} />
+      <StatCard title="قيد المراجعة" value={String(stats.pendingCount)} icon={Clock} />
+      <StatCard
         title="معتمدة"
         value={String(stats.approvedCount)}
         hint="بانتظار التحويل"
         icon={CheckCircle2}
-        tone="approved"
       />
-      <SummaryCard
-        title="مدفوعة"
-        value={String(stats.paidCount)}
-        icon={CheckCircle2}
-        tone="paid"
-      />
-      <SummaryCard
-        title="مرفوضة"
-        value={String(stats.rejectedCount)}
-        icon={XCircle}
-        tone="rejected"
-      />
+      <StatCard title="مدفوعة" value={String(stats.paidCount)} icon={CheckCircle2} trendUp />
+      <StatCard title="مرفوضة" value={String(stats.rejectedCount)} icon={XCircle} />
     </section>
   );
 }

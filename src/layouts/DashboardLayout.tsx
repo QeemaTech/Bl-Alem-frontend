@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import type { MaterialIcon } from '@/icons';
+import { PlatformStatusBanner } from '../components/platform/PlatformStatusBanner';
 import { Header } from '../components/dashboard/Header';
 import { Sidebar } from '../components/dashboard/Sidebar';
 import { useAuth } from '../store/AuthContext';
@@ -13,6 +14,7 @@ interface DashboardLayoutProps {
   items: { label: string; path: string; icon: MaterialIcon }[];
   notificationsPath?: string;
   profilePath?: string;
+  platformBanner?: 'student' | 'admin';
 }
 
 export default function DashboardLayout({
@@ -21,6 +23,7 @@ export default function DashboardLayout({
   items,
   notificationsPath,
   profilePath,
+  platformBanner,
 }: DashboardLayoutProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -48,9 +51,10 @@ export default function DashboardLayout({
         title={sidebarTitle}
         items={items}
         isOpen={isOpen}
-        isCollapsed={isCollapsed}
+        isCollapsed={isCollapsed && !isOpen}
         onClose={() => setIsOpen(false)}
         onLogout={handleLogout}
+        onToggleCollapse={toggleCollapse}
       />
       {isOpen ? (
         <button className="drawer-backdrop" aria-label="إغلاق القائمة" onClick={() => setIsOpen(false)} />
@@ -65,6 +69,7 @@ export default function DashboardLayout({
           onToggleCollapse={toggleCollapse}
         />
         <div className="dashboard-content">
+          {platformBanner ? <PlatformStatusBanner variant={platformBanner} /> : null}
           <Outlet />
         </div>
       </main>

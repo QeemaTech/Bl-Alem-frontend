@@ -16,16 +16,21 @@ const fmtReviewDate = (value?: string) => (value
   : '');
 
 function ReviewStars({ rating }: { rating: number }) {
+  const value = Math.max(0, Math.min(5, Number(rating) || 0));
   return (
-    <span className="latest-review-stars" aria-label={`${rating} من 5`}>
-      {[1, 2, 3, 4, 5].map((value) => (
-        <Star
-          key={value}
-          size={14}
-          fill={value <= rating ? 'var(--warning)' : 'none'}
-          color={value <= rating ? 'var(--warning)' : 'var(--border)'}
-        />
-      ))}
+    <span className="latest-review-stars" aria-label={`${value} من 5`}>
+      {Array.from({ length: 5 }).map((_, index) => {
+        const filled = index < value;
+        return (
+          <Star
+            key={index}
+            size={14}
+            className={filled ? 'review-star is-filled' : 'review-star'}
+            {...(filled ? { fill: 'currentColor' } : {})}
+            aria-hidden="true"
+          />
+        );
+      })}
     </span>
   );
 }
@@ -106,7 +111,7 @@ export default function InstructorDashboardPage() {
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="أرباح الشهر" value={`${Number(data?.monthEarnings || 0)} ر.س`} icon={Wallet} />
+        <StatCard title="أرباح الشهر" value={`${Number(data?.monthEarnings || 0)} ج.م`} icon={Wallet} />
         <StatCard title="الطلاب" value={String(data?.totalStudents || 0)} icon={UsersRound} />
         <StatCard title="المنشورة" value={String(data?.publishedCourses || 0)} icon={BookOpen} />
         <StatCard title="جلسات قادمة" value={String(data?.upcomingLiveSessions?.length || 0)} icon={Calendar} />
@@ -149,7 +154,7 @@ export default function InstructorDashboardPage() {
                   <h4>{c.titleAr}</h4>
                   <p>{c.salesCount} عملية بيع — {c.enrollments} طالب</p>
                 </div>
-                <strong style={{ color: 'var(--primary-dark)' }}>{Number(c.revenue)} ر.س</strong>
+                <strong style={{ color: 'var(--primary-dark)' }}>{Number(c.revenue)} ج.م</strong>
               </div>
             ))
           ) : (

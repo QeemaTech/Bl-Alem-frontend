@@ -1,4 +1,4 @@
-﻿import type { HTMLAttributes } from 'react';
+﻿import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 type BadgeVariant =
@@ -8,15 +8,14 @@ type BadgeVariant =
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
   dot?: boolean;
+  children: ReactNode;
 }
 
 export function Badge({ className = '', variant = 'default', dot, children, ...props }: BadgeProps) {
   return (
     <span className={cn('badge', `badge-${variant}`, className)} {...props}>
-      {dot ? (
-        <span className="ms-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current opacity-80" aria-hidden />
-      ) : null}
-      {children}
+      {dot ? <span className="badge-dot" aria-hidden /> : null}
+      <span className="badge-label">{children}</span>
     </span>
   );
 }

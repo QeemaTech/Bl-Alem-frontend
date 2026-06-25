@@ -2,10 +2,10 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, GraduationCap, Plus, Users, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { InstructorsTable } from '../../components/admin/users/InstructorsTable';
+import { approvalLabels, fmtDate, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
 import { Input } from '../../components/ui/Input';
@@ -13,51 +13,10 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
-import { Table } from '../../components/ui/Table';
-import { TableEntityLink } from '../../components/ui/TableEntityLink';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-function CountBadge({ value }: { value: string | number }) {
-  return <span className="admin-count-badge" aria-label={`العدد: ${value}`}>{value}</span>;
-}
-
-const approvalLabels: Record<string, string> = {
-  PENDING: 'قيد المراجعة',
-  APPROVED: 'معتمد',
-  REJECTED: 'مرفوض',
-  SUSPENDED: 'موقوف',
-};
-
-const accountLabels: Record<string, string> = {
-  ACTIVE: 'نشط',
-  PENDING: 'بانتظار التفعيل',
-  SUSPENDED: 'موقوف',
-  REJECTED: 'مرفوض',
-};
-
-const approvalVariant = (status: string) => {
-  if (status === 'APPROVED') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'REJECTED') return 'rejected' as const;
-  if (status === 'SUSPENDED') return 'suspended' as const;
-  return 'default' as const;
-};
-
-const accountVariant = (status: string) => {
-  if (status === 'ACTIVE') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'SUSPENDED') return 'suspended' as const;
-  if (status === 'REJECTED') return 'rejected' as const;
-  return 'default' as const;
-};
-
-const fmtMoney = (value: number) => `${Number(value || 0).toLocaleString('ar-SA')} ر.س`;
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-  : '—');
+import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -133,6 +92,8 @@ export default function AdminInstructorsPage() {
     return result;
   }, [items, approvalFilter, accountFilter, search]);
 
+  const hasActiveFilters = Boolean(search.trim() || approvalFilter || accountFilter);
+
   const stats = useMemo(() => ({
     total: items.length,
     pending: items.filter((i) => i.instructorProfile?.approvalStatus === 'PENDING').length,
@@ -163,7 +124,7 @@ export default function AdminInstructorsPage() {
     students: String(row.instructorProfile?.totalStudents ?? 0),
     earnings: fmtMoney(Number(row.instructorProfile?.totalEarnings || 0)),
     approvalStatus: approvalLabels[row.instructorProfile?.approvalStatus] || '—',
-    accountStatus: accountLabels[row.status] || row.status,
+    accountStatus: statusLabels[row.status] || row.status,
     joinedAt: fmtDate(row.createdAt),
     _raw: row,
   })), [filteredItems]);
@@ -276,10 +237,10 @@ export default function AdminInstructorsPage() {
   };
 
   return (
-    <div className="page-grid admin-list-page admin-instructors-page">
-      <div className="admin-list-header">
+    <div className="page-grid">
+      <div className="reports-header">
         <PageHeader title="المحاضرون" subtitle="إدارة حسابات المحاضرين واعتماد طلباتهم" />
-        <div className="admin-list-header-actions">
+        <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
             تصدير Excel
           </Button>
@@ -289,7 +250,7 @@ export default function AdminInstructorsPage() {
         </div>
       </div>
 
-      <div className="admin-list-stats stats-grid">
+      <div className="stats-grid">
         <StatCard title="إجمالي المحاضرين" value={String(stats.total)} icon={GraduationCap} />
         <StatCard title="قيد المراجعة" value={String(stats.pending)} icon={Users} />
         <StatCard title="معتمدون" value={String(stats.approved)} icon={GraduationCap} />
@@ -298,18 +259,18 @@ export default function AdminInstructorsPage() {
         <StatCard title="إجمالي الأرباح" value={fmtMoney(stats.earnings)} icon={Wallet} />
       </div>
 
-      <div className="admin-list-charts reports-charts-grid">
+      <div className="reports-charts-grid">
         <ReportChart title="توزيع حالات الاعتماد" type="pie" data={approvalChart} />
       </div>
 
       <FilterBar
-        className="filter-bar--modern admin-instructors-filters"
+        className="filter-bar--modern"
         searchValue={search}
         searchPlaceholder="بحث بالاسم، البريد، التخصص..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setApprovalFilter(''); setAccountFilter(''); }}
+        resetDisabled={!hasActiveFilters}
         searchIconSize={20}
-        resetVariant="secondary"
       >
         <Select
           label="حالة الاعتماد"
@@ -337,129 +298,17 @@ export default function AdminInstructorsPage() {
         />
       </FilterBar>
 
-      <Card className="admin-table-card">
-        <Table
-          className="admin-instructors-table"
-          loading={loading}
-          data={tableRows}
-          onRowClick={(row) => goToDetail(row._raw)}
-          hideScrollNotice
-          emptyTitle="لا يوجد محاضرون"
-          emptyDescription="أضف محاضراً جديداً أو انتظر طلبات التسجيل."
-          columns={[
-            {
-              key: 'fullName',
-              header: 'الاسم',
-              minWidth: 160,
-              render: (row) => (
-                <TableEntityLink to={`/admin/instructors/${row._raw.id}`}>
-                  {row.fullName}
-                </TableEntityLink>
-              ),
-            },
-            {
-              key: 'email',
-              header: 'البريد',
-              align: 'end',
-              minWidth: 200,
-              render: (row) => <span dir="ltr" className="admin-cell-email">{row.email}</span>,
-            },
-            {
-              key: 'phone',
-              header: 'الهاتف',
-              align: 'end',
-              hideOnMobile: true,
-              render: (row) => <span dir="ltr">{row.phone}</span>,
-            },
-            { key: 'specialization', header: 'التخصص', minWidth: 180, wrap: true },
-            {
-              key: 'courses',
-              header: 'الكورسات',
-              align: 'center',
-              render: (row) => <CountBadge value={row.courses} />,
-            },
-            {
-              key: 'students',
-              header: 'الطلاب',
-              align: 'center',
-              render: (row) => <CountBadge value={row.students} />,
-            },
-            {
-              key: 'earnings',
-              header: 'الأرباح',
-              align: 'center',
-              hideOnMobile: true,
-            },
-            {
-              key: 'approvalStatus',
-              header: 'الاعتماد',
-              align: 'center',
-              render: (row) => (
-                <Badge variant={approvalVariant(String(row._raw?.instructorProfile?.approvalStatus))}>
-                  {approvalLabels[String(row._raw?.instructorProfile?.approvalStatus)] || row.approvalStatus}
-                </Badge>
-              ),
-            },
-            {
-              key: 'accountStatus',
-              header: 'الحساب',
-              align: 'center',
-              hideOnMobile: true,
-              render: (row) => (
-                <Badge variant={accountVariant(String(row._raw?.status))}>
-                  {accountLabels[String(row._raw?.status)] || row.accountStatus}
-                </Badge>
-              ),
-            },
-            {
-              key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => {
-                const instructor = row._raw;
-                const approval = instructor.instructorProfile?.approvalStatus;
-                return (
-                  <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => goToDetail(instructor)}>
-                      التفاصيل
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(instructor)}>
-                      تعديل
-                    </Button>
-                    {approval === 'PENDING' ? (
-                      <>
-                        <Button variant="secondary" size="sm" onClick={() => handleApprove(instructor)}>
-                          اعتماد
-                        </Button>
-                        <Button variant="danger" size="sm" onClick={() => setRejectTarget(instructor)}>
-                          رفض
-                        </Button>
-                      </>
-                    ) : null}
-                    {['APPROVED', 'ACTIVE'].includes(approval) && instructor.status === 'ACTIVE' ? (
-                      <Button variant="secondary" size="sm" onClick={() => handleSuspend(instructor)}>
-                        إيقاف
-                      </Button>
-                    ) : null}
-                    {['SUSPENDED', 'REJECTED'].includes(approval) || instructor.status === 'SUSPENDED' ? (
-                      <Button variant="secondary" size="sm" onClick={() => handleActivate(instructor)}>
-                        تفعيل
-                      </Button>
-                    ) : null}
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => setDeleteTarget(instructor)}
-                      disabled={Number(instructor._count?.courses || 0) > 0}
-                    >
-                      حذف
-                    </Button>
-                  </div>
-                );
-              },
-            },
-          ]}
-        />
-      </Card>
+      <InstructorsTable
+        items={tableRows}
+        loading={loading}
+        onDetail={goToDetail}
+        onEdit={openEdit}
+        onApprove={handleApprove}
+        onReject={setRejectTarget}
+        onSuspend={handleSuspend}
+        onActivate={handleActivate}
+        onDelete={setDeleteTarget}
+      />
 
       <Modal
         isOpen={formOpen}

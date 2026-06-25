@@ -70,10 +70,11 @@ const resolveSticky = (
   total: number,
   isWide: boolean,
 ) => {
+  if (String(col.key) === 'actions') return undefined;
   if (col.sticky) return col.sticky;
   if (!isWide) return undefined;
   if (index === 0) return 'start' as const;
-  if (String(col.key) === 'actions' || index === total - 1) return 'end' as const;
+  if (index === total - 1) return 'end' as const;
   return undefined;
 };
 

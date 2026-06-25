@@ -146,12 +146,12 @@ export function UserDetailDashboard({
           <div className="admin-user-hero-copy">
             <div className="admin-user-hero-title-row">
               <h1>{data.fullName}</h1>
-              <Badge variant={accountStatusVariant(data.status)}>
+              <Badge variant={accountStatusVariant(data.status)} dot className="status-badge">
                 {accountStatusLabels[data.status] || data.status}
               </Badge>
-              <Badge variant={roleVariant(data.role)}>{roleLabels[data.role] || data.role}</Badge>
+              <Badge variant={roleVariant(data.role)} dot className="status-badge">{roleLabels[data.role] || data.role}</Badge>
               {data.instructorProfile?.approvalStatus ? (
-                <Badge variant={approvalVariant(data.instructorProfile.approvalStatus)}>
+                <Badge variant={approvalVariant(data.instructorProfile.approvalStatus)} dot className="status-badge">
                   {approvalLabels[data.instructorProfile.approvalStatus] || data.instructorProfile.approvalStatus}
                 </Badge>
               ) : null}
@@ -219,7 +219,7 @@ export function UserDetailDashboard({
                 key: 'title',
                 header: 'الدورة',
                 render: (row) => row.courseId ? (
-                  <Link to={`/admin/course-review/${row.courseId}`} className="admin-detail-list-link">
+                  <Link to={`/admin/courses/${row.courseId}`} className="admin-detail-list-link">
                     {row.title}
                   </Link>
                 ) : row.title,
@@ -540,7 +540,7 @@ export function UserDetailDashboard({
                 key: 'title',
                 header: 'الدورة',
                 render: (row) => (
-                  <Link to={`/admin/course-review/${row.id}`} className="admin-detail-list-link">{String(row.title)}</Link>
+                  <Link to={`/admin/courses/${row.id}`} className="admin-detail-list-link">{String(row.title)}</Link>
                 ),
               },
               { key: 'students', header: 'الطلاب' },

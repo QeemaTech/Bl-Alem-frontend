@@ -35,6 +35,7 @@ export const fmtWithdrawalDate = (value: string) => new Date(value).toLocaleDate
   minute: '2-digit',
 });
 
-export const fmtWithdrawalMoney = (value: number | string) => (
-  `${Number(value || 0).toLocaleString('ar-SA')} ر.س`
-);
+import { getCurrencySymbol } from '../../../utils/currency';
+
+export const fmtWithdrawalMoney = (value: number | string) =>
+  `${Number(value || 0).toLocaleString('ar-EG')} ${getCurrencySymbol()}`;

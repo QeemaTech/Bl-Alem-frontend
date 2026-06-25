@@ -24,29 +24,30 @@ export function StatCard({
   className,
 }: StatCardProps) {
   const subtitle = hint || trend;
+
   return (
-    <article className={cn('stat-card card', className)}>
+    <article className={cn('stat-card', className)}>
       <div className="stat-icon" aria-hidden>
         <Icon size={22} />
       </div>
-      <div className="min-w-0">
+      <div className="stat-card-content">
         <p className="stat-card-title">
-          <span>{title}</span>
+          <span className="stat-card-title-text">{title}</span>
           {tooltip ? (
             <span
               className="stat-card-info"
               tabIndex={0}
               role="note"
               aria-label={tooltip}
-              data-tooltip={tooltip}
+              title={tooltip}
             >
               <Info size={14} aria-hidden />
             </span>
           ) : null}
         </p>
-        <strong>{value}</strong>
+        <strong className="stat-card-value">{value}</strong>
         {subtitle ? (
-          <small style={{ color: trendUp ? 'var(--color-success)' : 'var(--color-on-surface-variant)' }}>
+          <small className={cn('stat-card-hint', trendUp && 'is-up')}>
             {subtitle}
           </small>
         ) : null}

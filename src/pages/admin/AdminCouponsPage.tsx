@@ -36,7 +36,7 @@ const statusVariant = (status: string) => {
 const fmtDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString('ar-SA') : '—');
 
 const formatValue = (type: string, value: number) =>
-  (type === 'PERCENTAGE' ? `${value}%` : `${value} ر.س`);
+  (type === 'PERCENTAGE' ? `${value}%` : `${value} ج.م`);
 
 const emptyForm = {
   code: '',
@@ -296,11 +296,11 @@ export default function AdminCouponsPage() {
             onChange={(e) => setForm({ ...form, type: e.target.value })}
             options={[
               { label: 'نسبة مئوية (%)', value: 'PERCENTAGE' },
-              { label: 'مبلغ ثابت (ر.س)', value: 'FIXED' },
+              { label: 'مبلغ ثابت (ج.م)', value: 'FIXED' },
             ]}
           />
           <Input
-            label={form.type === 'PERCENTAGE' ? 'نسبة الخصم (%)' : 'قيمة الخصم (ر.س)'}
+            label={form.type === 'PERCENTAGE' ? 'نسبة الخصم (%)' : 'قيمة الخصم (ج.م)'}
             type="number"
             min="1"
             value={form.value}

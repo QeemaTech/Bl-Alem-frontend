@@ -2,10 +2,10 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Plus, Shield, UserCheck, Users } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { UsersTable } from '../../components/admin/users/UsersTable';
+import { fmtDate, roleLabels, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
 import { Input } from '../../components/ui/Input';
@@ -13,43 +13,9 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
-import { Table } from '../../components/ui/Table';
-import { TableEntityLink } from '../../components/ui/TableEntityLink';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const roleLabels: Record<string, string> = {
-  STUDENT: 'طالب',
-  INSTRUCTOR: 'محاضر',
-  SUPER_ADMIN: 'مشرف',
-};
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: 'نشط',
-  PENDING: 'بانتظار التفعيل',
-  SUSPENDED: 'موقوف',
-  REJECTED: 'مرفوض',
-};
-
-const statusVariant = (status: string) => {
-  if (status === 'ACTIVE') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'SUSPENDED') return 'suspended' as const;
-  if (status === 'REJECTED') return 'rejected' as const;
-  return 'default' as const;
-};
-
-const roleVariant = (role: string) => {
-  if (role === 'SUPER_ADMIN') return 'warning' as const;
-  if (role === 'INSTRUCTOR') return 'info' as const;
-  return 'default' as const;
-};
-
-const fmtMoney = (value: number) => `${Number(value || 0).toLocaleString('ar-SA')} ر.س`;
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-  : '—');
+import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -108,6 +74,8 @@ export default function AdminUsersPage() {
     }
     return result;
   }, [items, roleFilter, statusFilter, search]);
+
+  const hasActiveFilters = Boolean(search.trim() || roleFilter || statusFilter);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -237,7 +205,7 @@ export default function AdminUsersPage() {
     <div className="page-grid">
       <div className="reports-header">
         <PageHeader title="المستخدمون" subtitle="إدارة جميع حسابات المنصة" />
-        <div className="chip-row">
+        <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
             تصدير Excel
           </Button>
@@ -262,10 +230,13 @@ export default function AdminUsersPage() {
       </div>
 
       <FilterBar
+        className="filter-bar--modern"
         searchValue={search}
         searchPlaceholder="بحث بالاسم، البريد، أو الهاتف..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setRoleFilter(''); setStatusFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        searchIconSize={20}
       >
         <Select
           label="الدور"
@@ -292,72 +263,14 @@ export default function AdminUsersPage() {
         />
       </FilterBar>
 
-      <Card>
-        <Table
-          loading={loading}
-          data={tableRows}
-          onRowClick={(row) => goToDetail(row._raw)}
-          emptyTitle="لا يوجد مستخدمون"
-          emptyDescription="أضف مستخدماً جديداً للبدء."
-          columns={[
-            {
-              key: 'fullName',
-              header: 'الاسم',
-              render: (row) => (
-                <TableEntityLink to={`/admin/users/${row._raw.id}`}>
-                  {row.fullName}
-                </TableEntityLink>
-              ),
-            },
-            { key: 'email', header: 'البريد' },
-            { key: 'phone', header: 'الهاتف' },
-            {
-              key: 'role',
-              header: 'الدور',
-              render: (row) => (
-                <Badge variant={roleVariant(String(row._raw?.role))}>
-                  {roleLabels[String(row._raw?.role)] || row.role}
-                </Badge>
-              ),
-            },
-            {
-              key: 'status',
-              header: 'الحالة',
-              render: (row) => (
-                <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {statusLabels[String(row._raw?.status)] || row.status}
-                </Badge>
-              ),
-            },
-            { key: 'wallet', header: 'المحفظة' },
-            { key: 'activity', header: 'النشاط' },
-            { key: 'joinedAt', header: 'تاريخ التسجيل' },
-            {
-              key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => {
-                const user = row._raw;
-                return (
-                  <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => goToDetail(user)}>
-                      التفاصيل
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(user)}>
-                      تعديل
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => toggleStatus(user)}>
-                      {user.status === 'ACTIVE' ? 'إيقاف' : 'تفعيل'}
-                    </Button>
-                    <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)}>
-                      حذف
-                    </Button>
-                  </div>
-                );
-              },
-            },
-          ]}
-        />
-      </Card>
+      <UsersTable
+        items={tableRows}
+        loading={loading}
+        onDetail={goToDetail}
+        onEdit={openEdit}
+        onToggleStatus={toggleStatus}
+        onDelete={setDeleteTarget}
+      />
 
       <Modal
         isOpen={formOpen}

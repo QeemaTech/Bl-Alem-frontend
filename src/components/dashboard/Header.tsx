@@ -1,7 +1,6 @@
 ﻿import { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, DarkMode, LightMode, LogOut, Menu, UserRound } from '@/icons';
+import { Bell, ChevronDown, ChevronLeft, ChevronRight, DarkMode, LightMode, LogOut, Menu, UserRound } from '@/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { useAuth } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
@@ -20,6 +19,8 @@ export function Header({
   notificationsPath,
   profilePath,
   onMenuClick,
+  isCollapsed,
+  onToggleCollapse,
 }: HeaderProps) {
   const { user, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -50,9 +51,25 @@ export function Header({
   return (
     <>
       <header className="dashboard-header">
-        <Button variant="ghost" className="menu-btn" onClick={onMenuClick} aria-label="القائمة">
+        <button
+          type="button"
+          className="icon-btn dashboard-menu-mobile"
+          onClick={onMenuClick}
+          aria-label="فتح القائمة"
+        >
           <Menu size={20} />
-        </Button>
+        </button>
+        {onToggleCollapse ? (
+          <button
+            type="button"
+            className="icon-btn dashboard-sidebar-toggle"
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? 'فتح القائمة الجانبية' : 'طيّ القائمة الجانبية'}
+            aria-expanded={!isCollapsed}
+          >
+            {isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          </button>
+        ) : null}
         <div className="dashboard-header-title">
           <h1>{title}</h1>
           <p>مرحباً {user?.fullName || 'بك'}، تابع يومك التعليمي من هنا.</p>

@@ -18,6 +18,7 @@ export function SidebarItem({ label, path, icon: Icon, onNavigate }: SidebarItem
       end={end}
       onClick={onNavigate}
       className={({ isActive }) => cn('sidebar-item', isActive && 'is-active')}
+      title={label}
     >
       {({ isActive }) => (
         <>

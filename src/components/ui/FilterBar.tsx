@@ -8,10 +8,12 @@ interface FilterBarProps {
   searchPlaceholder?: string;
   onSearchChange?: (value: string) => void;
   onReset?: () => void;
+  resetDisabled?: boolean;
+  resetLabel?: string;
+  ariaLabel?: string;
   children?: ReactNode;
   className?: string;
   searchIconSize?: number;
-  resetVariant?: 'ghost' | 'secondary' | 'outline';
 }
 
 export function FilterBar({
@@ -19,31 +21,43 @@ export function FilterBar({
   searchPlaceholder = 'بحث...',
   onSearchChange,
   onReset,
+  resetDisabled = false,
+  resetLabel = 'إعادة تعيين',
+  ariaLabel = 'فلاتر البحث',
   children,
   className = '',
   searchIconSize = 18,
-  resetVariant = 'outline',
 }: FilterBarProps) {
   return (
-    <div className={`filter-bar ${className}`.trim()} role="search">
-      {onSearchChange ? (
-        <Input
-          label="بحث"
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={searchPlaceholder}
-          icon={<Search size={searchIconSize} aria-hidden />}
-          className="filter-bar-search"
-        />
-      ) : null}
-      {children}
+    <section className={`filter-bar ${className}`.trim()} aria-label={ariaLabel}>
+      <div className="filter-bar-fields">
+        {onSearchChange ? (
+          <Input
+            label="بحث"
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={searchPlaceholder}
+            icon={<Search size={searchIconSize} aria-hidden />}
+            className="filter-bar-search"
+          />
+        ) : null}
+        {children}
+      </div>
       {onReset ? (
         <div className="filter-bar-actions">
-          <Button variant={resetVariant} size="sm" onClick={onReset} icon={<RotateCcw size={16} aria-hidden />}>
-            إعادة تعيين
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="filter-bar-reset"
+            onClick={onReset}
+            disabled={resetDisabled}
+            icon={<RotateCcw size={16} aria-hidden />}
+          >
+            {resetLabel}
           </Button>
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }

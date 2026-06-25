@@ -1,27 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Star, Trash2 } from '@/icons';
+import { useNavigate } from 'react-router-dom';
+import { Download, Star } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { ReviewsTable } from '../../components/admin/reviews/ReviewsTable';
+import { fmtReviewDate, type ReviewItem } from '../../components/admin/reviews/reviewShared';
 import { ReportChart } from '../../components/reports/ReportChart';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
-import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
-import { Table } from '../../components/ui/Table';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 const exportColumns = [
   { key: 'id', header: 'رقم التقييم' },
@@ -34,44 +25,31 @@ const exportColumns = [
   { key: 'createdAt', header: 'التاريخ' },
 ];
 
-function Stars({ rating }: { rating: number }) {
-  return (
-    <span className="review-stars" aria-label={`${rating} من 5`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          size={14}
-          fill={i < rating ? 'var(--warning)' : 'transparent'}
-          color={i < rating ? 'var(--warning)' : 'var(--border)'}
-        />
-      ))}
-      <strong>{rating}/5</strong>
-    </span>
-  );
-}
-
-function ratingVariant(rating: number) {
-  if (rating >= 4) return 'success' as const;
-  if (rating === 3) return 'warning' as const;
-  return 'rejected' as const;
-}
-
 export default function AdminReviewsPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [ratingFilter, setRatingFilter] = useState('');
-  const [selected, setSelected] = useState<any>(null);
-  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ReviewItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    setItems(await adminApi.reviews());
-    setLoading(false);
+    try {
+      setItems(await adminApi.reviews());
+    } catch {
+      showToast('تعذّر تحميل التقييمات.', 'error');
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
+
+  const openDetail = (item: ReviewItem) => navigate(`/admin/reviews/${item.id}`);
 
   const filteredItems = useMemo(() => {
     let result = items;
@@ -94,56 +72,64 @@ export default function AdminReviewsPage() {
     return { total, avg, fiveStar, lowRating };
   }, [items]);
 
-  const ratingChart = useMemo(() => {
-    const counts = [5, 4, 3, 2, 1].map((star) => ({
+  const ratingChart = useMemo(() => (
+    [5, 4, 3, 2, 1].map((star) => ({
       label: `${star} نجوم`,
       value: items.filter((i) => i.rating === star).length,
-    }));
-    return counts;
-  }, [items]);
-
-  const tableRows = useMemo(() => filteredItems.map((row) => ({
-    id: row.id,
-    student: row.user?.fullName || '—',
-    email: row.user?.email || '—',
-    course: row.course?.titleAr || '—',
-    instructor: row.course?.instructor?.fullName || '—',
-    rating: `${row.rating}/5`,
-    comment: row.comment?.length > 40 ? `${row.comment.slice(0, 40)}...` : (row.comment || '—'),
-    createdAt: fmtDate(row.createdAt),
-    _raw: row,
-  })), [filteredItems]);
+    }))
+  ), [items]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await adminApi.deleteReview(deleteTarget.id);
-    showToast('تم حذف التقييم.', 'success');
-    setDeleteTarget(null);
-    if (selected?.id === deleteTarget.id) setSelected(null);
-    load();
+    setDeleting(true);
+    try {
+      await adminApi.deleteReview(deleteTarget.id);
+      showToast('تم حذف التقييم.', 'success');
+      setDeleteTarget(null);
+      await load();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        || 'تعذّر حذف التقييم.';
+      showToast(message, 'error');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleExport = () => {
     exportTableToExcel(
       'التقييمات',
       exportColumns,
-      tableRows.map(({ _raw, comment, ...row }) => ({
-        ...row,
-        comment: _raw.comment || comment,
+      filteredItems.map((row) => ({
+        id: row.id,
+        student: row.user?.fullName || '—',
+        email: row.user?.email || '—',
+        course: row.course?.titleAr || '—',
+        instructor: row.course?.instructor?.fullName || '—',
+        rating: `${row.rating}/5`,
+        comment: row.comment || '—',
+        createdAt: fmtReviewDate(row.createdAt),
       })),
     );
   };
 
   return (
-    <div className="page-grid">
+    <div className="page-grid admin-reviews-page">
       <div className="reports-header">
         <PageHeader
           title="التقييمات"
           subtitle="مراجعة تقييمات الطلاب على الكورسات"
         />
-        <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-          تصدير Excel
-        </Button>
+        <div className="reports-header-actions">
+          <Button
+            variant="outline"
+            icon={<Download size={18} />}
+            onClick={handleExport}
+            disabled={!filteredItems.length}
+          >
+            تصدير Excel
+          </Button>
+        </div>
       </div>
 
       <div className="stats-grid">
@@ -180,77 +166,21 @@ export default function AdminReviewsPage() {
         />
       </FilterBar>
 
-      <Card>
-        <Table
-          loading={loading}
-          data={tableRows}
-          emptyTitle="لا توجد تقييمات"
-          emptyDescription="لم يتم إضافة أي تقييمات بعد."
-          columns={[
-            { key: 'id', header: 'رقم التقييم' },
-            { key: 'student', header: 'الطالب' },
-            { key: 'course', header: 'الكورس' },
-            { key: 'instructor', header: 'المحاضر' },
-            {
-              key: 'rating',
-              header: 'التقييم',
-              render: (row) => (
-                <div className="review-rating-cell">
-                  <Stars rating={Number(row._raw?.rating || 0)} />
-                  <Badge variant={ratingVariant(Number(row._raw?.rating || 0))}>
-                    {row.rating}
-                  </Badge>
-                </div>
-              ),
-            },
-            { key: 'comment', header: 'التعليق' },
-            { key: 'createdAt', header: 'التاريخ' },
-            {
-              key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => (
-                <div className="card-actions">
-                  <Button variant="secondary" size="sm" onClick={() => setSelected(row._raw)}>
-                    التفاصيل
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(row._raw)}>
-                    حذف
-                  </Button>
-                </div>
-              ),
-            },
-          ]}
-        />
-      </Card>
-
-      <Modal isOpen={Boolean(selected)} title="تفاصيل التقييم" onClose={() => setSelected(null)}>
-        {selected ? (
-          <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>رقم التقييم</span><strong>{selected.id}</strong></div>
-            <div className="detail-row"><span>الطالب</span><strong>{selected.user?.fullName}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.user?.email}</strong></div>
-            <div className="detail-row"><span>الكورس</span><strong>{selected.course?.titleAr}</strong></div>
-            <div className="detail-row"><span>المحاضر</span><strong>{selected.course?.instructor?.fullName || '—'}</strong></div>
-            <div className="detail-row">
-              <span>التقييم</span>
-              <Stars rating={Number(selected.rating)} />
-            </div>
-            <div className="detail-row"><span>التاريخ</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            <div className="admin-notification-body">
-              <strong>التعليق</strong>
-              <p>{selected.comment || '—'}</p>
-            </div>
-          </div>
-        ) : null}
-      </Modal>
+      <ReviewsTable
+        items={filteredItems}
+        loading={loading}
+        onDetail={openDetail}
+        onDelete={setDeleteTarget}
+      />
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         title="حذف التقييم"
-        message={`هل أنت متأكد من حذف تقييم ${deleteTarget?.user?.fullName} على كورس "${deleteTarget?.course?.titleAr}"؟`}
+        message={`هل أنت متأكد من حذف تقييم ${deleteTarget?.user?.fullName || 'الطالب'} على كورس "${deleteTarget?.course?.titleAr || '—'}"؟`}
         confirmLabel="حذف"
         onConfirm={handleDelete}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={() => !deleting && setDeleteTarget(null)}
+        loading={deleting}
       />
     </div>
   );

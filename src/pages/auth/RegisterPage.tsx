@@ -1,12 +1,13 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, CoPresent, GraduationCap, Lock, Mail, Phone, User } from '@/icons';
+import { Check, CoPresent, GraduationCap, Lock, Mail, Phone, User, AlertTriangle } from '@/icons';
 import { cn } from '@/lib/cn';
 import { BrandMark } from '../../components/ui/BrandMark';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../store/AuthContext';
+import { useSiteSettings } from '../../store/SiteSettingsContext';
 import { getDashboardPath } from '../../utils/roleRedirect';
 import type { MaterialIcon } from '@/icons';
 import type { RegisterInput } from '../../utils/types';
@@ -62,11 +63,25 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const { showToast } = useToast();
+  const { platform, loaded: settingsLoaded } = useSiteSettings();
   const [form, setForm] = useState<RegisterInput & { confirmPassword: string; acceptTerms: boolean }>({
     fullName: '', email: '', phone: '', password: '', confirmPassword: '', role: 'STUDENT', acceptTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const studentOpen = platform.registrationEnabled;
+  const instructorOpen = platform.instructorRegistrationEnabled;
+  const registrationClosed = platform.maintenanceMode || (!studentOpen && !instructorOpen);
+
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    if (form.role === 'STUDENT' && !studentOpen && instructorOpen) {
+      setForm((current) => ({ ...current, role: 'INSTRUCTOR' }));
+    } else if (form.role === 'INSTRUCTOR' && !instructorOpen && studentOpen) {
+      setForm((current) => ({ ...current, role: 'STUDENT' }));
+    }
+  }, [settingsLoaded, studentOpen, instructorOpen, form.role]);
 
   const updateField = (key: string, value: string | boolean) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -85,6 +100,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (registrationClosed) {
+      showToast(platform.maintenanceMode ? 'التسجيل متوقف أثناء وضع الصيانة.' : 'التسجيل مغلق حالياً.', 'error');
+      return;
+    }
     if (!validate()) return;
     setIsSubmitting(true);
     try {
@@ -119,6 +138,26 @@ export default function RegisterPage() {
           <h1 className="mb-1 text-2xl font-extrabold text-on-surface sm:text-3xl">إنشاء حساب جديد</h1>
           <p className="text-on-surface-variant">ابدأ رحلتك التعليمية داخل منصّة بالعِلم في أقل من دقيقة.</p>
         </motion.div>
+
+        {settingsLoaded && platform.maintenanceMode ? (
+          <motion.div
+            variants={item}
+            className="mb-6 flex items-start gap-3 rounded-2xl border border-warning/50 bg-warning-container/35 p-4"
+          >
+            <AlertTriangle size={22} className="mt-0.5 shrink-0 text-warning" />
+            <div>
+              <p className="font-bold text-on-surface">المنصة في وضع الصيانة</p>
+              <p className="mt-1 text-sm text-on-surface-variant">التسجيل غير متاح مؤقتاً. يمكنك تسجيل الدخول إذا كان لديك حساب.</p>
+            </div>
+          </motion.div>
+        ) : null}
+
+        {settingsLoaded && !platform.maintenanceMode && !studentOpen && !instructorOpen ? (
+          <motion.div variants={item} className="mb-6 rounded-2xl border border-error/40 bg-error-container/25 p-4">
+            <p className="font-bold text-error">التسجيل مغلق حالياً</p>
+            <p className="mt-1 text-sm text-on-surface-variant">تم إيقاف تسجيل الطلاب والمحاضرين من إعدادات المنصة.</p>
+          </motion.div>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <motion.div variants={item}>
@@ -160,21 +199,35 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               {roleOptions.map(({ value, label, desc, icon: Icon }) => {
                 const active = form.role === value;
+                const disabled = platform.maintenanceMode
+                  || (value === 'STUDENT' && !studentOpen)
+                  || (value === 'INSTRUCTOR' && !instructorOpen);
+                const closedLabel = value === 'STUDENT' ? 'تسجيل الطلاب مغلق' : 'تسجيل المحاضرين مغلق';
                 return (
                   <motion.button
                     key={value}
                     type="button"
-                    onClick={() => updateField('role', value)}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    disabled={disabled}
+                    onClick={() => !disabled && updateField('role', value)}
+                    whileHover={disabled ? undefined : { scale: 1.02, y: -2 }}
+                    whileTap={disabled ? undefined : { scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className={cn(
                       'relative rounded-2xl border-2 p-5 text-center transition-colors duration-200',
-                      active
+                      disabled && 'cursor-not-allowed opacity-55',
+                      active && !disabled
                         ? 'border-primary bg-primary-container/40 ring-4 ring-primary/10'
                         : 'border-outline bg-surface-container hover:border-primary/60',
                     )}
                   >
+                    {disabled && !platform.maintenanceMode ? (
+                      <span
+                        className="absolute top-2 rounded-full bg-error-container px-2 py-0.5 text-[10px] font-bold text-error"
+                        style={{ insetInlineStart: '0.5rem' }}
+                      >
+                        {closedLabel}
+                      </span>
+                    ) : null}
                     <motion.span
                       initial={false}
                       animate={{ scale: active ? 1 : 0, opacity: active ? 1 : 0 }}
@@ -242,8 +295,8 @@ export default function RegisterPage() {
           </motion.div>
 
           <motion.div variants={item}>
-            <Button type="submit" size="lg" fullWidth loading={isSubmitting}>
-              {isSubmitting ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
+            <Button type="submit" size="lg" fullWidth loading={isSubmitting} disabled={registrationClosed}>
+              {registrationClosed ? 'التسجيل غير متاح' : isSubmitting ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
             </Button>
           </motion.div>
         </form>

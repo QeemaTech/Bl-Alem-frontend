@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Award, BadgeCheck, BookOpen, LiveTv, TrendingUp } from '@/icons';
+import { Award, BadgeCheck, BookOpen, AlertTriangle, LiveTv, TrendingUp } from '@/icons';
 import { BrandMark } from '../components/ui/BrandMark';
 import { useSiteSettings } from '../store/SiteSettingsContext';
 
@@ -26,7 +26,7 @@ const fadeUp = {
 };
 
 export default function AuthLayout() {
-  const { settings } = useSiteSettings();
+  const { settings, platform, loaded } = useSiteSettings();
 
   return (
     <div className="grid min-h-screen grid-cols-1 bg-surface lg:grid-cols-[52%_48%] mx-auto max-w-[1600px]">
@@ -134,7 +134,16 @@ export default function AuthLayout() {
       </aside>
 
       {/* Form — 48% */}
-      <main className="flex items-center justify-center px-5 py-10 sm:px-8 lg:min-h-screen lg:px-10">
+      <main className="flex flex-col items-center justify-center px-5 py-10 sm:px-8 lg:min-h-screen lg:px-10">
+        {loaded && platform.maintenanceMode ? (
+          <div className="mb-5 w-full max-w-[500px] flex items-start gap-3 rounded-2xl border border-warning/50 bg-warning-container/35 p-4">
+            <AlertTriangle size={22} className="mt-0.5 shrink-0 text-warning" />
+            <div>
+              <p className="font-bold text-on-surface">وضع الصيانة مفعّل</p>
+              <p className="mt-1 text-sm text-on-surface-variant">قد تكون بعض الخدمات محدودة. يمكنك تسجيل الدخول إذا كان لديك حساب.</p>
+            </div>
+          </div>
+        ) : null}
         <Outlet />
       </main>
     </div>

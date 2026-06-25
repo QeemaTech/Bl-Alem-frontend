@@ -161,8 +161,8 @@ export default function StudentPricingPage() {
                 <p className="pricing-plan-desc">{plan.descriptionAr}</p>
 
                 <div className="pricing-plan-price">
-                  <strong>{formatMoney(plan.price).replace(' ر.س', '')}</strong>
-                  <span>ر.س / {plan.durationDays} يوم</span>
+                  <strong>{formatMoney(plan.price).replace(' ج.م', '')}</strong>
+                  <span>ج.م / {plan.durationDays} يوم</span>
                 </div>
 
                 <ul className="pricing-plan-features">

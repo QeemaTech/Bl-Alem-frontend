@@ -1,4 +1,5 @@
 import { CheckCircle2, Eye, Upload, XCircle } from '@/icons';
+import { Button } from '../../ui/Button';
 import type { WithdrawalActionType, WithdrawalItem } from './types';
 
 interface WithdrawalActionButtonsProps {
@@ -28,67 +29,67 @@ export function WithdrawalActionButtons({
   onReject,
   onConfirmTransfer,
 }: WithdrawalActionButtonsProps) {
+  const busy = Boolean(loadingAction);
+
   return (
-    <div className="wd-row-actions">
+    <div className="table-actions withdrawal-row-actions">
       {!hideDetail ? (
-        <button
-          type="button"
-          className="wd-btn wd-btn-outline"
+        <Button
+          variant="outline"
+          size="sm"
+          icon={<Eye size={16} />}
           onClick={() => onDetail(item)}
-          disabled={Boolean(loadingAction)}
+          disabled={busy}
         >
-          <Eye size={15} aria-hidden="true" />
-          <span>التفاصيل</span>
-        </button>
+          التفاصيل
+        </Button>
       ) : null}
 
       {item.status === 'PENDING' ? (
         <>
-          <button
-            type="button"
-            className="wd-btn wd-btn-primary"
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<CheckCircle2 size={16} />}
+            loading={isLoading(loadingAction, item.id, 'approve')}
             onClick={() => onApprove(item)}
-            disabled={Boolean(loadingAction)}
+            disabled={busy && !isLoading(loadingAction, item.id, 'approve')}
           >
-            {isLoading(loadingAction, item.id, 'approve') ? (
-              <span className="wd-btn-spinner" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 size={15} aria-hidden="true" />
-            )}
-            <span>اعتماد</span>
-          </button>
-          <button
-            type="button"
-            className="wd-btn wd-btn-danger"
+            اعتماد
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            icon={<XCircle size={16} />}
             onClick={() => onReject(item)}
-            disabled={Boolean(loadingAction)}
+            disabled={busy}
           >
-            <XCircle size={15} aria-hidden="true" />
-            <span>رفض</span>
-          </button>
+            رفض
+          </Button>
         </>
       ) : null}
 
       {item.status === 'APPROVED' ? (
         <>
-          <button
-            type="button"
-            className="wd-btn wd-btn-primary"
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<Upload size={16} />}
+            loading={isLoading(loadingAction, item.id, 'paid')}
             onClick={() => onConfirmTransfer(item)}
-            disabled={Boolean(loadingAction)}
+            disabled={busy && !isLoading(loadingAction, item.id, 'paid')}
           >
-            <Upload size={15} aria-hidden="true" />
-            <span>تأكيد التحويل</span>
-          </button>
-          <button
-            type="button"
-            className="wd-btn wd-btn-danger"
+            تأكيد التحويل
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            icon={<XCircle size={16} />}
             onClick={() => onReject(item)}
-            disabled={Boolean(loadingAction)}
+            disabled={busy}
           >
-            <XCircle size={15} aria-hidden="true" />
-            <span>رفض</span>
-          </button>
+            رفض
+          </Button>
         </>
       ) : null}
     </div>

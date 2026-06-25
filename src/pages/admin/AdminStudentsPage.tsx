@@ -2,10 +2,10 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Award, BookOpen, Download, Plus, Users, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { StudentsTable } from '../../components/admin/users/StudentsTable';
+import { fmtDate, formatInterests, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
 import { Input } from '../../components/ui/Input';
@@ -13,38 +13,10 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
-import { Table } from '../../components/ui/Table';
-import { TableEntityLink } from '../../components/ui/TableEntityLink';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: 'نشط',
-  PENDING: 'بانتظار التفعيل',
-  SUSPENDED: 'موقوف',
-  REJECTED: 'مرفوض',
-};
-
-const statusVariant = (status: string) => {
-  if (status === 'ACTIVE') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'SUSPENDED') return 'suspended' as const;
-  if (status === 'REJECTED') return 'rejected' as const;
-  return 'default' as const;
-};
-
-const fmtMoney = (value: number) => `${Number(value || 0).toLocaleString('ar-SA')} ر.س`;
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-  : '—');
-
-const formatInterests = (interests: unknown) => {
-  if (!interests) return '—';
-  if (Array.isArray(interests)) return interests.join('، ');
-  return String(interests);
-};
+import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -110,6 +82,8 @@ export default function AdminStudentsPage() {
     }
     return result;
   }, [items, statusFilter, search]);
+
+  const hasActiveFilters = Boolean(search.trim() || statusFilter);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -231,7 +205,7 @@ export default function AdminStudentsPage() {
     <div className="page-grid">
       <div className="reports-header">
         <PageHeader title="الطلاب" subtitle="إدارة حسابات الطلاب ومتابعة نشاطهم التعليمي" />
-        <div className="chip-row">
+        <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
             تصدير Excel
           </Button>
@@ -255,10 +229,13 @@ export default function AdminStudentsPage() {
       </div>
 
       <FilterBar
+        className="filter-bar--modern"
         searchValue={search}
         searchPlaceholder="بحث بالاسم، البريد، أو المستوى التعليمي..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        searchIconSize={20}
       >
         <Select
           label="حالة الحساب"
@@ -274,65 +251,14 @@ export default function AdminStudentsPage() {
         />
       </FilterBar>
 
-      <Card>
-        <Table
-          loading={loading}
-          data={tableRows}
-          onRowClick={(row) => goToDetail(row._raw)}
-          emptyTitle="لا يوجد طلاب"
-          emptyDescription="أضف طالباً جديداً أو انتظر التسجيلات."
-          columns={[
-            {
-              key: 'fullName',
-              header: 'الاسم',
-              render: (row) => (
-                <TableEntityLink to={`/admin/students/${row._raw.id}`}>
-                  {row.fullName}
-                </TableEntityLink>
-              ),
-            },
-            { key: 'email', header: 'البريد' },
-            { key: 'phone', header: 'الهاتف' },
-            { key: 'educationLevel', header: 'المستوى التعليمي' },
-            { key: 'enrollments', header: 'الاشتراكات' },
-            { key: 'payments', header: 'المدفوعات' },
-            { key: 'certificates', header: 'الشهادات' },
-            { key: 'wallet', header: 'المحفظة' },
-            {
-              key: 'status',
-              header: 'الحالة',
-              render: (row) => (
-                <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {statusLabels[String(row._raw?.status)] || row.status}
-                </Badge>
-              ),
-            },
-            {
-              key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => {
-                const student = row._raw;
-                return (
-                  <div className="card-actions" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => goToDetail(student)}>
-                      التفاصيل
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(student)}>
-                      تعديل
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => toggleStatus(student)}>
-                      {student.status === 'ACTIVE' ? 'إيقاف' : 'تفعيل'}
-                    </Button>
-                    <Button variant="danger" size="sm" onClick={() => setDeleteTarget(student)}>
-                      حذف
-                    </Button>
-                  </div>
-                );
-              },
-            },
-          ]}
-        />
-      </Card>
+      <StudentsTable
+        items={tableRows}
+        loading={loading}
+        onDetail={goToDetail}
+        onEdit={openEdit}
+        onToggleStatus={toggleStatus}
+        onDelete={setDeleteTarget}
+      />
 
       <Modal
         isOpen={formOpen}

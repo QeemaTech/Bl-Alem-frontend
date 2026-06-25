@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Search } from '@/icons';
+import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { Table, type TableColumn } from '../../ui/Table';
@@ -124,9 +125,25 @@ export function AdminDataTable<T extends Record<string, unknown>>({
       <div className="admin-data-table-footer">
         <span>{filtered.length.toLocaleString('ar-SA')} سجل</span>
         <div className="admin-data-table-pagination">
-          <button type="button" disabled={currentPage <= 1} onClick={() => setPage((p) => p - 1)}>السابق</button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={currentPage <= 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            السابق
+          </Button>
           <span>{currentPage} / {totalPages}</span>
-          <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((p) => p + 1)}>التالي</button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={currentPage >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            التالي
+          </Button>
         </div>
       </div>
     </div>

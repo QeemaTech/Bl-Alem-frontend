@@ -1,5 +1,5 @@
 import type { MaterialIcon } from '@/icons';
-import { LogOut } from '@/icons';
+import { ChevronLeft, ChevronRight, LogOut } from '@/icons';
 import { cn } from '@/lib/cn';
 import { Button } from '../ui/Button';
 import { BrandMark } from '../ui/BrandMark';
@@ -13,6 +13,7 @@ interface SidebarProps {
   isCollapsed: boolean;
   onClose: () => void;
   onLogout: () => void;
+  onToggleCollapse?: () => void;
 }
 
 export function Sidebar({
@@ -22,6 +23,7 @@ export function Sidebar({
   isCollapsed,
   onClose,
   onLogout,
+  onToggleCollapse,
 }: SidebarProps) {
   const { user } = useAuth();
   const initials = user?.fullName?.split(' ').map((w) => w[0]).slice(0, 2).join('') || '؟';
@@ -33,6 +35,16 @@ export function Sidebar({
     >
       <div className="sidebar-brand">
         <BrandMark variant="sidebar" />
+        {onToggleCollapse ? (
+          <button
+            type="button"
+            className="sidebar-collapse-trigger"
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? 'فتح القائمة الجانبية' : 'طيّ القائمة الجانبية'}
+          >
+            {isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          </button>
+        ) : null}
       </div>
 
       {!isCollapsed ? (

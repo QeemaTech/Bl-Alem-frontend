@@ -148,8 +148,8 @@ export default function StudentCourseDetailsPage() {
           </p>
           <p>المحاضر: <strong>{course.instructor?.fullName}</strong></p>
           <p className="price-line">
-            <strong>{price} ر.س</strong>
-            {course.discountPrice ? <span className="old-price">{Number(course.price)} ر.س</span> : null}
+            <strong>{price} ج.م</strong>
+            {course.discountPrice ? <span className="old-price">{Number(course.price)} ج.م</span> : null}
           </p>
         </div>
       </Card>
@@ -372,8 +372,8 @@ export default function StudentCourseDetailsPage() {
         <form className="stack-sm" onSubmit={checkout}>
           <Input label="كود الخصم" value={couponCode} onChange={(event) => setCouponCode(event.target.value)} placeholder="BI20" />
           <Button type="button" variant="secondary" onClick={validateCoupon}>تطبيق الكوبون</Button>
-          <p>السعر النهائي: <strong>{coupon ? Number(coupon.finalAmount) : price} ر.س</strong></p>
-          <p>رصيد المحفظة: <strong>{walletBalance} ر.س</strong></p>
+          <p>السعر النهائي: <strong>{coupon ? Number(coupon.finalAmount) : price} ج.م</strong></p>
+          <p>رصيد المحفظة: <strong>{walletBalance} ج.م</strong></p>
           <div className="segmented-control">
             <button type="button" className={paymentGateway === 'SIMULATED' ? 'active' : ''} onClick={() => setPaymentGateway('SIMULATED')}>دفع تجريبي</button>
             <button type="button" className={paymentGateway === 'WALLET' ? 'active' : ''} onClick={() => setPaymentGateway('WALLET')}>من المحفظة</button>

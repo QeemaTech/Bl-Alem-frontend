@@ -13,15 +13,18 @@ export type MaterialIconProps = {
 export type MaterialIcon = ComponentType<MaterialIconProps>;
 
 const createIcon = (name: string, defaultFilled = false): MaterialIcon => {
-  const Component = ({ size = 20, className, fill, color, style }: MaterialIconProps) => (
-    <Icon
-      name={name}
-      size={size}
-      className={className}
-      filled={Boolean(fill) || defaultFilled}
-      style={{ color: color || fill, ...style }}
-    />
-  );
+  const Component = ({ size = 20, className, fill, color, style }: MaterialIconProps) => {
+    const paint = color || (fill && !['currentColor', 'transparent', 'none'].includes(String(fill)) ? fill : undefined);
+    return (
+      <Icon
+        name={name}
+        size={size}
+        className={className}
+        filled={Boolean(fill) || defaultFilled}
+        style={{ ...(paint ? { color: paint } : {}), ...style }}
+      />
+    );
+  };
   Component.displayName = name;
   return Component;
 };

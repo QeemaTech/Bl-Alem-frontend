@@ -42,7 +42,7 @@ const exportColumns = [
   { key: 'referredUser', header: 'المدعو' },
   { key: 'referredEmail', header: 'بريد المدعو' },
   { key: 'code', header: 'كود الإحالة' },
-  { key: 'rewardAmount', header: 'قيمة المكافأة (ر.س)' },
+  { key: 'rewardAmount', header: 'قيمة المكافأة (ج.م)' },
   { key: 'status', header: 'الحالة' },
   { key: 'createdAt', header: 'تاريخ الإحالة' },
 ];
@@ -105,7 +105,7 @@ export default function AdminRewardsPage() {
     referredUser: row.referredUser?.fullName || '—',
     referredEmail: row.referredUser?.email || '—',
     code: row.code,
-    rewardAmount: row.rewardStatus === 'APPROVED' ? `${rewardAmount} ر.س` : '—',
+    rewardAmount: row.rewardStatus === 'APPROVED' ? `${rewardAmount} ج.م` : '—',
     status: statusLabels[row.rewardStatus] || row.rewardStatus,
     createdAt: fmtDate(row.createdAt),
     _raw: row,
@@ -153,11 +153,11 @@ export default function AdminRewardsPage() {
         <StatCard title="قيد المراجعة" value={String(stats.pending)} icon={Clock} />
         <StatCard title="معتمدة" value={String(stats.approved)} icon={CheckCircle2} />
         <StatCard title="مرفوضة" value={String(stats.rejected)} icon={XCircle} />
-        <StatCard title="إجمالي المكافآت المدفوعة" value={`${stats.totalPaid.toLocaleString('ar-SA')} ر.س`} icon={Gift} />
+        <StatCard title="إجمالي المكافآت المدفوعة" value={`${stats.totalPaid.toLocaleString('ar-SA')} ج.م`} icon={Gift} />
       </div>
 
       <Card className="admin-reward-info">
-        <p>قيمة المكافأة لكل إحالة معتمدة: <strong>{rewardAmount} ر.س</strong> — تُضاف تلقائياً لمحفظة المُحيل عند الاعتماد.</p>
+        <p>قيمة المكافأة لكل إحالة معتمدة: <strong>{rewardAmount} ج.م</strong> — تُضاف تلقائياً لمحفظة المُحيل عند الاعتماد.</p>
       </Card>
 
       <FilterBar
@@ -246,7 +246,7 @@ export default function AdminRewardsPage() {
             <div className="detail-row"><span>المدعو</span><strong>{selected.referredUser?.fullName}</strong></div>
             <div className="detail-row"><span>بريد المدعو</span><strong>{selected.referredUser?.email}</strong></div>
             <div className="detail-row"><span>كود الإحالة</span><strong>{selected.code}</strong></div>
-            <div className="detail-row"><span>قيمة المكافأة</span><strong>{rewardAmount} ر.س</strong></div>
+            <div className="detail-row"><span>قيمة المكافأة</span><strong>{rewardAmount} ج.م</strong></div>
             <div className="detail-row">
               <span>الحالة</span>
               <Badge variant={statusVariant(selected.rewardStatus)}>{statusLabels[selected.rewardStatus]}</Badge>
@@ -259,7 +259,7 @@ export default function AdminRewardsPage() {
       <ConfirmDialog
         isOpen={confirmAction === 'approve'}
         title="اعتماد المكافأة"
-        message={`هل تريد اعتماد مكافأة ${rewardAmount} ر.س للمُحيل ${selected?.referrer?.fullName} عن إحالة ${selected?.referredUser?.fullName}؟ سيتم إضافة المبلغ لمحفظته.`}
+        message={`هل تريد اعتماد مكافأة ${rewardAmount} ج.م للمُحيل ${selected?.referrer?.fullName} عن إحالة ${selected?.referredUser?.fullName}؟ سيتم إضافة المبلغ لمحفظته.`}
         confirmLabel="اعتماد"
         onConfirm={() => updateStatus('APPROVED')}
         onCancel={() => { setConfirmAction(null); setSelected(null); }}

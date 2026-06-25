@@ -3484,10 +3484,16 @@
 }
 .settings-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(min(100%, 16rem), 20rem);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(14px, 1.75vw, 18px);
   align-items: start;
   min-width: 0;
+}
+.settings-layout--full {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
 }
 .settings-form-card { padding: 24px; }
 .settings-section-head {
@@ -3509,6 +3515,15 @@
   padding-top: 8px;
 }
 .settings-toggle-field { grid-column: span 1; }
+.settings-platform-toggles {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 960px) {
+  .settings-platform-toggles { grid-template-columns: 1fr; }
+}
 .settings-toggle-row {
   display: flex;
   align-items: center;

@@ -74,7 +74,7 @@ export function CourseCard({
             <span className="course-rating"><Star size={15} fill="currentColor" /> {rating.toFixed(1)}</span>
           ) : null}
           {price !== undefined ? (
-            <span className="price-line"><strong>{price} ر.س</strong></span>
+            <span className="price-line"><strong>{price} ج.م</strong></span>
           ) : null}
         </div>
       )}

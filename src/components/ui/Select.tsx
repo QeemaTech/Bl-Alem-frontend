@@ -1,5 +1,6 @@
 import type { SelectHTMLAttributes } from 'react';
-import { ChevronDown } from '@/icons';
+import { cn } from '@/lib/cn';
+import { Icon } from './Icon';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
@@ -8,13 +9,22 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   helper?: string;
 }
 
-export function Select({ label, options, error, helper, className = '', ...props }: SelectProps) {
+export function Select({ label, options, error, helper, className = '', id, ...props }: SelectProps) {
+  const selectId = id || `select-${label.replace(/\s+/g, '-')}`;
+
   return (
-    <label className="field">
+    <label className="field" htmlFor={selectId}>
       <span>{label}</span>
-      <div className="select-wrap">
+      <div className="relative">
         <select
-          className={`input select ${error ? 'input-error' : ''} ${className}`}
+          id={selectId}
+          className={cn(
+            'select w-full cursor-pointer appearance-none rounded-xl border bg-surface-container text-on-surface outline-none transition-all duration-200',
+            'min-h-12 px-4 focus:border-primary focus:ring-4 focus:ring-primary/15',
+            error ? 'border-error' : 'border-outline hover:border-outline-variant',
+            className,
+          )}
+          style={{ paddingInlineEnd: '2.5rem' }}
           {...props}
         >
           {options.map((option) => (
@@ -23,7 +33,13 @@ export function Select({ label, options, error, helper, className = '', ...props
             </option>
           ))}
         </select>
-        <ChevronDown size={18} className="select-chevron" aria-hidden />
+        <span
+          className="pointer-events-none absolute top-1/2 grid -translate-y-1/2 place-items-center text-on-surface-variant"
+          style={{ insetInlineEnd: '0.875rem' }}
+          aria-hidden
+        >
+          <Icon name="expand_more" size={22} />
+        </span>
       </div>
       {error ? <small className="field-error">{error}</small> : null}
       {!error && helper ? <small className="field-helper">{helper}</small> : null}

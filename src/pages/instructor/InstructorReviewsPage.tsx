@@ -50,17 +50,22 @@ const exportColumns = [
 ];
 
 function Stars({ rating }: { rating: number }) {
+  const value = Math.max(0, Math.min(5, Number(rating) || 0));
   return (
-    <span className="review-stars" aria-label={`${rating} من 5`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          size={14}
-          fill={i < rating ? 'var(--warning)' : 'transparent'}
-          color={i < rating ? 'var(--warning)' : 'var(--border)'}
-        />
-      ))}
-      <strong>{rating}/5</strong>
+    <span className="review-stars" aria-label={`${value} من 5`}>
+      {Array.from({ length: 5 }).map((_, index) => {
+        const filled = index < value;
+        return (
+          <Star
+            key={index}
+            size={14}
+            className={filled ? 'review-star is-filled' : 'review-star'}
+            {...(filled ? { fill: 'currentColor' } : {})}
+            aria-hidden="true"
+          />
+        );
+      })}
+      <strong className="review-stars-score">{value}/5</strong>
     </span>
   );
 }

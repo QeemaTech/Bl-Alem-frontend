@@ -14,6 +14,7 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
+import { fmtMoney } from '../../utils/adminFormatters';
 
 const statusLabels: Record<string, string> = {
   PAID: 'مدفوع',
@@ -36,8 +37,6 @@ const statusVariant = (status: string) => {
   if (status === 'REFUNDED') return 'warning' as const;
   return 'default' as const;
 };
-
-const fmtMoney = (value: number) => `${Number(value).toLocaleString('ar-SA')} ر.س`;
 
 const fmtDate = (value?: string | null) => (value
   ? new Date(value).toLocaleDateString('ar-SA', {

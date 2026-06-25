@@ -1,4 +1,7 @@
-export const fmtMoney = (value: number) => `${Number(value || 0).toLocaleString('ar-SA')} ر.س`;
+import { DEFAULT_CURRENCY, getCurrencySymbol } from './currency';
+
+export const fmtMoney = (value: number, currencyCode = DEFAULT_CURRENCY) =>
+  `${Number(value || 0).toLocaleString('ar-EG')} ${getCurrencySymbol(currencyCode)}`;
 
 export const fmtDate = (value?: string | null) => (value
   ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })

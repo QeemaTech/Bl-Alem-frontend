@@ -1,11 +1,11 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { ImagePlus, Upload, Wallet } from '@/icons';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/admin';
 import { WithdrawalActionButtons } from '../../components/admin/withdrawals/WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from '../../components/admin/withdrawals/WithdrawalStatusBadge';
 import { WithdrawalsFiltersBar, type WithdrawalsFilters } from '../../components/admin/withdrawals/WithdrawalsFiltersBar';
 import { WithdrawalsSummaryCards } from '../../components/admin/withdrawals/WithdrawalsSummaryCards';
 import { WithdrawalsTable } from '../../components/admin/withdrawals/WithdrawalsTable';
+import { WithdrawTransferForm } from '../../components/admin/withdrawals/WithdrawTransferForm';
 import {
   fmtWithdrawalDate,
   fmtWithdrawalMoney,
@@ -19,6 +19,7 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { Download } from '@/icons';
 import { exportTableToExcel } from '../../utils/exportExcel';
 import { mediaUrl, normalizeStoredMediaPath } from '../../utils/mediaUrl';
 
@@ -32,7 +33,7 @@ const exportColumns = [
   { key: 'id', header: 'رقم الطلب' },
   { key: 'instructor', header: 'المحاضر' },
   { key: 'email', header: 'البريد' },
-  { key: 'amount', header: 'المبلغ (ر.س)' },
+  { key: 'amount', header: 'المبلغ (ج.م)' },
   { key: 'bankName', header: 'البنك' },
   { key: 'accountName', header: 'اسم الحساب' },
   { key: 'iban', header: 'IBAN' },
@@ -57,7 +58,6 @@ export default function AdminWithdrawalsPage() {
   const [submittingPaid, setSubmittingPaid] = useState(false);
   const [submittingReject, setSubmittingReject] = useState(false);
   const [loadingAction, setLoadingAction] = useState<{ id: number; type: WithdrawalActionType } | null>(null);
-  const transferInputRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -202,15 +202,22 @@ export default function AdminWithdrawalsPage() {
 
   return (
     <div className="admin-withdrawals-page page-grid">
-      <header className="wd-page-header">
+      <div className="reports-header">
         <PageHeader
           title="إدارة السحوبات"
           subtitle="مراجعة واعتماد طلبات سحب أرباح المحاضرين بأمان ووضوح"
         />
-        <div className="wd-page-header-badge" aria-hidden="true">
-          <Wallet size={20} />
+        <div className="reports-header-actions">
+          <Button
+            variant="outline"
+            icon={<Download size={18} />}
+            onClick={handleExport}
+            disabled={!filteredItems.length}
+          >
+            تصدير Excel
+          </Button>
         </div>
-      </header>
+      </div>
 
       <WithdrawalsSummaryCards stats={stats} />
 
@@ -218,8 +225,6 @@ export default function AdminWithdrawalsPage() {
         filters={filters}
         onChange={(patch) => setFilters((prev) => ({ ...prev, ...patch }))}
         onReset={() => setFilters(EMPTY_FILTERS)}
-        onExport={handleExport}
-        exportDisabled={!filteredItems.length}
       />
 
       <WithdrawalsTable
@@ -306,68 +311,18 @@ export default function AdminWithdrawalsPage() {
       </Modal>
 
       <Modal isOpen={paidOpen} title="تأكيد التحويل" onClose={() => !submittingPaid && resetPaidModal()}>
-        <form className="stack-sm withdraw-paid-form" onSubmit={handlePaid}>
-          <p>
-            أكّد تحويل مبلغ{' '}
-            <strong>{fmtWithdrawalMoney(selected?.amount || 0)}</strong>{' '}
-            إلى المحاضر <strong>{selected?.instructor?.fullName}</strong>.
-          </p>
-          <div className="withdraw-transfer-upload">
-            <input
-              ref={transferInputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => handleTransferFile(e.target.files?.[0])}
-            />
-            {transferPreview ? (
-              <div className="withdraw-transfer-preview">
-                <img src={transferPreview} alt="معاينة صورة التحويل" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setTransferFile(null);
-                    setTransferPreview('');
-                    if (transferInputRef.current) transferInputRef.current.value = '';
-                  }}
-                >
-                  إزالة الصورة
-                </Button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="withdraw-transfer-dropzone"
-                onClick={() => transferInputRef.current?.click()}
-              >
-                <ImagePlus size={28} />
-                <span>إرفاق صورة التحويل (اختياري)</span>
-                <small>PNG أو JPG — يمكنك التأكيد بدون صورة</small>
-              </button>
-            )}
-            {!transferPreview ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                icon={<Upload size={14} />}
-                onClick={() => transferInputRef.current?.click()}
-              >
-                اختيار صورة
-              </Button>
-            ) : null}
-          </div>
-          <div className="modal-actions">
-            <Button type="button" variant="secondary" onClick={resetPaidModal} disabled={submittingPaid}>
-              إلغاء
-            </Button>
-            <Button type="submit" loading={submittingPaid}>
-              تأكيد الدفع
-            </Button>
-          </div>
-        </form>
+        <WithdrawTransferForm
+          item={selected}
+          preview={transferPreview}
+          submitting={submittingPaid}
+          onFileSelect={handleTransferFile}
+          onRemoveFile={() => {
+            setTransferFile(null);
+            setTransferPreview('');
+          }}
+          onCancel={resetPaidModal}
+          onSubmit={handlePaid}
+        />
       </Modal>
 
       <ConfirmDialog

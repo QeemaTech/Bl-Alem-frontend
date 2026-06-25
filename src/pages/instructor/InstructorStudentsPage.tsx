@@ -172,7 +172,6 @@ export default function InstructorStudentsPage() {
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); handleCourseChange(''); }}
         searchIconSize={20}
-        resetVariant="secondary"
       >
         <Select
           label="الكورس"

@@ -529,7 +529,7 @@ export default function InstructorCourseFormPage() {
                 {!form.isFree ? (
                   <>
                     <Input
-                      label="السعر (ر.س)"
+                      label="السعر (ج.م)"
                       type="number"
                       min={0}
                       step="0.01"

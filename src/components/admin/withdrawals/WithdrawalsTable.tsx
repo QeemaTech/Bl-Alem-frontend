@@ -1,4 +1,5 @@
-import { Banknote } from '@/icons';
+import { Banknote, Table2 } from '@/icons';
+import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { WithdrawalActionButtons } from './WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from './WithdrawalStatusBadge';
@@ -38,9 +39,17 @@ export function WithdrawalsTable({
   }));
 
   return (
-    <div className="wd-table-card">
+    <Card className="reports-table-card">
+      <div className="section-heading reports-table-head">
+        <h2>
+          <span className="reports-table-title-icon" aria-hidden="true">
+            <Table2 size={20} />
+          </span>
+          طلبات السحب
+        </h2>
+        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+      </div>
       <Table
-        className="wd-data-grid"
         loading={loading}
         stickyHeader
         compact
@@ -51,23 +60,23 @@ export function WithdrawalsTable({
         emptyDescription="لم يتم إرسال أي طلبات سحب من المحاضرين بعد، أو لا توجد نتائج مطابقة للفلاتر."
         data={rows}
         columns={[
-          { key: 'id', header: 'رقم الطلب', width: '6.5rem', className: 'wd-col-id', align: 'center' },
+          { key: 'id', header: 'رقم الطلب', width: '6.5rem', align: 'center' },
           { key: 'instructorName', header: 'المحاضر', width: '16%' },
           {
             key: 'instructorEmail',
             header: 'البريد',
             width: '16%',
             truncate: true,
-            className: 'wd-col-email',
             hideOnMobile: true,
           },
           {
             key: 'amountLabel',
             header: 'المبلغ',
             width: '11%',
+            align: 'center',
             render: (row) => (
-              <span className="wd-amount-cell">
-                <Banknote size={14} aria-hidden="true" />
+              <span className="withdrawal-amount-cell">
+                <Banknote size={16} aria-hidden="true" />
                 <strong>{row.amountLabel}</strong>
               </span>
             ),
@@ -75,16 +84,18 @@ export function WithdrawalsTable({
           {
             key: 'status',
             header: 'الحالة',
-            width: '11%',
+            width: '10.5rem',
+            minWidth: '10.5rem',
             align: 'center',
+            truncate: false,
+            className: 'wd-col-status',
             render: (row) => <WithdrawalStatusBadge status={String(row._raw.status)} />,
           },
-          { key: 'dateLabel', header: 'التاريخ', width: '15%', className: 'wd-col-date' },
+          { key: 'dateLabel', header: 'التاريخ', width: '15%' },
           {
             key: 'actions',
             header: 'الإجراءات',
             width: '32%',
-            className: 'wd-col-actions',
             wrap: true,
             truncate: false,
             render: (row) => (
@@ -100,6 +111,6 @@ export function WithdrawalsTable({
           },
         ]}
       />
-    </div>
+    </Card>
   );
 }

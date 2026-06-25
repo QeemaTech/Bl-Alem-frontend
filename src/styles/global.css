@@ -1371,7 +1371,6 @@ button, input, select, textarea { font: inherit; }
   table-layout: auto;
 }
 .table-shell.is-wide .data-table {
-<<<<<<< Updated upstream
   min-width: max(100%, 52rem);
 }
 .table-shell.is-fluid .table-scroll {
@@ -1402,9 +1401,6 @@ button, input, select, textarea { font: inherit; }
 }
 .table-shell.is-fluid .col-truncate .td-content {
   max-width: 100%;
-=======
-  min-width: 0;
->>>>>>> Stashed changes
 }
 .table-scroll.has-sticky-head .data-table-head th {
   position: sticky;

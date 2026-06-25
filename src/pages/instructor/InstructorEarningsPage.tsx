@@ -52,7 +52,7 @@ const emptyWithdrawForm = {
 };
 
 const exportColumns = [
-  { key: 'amount', header: 'المبلغ (ر.س)' },
+  { key: 'amount', header: 'المبلغ (ج.م)' },
   { key: 'status', header: 'الحالة' },
   { key: 'bankName', header: 'البنك' },
   { key: 'accountName', header: 'اسم الحساب' },
@@ -395,7 +395,7 @@ export default function InstructorEarningsPage() {
         </div>
         <form className="stack-sm withdraw-modal-form" onSubmit={withdraw}>
           <Input
-            label="المبلغ (ر.س)"
+            label="المبلغ (ج.م)"
             type="number"
             min={minWithdrawalAmount || 1}
             max={withdrawable}

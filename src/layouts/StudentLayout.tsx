@@ -9,6 +9,7 @@ export default function StudentLayout() {
     <DashboardLayout
       title="لوحة الطالب"
       sidebarTitle="مساحة التعلم"
+      platformBanner="student"
       notificationsPath="/student/notifications"
       profilePath="/student/profile"
       items={[

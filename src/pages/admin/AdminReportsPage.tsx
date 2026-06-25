@@ -1,5 +1,25 @@
-import { useEffect, useState } from 'react';
-import { BarChart3, Download, TrendingUp } from '@/icons';
+import { useEffect, useMemo, useState } from 'react';
+import type { MaterialIcon } from '@/icons';
+import {
+  BarChart3,
+  BookOpen,
+  CheckCircle2,
+  CoPresent,
+  CreditCard,
+  Download,
+  DollarSign,
+  GraduationCap,
+  Percent,
+  Receipt,
+  Shield,
+  Table2,
+  Ticket,
+  TrendingUp,
+  UserCheck,
+  Users,
+  Wallet,
+  XCircle,
+} from '@/icons';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';
@@ -21,6 +41,8 @@ const tabs = [
 
 type ReportTab = (typeof tabs)[number]['id'];
 
+const HIDDEN_SUMMARY_KEYS = new Set(['refundedCount', 'refundedAmount']);
+
 const tabTitles: Record<ReportTab, string> = {
   revenue: 'تقرير الإيرادات',
   users: 'تقرير المستخدمين',
@@ -29,9 +51,17 @@ const tabTitles: Record<ReportTab, string> = {
   enrollments: 'تقرير الاشتراكات',
 };
 
+const tableTitleIcons: Record<ReportTab, MaterialIcon> = {
+  revenue: Receipt,
+  users: Users,
+  courses: BookOpen,
+  instructors: CoPresent,
+  enrollments: Ticket,
+};
+
 const summaryLabels: Record<ReportTab, Record<string, string>> = {
   revenue: {
-    totalRevenue: 'إجمالي الإيرادات (ر.س)',
+    totalRevenue: 'إجمالي الإيرادات (ج.م)',
     paymentsCount: 'عدد المدفوعات',
     monthRevenue: 'إيرادات الشهر الحالي',
     monthPayments: 'مدفوعات الشهر الحالي',
@@ -74,7 +104,50 @@ const summaryLabels: Record<ReportTab, Record<string, string>> = {
   },
 };
 
-const currencyKeys = new Set(['totalRevenue', 'monthRevenue', 'avgPayment', 'totalDiscount', 'refundedAmount', 'totalEarnings']);
+const summaryIcons: Record<ReportTab, Record<string, MaterialIcon>> = {
+  revenue: {
+    totalRevenue: DollarSign,
+    paymentsCount: Receipt,
+    monthRevenue: TrendingUp,
+    monthPayments: CreditCard,
+    avgPayment: Wallet,
+    totalDiscount: Percent,
+  },
+  users: {
+    total: Users,
+    students: GraduationCap,
+    instructors: CoPresent,
+    admins: Shield,
+    active: UserCheck,
+    suspended: XCircle,
+    newThisMonth: TrendingUp,
+  },
+  courses: {
+    total: BookOpen,
+    published: CheckCircle2,
+    pending: BarChart3,
+    draft: BookOpen,
+    rejected: XCircle,
+    suspended: Shield,
+  },
+  instructors: {
+    total: CoPresent,
+    pending: BarChart3,
+    approved: UserCheck,
+    rejected: XCircle,
+    suspended: Shield,
+  },
+  enrollments: {
+    total: Ticket,
+    active: CheckCircle2,
+    completed: GraduationCap,
+    cancelled: XCircle,
+    avgProgress: BarChart3,
+    completionRate: TrendingUp,
+  },
+};
+
+const currencyKeys = new Set(['totalRevenue', 'monthRevenue', 'avgPayment', 'totalDiscount', 'totalEarnings']);
 
 interface ReportData {
   summary: Record<string, number>;
@@ -83,9 +156,17 @@ interface ReportData {
 }
 
 function formatSummaryValue(key: string, value: number) {
-  if (currencyKeys.has(key)) return `${value.toLocaleString('ar-SA')} ر.س`;
+  if (currencyKeys.has(key)) return `${value.toLocaleString('ar-EG')} ج.م`;
   if (key === 'avgProgress' || key === 'completionRate') return `${value}%`;
-  return value.toLocaleString('ar-SA');
+  return value.toLocaleString('ar-EG');
+}
+
+function formatTableCell(key: string, value: unknown) {
+  if (value == null || value === '') return '—';
+  if (key === 'amount' || key === 'discount') {
+    return `${Number(value).toLocaleString('ar-EG')} ج.م`;
+  }
+  return String(value);
 }
 
 export default function AdminReportsPage() {
@@ -98,33 +179,42 @@ export default function AdminReportsPage() {
     adminApi.report(tab).then(setData).finally(() => setLoading(false));
   }, [tab]);
 
+  const summaryEntries = useMemo(
+    () => Object.entries(data?.summary || {}).filter(([key]) => !HIDDEN_SUMMARY_KEYS.has(key)),
+    [data],
+  );
+
   const handleExport = () => {
     if (!data) return;
     exportReportToExcel(tabTitles[tab], data.summary, summaryLabels[tab], data.table);
   };
 
+  const TableTitleIcon = tableTitleIcons[tab];
+
   return (
-    <div className="page-grid">
+    <div className="page-grid admin-reports-page">
       <div className="reports-header">
         <PageHeader title="التقارير" subtitle="إحصائيات وتحليلات أداء المنصة" />
-        <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={loading || !data}>
-          تصدير Excel
-        </Button>
+        <div className="reports-header-actions">
+          <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={loading || !data}>
+            تصدير Excel
+          </Button>
+        </div>
       </div>
 
-      <Tabs activeTab={tab} onChange={(next) => setTab(next as ReportTab)} tabs={[...tabs]} />
+      <Tabs activeTab={tab} onChange={(next) => setTab(next as ReportTab)} tabs={[...tabs]} variant="pills" />
 
       {loading ? (
         <DashboardSkeleton />
       ) : data ? (
         <>
           <div className="stats-grid">
-            {Object.entries(data.summary).map(([key, value]) => (
+            {summaryEntries.map(([key, value]) => (
               <StatCard
                 key={key}
                 title={summaryLabels[tab][key] || key}
                 value={formatSummaryValue(key, value)}
-                icon={key.includes('Revenue') || key.includes('Payment') || key.includes('Earning') ? TrendingUp : BarChart3}
+                icon={summaryIcons[tab][key] || BarChart3}
               />
             ))}
           </div>
@@ -137,10 +227,27 @@ export default function AdminReportsPage() {
             </div>
           ) : null}
 
-          <Card>
-            <h2>{data.table.title}</h2>
+          <Card className="reports-table-card">
+            <div className="section-heading reports-table-head">
+              <h2>
+                <span className="reports-table-title-icon" aria-hidden="true">
+                  <TableTitleIcon size={20} />
+                </span>
+                {data.table.title}
+              </h2>
+              <span className="muted-count">
+                {data.table.rows.length.toLocaleString('ar-EG')} سجل
+              </span>
+            </div>
             <Table
-              columns={data.table.columns.map((col) => ({ key: col.key, header: col.header }))}
+              fluid
+              hideScrollNotice
+              columns={data.table.columns.map((col) => ({
+                key: col.key,
+                header: col.header,
+                align: col.key === 'id' || col.key === 'amount' || col.key === 'discount' ? 'center' : 'start',
+                render: (row) => formatTableCell(col.key, row[col.key]),
+              }))}
               data={data.table.rows}
               emptyTitle="لا توجد بيانات"
               emptyDescription="لم يتم العثور على سجلات لهذا التقرير."

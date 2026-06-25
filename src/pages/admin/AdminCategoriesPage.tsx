@@ -1,44 +1,20 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, FolderTree, Layers, Plus } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { buildCategoryTableRows, CategoriesTable } from '../../components/admin/categories/CategoriesTable';
+import { CategoryFormModal } from '../../components/admin/categories/CategoryFormModal';
+import { emptyCategoryForm } from '../../components/admin/categories/categoryShared';
 import { ReportChart } from '../../components/reports/ReportChart';
-import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
-import { Input } from '../../components/ui/Input';
-import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
-import { Table } from '../../components/ui/Table';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: 'فعّال',
-  INACTIVE: 'غير فعّال',
-};
-
-const statusVariant = (status: string) => {
-  if (status === 'ACTIVE') return 'success' as const;
-  if (status === 'INACTIVE') return 'warning' as const;
-  return 'default' as const;
-};
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-  : '—');
-
-const emptyForm = {
-  nameAr: '',
-  nameEn: '',
-  slug: '',
-  icon: '',
-  image: '',
-  status: 'ACTIVE',
-};
+import { statusLabels } from '../../components/admin/categories/categoryShared';
 
 const exportColumns = [
   { key: 'id', header: 'رقم التصنيف' },
@@ -52,6 +28,7 @@ const exportColumns = [
 ];
 
 export default function AdminCategoriesPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,11 +36,9 @@ export default function AdminCategoriesPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(emptyCategoryForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
 
   const load = async () => {
     setLoading(true);
@@ -102,21 +77,11 @@ export default function AdminCategoriesPage() {
     return Object.entries(counts).map(([label, value]) => ({ label, value }));
   }, [items]);
 
-  const tableRows = useMemo(() => filteredItems.map((row) => ({
-    id: row.id,
-    nameAr: row.nameAr,
-    nameEn: row.nameEn || '—',
-    slug: row.slug,
-    icon: row.icon || '—',
-    courses: String(row._count?.courses ?? 0),
-    status: statusLabels[row.status] || row.status,
-    createdAt: fmtDate(row.createdAt),
-    _raw: row,
-  })), [filteredItems]);
+  const tableRows = useMemo(() => buildCategoryTableRows(filteredItems), [filteredItems]);
 
   const openCreate = () => {
     setEditing(null);
-    setForm(emptyForm);
+    setForm(emptyCategoryForm);
     setFormOpen(true);
   };
 
@@ -134,8 +99,7 @@ export default function AdminCategoriesPage() {
   };
 
   const openDetail = (category: any) => {
-    setSelected(category);
-    setDetailOpen(true);
+    navigate(`/admin/categories/${category.id}`);
   };
 
   const saveCategory = async (e: FormEvent) => {
@@ -159,7 +123,7 @@ export default function AdminCategoriesPage() {
       }
       setFormOpen(false);
       setEditing(null);
-      setForm(emptyForm);
+      setForm(emptyCategoryForm);
       await load();
     } catch {
       showToast('تعذّر حفظ التصنيف.', 'error');
@@ -193,10 +157,10 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div className="page-grid">
+    <div className="page-grid admin-categories-page">
       <div className="reports-header">
         <PageHeader title="التصنيفات" subtitle="إدارة تصنيفات الدورات على المنصة" />
-        <div className="chip-row">
+        <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
             تصدير Excel
           </Button>
@@ -206,7 +170,7 @@ export default function AdminCategoriesPage() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="stats-grid admin-categories-stats">
         <StatCard title="إجمالي التصنيفات" value={String(stats.total)} icon={FolderTree} />
         <StatCard title="فعّالة" value={String(stats.active)} icon={Layers} />
         <StatCard title="غير فعّالة" value={String(stats.inactive)} icon={FolderTree} />
@@ -235,137 +199,24 @@ export default function AdminCategoriesPage() {
         />
       </FilterBar>
 
-      <Card>
-        <Table
-          loading={loading}
-          data={tableRows}
-          emptyTitle="لا توجد تصنيفات"
-          emptyDescription="أضف تصنيفاً جديداً لتنظيم الدورات."
-          columns={[
-            { key: 'nameAr', header: 'الاسم العربي' },
-            { key: 'nameEn', header: 'الاسم الإنجليزي' },
-            { key: 'slug', header: 'الرابط' },
-            { key: 'icon', header: 'الأيقونة' },
-            { key: 'courses', header: 'الكورسات' },
-            {
-              key: 'status',
-              header: 'الحالة',
-              render: (row) => (
-                <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {statusLabels[String(row._raw?.status)] || row.status}
-                </Badge>
-              ),
-            },
-            { key: 'createdAt', header: 'تاريخ الإنشاء' },
-            {
-              key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => {
-                const category = row._raw;
-                return (
-                  <div className="card-actions">
-                    <Button variant="ghost" size="sm" onClick={() => openDetail(category)}>
-                      التفاصيل
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(category)}>
-                      تعديل
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => toggleStatus(category)}>
-                      {category.status === 'ACTIVE' ? 'إيقاف' : 'تفعيل'}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => setDeleteTarget(category)}
-                      disabled={Number(category._count?.courses || 0) > 0}
-                    >
-                      حذف
-                    </Button>
-                  </div>
-                );
-              },
-            },
-          ]}
-        />
-      </Card>
+      <CategoriesTable
+        items={tableRows}
+        loading={loading}
+        onDetail={openDetail}
+        onEdit={openEdit}
+        onToggleStatus={toggleStatus}
+        onDelete={setDeleteTarget}
+      />
 
-      <Modal
-        isOpen={detailOpen}
-        title="تفاصيل التصنيف"
-        onClose={() => { setDetailOpen(false); setSelected(null); }}
-      >
-        {selected ? (
-          <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>رقم التصنيف</span><strong>{selected.id}</strong></div>
-            <div className="detail-row"><span>الاسم العربي</span><strong>{selected.nameAr}</strong></div>
-            <div className="detail-row"><span>الاسم الإنجليزي</span><strong>{selected.nameEn || '—'}</strong></div>
-            <div className="detail-row"><span>الرابط</span><strong dir="ltr">{selected.slug}</strong></div>
-            <div className="detail-row"><span>الأيقونة</span><strong>{selected.icon || '—'}</strong></div>
-            <div className="detail-row"><span>عدد الكورسات</span><strong>{selected._count?.courses ?? 0}</strong></div>
-            <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={statusVariant(selected.status)}>
-                {statusLabels[selected.status] || selected.status}
-              </Badge>
-            </div>
-            <div className="detail-row"><span>تاريخ الإنشاء</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            <div className="detail-row"><span>آخر تحديث</span><strong>{fmtDate(selected.updatedAt)}</strong></div>
-            <Button variant="ghost" onClick={() => { setDetailOpen(false); openEdit(selected); }}>
-              تعديل التصنيف
-            </Button>
-          </div>
-        ) : null}
-      </Modal>
-
-      <Modal
+      <CategoryFormModal
         isOpen={formOpen}
-        title={editing ? 'تعديل التصنيف' : 'إضافة تصنيف'}
-        onClose={() => { setFormOpen(false); setEditing(null); setForm(emptyForm); }}
-      >
-        <form className="stack-sm" onSubmit={saveCategory}>
-          <Input
-            label="الاسم العربي"
-            value={form.nameAr}
-            onChange={(e) => setForm({ ...form, nameAr: e.target.value })}
-            required
-          />
-          <Input
-            label="الاسم الإنجليزي"
-            value={form.nameEn}
-            onChange={(e) => setForm({ ...form, nameEn: e.target.value })}
-          />
-          <Input
-            label="الرابط (slug)"
-            value={form.slug}
-            onChange={(e) => setForm({ ...form, slug: e.target.value })}
-            placeholder="programming"
-            dir="ltr"
-            disabled={Boolean(editing)}
-          />
-          <Input
-            label="الأيقونة"
-            value={form.icon}
-            onChange={(e) => setForm({ ...form, icon: e.target.value })}
-            placeholder="code"
-          />
-          <Input
-            label="رابط الصورة (اختياري)"
-            value={form.image}
-            onChange={(e) => setForm({ ...form, image: e.target.value })}
-            placeholder="https://..."
-          />
-          <Select
-            label="الحالة"
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-            options={[
-              { label: 'فعّال', value: 'ACTIVE' },
-              { label: 'غير فعّال', value: 'INACTIVE' },
-            ]}
-          />
-          <Button loading={submitting}>{editing ? 'حفظ التعديلات' : 'إنشاء التصنيف'}</Button>
-        </form>
-      </Modal>
+        editing={editing}
+        form={form}
+        submitting={submitting}
+        onClose={() => { setFormOpen(false); setEditing(null); setForm(emptyCategoryForm); }}
+        onChange={setForm}
+        onSubmit={saveCategory}
+      />
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}

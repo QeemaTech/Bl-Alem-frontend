@@ -44,13 +44,17 @@ import InstructorNotificationsPage from './pages/instructor/InstructorNotificati
 import InstructorSupportPage from './pages/instructor/InstructorSupportPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminResourcePage from './pages/admin/AdminResourcePage';
+import AdminCourseDetailPage from './pages/admin/AdminCourseDetailPage';
 import AdminCourseReviewPage from './pages/admin/AdminCourseReviewPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminWithdrawalsPage from './pages/admin/AdminWithdrawalsPage';
 import AdminSupportPage from './pages/admin/AdminSupportPage';
+import AdminSupportTicketPage from './pages/admin/AdminSupportTicketPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
+import AdminNotificationDetailPage from './pages/admin/AdminNotificationDetailPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
+import AdminReviewDetailPage from './pages/admin/AdminReviewDetailPage';
 import AdminCertificatesPage from './pages/admin/AdminCertificatesPage';
 import AdminRewardsPage from './pages/admin/AdminRewardsPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
@@ -58,6 +62,7 @@ import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
 import AdminLiveSessionsPage from './pages/admin/AdminLiveSessionsPage';
 import AdminCoursesPage from './pages/admin/AdminCoursesPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
+import AdminCategoryDetailPage from './pages/admin/AdminCategoryDetailPage';
 import AdminLearningPathsPage from './pages/admin/AdminLearningPathsPage';
 import AdminLearningPathEditorPage from './pages/admin/AdminLearningPathEditorPage';
 import AdminInstructorsPage from './pages/admin/AdminInstructorsPage';
@@ -134,15 +139,20 @@ function App() {
           <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/admin/reports" element={<AdminReportsPage />} />
           <Route path="/admin/withdrawals" element={<AdminWithdrawalsPage />} />
+          <Route path="/admin/support/:ticketId" element={<AdminSupportTicketPage />} />
           <Route path="/admin/support" element={<AdminSupportPage />} />
+          <Route path="/admin/notifications/:notificationId" element={<AdminNotificationDetailPage />} />
           <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+          <Route path="/admin/reviews/:reviewId" element={<AdminReviewDetailPage />} />
           <Route path="/admin/reviews" element={<AdminReviewsPage />} />
           <Route path="/admin/certificates" element={<AdminCertificatesPage />} />
           <Route path="/admin/rewards" element={<AdminRewardsPage />} />
           <Route path="/admin/coupons" element={<AdminCouponsPage />} />
           <Route path="/admin/payments" element={<AdminPaymentsPage />} />
           <Route path="/admin/live" element={<AdminLiveSessionsPage />} />
+          <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
+          <Route path="/admin/categories/:categoryId" element={<AdminCategoryDetailPage />} />
           <Route path="/admin/categories" element={<AdminCategoriesPage />} />
           <Route path="/admin/learning-paths/:id" element={<AdminLearningPathEditorPage />} />
           <Route path="/admin/learning-paths" element={<AdminLearningPathsPage />} />

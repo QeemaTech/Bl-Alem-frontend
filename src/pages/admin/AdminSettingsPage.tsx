@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Award, Globe, Mail, Palette, RefreshCw, Save, Settings2, Shield, Upload, Wallet, Wrench,
+  Award, RefreshCw, Save, Settings2, Shield, Upload, Wallet,
 } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { cn } from '@/lib/cn';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -16,6 +17,8 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { useSiteSettings } from '../../store/SiteSettingsContext';
 import { mediaUrl, normalizeHexColor, normalizeStoredMediaPath } from '../../utils/mediaUrl';
+import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, currencySuffix, getCurrencySymbol } from '../../utils/currency';
+import { isSettingTruthy } from '../../utils/platformSettings';
 
 type FieldType = 'text' | 'number' | 'email' | 'url' | 'color' | 'select' | 'toggle' | 'textarea';
 
@@ -46,7 +49,7 @@ const DEFAULTS: Record<string, string> = {
   primaryColor: '#22A6BC',
   secondaryColor: '#1E293B',
   platformCommissionPercentage: '20',
-  currency: 'SAR',
+  currency: DEFAULT_CURRENCY,
   taxPercentage: '15',
   certificatePrefix: 'BI',
   supportEmail: 'support@bi-alem.com',
@@ -54,7 +57,7 @@ const DEFAULTS: Record<string, string> = {
   whatsappNumber: '',
   paymentGatewayPlaceholder: 'SIMULATED',
   defaultLanguage: 'ar',
-  timezone: 'Asia/Riyadh',
+  timezone: 'Africa/Cairo',
   minWithdrawalAmount: '100',
   referralRewardAmount: '50',
   referralEnabled: 'true',
@@ -96,6 +99,7 @@ const SECTIONS: SettingSection[] = [
         label: 'المنطقة الزمنية',
         type: 'select',
         options: [
+          { label: 'القاهرة (GMT+2)', value: 'Africa/Cairo' },
           { label: 'الرياض (GMT+3)', value: 'Asia/Riyadh' },
           { label: 'دبي (GMT+4)', value: 'Asia/Dubai' },
           { label: 'UTC', value: 'UTC' },
@@ -125,9 +129,9 @@ const SECTIONS: SettingSection[] = [
     description: 'العمولات، العملة، السحوبات، وبوابة الدفع.',
     fields: [
       { key: 'platformCommissionPercentage', label: 'نسبة عمولة المنصة (%)', type: 'number', min: 0, max: 100 },
-      { key: 'currency', label: 'العملة', type: 'select', options: [{ label: 'ريال سعودي (SAR)', value: 'SAR' }, { label: 'دولار (USD)', value: 'USD' }] },
+      { key: 'currency', label: 'العملة', type: 'select', options: [...CURRENCY_OPTIONS] },
       { key: 'taxPercentage', label: 'نسبة الضريبة (%)', type: 'number', min: 0, max: 100 },
-      { key: 'minWithdrawalAmount', label: 'الحد الأدنى للسحب (ر.س)', type: 'number', min: 0 },
+      { key: 'minWithdrawalAmount', label: `الحد الأدنى للسحب ${currencySuffix()}`, type: 'number', min: 0 },
       { key: 'paymentGatewayPlaceholder', label: 'بوابة الدفع', type: 'text', helper: 'SIMULATED للتجربة — استبدلها بمزود حقيقي لاحقاً' },
     ],
   },
@@ -138,7 +142,7 @@ const SECTIONS: SettingSection[] = [
     description: 'بادئة الشهادات ومكافآت برنامج الإحالة.',
     fields: [
       { key: 'certificatePrefix', label: 'بادئة الشهادات', type: 'text', placeholder: 'BI', helper: 'مثال: BI-2026-00001' },
-      { key: 'referralRewardAmount', label: 'مكافأة الإحالة (ر.س)', type: 'number', min: 0 },
+      { key: 'referralRewardAmount', label: `مكافأة الإحالة ${currencySuffix()}`, type: 'number', min: 0 },
       { key: 'referralEnabled', label: 'تفعيل برنامج الإحالة', type: 'toggle' },
     ],
   },
@@ -185,8 +189,6 @@ const SECTIONS: SettingSection[] = [
 ];
 
 const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
-
-const isTruthy = (value?: string) => value === 'true' || value === '1';
 
 function BrandPreview({ settings }: { settings: Record<string, string> }) {
   const primary = normalizeHexColor(settings.primaryColor || '', '#22A6BC');
@@ -299,22 +301,38 @@ function ToggleField({ label, helper, checked, onChange }: {
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="field settings-toggle-field">
-      <span>{label}</span>
-      <div className="settings-toggle-row">
+    <div className="settings-toggle-field rounded-2xl border border-outline/80 bg-surface-container-low p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-on-surface">{label}</p>
+          {helper ? <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{helper}</p> : null}
+        </div>
         <button
           type="button"
           role="switch"
           aria-checked={checked}
-          className={`settings-toggle ${checked ? 'active' : ''}`}
+          aria-label={label}
           onClick={() => onChange(!checked)}
+          className={cn(
+            'relative h-8 w-14 shrink-0 rounded-full transition-colors duration-200',
+            checked ? 'bg-primary' : 'bg-outline-variant',
+          )}
         >
-          <span className="settings-toggle-thumb" />
+          <span
+            className={cn(
+              'absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-all duration-200',
+              checked ? 'start-7' : 'start-1',
+            )}
+          />
         </button>
-        <span className="settings-toggle-label">{checked ? 'مفعّل' : 'معطّل'}</span>
       </div>
-      {helper ? <small className="field-helper">{helper}</small> : null}
-    </label>
+      <div className="mt-3 flex items-center gap-2">
+        <Badge variant={checked ? 'success' : 'warning'}>{checked ? 'مفعّل' : 'معطّل'}</Badge>
+        <span className="text-xs text-on-surface-variant">
+          {checked ? 'ينعكس فوراً على المنصة' : 'غير مفعّل حالياً'}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -466,7 +484,7 @@ export default function AdminSettingsPage() {
 
   if (loading) return <DashboardSkeleton />;
 
-  const maintenance = isTruthy(settings.maintenanceMode);
+  const maintenance = isSettingTruthy(settings.maintenanceMode);
 
   return (
     <div className="page-grid">
@@ -491,7 +509,7 @@ export default function AdminSettingsPage() {
           hint={maintenance ? 'الزوار يرون رسالة صيانة' : 'المنصة متاحة للجميع'}
         />
         <StatCard title="عمولة المنصة" value={`${savedSnapshot.platformCommissionPercentage || '0'}%`} icon={Wallet} />
-        <StatCard title="مكافأة الإحالة" value={`${savedSnapshot.referralRewardAmount || '0'} ر.س`} icon={Award} />
+        <StatCard title="مكافأة الإحالة" value={`${savedSnapshot.referralRewardAmount || '0'} ${getCurrencySymbol(savedSnapshot.currency || DEFAULT_CURRENCY)}`} icon={Award} />
       </div>
 
       <Tabs
@@ -501,7 +519,7 @@ export default function AdminSettingsPage() {
         tabs={SECTIONS.map((s) => ({ id: s.id, label: s.label }))}
       />
 
-      <div className="settings-layout">
+      <div className="settings-layout settings-layout--full">
         <Card className="settings-form-card">
           <div className="settings-section-head">
             <div>
@@ -521,12 +539,13 @@ export default function AdminSettingsPage() {
               const value = settings[field.key] ?? '';
 
               if (field.type === 'toggle') {
+                if (activeTab === 'general') return null;
                 return (
                   <ToggleField
                     key={field.key}
                     label={field.label}
                     helper={field.helper}
-                    checked={isTruthy(value)}
+                    checked={isSettingTruthy(value)}
                     onChange={(v) => set(field.key, v ? 'true' : 'false')}
                   />
                 );
@@ -612,6 +631,22 @@ export default function AdminSettingsPage() {
                 />
               );
             })}
+            {activeTab === 'general' ? (
+              <div className="settings-platform-toggles">
+                {currentSection.fields.filter((field) => field.type === 'toggle').map((field) => {
+                  const value = settings[field.key] ?? '';
+                  return (
+                    <ToggleField
+                      key={field.key}
+                      label={field.label}
+                      helper={field.helper}
+                      checked={isSettingTruthy(value)}
+                      onChange={(v) => set(field.key, v ? 'true' : 'false')}
+                    />
+                  );
+                })}
+              </div>
+            ) : null}
 
             <div className="settings-form-actions">
               <Button type="button" variant="secondary" onClick={resetSection} disabled={!dirty || saving}>
@@ -623,34 +658,6 @@ export default function AdminSettingsPage() {
             </div>
           </form>
         </Card>
-
-        <aside className="settings-sidebar">
-          {activeTab === 'branding' ? (
-            <Card className="settings-preview-card">
-              <h4>معاينة الهوية</h4>
-              <BrandPreview settings={settings} />
-            </Card>
-          ) : null}
-
-          <Card className="settings-summary-card">
-            <h4>ملخص سريع</h4>
-            <ul className="settings-summary-list">
-              <li><Globe size={14} /> {settings.defaultLanguage === 'ar' ? 'العربية' : 'English'}</li>
-              <li><Mail size={14} /> {settings.supportEmail || '—'}</li>
-              <li><Palette size={14} /> {normalizeHexColor(settings.primaryColor || '', '#22A6BC')}</li>
-              <li><Wrench size={14} /> {maintenance ? 'وضع الصيانة مفعّل' : 'المنصة تعمل'}</li>
-            </ul>
-          </Card>
-
-          <Card className="settings-keys-card">
-            <h4>مفاتيح هذا القسم</h4>
-            <div className="settings-key-tags">
-              {sectionKeys.map((key) => (
-                <code key={key}>{key}</code>
-              ))}
-            </div>
-          </Card>
-        </aside>
       </div>
     </div>
   );

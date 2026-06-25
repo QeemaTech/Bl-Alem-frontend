@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, BellOff, Download, Send } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { fmtNotificationDate, roleLabels, typeLabels } from '../../components/admin/notifications/notificationShared';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -15,38 +17,6 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
-const typeLabels: Record<string, string> = {
-  WELCOME: 'ترحيب',
-  LIVE_SESSION: 'جلسة مباشرة',
-  CERTIFICATE: 'شهادة',
-  REWARD: 'مكافأة',
-  PAYMENT: 'دفع',
-  COMMUNITY: 'مجتمع',
-  SUBSCRIPTION: 'اشتراك',
-  EARNING: 'أرباح',
-  REVIEW: 'تقييم',
-  WITHDRAWAL: 'سحب',
-  COURSE: 'كورس',
-  INSTRUCTOR_REQUEST: 'طلب محاضر',
-  COURSE_REVIEW: 'مراجعة كورس',
-  SUPPORT: 'دعم فني',
-  ADMIN: 'إداري',
-};
-
-const roleLabels: Record<string, string> = {
-  STUDENT: 'طالب',
-  INSTRUCTOR: 'محاضر',
-  SUPER_ADMIN: 'مشرف',
-};
-
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
 const exportColumns = [
   { key: 'id', header: 'رقم الإشعار' },
   { key: 'recipient', header: 'المستلم' },
@@ -60,6 +30,7 @@ const exportColumns = [
 ];
 
 export default function AdminNotificationsPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +38,6 @@ export default function AdminNotificationsPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [readFilter, setReadFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  const [selected, setSelected] = useState<any>(null);
   const [sendOpen, setSendOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({
@@ -80,11 +50,19 @@ export default function AdminNotificationsPage() {
 
   const load = async () => {
     setLoading(true);
-    setItems(await adminApi.notifications());
-    setLoading(false);
+    try {
+      setItems(await adminApi.notifications());
+    } catch {
+      showToast('تعذّر تحميل الإشعارات.', 'error');
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, []);
+
+  const openDetail = (id: number) => navigate(`/admin/notifications/${id}`);
 
   const filteredItems = useMemo(() => {
     let result = items;
@@ -126,19 +104,43 @@ export default function AdminNotificationsPage() {
     body: row.bodyAr?.length > 50 ? `${row.bodyAr.slice(0, 50)}...` : row.bodyAr,
     type: typeLabels[row.type] || row.type || '—',
     readStatus: row.isRead ? 'مقروء' : 'غير مقروء',
-    createdAt: fmtDate(row.createdAt),
+    createdAt: fmtNotificationDate(row.createdAt),
     _raw: row,
   })), [filteredItems]);
 
+  const hasActiveFilters = Boolean(search.trim() || typeFilter || readFilter || roleFilter);
+
   const sendNotification = async (e: FormEvent) => {
     e.preventDefault();
+    const titleAr = form.titleAr.trim();
+    const bodyAr = form.bodyAr.trim();
+    if (!titleAr || !bodyAr) {
+      showToast('العنوان ونص الإشعار مطلوبان.', 'error');
+      return;
+    }
+    if (form.targetType === 'SPECIFIC_USER' && !form.userId.trim()) {
+      showToast('معرف المستخدم مطلوب.', 'error');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const result = await adminApi.sendNotification(form);
-      showToast(`تم إرسال الإشعار إلى ${result?.sent ?? ''} مستخدم.`, 'success');
+      const payload = {
+        targetType: form.targetType,
+        titleAr,
+        bodyAr,
+        type: form.type,
+        ...(form.targetType === 'SPECIFIC_USER' ? { userId: Number(form.userId) } : {}),
+      };
+      const result = await adminApi.sendNotification(payload);
+      showToast(`تم إرسال الإشعار إلى ${result?.sent ?? 0} مستخدم.`, 'success');
       setSendOpen(false);
       setForm({ targetType: 'ALL', userId: '', titleAr: '', bodyAr: '', type: 'ADMIN' });
-      load();
+      await load();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        || 'تعذّر إرسال الإشعار.';
+      showToast(message, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -184,6 +186,8 @@ export default function AdminNotificationsPage() {
         searchPlaceholder="بحث بالعنوان، النص، المستلم، أو البريد..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setTypeFilter(''); setReadFilter(''); setRoleFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        ariaLabel="فلاتر الإشعارات"
       >
         <Select
           label="النوع"
@@ -214,12 +218,13 @@ export default function AdminNotificationsPage() {
         />
       </FilterBar>
 
-      <Card>
+      <Card className="reports-table-card">
         <Table
           loading={loading}
           data={tableRows}
           emptyTitle="لا توجد إشعارات"
           emptyDescription="لم يتم إرسال أي إشعارات بعد."
+          onRowClick={(row) => openDetail(row._raw.id)}
           columns={[
             { key: 'id', header: 'رقم الإشعار' },
             { key: 'recipient', header: 'المستلم' },
@@ -230,7 +235,11 @@ export default function AdminNotificationsPage() {
               key: 'readStatus',
               header: 'الحالة',
               render: (row) => (
-                <Badge variant={row._raw?.isRead ? 'default' : 'info'}>
+                <Badge
+                  variant={row._raw?.isRead ? 'default' : 'info'}
+                  dot
+                  className="status-badge"
+                >
                   {row.readStatus}
                 </Badge>
               ),
@@ -240,7 +249,14 @@ export default function AdminNotificationsPage() {
               key: 'actions',
               header: 'الإجراءات',
               render: (row) => (
-                <Button variant="secondary" size="sm" onClick={() => setSelected(row._raw)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDetail(row._raw.id);
+                  }}
+                >
                   التفاصيل
                 </Button>
               ),
@@ -248,27 +264,6 @@ export default function AdminNotificationsPage() {
           ]}
         />
       </Card>
-
-      <Modal isOpen={Boolean(selected)} title="تفاصيل الإشعار" onClose={() => setSelected(null)}>
-        {selected ? (
-          <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>رقم الإشعار</span><strong>{selected.id}</strong></div>
-            <div className="detail-row"><span>المستلم</span><strong>{selected.user?.fullName}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.user?.email}</strong></div>
-            <div className="detail-row"><span>الدور</span><strong>{roleLabels[selected.user?.role] || selected.user?.role}</strong></div>
-            <div className="detail-row"><span>النوع</span><strong>{typeLabels[selected.type] || selected.type}</strong></div>
-            <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={selected.isRead ? 'default' : 'info'}>{selected.isRead ? 'مقروء' : 'غير مقروء'}</Badge>
-            </div>
-            <div className="detail-row"><span>التاريخ</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            <div className="admin-notification-body">
-              <strong>{selected.titleAr}</strong>
-              <p>{selected.bodyAr}</p>
-            </div>
-          </div>
-        ) : null}
-      </Modal>
 
       <Modal isOpen={sendOpen} title="إرسال إشعار" onClose={() => setSendOpen(false)}>
         <form className="stack-sm" onSubmit={sendNotification}>
@@ -286,6 +281,8 @@ export default function AdminNotificationsPage() {
           {form.targetType === 'SPECIFIC_USER' ? (
             <Input
               label="معرف المستخدم"
+              type="number"
+              min={1}
               value={form.userId}
               onChange={(e) => setForm({ ...form, userId: e.target.value })}
               required
@@ -315,7 +312,14 @@ export default function AdminNotificationsPage() {
             onChange={(e) => setForm({ ...form, bodyAr: e.target.value })}
             required
           />
-          <Button loading={submitting}>إرسال الإشعار</Button>
+          <div className="modal-actions">
+            <Button type="button" variant="outline" onClick={() => setSendOpen(false)}>
+              إلغاء
+            </Button>
+            <Button type="submit" loading={submitting}>
+              إرسال الإشعار
+            </Button>
+          </div>
         </form>
       </Modal>
     </div>
