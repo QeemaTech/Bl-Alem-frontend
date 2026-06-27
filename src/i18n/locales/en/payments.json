@@ -1,0 +1,109 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "PAID": "Paid",
+      "PENDING": "Pending",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded"
+    },
+    "gateway": {
+      "SIMULATED": "Simulated",
+      "WALLET": "Wallet",
+      "STRIPE": "Stripe",
+      "PAYPAL": "PayPal"
+    },
+    "itemType": {
+      "COURSE": "Course",
+      "LEARNING_PATH": "Learning path"
+    }
+  },
+  "title": "Payments",
+  "subtitle": "Review payments and refunds",
+  "backToPayments": "Back to payments",
+  "notFound": {
+    "title": "Payment not found",
+    "description": "We could not find this payment."
+  },
+  "stats": {
+    "total": "Total transactions",
+    "paidCount": "Successful payments",
+    "totalRevenue": "Total revenue",
+    "pendingCount": "Pending",
+    "failedCount": "Failed",
+    "refundedCount": "Refunded"
+  },
+  "charts": {
+    "monthlyRevenue": "Monthly revenue (successful payments)",
+    "statusDistribution": "Payment status distribution"
+  },
+  "filters": {
+    "allStatuses": "All statuses",
+    "allGateways": "All gateways",
+    "status": "Status",
+    "gateway": "Payment gateway",
+    "searchPlaceholder": "Search by student, course, or transaction ref..."
+  },
+  "table": {
+    "title": "Payments table",
+    "emptyTitle": "No payments",
+    "emptyDescription": "Payments will appear here when completed.",
+    "columns": {
+      "id": "Transaction ID",
+      "student": "Student",
+      "course": "Course",
+      "finalAmount": "Amount",
+      "gateway": "Gateway",
+      "status": "Status",
+      "createdAt": "Date",
+      "actions": "Actions"
+    }
+  },
+  "export": {
+    "sheetName": "Payments",
+    "columns": {
+      "id": "Transaction ID",
+      "student": "Student",
+      "email": "Email",
+      "course": "Course",
+      "amount": "Original amount",
+      "discount": "Discount",
+      "finalAmount": "Final amount",
+      "gateway": "Payment gateway",
+      "transactionRef": "Transaction ref",
+      "status": "Status",
+      "createdAt": "Date"
+    }
+  },
+  "actions": {
+    "detail": "Details",
+    "exportExcel": "Export Excel"
+  },
+  "detail": {
+    "heading": "Payment",
+    "studentSection": "Student details",
+    "productSection": "Paid product",
+    "paymentSection": "Payment details",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "type": "Type",
+      "title": "Title",
+      "instructor": "Instructor",
+      "amount": "Original amount",
+      "discount": "Discount",
+      "pointsUsed": "Points used",
+      "finalAmount": "Final amount",
+      "coupon": "Discount coupon",
+      "gateway": "Payment gateway",
+      "transactionRef": "Transaction ref",
+      "platformShare": "Platform share",
+      "instructorShare": "Instructor share",
+      "createdAt": "Transaction date"
+    }
+  },
+  "toast": {
+    "loadError": "Could not load payment."
+  }
+}

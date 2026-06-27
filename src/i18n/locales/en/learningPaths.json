@@ -1,0 +1,103 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    }
+  },
+  "actions": {
+    "exportExcel": "Export Excel",
+    "newPath": "New path",
+    "manageCourses": "Manage courses",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "savePath": "Save path",
+    "saveData": "Save details",
+    "saveCourses": "Save courses",
+    "saveSelectedCourses": "Save selected courses",
+    "remove": "Remove"
+  },
+  "admin": {
+    "list": {
+      "title": "Learning paths",
+      "subtitle": "Manage learning paths and link courses",
+      "deleteTitle": "Delete path",
+      "deleteMessage": "Are you sure you want to delete this path? Course links will be removed.",
+      "stats": {
+        "total": "Total paths",
+        "active": "Active",
+        "inactive": "Inactive",
+        "totalCourses": "Total courses"
+      },
+      "charts": {
+        "statusDistribution": "Path status distribution"
+      },
+      "filters": {
+        "all": "All",
+        "status": "Status",
+        "searchPlaceholder": "Search by path name or description..."
+      },
+      "table": {
+        "emptyTitle": "No paths",
+        "emptyDescription": "Start by creating a new learning path.",
+        "columns": {
+          "id": "ID",
+          "title": "Path",
+          "courses": "Courses",
+          "status": "Status",
+          "createdAt": "Date",
+          "actions": "Actions"
+        }
+      },
+      "export": {
+        "sheetName": "Learning paths",
+        "columns": {
+          "id": "Path ID",
+          "titleAr": "Path title",
+          "courses": "Course count",
+          "status": "Status",
+          "createdAt": "Created"
+        }
+      },
+      "toast": {
+        "deleted": "Path deleted.",
+        "deleteError": "Could not delete path."
+      }
+    },
+    "editor": {
+      "backToPaths": "← Back to paths",
+      "newTitle": "New learning path",
+      "editTitle": "Manage path: {{title}}",
+      "newSubtitle": "Enter path details and select courses from the list below.",
+      "editSubtitle": "Edit path details and linked courses.",
+      "infoSection": "Path information",
+      "selectedSection": "Selected courses ({{count}})",
+      "pickSection": "Select courses",
+      "pickHint": "Click a course to add or remove it from the path",
+      "searchPlaceholder": "Search by course or instructor...",
+      "emptyCoursesTitle": "No published courses",
+      "emptyCoursesDescription": "Publish courses first to add them to a path.",
+      "form": {
+        "titleAr": "Arabic title",
+        "titleEn": "English title",
+        "description": "Path description",
+        "coverImage": "Cover image URL",
+        "status": "Status"
+      },
+      "toast": {
+        "loadCoursesError": "Could not load courses.",
+        "loadPathError": "Could not load path.",
+        "titleRequired": "Path title is required.",
+        "enterTitleFirst": "Enter the path title first.",
+        "createError": "Could not create path.",
+        "saveError": "Could not save path.",
+        "saveCoursesError": "Could not save courses.",
+        "created": "Path created and courses saved.",
+        "saved": "Path details saved.",
+        "coursesSaved": "Path courses saved."
+      }
+    }
+  }
+}

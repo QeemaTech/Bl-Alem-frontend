@@ -1,9 +1,14 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Eye, Table2, Trash2 } from '@/icons';
+import { useAdminReviewLabels } from '../../../hooks/useAdminReviewLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Card } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Table } from '../../ui/Table';
-import { fmtReviewDate, type ReviewItem } from './reviewShared';
+import type { ReviewItem } from './reviewShared';
 import { ReviewStars } from './ReviewStars';
+
 interface ReviewsTableProps {
   items: ReviewItem[];
   loading?: boolean;
@@ -17,18 +22,22 @@ export function ReviewsTable({
   onDetail,
   onDelete,
 }: ReviewsTableProps) {
-  const rows = items.map((item) => ({
+  const { t, i18n } = useTranslation(['reviews', 'common']);
+  const { fmtReviewDate, ratingOf, empty } = useAdminReviewLabels();
+  const cols = t('table.columns', { returnObjects: true, ns: 'reviews' }) as Record<string, string>;
+
+  const rows = useMemo(() => items.map((item) => ({
     id: item.id,
-    student: item.user?.fullName || '—',
-    course: item.course?.titleAr || '—',
-    instructor: item.course?.instructor?.fullName || '—',
-    ratingLabel: `${item.rating}/5`,
+    student: item.user?.fullName || empty,
+    course: item.course?.titleAr || empty,
+    instructor: item.course?.instructor?.fullName || empty,
+    ratingLabel: ratingOf(item.rating),
     commentPreview: item.comment?.trim()
       ? (item.comment.length > 48 ? `${item.comment.slice(0, 48)}...` : item.comment)
-      : '—',
+      : empty,
     dateLabel: fmtReviewDate(item.createdAt),
     _raw: item,
-  }));
+  })), [items, fmtReviewDate, ratingOf, empty]);
 
   return (
     <Card className="reports-table-card">
@@ -37,9 +46,13 @@ export function ReviewsTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          تقييمات الطلاب
+          {t('table.title', { ns: 'reviews' })}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+        <span className="muted-count">
+          {t('common:table.recordCount', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table
         loading={loading}
@@ -48,23 +61,23 @@ export function ReviewsTable({
         fluid
         hideScrollNotice
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا توجد تقييمات"
-        emptyDescription="لم يتم إضافة أي تقييمات بعد، أو لا توجد نتائج مطابقة للفلاتر."
+        emptyTitle={t('table.emptyTitle', { ns: 'reviews' })}
+        emptyDescription={t('table.emptyDescription', { ns: 'reviews' })}
         data={rows}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم التقييم', width: '6.5rem', align: 'center' },
-          { key: 'student', header: 'الطالب', width: '14%' },
-          { key: 'course', header: 'الكورس', width: '18%', className: 'col-primary' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
+          { key: 'student', header: cols.student, width: '14%' },
+          { key: 'course', header: cols.course, width: '18%', className: 'col-primary' },
           {
             key: 'instructor',
-            header: 'المحاضر',
+            header: cols.instructor,
             width: '14%',
             hideOnMobile: true,
           },
           {
             key: 'ratingLabel',
-            header: 'التقييم',
+            header: cols.rating,
             width: '8.75rem',
             minWidth: '8.75rem',
             align: 'center',
@@ -76,15 +89,15 @@ export function ReviewsTable({
           },
           {
             key: 'commentPreview',
-            header: 'التعليق',
+            header: cols.comment,
             width: '22%',
             truncate: true,
             hideOnMobile: true,
           },
-          { key: 'dateLabel', header: 'التاريخ', width: '14%', hideOnMobile: true },
+          { key: 'dateLabel', header: cols.date, width: '14%', hideOnMobile: true },
           {
             key: 'actions',
-            header: 'الإجراءات',
+            header: cols.actions,
             width: '13rem',
             wrap: true,
             truncate: false,
@@ -96,7 +109,7 @@ export function ReviewsTable({
                   icon={<Eye size={16} />}
                   onClick={() => onDetail(row._raw)}
                 >
-                  التفاصيل
+                  {t('actions.details', { ns: 'reviews' })}
                 </Button>
                 <Button
                   variant="danger"
@@ -104,7 +117,7 @@ export function ReviewsTable({
                   icon={<Trash2 size={16} />}
                   onClick={() => onDelete(row._raw)}
                 >
-                  حذف
+                  {t('actions.delete', { ns: 'reviews' })}
                 </Button>
               </div>
             ),

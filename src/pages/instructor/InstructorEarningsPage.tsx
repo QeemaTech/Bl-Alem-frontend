@@ -43,6 +43,21 @@ const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
   minute: '2-digit',
 });
 
+const normalizeSearchText = (value: unknown) => String(value ?? '').toLowerCase().trim();
+
+const withdrawalSearchText = (item: any) => normalizeSearchText([
+  item.id,
+  item.bankName,
+  item.accountName,
+  item.iban,
+  item.notes,
+  item.adminNotes,
+  item.amount,
+  fmtDate(String(item.createdAt || '')),
+  withdrawalLabels[item.status],
+  item.status,
+].join(' '));
+
 const emptyWithdrawForm = {
   amount: '',
   bankName: '',
@@ -99,15 +114,16 @@ export default function InstructorEarningsPage() {
 
   const withdrawals = data?.withdrawals || [];
 
+  const hasActiveFilters = Boolean(search.trim() || statusFilter);
+
   const filteredWithdrawals = useMemo(() => {
-    let result = withdrawals;
-    if (statusFilter) result = result.filter((i: any) => i.status === statusFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter((i: any) =>
-        [i.bankName, i.accountName, i.iban, String(i.amount), withdrawalLabels[i.status]]
-          .some((v) => String(v || '').toLowerCase().includes(q)),
-      );
+    let result = withdrawals as any[];
+    if (statusFilter) {
+      result = result.filter((item) => String(item.status) === statusFilter);
+    }
+    const q = normalizeSearchText(search);
+    if (q) {
+      result = result.filter((item) => withdrawalSearchText(item).includes(q));
     }
     return result;
   }, [withdrawals, statusFilter, search]);
@@ -271,9 +287,21 @@ export default function InstructorEarningsPage() {
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث في السحوبات..."
+        searchPlaceholder="بحث بالبنك، الحساب، IBAN، المبلغ، أو الحالة..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        extraActions={(
+          <Button
+            type="button"
+            variant="outline"
+            icon={<Download size={16} />}
+            onClick={handleExport}
+            disabled={!filteredWithdrawals.length}
+          >
+            تصدير Excel
+          </Button>
+        )}
       >
         <Select
           label="حالة السحب"
@@ -287,20 +315,26 @@ export default function InstructorEarningsPage() {
             { label: 'مرفوض', value: 'REJECTED' },
           ]}
         />
-        <Button variant="outline" icon={<Download size={16} />} onClick={handleExport} disabled={!filteredWithdrawals.length}>
-          تصدير Excel
-        </Button>
       </FilterBar>
 
       <Card>
         <div className="section-heading">
           <h2>السحوبات</h2>
-          <span className="muted-count">{filteredWithdrawals.length} طلب</span>
+          <span className="muted-count">
+            {hasActiveFilters
+              ? `${filteredWithdrawals.length} من ${withdrawals.length} طلب`
+              : `${filteredWithdrawals.length} طلب`}
+          </span>
         </div>
         <Table
           data={filteredWithdrawals}
-          emptyTitle="لا توجد سحوبات"
-          emptyDescription="اطلب سحب الرصيد المتاح عند الحاجة."
+          showHeadersWhenEmpty={hasActiveFilters}
+          emptyTitle={hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد سحوبات'}
+          emptyDescription={
+            hasActiveFilters
+              ? 'جرّب تغيير كلمة البحث أو حالة السحب.'
+              : 'اطلب سحب الرصيد المتاح عند الحاجة.'
+          }
           columns={[
             {
               key: 'amount',

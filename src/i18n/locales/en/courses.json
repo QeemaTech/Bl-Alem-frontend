@@ -1,0 +1,233 @@
+{
+  "management": {
+    "title": "Course management",
+    "subtitle": "Create, edit, and submit your courses for review",
+    "addCourse": "Add course"
+  },
+  "tabs": {
+    "all": "All",
+    "draft": "Draft",
+    "pendingReview": "Pending review",
+    "published": "Published",
+    "rejected": "Rejected",
+    "suspended": "Suspended"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "PENDING_REVIEW": "Pending review",
+    "REJECTED": "Rejected",
+    "SUSPENDED": "Suspended"
+  },
+  "actions": {
+    "edit": "Edit",
+    "content": "Content",
+    "submitReview": "Submit for review",
+    "delete": "Delete"
+  },
+  "toast": {
+    "submitted": "Course submitted for review.",
+    "submitFailed": "Could not submit course for review.",
+    "deleted": "Course deleted."
+  },
+  "deleteDialog": {
+    "title": "Delete course",
+    "message": "Are you sure you want to delete this course?"
+  },
+  "empty": {
+    "title": "No courses",
+    "allDesc": "Start by creating a new course as a draft.",
+    "filteredDesc": "No courses with status \"{{status}}\"."
+  },
+  "count": "{{count}} course",
+  "countFiltered": "{{count}} courses — {{status}}",
+  "form": {
+    "steps": {
+      "basic": "Basic information",
+      "details": "Learning details",
+      "pricing": "Pricing",
+      "review": "Review"
+    },
+    "levels": {
+      "BEGINNER": "Beginner",
+      "INTERMEDIATE": "Intermediate",
+      "ADVANCED": "Advanced"
+    },
+    "types": {
+      "RECORDED": "Recorded",
+      "LIVE": "Live",
+      "MIXED": "Mixed"
+    },
+    "languages": {
+      "ar": "Arabic",
+      "en": "English",
+      "ar-en": "Arabic and English"
+    },
+    "cover": {
+      "label": "Cover image",
+      "previewAlt": "Course cover preview",
+      "empty": "No image uploaded yet",
+      "hint": "PNG or JPG — 1280×720 recommended",
+      "change": "Change image",
+      "upload": "Upload cover image",
+      "helper": "An attractive image increases course enrollment."
+    },
+    "createTitle": "Create new course",
+    "editTitle": "Edit course",
+    "subtitle": "Complete the four steps to save the course as a draft, then add content",
+    "saveDraft": "Save as draft",
+    "saveAndBuilder": "Save and go to content"
+  },
+  "admin": {
+    "empty": "—",
+    "free": "Free",
+    "durationMinutes": "{{count}} min",
+    "durationMinutes_one": "{{count}} minute",
+    "durationMinutes_other": "{{count}} minutes",
+    "labels": {
+      "status": {
+        "DRAFT": "Draft",
+        "PENDING_REVIEW": "Pending review",
+        "APPROVED": "Approved",
+        "PUBLISHED": "Published",
+        "REJECTED": "Rejected",
+        "SUSPENDED": "Suspended"
+      }
+    },
+    "actions": {
+      "detail": "Details",
+      "approve": "Approve",
+      "publish": "Publish",
+      "reject": "Reject",
+      "suspend": "Suspend",
+      "delete": "Delete",
+      "confirmReject": "Confirm rejection",
+      "confirmSuspend": "Confirm suspension",
+      "exportExcel": "Export Excel"
+    },
+    "courses": {
+      "title": "Courses",
+      "subtitle": "Review and manage platform courses",
+      "backToCourses": "Back to courses",
+      "notFound": {
+        "title": "Course not found",
+        "description": "We could not find this course."
+      },
+      "stats": {
+        "total": "Total courses",
+        "published": "Published",
+        "pending": "Pending review",
+        "draft": "Drafts",
+        "rejectedSuspended": "Rejected / suspended",
+        "totalStudents": "Total students"
+      },
+      "charts": {
+        "statusDistribution": "Course status distribution"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "allCategories": "All categories",
+        "status": "Status",
+        "category": "Category",
+        "searchPlaceholder": "Search by title, instructor, or category..."
+      },
+      "table": {
+        "title": "Courses list",
+        "count": "{{count}} courses",
+        "emptyTitle": "No courses",
+        "emptyDescription": "Courses will appear here when instructors create them.",
+        "columns": {
+          "id": "Course ID",
+          "title": "Title",
+          "instructor": "Instructor",
+          "category": "Category",
+          "level": "Level",
+          "price": "Price",
+          "students": "Students",
+          "lessons": "Lessons",
+          "status": "Status",
+          "updatedAt": "Last updated",
+          "actions": "Actions"
+        }
+      },
+      "detail": {
+        "instructor": "Instructor",
+        "overviewAriaLabel": "Course overview",
+        "noCover": "No image",
+        "noShortDesc": "No short description.",
+        "sections": "{{count}} sections",
+        "sections_one": "{{count}} section",
+        "sections_other": "{{count}} sections",
+        "lessons": "{{count}} lessons",
+        "lessons_one": "{{count}} lesson",
+        "lessons_other": "{{count}} lessons",
+        "students": "{{count}} students",
+        "students_one": "{{count}} student",
+        "students_other": "{{count}} students",
+        "reviews": "{{count}} reviews",
+        "reviews_one": "{{count}} review",
+        "reviews_other": "{{count}} reviews",
+        "metaAriaLabel": "Course details",
+        "metaTitle": "Course details",
+        "category": "Category",
+        "level": "Level",
+        "price": "Price",
+        "language": "Language",
+        "lessonCount": "Lesson count",
+        "studentCount": "Student count",
+        "createdAt": "Created",
+        "updatedAt": "Last updated",
+        "rejectionReason": "Rejection / suspension reason",
+        "description": "Course description",
+        "introVideo": "Intro video",
+        "whatYouWillLearn": "What students will learn",
+        "quizzes": "Quizzes ({{count}})",
+        "quizMeta": "{{questions}} questions · {{minutes}} min",
+        "rejectTitle": "Reject course",
+        "rejectPrompt": "Reject course:",
+        "rejectReason": "Rejection reason",
+        "suspendTitle": "Suspend course",
+        "suspendMessage": "Are you sure you want to temporarily suspend course \"{{name}}\"?",
+        "deleteTitle": "Delete course",
+        "deleteMessage": "Are you sure you want to delete course \"{{name}}\"? This action cannot be undone."
+      },
+      "curriculum": {
+        "title": "Curriculum",
+        "empty": "No sections or lessons yet.",
+        "noLessonsInSection": "No lessons in this section.",
+        "preview": "Preview",
+        "locked": "Locked",
+        "resources": "{{count}} resources",
+        "resources_one": "{{count}} resource",
+        "resources_other": "{{count}} resources",
+        "video": "video"
+      },
+      "export": {
+        "sheetName": "Courses",
+        "columns": {
+          "id": "Course ID",
+          "title": "Title",
+          "instructor": "Instructor",
+          "category": "Category",
+          "level": "Level",
+          "price": "Price",
+          "students": "Students",
+          "lessons": "Lessons",
+          "status": "Status",
+          "updatedAt": "Last updated"
+        }
+      },
+      "toast": {
+        "approved": "Course approved.",
+        "published": "Course published.",
+        "suspended": "Course suspended.",
+        "rejected": "Course rejected.",
+        "deleted": "Course deleted.",
+        "loadError": "Could not load course.",
+        "actionError": "Could not complete action.",
+        "rejectError": "Could not reject course.",
+        "deleteError": "Could not delete course."
+      }
+    }
+  }
+}

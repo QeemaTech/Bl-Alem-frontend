@@ -1,0 +1,103 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "ACTIVE": "فعّال",
+      "INACTIVE": "غير فعّال"
+    }
+  },
+  "actions": {
+    "exportExcel": "تصدير Excel",
+    "newPath": "مسار جديد",
+    "manageCourses": "إدارة الدورات",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "savePath": "حفظ المسار",
+    "saveData": "حفظ البيانات",
+    "saveCourses": "حفظ الدورات",
+    "saveSelectedCourses": "حفظ الدورات المختارة",
+    "remove": "إزالة"
+  },
+  "admin": {
+    "list": {
+      "title": "المسارات التعليمية",
+      "subtitle": "إدارة المسارات التعليمية وربط الدورات بها",
+      "deleteTitle": "حذف المسار",
+      "deleteMessage": "هل أنت متأكد من حذف هذا المسار؟ سيتم إزالة الربط مع الدورات.",
+      "stats": {
+        "total": "إجمالي المسارات",
+        "active": "فعّالة",
+        "inactive": "غير فعّالة",
+        "totalCourses": "إجمالي الدورات"
+      },
+      "charts": {
+        "statusDistribution": "توزيع حالات المسارات"
+      },
+      "filters": {
+        "all": "الكل",
+        "status": "الحالة",
+        "searchPlaceholder": "بحث باسم المسار أو الوصف..."
+      },
+      "table": {
+        "emptyTitle": "لا توجد مسارات",
+        "emptyDescription": "ابدأ بإنشاء مسار تعليمي جديد.",
+        "columns": {
+          "id": "الرقم",
+          "title": "المسار",
+          "courses": "الدورات",
+          "status": "الحالة",
+          "createdAt": "التاريخ",
+          "actions": "الإجراءات"
+        }
+      },
+      "export": {
+        "sheetName": "المسارات التعليمية",
+        "columns": {
+          "id": "رقم المسار",
+          "titleAr": "عنوان المسار",
+          "courses": "عدد الدورات",
+          "status": "الحالة",
+          "createdAt": "تاريخ الإنشاء"
+        }
+      },
+      "toast": {
+        "deleted": "تم حذف المسار.",
+        "deleteError": "تعذّر حذف المسار."
+      }
+    },
+    "editor": {
+      "backToPaths": "← العودة للمسارات",
+      "newTitle": "مسار تعليمي جديد",
+      "editTitle": "إدارة المسار: {{title}}",
+      "newSubtitle": "أدخل بيانات المسار واختر الدورات من القائمة أدناه.",
+      "editSubtitle": "عدّل بيانات المسار واختر الدورات المرتبطة به.",
+      "infoSection": "معلومات المسار",
+      "selectedSection": "الدورات المختارة ({{count}})",
+      "pickSection": "اختيار الدورات",
+      "pickHint": "اضغطي على الدورة لإضافتها أو إزالتها من المسار",
+      "searchPlaceholder": "بحث باسم الكورس أو المحاضر...",
+      "emptyCoursesTitle": "لا توجد دورات منشورة",
+      "emptyCoursesDescription": "انشري كورسات أولاً لتتمكني من إضافتها للمسار.",
+      "form": {
+        "titleAr": "العنوان العربي",
+        "titleEn": "العنوان الإنجليزي",
+        "description": "وصف المسار",
+        "coverImage": "رابط الغلاف",
+        "status": "الحالة"
+      },
+      "toast": {
+        "loadCoursesError": "تعذّر تحميل الدورات.",
+        "loadPathError": "تعذّر تحميل المسار.",
+        "titleRequired": "عنوان المسار مطلوب.",
+        "enterTitleFirst": "أدخل عنوان المسار أولاً.",
+        "createError": "تعذّر إنشاء المسار.",
+        "saveError": "تعذّر حفظ المسار.",
+        "saveCoursesError": "تعذّر حفظ الدورات.",
+        "created": "تم إنشاء المسار وحفظ الدورات.",
+        "saved": "تم حفظ بيانات المسار.",
+        "coursesSaved": "تم حفظ دورات المسار."
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 import { useRef, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ImagePlus, Trash2, Upload } from '@/icons';
+import { useAdminWithdrawalLabels } from '../../../hooks/useAdminWithdrawalLabels';
 import { Button } from '../../ui/Button';
-import { fmtWithdrawalMoney, type WithdrawalItem } from './types';
+import type { WithdrawalItem } from './types';
 
 interface WithdrawTransferFormProps {
   item: WithdrawalItem | null;
@@ -22,6 +24,8 @@ export function WithdrawTransferForm({
   onCancel,
   onSubmit,
 }: WithdrawTransferFormProps) {
+  const { t } = useTranslation(['withdrawals', 'common']);
+  const { fmtWithdrawalMoney, empty } = useAdminWithdrawalLabels();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const openPicker = () => inputRef.current?.click();
@@ -36,27 +40,28 @@ export function WithdrawTransferForm({
     <form className="withdraw-transfer-form" onSubmit={onSubmit}>
       <div className="withdraw-transfer-summary">
         <p className="withdraw-transfer-lead">
-          أكّد تحويل مبلغ{' '}
-          <strong>{fmtWithdrawalMoney(item?.amount || 0)}</strong>{' '}
-          إلى المحاضر <strong>{item?.instructor?.fullName || '—'}</strong>
+          {t('admin.transferModal.lead', {
+            amount: fmtWithdrawalMoney(item?.amount || 0),
+            name: item?.instructor?.fullName || empty,
+          })}
         </p>
         {item?.bankName || item?.iban ? (
           <dl className="withdraw-transfer-meta">
             {item.bankName ? (
               <div>
-                <dt>البنك</dt>
+                <dt>{t('admin.transferModal.bank')}</dt>
                 <dd>{item.bankName}</dd>
               </div>
             ) : null}
             {item.accountName ? (
               <div>
-                <dt>اسم الحساب</dt>
+                <dt>{t('admin.transferModal.accountName')}</dt>
                 <dd>{item.accountName}</dd>
               </div>
             ) : null}
             {item.iban ? (
               <div>
-                <dt>IBAN</dt>
+                <dt>{t('admin.transferModal.iban')}</dt>
                 <dd dir="ltr">{item.iban}</dd>
               </div>
             ) : null}
@@ -78,13 +83,13 @@ export function WithdrawTransferForm({
 
         {preview ? (
           <div className="withdraw-transfer-preview">
-            <img src={preview} alt="معاينة إيصال التحويل" />
+            <img src={preview} alt={t('admin.transferModal.previewAlt')} />
             <div className="withdraw-transfer-preview-actions">
               <Button type="button" variant="outline" size="sm" icon={<Upload size={16} />} onClick={openPicker}>
-                استبدال الصورة
+                {t('admin.transferModal.replaceImage')}
               </Button>
               <Button type="button" variant="ghost" size="sm" icon={<Trash2 size={16} />} onClick={onRemoveFile}>
-                إزالة
+                {t('admin.transferModal.remove')}
               </Button>
             </div>
           </div>
@@ -99,18 +104,18 @@ export function WithdrawTransferForm({
             <span className="withdraw-transfer-dropzone-icon" aria-hidden="true">
               <ImagePlus size={28} />
             </span>
-            <span className="withdraw-transfer-dropzone-title">إرفاق صورة التحويل</span>
-            <span className="withdraw-transfer-dropzone-hint">اسحب الصورة هنا أو اضغط للاختيار — PNG أو JPG (اختياري)</span>
+            <span className="withdraw-transfer-dropzone-title">{t('admin.transferModal.dropzoneTitle')}</span>
+            <span className="withdraw-transfer-dropzone-hint">{t('admin.transferModal.dropzoneHint')}</span>
           </button>
         )}
       </div>
 
       <div className="modal-actions">
         <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
-          إلغاء
+          {t('actions.cancel', { ns: 'common' })}
         </Button>
         <Button type="submit" loading={submitting} icon={<Upload size={16} />}>
-          تأكيد الدفع
+          {t('admin.transferModal.confirmPayment')}
         </Button>
       </div>
     </form>

@@ -20,22 +20,9 @@ export interface WithdrawalItem {
   };
 }
 
-export const WITHDRAWAL_STATUS_LABELS: Record<WithdrawalStatus, string> = {
-  PENDING: 'قيد المراجعة',
-  APPROVED: 'معتمد',
-  PAID: 'مدفوع',
-  REJECTED: 'مرفوض',
+export const withdrawalStatusVariant: Record<WithdrawalStatus, 'pending' | 'success' | 'rejected' | 'info'> = {
+  PENDING: 'pending',
+  APPROVED: 'info',
+  PAID: 'success',
+  REJECTED: 'rejected',
 };
-
-export const fmtWithdrawalDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-import { getCurrencySymbol } from '../../../utils/currency';
-
-export const fmtWithdrawalMoney = (value: number | string) =>
-  `${Number(value || 0).toLocaleString('ar-EG')} ${getCurrencySymbol()}`;

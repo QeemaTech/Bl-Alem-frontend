@@ -11,7 +11,7 @@ export const studentApi = {
   categories: () => unwrap<any[]>(apiClient.get('/student/categories')),
   courses: (params?: Record<string, string>) => unwrap<any[]>(apiClient.get('/student/courses', { params })),
   courseDetails: (id: string | number) => unwrap<any>(apiClient.get(`/student/courses/${id}`)),
-  checkout: (courseId: string | number, payload: { couponCode?: string; gateway?: string }) => unwrap<any>(apiClient.post(`/student/courses/${courseId}/checkout`, payload)),
+  checkout: (courseId: string | number, payload: { couponCode?: string; pointsToUse?: number; gateway?: string }) => unwrap<any>(apiClient.post(`/student/courses/${courseId}/checkout`, payload)),
   payments: () => unwrap<any[]>(apiClient.get('/student/payments')),
   validateCoupon: (payload: { code: string; courseId: number }) => unwrap<any>(apiClient.post('/student/coupons/validate', payload)),
   myCourses: (status = 'all') => unwrap<any[]>(apiClient.get('/student/my-courses', { params: { status } })),

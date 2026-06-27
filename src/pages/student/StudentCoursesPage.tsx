@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  BookOpen, Download, GraduationCap, LayoutGrid, Search, Star, Table2, Users,
+  BookOpen, Download, GraduationCap, LayoutGrid, Search, Star, Users,
 } from '@/icons';
 import { studentApi } from '../../api/student';
+import { StudentCourseCard } from '../../components/student/StudentCourseCard';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { CourseCard } from '../../components/ui/CourseCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { FilterBar } from '../../components/ui/FilterBar';
-import { CourseGridSkeleton } from '../../components/ui/LoadingSkeleton';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Select } from '../../components/ui/Select';
@@ -26,11 +25,15 @@ const levelLabels: Record<string, string> = {
   ADVANCED: 'متقدم',
 };
 
-const typeLabels: Record<string, string> = {
-  RECORDED: 'مسجّلة',
-  LIVE: 'مباشرة',
-  MIXED: 'مختلطة',
-};
+function StudentCoursesGridSkeleton() {
+  return (
+    <div className="course-list-grid student-courses-grid">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="skeleton skeleton-card student-courses-skeleton-card" />
+      ))}
+    </div>
+  );
+}
 
 const exportColumns = [
   { key: 'title', header: 'الدورة' },
@@ -182,6 +185,7 @@ export default function StudentCoursesPage() {
         searchPlaceholder="ابحث باسم الدورة أو المحاضر"
         onSearchChange={(v) => updateFilter('search', v)}
         onReset={resetFilters}
+        className="student-courses-filter"
       >
         <Select
           label="المستوى"
@@ -263,33 +267,27 @@ export default function StudentCoursesPage() {
       />
 
       {loading ? (
-        <CourseGridSkeleton />
+        <StudentCoursesGridSkeleton />
       ) : courses.length ? (
         viewMode === 'cards' ? (
-          <div className="course-list-grid">
-            {courses.map((course) => {
+          <div className="course-list-grid student-courses-grid">
+            {courses.map((course, index) => {
               const isEnrolled = enrolledIds.has(course.id);
-              const price = Number(course.discountPrice ?? course.price ?? 0);
               return (
-                <CourseCard
+                <StudentCourseCard
                   key={course.id}
-                  title={course.titleAr}
-                  category={course.category?.nameAr || 'دورة'}
-                  instructor={course.instructor?.fullName}
-                  imageUrl={course.coverImage}
-                  price={price}
-                  rating={Number(course.ratingAverage || 0)}
-                  duration={`${course._count?.lessons || 0} دروس · ${levelLabels[course.level] || typeLabels[course.type] || ''}`}
-                  status={isEnrolled ? 'مسجّل' : price === 0 ? 'مجاني' : undefined}
-                  statusVariant={isEnrolled ? 'success' : 'info'}
-                  actionLabel={isEnrolled ? 'استكمال' : 'عرض التفاصيل'}
-                  onAction={() => navigate(isEnrolled ? `/student/player/${course.id}` : `/student/courses/${course.id}`)}
+                  course={course}
+                  isEnrolled={isEnrolled}
+                  style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+                  onPrimaryAction={() => navigate(
+                    isEnrolled ? `/student/player/${course.id}` : `/student/courses/${course.id}`,
+                  )}
                 />
               );
             })}
           </div>
         ) : (
-          <Card>
+          <Card className="student-courses-table-wrap">
             <Table
               data={tableRows}
               emptyTitle="لا توجد دورات"
@@ -320,7 +318,11 @@ export default function StudentCoursesPage() {
                           : `/student/courses/${row.id}`,
                       )}
                     >
-                      {enrolledIds.has(row.id) ? 'استكمال' : 'عرض'}
+                      {enrolledIds.has(row.id)
+                        ? 'استكمال'
+                        : Number(row._raw?.discountPrice ?? row._raw?.price ?? 0) === 0
+                          ? 'اشتراك'
+                          : 'عرض الدورة'}
                     </Button>
                   ),
                 },

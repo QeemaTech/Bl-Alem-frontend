@@ -1,0 +1,98 @@
+{
+  "title": "الدعم",
+  "newTicket": "تذكرة جديدة",
+  "empty": "لا توجد تذاكر",
+  "status": {
+    "open": "مفتوحة",
+    "closed": "مغلقة",
+    "pending": "قيد المعالجة"
+  },
+  "admin": {
+    "title": "الدعم الفني",
+    "subtitle": "إدارة تذاكر الدعم والرد على المستخدمين",
+    "exportExcel": "تصدير Excel",
+    "backToList": "العودة لتذاكر الدعم",
+    "backToSupport": "العودة للدعم الفني",
+    "stats": {
+      "total": "إجمالي التذاكر",
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "closed": "مغلقة"
+    },
+    "filters": {
+      "searchPlaceholder": "بحث بالموضوع، الرسالة، المستخدم، أو البريد...",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات"
+    },
+    "table": {
+      "title": "تذاكر الدعم",
+      "ticketCount": "{{count}} تذكرة",
+      "ticketCount_other": "{{count}} تذكرة",
+      "emptyTitle": "لا توجد تذاكر",
+      "emptyDescription": "لم يتم إرسال أي تذاكر دعم بعد.",
+      "columns": {
+        "id": "رقم التذكرة",
+        "user": "المستخدم",
+        "email": "البريد",
+        "role": "الدور",
+        "subject": "الموضوع",
+        "message": "الرسالة",
+        "repliesCount": "الردود",
+        "status": "الحالة",
+        "createdAt": "التاريخ",
+        "updatedAt": "آخر تحديث",
+        "actions": "الإجراءات"
+      }
+    },
+    "export": {
+      "sheetName": "تذاكر الدعم",
+      "columns": {
+        "id": "رقم التذكرة",
+        "user": "المستخدم",
+        "email": "البريد",
+        "role": "الدور",
+        "subject": "الموضوع",
+        "message": "الرسالة",
+        "repliesCount": "عدد الردود",
+        "status": "الحالة",
+        "createdAt": "تاريخ الإنشاء",
+        "updatedAt": "آخر تحديث"
+      }
+    },
+    "actions": {
+      "view": "عرض"
+    },
+    "detail": {
+      "notFoundTitle": "التذكرة غير موجودة",
+      "notFoundDescription": "لم نتمكن من العثور على هذه التذكرة.",
+      "noReplies": "لا توجد ردود بعد.",
+      "replyLabel": "رد الدعم",
+      "replyPlaceholder": "اكتب ردك للمستخدم...",
+      "sendReply": "إرسال الرد",
+      "startProcessing": "بدء المعالجة",
+      "closeTicket": "إغلاق التذكرة",
+      "closedNotice": "تم إغلاق هذه التذكرة.",
+      "reopen": "إعادة فتح"
+    },
+    "toast": {
+      "loadFailed": "تعذّر تحميل التذكرة.",
+      "loadListFailed": "تعذّر تحميل التذاكر.",
+      "statusUpdated": "تم تحديث حالة التذكرة.",
+      "statusUpdateFailed": "تعذّر تحديث الحالة.",
+      "replySent": "تم إرسال الرد.",
+      "replyFailed": "تعذّر إرسال الرد."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "مفتوحة",
+        "IN_PROGRESS": "قيد المعالجة",
+        "CLOSED": "مغلقة"
+      },
+      "role": {
+        "STUDENT": "طالب",
+        "INSTRUCTOR": "محاضر",
+        "SUPER_ADMIN": "مشرف"
+      }
+    }
+  }
+}

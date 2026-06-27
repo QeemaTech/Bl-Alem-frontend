@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -10,6 +11,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { useToast } from '../../components/ui/Toast';
 
 export default function AdminSupportTicketPage() {
+  const { t } = useTranslation('support');
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -24,7 +26,7 @@ export default function AdminSupportTicketPage() {
     try {
       setTicket(await adminApi.supportTicket(ticketId));
     } catch {
-      showToast('تعذّر تحميل التذكرة.', 'error');
+      showToast(t('admin.toast.loadFailed'), 'error');
       setTicket(null);
     } finally {
       setLoading(false);
@@ -38,10 +40,10 @@ export default function AdminSupportTicketPage() {
     setSubmitting(true);
     try {
       await adminApi.supportStatus(ticket.id, status);
-      showToast('تم تحديث حالة التذكرة.', 'success');
+      showToast(t('admin.toast.statusUpdated'), 'success');
       await load();
     } catch {
-      showToast('تعذّر تحديث الحالة.', 'error');
+      showToast(t('admin.toast.statusUpdateFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -54,10 +56,10 @@ export default function AdminSupportTicketPage() {
     try {
       await adminApi.supportReply(ticket.id, reply.trim());
       setReply('');
-      showToast('تم إرسال الرد.', 'success');
+      showToast(t('admin.toast.replySent'), 'success');
       await load();
     } catch {
-      showToast('تعذّر إرسال الرد.', 'error');
+      showToast(t('admin.toast.replyFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -69,11 +71,11 @@ export default function AdminSupportTicketPage() {
     return (
       <div className="page-grid admin-support-ticket-page">
         <EmptyState
-          title="التذكرة غير موجودة"
-          description="لم نتمكن من العثور على هذه التذكرة."
+          title={t('admin.detail.notFoundTitle')}
+          description={t('admin.detail.notFoundDescription')}
         />
         <Button variant="outline" onClick={() => navigate('/admin/support')}>
-          العودة للدعم الفني
+          {t('admin.backToSupport')}
         </Button>
       </div>
     );
@@ -83,7 +85,7 @@ export default function AdminSupportTicketPage() {
     <div className="page-grid admin-support-ticket-page">
       <Link to="/admin/support" className="support-ticket-back">
         <ArrowRight size={18} aria-hidden="true" />
-        العودة لتذاكر الدعم
+        {t('admin.backToList')}
       </Link>
 
       <Card className="support-ticket-page-card">

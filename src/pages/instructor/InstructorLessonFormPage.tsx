@@ -40,7 +40,8 @@ export default function InstructorLessonFormPage() {
       try {
         const course = await instructorApi.course(id);
         setCourseTitle(course.titleAr || '');
-        setSections(course.sections || []);
+        const courseSections = course.sections || [];
+        setSections(courseSections);
         if (isEdit && lessonId) {
           const lesson = course.sections
             ?.flatMap((s: any) => s.lessons || [])
@@ -54,6 +55,12 @@ export default function InstructorLessonFormPage() {
             durationMinutes: lesson.duration ? String(Math.round(lesson.duration / 60)) : '',
             isPreview: Boolean(lesson.isPreview),
           });
+        } else {
+          const fromQuery = searchParams.get('sectionId');
+          const defaultSectionId = fromQuery || (courseSections[0]?.id ? String(courseSections[0].id) : '');
+          if (defaultSectionId) {
+            setForm((current) => ({ ...current, sectionId: defaultSectionId }));
+          }
         }
       } catch {
         showToast('تعذّر تحميل بيانات الدرس.', 'error');
@@ -63,7 +70,7 @@ export default function InstructorLessonFormPage() {
       }
     };
     load();
-  }, [id, lessonId, isEdit, navigate, showToast]);
+  }, [id, lessonId, isEdit, navigate, showToast, searchParams]);
 
   const builderPath = `/instructor/courses/${id}/builder`;
   const update = (key: string, value: unknown) => setForm((current) => ({ ...current, [key]: value }));
@@ -218,7 +225,7 @@ export default function InstructorLessonFormPage() {
             <Button type="button" variant="outline" onClick={() => navigate(builderPath)}>
               إلغاء
             </Button>
-            <Button loading={submitting}>{isEdit ? 'حفظ التعديلات' : 'إضافة الدرس'}</Button>
+            <Button type="submit" loading={submitting}>{isEdit ? 'حفظ التعديلات' : 'إضافة الدرس'}</Button>
           </div>
         </form>
       </Card>

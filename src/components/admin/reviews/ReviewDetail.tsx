@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { Badge } from '../../ui/Badge';
-import { fmtReviewDate, ratingVariant, type ReviewItem } from './reviewShared';
+import { useAdminReviewLabels } from '../../../hooks/useAdminReviewLabels';
+import { ratingVariant, type ReviewItem } from './reviewShared';
 import { ReviewStars } from './ReviewStars';
 
 interface ReviewDetailProps {
@@ -7,6 +9,8 @@ interface ReviewDetailProps {
 }
 
 export function ReviewDetail({ review }: ReviewDetailProps) {
+  const { t } = useTranslation('reviews');
+  const { fmtReviewDate, ratingOf } = useAdminReviewLabels();
   const rating = Number(review.rating) || 0;
 
   return (
@@ -14,10 +18,10 @@ export function ReviewDetail({ review }: ReviewDetailProps) {
       <div className="support-ticket-detail-header">
         <div>
           <span className="support-ticket-id">#{review.id}</span>
-          <h2>تقييم كورس {review.course?.titleAr || '—'}</h2>
+          <h2>{t('detail.title', { course: review.course?.titleAr || t('empty') })}</h2>
         </div>
         <Badge variant={ratingVariant(rating)} dot className="status-badge">
-          {rating}/5
+          {ratingOf(rating)}
         </Badge>
       </div>
 
@@ -28,26 +32,26 @@ export function ReviewDetail({ review }: ReviewDetailProps) {
 
       <div className="admin-review-meta-grid">
         <div className="admin-review-meta-card">
-          <span>الطالب</span>
-          <strong>{review.user?.fullName || '—'}</strong>
-          <small>{review.user?.email || '—'}</small>
+          <span>{t('detail.student')}</span>
+          <strong>{review.user?.fullName || t('empty')}</strong>
+          <small>{review.user?.email || t('empty')}</small>
           {review.user?.phone ? <small>{review.user.phone}</small> : null}
         </div>
         <div className="admin-review-meta-card">
-          <span>الكورس</span>
-          <strong>{review.course?.titleAr || '—'}</strong>
-          {review.course?.id ? <small>رقم الكورس: {review.course.id}</small> : null}
+          <span>{t('detail.course')}</span>
+          <strong>{review.course?.titleAr || t('empty')}</strong>
+          {review.course?.id ? <small>{t('detail.courseId', { id: review.course.id })}</small> : null}
         </div>
         <div className="admin-review-meta-card">
-          <span>المحاضر</span>
-          <strong>{review.course?.instructor?.fullName || '—'}</strong>
+          <span>{t('detail.instructor')}</span>
+          <strong>{review.course?.instructor?.fullName || t('empty')}</strong>
           {review.course?.instructor?.email ? <small>{review.course.instructor.email}</small> : null}
         </div>
       </div>
 
       <div className="admin-review-comment">
-        <strong>التعليق</strong>
-        <p>{review.comment?.trim() || 'لا يوجد تعليق مكتوب.'}</p>
+        <strong>{t('detail.comment')}</strong>
+        <p>{review.comment?.trim() || t('detail.noComment')}</p>
       </div>
     </div>
   );

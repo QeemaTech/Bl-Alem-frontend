@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Table2 } from '@/icons';
+import { useAdminUserLabels } from '../../../hooks/useAdminUserLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
 import { UserRowActions } from './UserRowActions';
-import { statusLabels, statusVariant } from './userShared';
 
 export interface StudentTableRow extends Record<string, unknown> {
   id: number | string;
@@ -38,6 +40,10 @@ export function StudentsTable({
   onToggleStatus,
   onDelete,
 }: StudentsTableProps) {
+  const { t, i18n } = useTranslation(['users', 'common']);
+  const { statusLabels, statusVariant } = useAdminUserLabels();
+  const cols = t('admin.students.table.columns', { returnObjects: true }) as Record<string, string>;
+
   return (
     <Card className="reports-table-card">
       <div className="section-heading reports-table-head">
@@ -45,9 +51,13 @@ export function StudentsTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          قائمة الطلاب
+          {t('admin.students.table.title')}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+        <span className="muted-count">
+          {t('common:table.recordCount', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table<StudentTableRow>
         className="admin-users-table"
@@ -55,15 +65,15 @@ export function StudentsTable({
         stickyHeader
         compact
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا يوجد طلاب"
-        emptyDescription="أضف طالباً جديداً أو انتظر التسجيلات."
+        emptyTitle={t('admin.students.table.emptyTitle')}
+        emptyDescription={t('admin.students.table.emptyDescription')}
         data={items}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم الطالب', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'fullName',
-            header: 'الاسم',
+            header: cols.fullName,
             width: '16rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -75,7 +85,7 @@ export function StudentsTable({
           },
           {
             key: 'email',
-            header: 'البريد',
+            header: cols.email,
             width: '18rem',
             className: 'admin-col-email',
             truncate: false,
@@ -84,20 +94,20 @@ export function StudentsTable({
           },
           {
             key: 'phone',
-            header: 'الهاتف',
+            header: cols.phone,
             width: '11rem',
             className: 'admin-col-phone',
             truncate: false,
             hideOnMobile: true,
             render: (row) => <span dir="ltr">{row.phone}</span>,
           },
-          { key: 'educationLevel', header: 'المستوى', width: '11rem', hideOnMobile: true },
-          { key: 'enrollments', header: 'الاشتراكات', width: '6.5rem', align: 'center' },
-          { key: 'certificates', header: 'الشهادات', width: '6.5rem', align: 'center', hideOnMobile: true },
-          { key: 'wallet', header: 'المحفظة', width: '8rem', align: 'center', hideOnMobile: true },
+          { key: 'educationLevel', header: cols.educationLevel, width: '11rem', hideOnMobile: true },
+          { key: 'enrollments', header: cols.enrollments, width: '6.5rem', align: 'center' },
+          { key: 'certificates', header: cols.certificates, width: '6.5rem', align: 'center', hideOnMobile: true },
+          { key: 'wallet', header: cols.wallet, width: '8rem', align: 'center', hideOnMobile: true },
           {
             key: 'status',
-            header: 'الحالة',
+            header: cols.status,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -115,7 +125,7 @@ export function StudentsTable({
           },
           {
             key: 'joinedAt',
-            header: 'الانضمام',
+            header: cols.joinedAt,
             width: '10rem',
             className: 'admin-col-date',
             truncate: false,
@@ -123,9 +133,9 @@ export function StudentsTable({
           },
           {
             key: 'actions',
-            header: 'الإجراءات',
-            width: '22rem',
-            wrap: true,
+            header: cols.actions,
+            width: '26rem',
+            minWidth: '26rem',
             truncate: false,
             render: (row) => (
               <UserRowActions

@@ -1,11 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { Table2 } from '@/icons';
+import { useAdminCategoryLabels } from '../../../hooks/useAdminCategoryLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
 import { UserRowActions } from '../users/UserRowActions';
 import { CategoryIcon } from './CategoryIcon';
-import { fmtCategoryDate, statusLabels, statusVariant } from './categoryShared';
 
 export interface CategoryTableRow extends Record<string, unknown> {
   id: number | string;
@@ -36,6 +38,10 @@ export function CategoriesTable({
   onToggleStatus,
   onDelete,
 }: CategoriesTableProps) {
+  const { t, i18n } = useTranslation(['categories', 'common']);
+  const { statusLabels, statusVariant } = useAdminCategoryLabels();
+  const cols = t('admin.categories.table.columns', { returnObjects: true }) as Record<string, string>;
+
   return (
     <Card className="reports-table-card">
       <div className="section-heading reports-table-head">
@@ -43,9 +49,13 @@ export function CategoriesTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          قائمة التصنيفات
+          {t('admin.categories.table.title')}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} تصنيف</span>
+        <span className="muted-count">
+          {t('admin.categories.table.count', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table<CategoryTableRow>
         className="admin-users-table admin-categories-table"
@@ -55,15 +65,15 @@ export function CategoriesTable({
         fluid
         hideScrollNotice
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا توجد تصنيفات"
-        emptyDescription="أضف تصنيفاً جديداً لتنظيم الدورات."
+        emptyTitle={t('admin.categories.table.emptyTitle')}
+        emptyDescription={t('admin.categories.table.emptyDescription')}
         data={items}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم التصنيف', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'icon',
-            header: 'الأيقونة',
+            header: cols.icon,
             width: '5rem',
             align: 'center',
             render: (row) => (
@@ -72,7 +82,7 @@ export function CategoriesTable({
           },
           {
             key: 'nameAr',
-            header: 'الاسم العربي',
+            header: cols.nameAr,
             width: '14rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -84,27 +94,27 @@ export function CategoriesTable({
           },
           {
             key: 'nameEn',
-            header: 'الاسم الإنجليزي',
+            header: cols.nameEn,
             width: '14rem',
             hideOnMobile: true,
             truncate: false,
           },
           {
             key: 'slug',
-            header: 'الرابط',
+            header: cols.slug,
             width: '11rem',
             hideOnMobile: true,
             render: (row) => <span dir="ltr">{row.slug}</span>,
           },
           {
             key: 'courses',
-            header: 'الكورسات',
+            header: cols.courses,
             width: '6.5rem',
             align: 'center',
           },
           {
             key: 'status',
-            header: 'الحالة',
+            header: cols.status,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -122,7 +132,7 @@ export function CategoriesTable({
           },
           {
             key: 'createdAt',
-            header: 'تاريخ الإنشاء',
+            header: cols.createdAt,
             width: '10rem',
             className: 'admin-col-date',
             hideOnMobile: true,
@@ -130,7 +140,7 @@ export function CategoriesTable({
           },
           {
             key: 'actions',
-            header: 'الإجراءات',
+            header: cols.actions,
             width: '22rem',
             wrap: true,
             truncate: false,
@@ -149,18 +159,4 @@ export function CategoriesTable({
       />
     </Card>
   );
-}
-
-export function buildCategoryTableRows(categories: any[]): CategoryTableRow[] {
-  return categories.map((row) => ({
-    id: row.id,
-    nameAr: row.nameAr,
-    nameEn: row.nameEn || '—',
-    slug: row.slug,
-    icon: row.icon || '—',
-    courses: String(row._count?.courses ?? 0),
-    status: statusLabels[row.status] || row.status,
-    createdAt: fmtCategoryDate(row.createdAt),
-    _raw: row,
-  }));
 }

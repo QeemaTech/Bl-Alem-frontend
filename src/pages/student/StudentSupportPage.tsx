@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
-  CheckCircle2, Download, Headphones, MessageSquare, MessageSquarePlus, Plus, Send,
+  CheckCircle2, Download, Eye, Headphones, MessageSquare, MessageSquarePlus, Plus, Send, Table2, X,
 } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
@@ -106,12 +106,19 @@ export default function StudentSupportPage() {
   })), [filteredTickets]);
 
   const openTicket = async (id: number) => {
+    if (selected?.id === id) return;
     setDetailLoading(true);
+    setSelected(null);
     try {
       setSelected(await studentApi.supportTicket(id));
     } finally {
       setDetailLoading(false);
     }
+  };
+
+  const closeDetail = () => {
+    setSelected(null);
+    setReply('');
   };
 
   const createTicket = async (event: FormEvent) => {
@@ -161,170 +168,184 @@ export default function StudentSupportPage() {
   };
 
   return (
-    <div className="support-grid student-support-grid">
-      <section className="page-grid student-support-page">
-        <div className="reports-header">
-          <PageHeader
-            title="الدعم الفني"
-            subtitle="أنشئ تذكرة أو تابع ردود فريق الدعم"
-          />
-          <div className="reports-header-actions">
-            <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!tickets.length}>
-              تصدير Excel
-            </Button>
-            <Button icon={<Plus size={18} />} onClick={() => setIsOpen(true)}>
-              تذكرة جديدة
-            </Button>
-          </div>
+    <div className="page-grid student-support-page">
+      <div className="reports-header">
+        <PageHeader
+          title="الدعم الفني"
+          subtitle="أنشئ تذكرة أو تابع ردود فريق الدعم"
+        />
+        <div className="reports-header-actions">
+          <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!tickets.length}>
+            تصدير Excel
+          </Button>
+          <Button icon={<Plus size={18} />} onClick={() => setIsOpen(true)}>
+            تذكرة جديدة
+          </Button>
         </div>
+      </div>
 
-        <Card className="student-support-hero">
-          <div className="student-support-hero-icon">
-            <Headphones size={32} />
-          </div>
-          <div className="student-support-hero-body">
-            <strong>نحن هنا لمساعدتك</strong>
-            <p>أرسل استفسارك أو مشكلتك وسيرد عليك فريق الدعم في أقرب وقت.</p>
-          </div>
-        </Card>
-
-        <div className="stats-grid">
-          <StatCard title="إجمالي التذاكر" value={String(stats.total)} icon={Headphones} />
-          <StatCard title="مفتوحة" value={String(stats.open)} icon={MessageSquarePlus} />
-          <StatCard title="قيد المعالجة" value={String(stats.inProgress)} icon={MessageSquare} />
-          <StatCard title="مغلقة" value={String(stats.closed)} icon={CheckCircle2} />
+      <Card className="student-support-hero">
+        <div className="student-support-hero-icon">
+          <Headphones size={32} />
         </div>
+        <div className="student-support-hero-body">
+          <strong>نحن هنا لمساعدتك</strong>
+          <p>أرسل استفسارك أو مشكلتك وسيرد عليك فريق الدعم في أقرب وقت.</p>
+        </div>
+      </Card>
 
-        <FilterBar
-          searchValue={search}
-          searchPlaceholder="بحث بالموضوع أو الرسالة..."
-          onSearchChange={setSearch}
-          onReset={() => { setSearch(''); setStatusFilter(''); }}
-        >
-          <Select
-            label="الحالة"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={[
-              { label: 'كل الحالات', value: '' },
-              { label: 'مفتوحة', value: 'OPEN' },
-              { label: 'قيد المعالجة', value: 'IN_PROGRESS' },
-              { label: 'مغلقة', value: 'CLOSED' },
-            ]}
-          />
-        </FilterBar>
+      <div className="stats-grid">
+        <StatCard title="إجمالي التذاكر" value={String(stats.total)} icon={Headphones} />
+        <StatCard title="مفتوحة" value={String(stats.open)} icon={MessageSquarePlus} />
+        <StatCard title="قيد المعالجة" value={String(stats.inProgress)} icon={MessageSquare} />
+        <StatCard title="مغلقة" value={String(stats.closed)} icon={CheckCircle2} />
+      </div>
 
-        <Card>
-          <Table
-            loading={loading}
-            data={tableRows}
-            emptyTitle="لا توجد تذاكر"
-            emptyDescription="أنشئ تذكرة عند احتياجك للمساعدة."
-            columns={[
-              { key: 'id', header: 'رقم التذكرة' },
-              { key: 'subject', header: 'الموضوع' },
-              { key: 'repliesCount', header: 'الردود' },
-              {
-                key: 'status',
-                header: 'الحالة',
-                render: (row) => (
-                  <Badge variant={statusVariant(String(row._raw?.status))}>
-                    {statusLabels[String(row._raw?.status)] || row.status}
-                  </Badge>
-                ),
-              },
-              { key: 'createdAt', header: 'التاريخ' },
-              {
-                key: 'actions',
-                header: 'الإجراءات',
-                render: (row) => (
-                  <Button
-                    variant={selected?.id === row._raw?.id ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => openTicket(row._raw.id)}
-                  >
-                    عرض
-                  </Button>
-                ),
-              },
-            ]}
-          />
-        </Card>
-      </section>
+      <FilterBar
+        searchValue={search}
+        searchPlaceholder="بحث بالموضوع أو الرسالة..."
+        onSearchChange={setSearch}
+        onReset={() => { setSearch(''); setStatusFilter(''); }}
+      >
+        <Select
+          label="الحالة"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          options={[
+            { label: 'كل الحالات', value: '' },
+            { label: 'مفتوحة', value: 'OPEN' },
+            { label: 'قيد المعالجة', value: 'IN_PROGRESS' },
+            { label: 'مغلقة', value: 'CLOSED' },
+          ]}
+        />
+      </FilterBar>
 
-      <aside className="card support-detail student-support-detail">
-        {detailLoading ? (
-          <EmptyState title="جاري التحميل..." description="يتم جلب تفاصيل التذكرة." />
-        ) : selected ? (
-          <>
-            <div className="student-support-detail-header">
-              <div>
-                <span className="admin-support-ticket-id">#{selected.id}</span>
-                <h2>{selected.subject}</h2>
-              </div>
-              <Badge variant={statusVariant(selected.status)}>
-                {statusLabels[selected.status] || selected.status}
-              </Badge>
-            </div>
-
-            <div className="support-reply user">
-              <small>أنت · {fmtDate(selected.createdAt)}</small>
-              <p>{selected.message}</p>
-            </div>
-
-            <div className="admin-support-thread">
-              {selected.replies?.length ? (
-                selected.replies.map((item: any) => {
-                  const isAdmin = item.user?.role === 'SUPER_ADMIN';
-                  return (
-                    <div
-                      key={item.id}
-                      className={`support-reply ${isAdmin ? 'admin' : 'user'}`}
-                    >
-                      <small>
-                        {isAdmin ? 'فريق الدعم' : item.user?.fullName || 'أنت'}
-                        {' · '}
-                        {fmtDate(item.createdAt)}
-                      </small>
-                      <p>{item.message}</p>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="admin-support-no-replies">لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.</p>
-              )}
-            </div>
-
-            {selected.status !== 'CLOSED' ? (
-              <form className="stack-sm" onSubmit={sendReply}>
-                <Textarea
-                  label="رد جديد"
-                  value={reply}
-                  onChange={(event) => setReply(event.target.value)}
-                  placeholder="اكتب ردك أو أضف تفاصيل..."
-                  required
-                />
-                <Button type="submit" loading={submitting} disabled={!reply.trim()} icon={<Send size={16} />}>
-                  إرسال الرد
+      <Card className="reports-table-card">
+        <div className="section-heading reports-table-head">
+          <h2>
+            <span className="reports-table-title-icon" aria-hidden="true">
+              <Table2 size={20} />
+            </span>
+            تذاكر الدعم
+          </h2>
+          <span className="muted-count">{filteredTickets.length.toLocaleString('ar-EG')} تذكرة</span>
+        </div>
+        <Table
+          loading={loading}
+          fluid
+          hideScrollNotice
+          data={tableRows}
+          emptyTitle="لا توجد تذاكر"
+          emptyDescription="أنشئ تذكرة عند احتياجك للمساعدة."
+          columns={[
+            { key: 'id', header: 'رقم التذكرة', align: 'center' },
+            { key: 'subject', header: 'الموضوع' },
+            { key: 'repliesCount', header: 'الردود', align: 'center' },
+            {
+              key: 'status',
+              header: 'الحالة',
+              align: 'center',
+              render: (row) => (
+                <Badge variant={statusVariant(String(row._raw?.status))}>
+                  {statusLabels[String(row._raw?.status)] || row.status}
+                </Badge>
+              ),
+            },
+            { key: 'createdAt', header: 'التاريخ' },
+            {
+              key: 'actions',
+              header: 'الإجراءات',
+              render: (row) => (
+                <Button
+                  variant={selected?.id === row._raw?.id ? 'primary' : 'outline'}
+                  size="sm"
+                  icon={<Eye size={16} />}
+                  onClick={() => openTicket(row._raw.id)}
+                >
+                  عرض
                 </Button>
-              </form>
-            ) : (
-              <div className="admin-support-closed-notice">
-                <CheckCircle2 size={18} />
-                <span>تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية.</span>
+              ),
+            },
+          ]}
+        />
+      </Card>
+
+      {(detailLoading || selected) ? (
+        <Card className="student-support-detail-panel">
+          {detailLoading ? (
+            <EmptyState title="جاري التحميل..." description="يتم جلب تفاصيل التذكرة." />
+          ) : selected ? (
+            <>
+              <div className="student-support-detail-header">
+                <div>
+                  <span className="admin-support-ticket-id">#{selected.id}</span>
+                  <h2>{selected.subject}</h2>
+                </div>
+                <div className="student-support-detail-actions">
+                  <Badge variant={statusVariant(selected.status)}>
+                    {statusLabels[selected.status] || selected.status}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<X size={18} />}
+                    onClick={closeDetail}
+                    aria-label="إغلاق التفاصيل"
+                  />
+                </div>
               </div>
-            )}
-          </>
-        ) : (
-          <EmptyState
-            title="اختر تذكرة"
-            description="اضغط «عرض» لمراجعة التفاصيل والرد على فريق الدعم."
-            icon={Headphones}
-            actionLabel="تذكرة جديدة"
-            onAction={() => setIsOpen(true)}
-          />
-        )}
-      </aside>
+
+              <div className="support-reply user">
+                <small>أنت · {fmtDate(selected.createdAt)}</small>
+                <p>{selected.message}</p>
+              </div>
+
+              <div className="admin-support-thread">
+                {selected.replies?.length ? (
+                  selected.replies.map((item: any) => {
+                    const isAdmin = item.user?.role === 'SUPER_ADMIN';
+                    return (
+                      <div
+                        key={item.id}
+                        className={`support-reply ${isAdmin ? 'admin' : 'user'}`}
+                      >
+                        <small>
+                          {isAdmin ? 'فريق الدعم' : item.user?.fullName || 'أنت'}
+                          {' · '}
+                          {fmtDate(item.createdAt)}
+                        </small>
+                        <p>{item.message}</p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="admin-support-no-replies">لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.</p>
+                )}
+              </div>
+
+              {selected.status !== 'CLOSED' ? (
+                <form className="stack-sm" onSubmit={sendReply}>
+                  <Textarea
+                    label="رد جديد"
+                    value={reply}
+                    onChange={(event) => setReply(event.target.value)}
+                    placeholder="اكتب ردك أو أضف تفاصيل..."
+                    required
+                  />
+                  <Button type="submit" loading={submitting} disabled={!reply.trim()} icon={<Send size={16} />}>
+                    إرسال الرد
+                  </Button>
+                </form>
+              ) : (
+                <div className="admin-support-closed-notice">
+                  <CheckCircle2 size={18} />
+                  <span>تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية.</span>
+                </div>
+              )}
+            </>
+          ) : null}
+        </Card>
+      ) : null}
 
       <Modal isOpen={isOpen} title="تذكرة دعم جديدة" onClose={() => setIsOpen(false)}>
         <form className="stack-sm" onSubmit={createTicket}>

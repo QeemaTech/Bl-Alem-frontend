@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   CoPresent,
@@ -7,15 +8,15 @@ import {
 } from '@/icons';
 import type { MaterialIcon } from '@/icons';
 import { EmptyState } from '../../ui/EmptyState';
-import { fmtTimeAgo } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { ActivityItem, ActivityType } from './dashboardTypes';
 
-const ACTIVITY_META: Record<ActivityType, { icon: MaterialIcon; label: string }> = {
-  registration: { icon: UserPlus, label: 'تسجيل' },
-  course: { icon: BookOpen, label: 'كورس' },
-  payment: { icon: CreditCard, label: 'دفع' },
-  support: { icon: Headphones, label: 'دعم' },
-  instructor: { icon: CoPresent, label: 'محاضر' },
+const ACTIVITY_ICONS: Record<ActivityType, MaterialIcon> = {
+  registration: UserPlus,
+  course: BookOpen,
+  payment: CreditCard,
+  support: Headphones,
+  instructor: CoPresent,
 };
 
 interface ActivityTimelineProps {
@@ -23,20 +24,25 @@ interface ActivityTimelineProps {
 }
 
 export function ActivityTimeline({ items }: ActivityTimelineProps) {
+  const { t } = useTranslation('dashboard');
+  const { fmtTimeAgo } = useDashboardFormatters();
+
+  const activityLabel = (type: ActivityType) =>
+    t(`admin.dashboard.activity.types.${type}`);
+
   return (
-    <section className="admin-dash-timeline-section" aria-label="النشاط الأخير">
+    <section className="admin-dash-timeline-section" aria-label={t('admin.dashboard.activity.ariaLabel')}>
       <header className="admin-dash-section-head is-compact">
         <div>
-          <h2>النشاط الأخير</h2>
-          <p>آخر التحديثات على المنصة</p>
+          <h2>{t('admin.dashboard.activity.title')}</h2>
+          <p>{t('admin.dashboard.activity.subtitle')}</p>
         </div>
       </header>
 
       {items.length ? (
-        <ol className="admin-dash-timeline" aria-label="جدول زمني للنشاط">
+        <ol className="admin-dash-timeline" aria-label={t('admin.dashboard.activity.ariaLabel')}>
           {items.map((item) => {
-            const meta = ACTIVITY_META[item.type];
-            const Icon = meta.icon;
+            const Icon = ACTIVITY_ICONS[item.type];
             return (
               <li key={item.id} className="admin-dash-timeline-item">
                 <div className={`admin-dash-timeline-icon is-${item.type}`} aria-hidden>
@@ -48,7 +54,7 @@ export function ActivityTimeline({ items }: ActivityTimelineProps) {
                     <time dateTime={item.timestamp}>{fmtTimeAgo(item.timestamp)}</time>
                   </div>
                   <p>{item.description}</p>
-                  <span className="admin-dash-timeline-tag">{meta.label}</span>
+                  <span className="admin-dash-timeline-tag">{activityLabel(item.type)}</span>
                 </div>
               </li>
             );
@@ -57,8 +63,8 @@ export function ActivityTimeline({ items }: ActivityTimelineProps) {
       ) : (
         <EmptyState
           icon={Headphones}
-          title="لا يوجد نشاط حديث"
-          description="ستظهر هنا التسجيلات والمدفوعات والتذاكر فور حدوثها."
+          title={t('admin.dashboard.activity.emptyTitle')}
+          description={t('admin.dashboard.activity.emptyDesc')}
         />
       )}
     </section>

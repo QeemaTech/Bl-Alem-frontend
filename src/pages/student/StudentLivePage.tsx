@@ -150,7 +150,7 @@ export default function StudentLivePage() {
   const renderSessionCard = (session: any) => (
     <article
       key={session.id}
-      className={`live-session-item ${session.status === 'LIVE' ? 'is-live' : ''}`}
+      className={`live-session-item student-live-session-card ${session.status === 'LIVE' ? 'is-live' : ''}`}
     >
       <div className={`live-session-icon ${(session.status || 'scheduled').toLowerCase()}`}>
         {session.status === 'LIVE' ? <Radio size={22} /> : <Video size={22} />}
@@ -158,13 +158,15 @@ export default function StudentLivePage() {
 
       <div className="live-session-body">
         <div className="live-session-top">
-          <div>
-            <h3>{session.titleAr}</h3>
+          <div className="live-session-heading">
+            <div className="live-session-title-row">
+              <h3>{session.titleAr}</h3>
+              <Badge className="live-session-status" variant={statusVariant(session.status)}>
+                {statusLabels[session.status] || session.status}
+              </Badge>
+            </div>
             <p className="live-session-course">{session.course?.titleAr || '—'}</p>
           </div>
-          <Badge variant={statusVariant(session.status)}>
-            {statusLabels[session.status] || session.status}
-          </Badge>
         </div>
 
         <div className="live-session-meta">
@@ -316,7 +318,7 @@ export default function StudentLivePage() {
                 key: 'actions',
                 header: 'الإجراءات',
                 render: (row) => (
-                  <div className="table-actions">
+                  <div className="table-actions user-row-actions">
                     <Button size="sm" variant="secondary" onClick={() => setSelected(row._raw)}>
                       التفاصيل
                     </Button>

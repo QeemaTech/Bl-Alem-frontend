@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -14,6 +15,7 @@ import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { useToast } from '../../components/ui/Toast';
 
 export default function AdminCategoryDetailPage() {
+  const { t } = useTranslation(['categories', 'common']);
   const { categoryId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -30,7 +32,7 @@ export default function AdminCategoryDetailPage() {
     try {
       setCategory(await adminApi.category(categoryId));
     } catch {
-      showToast('تعذّر تحميل التصنيف.', 'error');
+      showToast(t('admin.categories.toast.loadError'), 'error');
       setCategory(null);
     } finally {
       setLoading(false);
@@ -66,11 +68,11 @@ export default function AdminCategoryDetailPage() {
         status: form.status,
       };
       await adminApi.updateCategory(category.id, payload);
-      showToast('تم تحديث التصنيف.', 'success');
+      showToast(t('admin.categories.toast.updated'), 'success');
       setFormOpen(false);
       await load();
     } catch {
-      showToast('تعذّر حفظ التصنيف.', 'error');
+      showToast(t('admin.categories.toast.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -82,10 +84,13 @@ export default function AdminCategoryDetailPage() {
     try {
       const next = category.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       await adminApi.categoryStatus(category.id, next);
-      showToast(next === 'ACTIVE' ? 'تم تفعيل التصنيف.' : 'تم إيقاف التصنيف.', 'success');
+      showToast(
+        next === 'ACTIVE' ? t('admin.categories.toast.activated') : t('admin.categories.toast.deactivated'),
+        'success',
+      );
       await load();
     } catch {
-      showToast('تعذّر تحديث الحالة.', 'error');
+      showToast(t('admin.categories.toast.statusError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -95,10 +100,10 @@ export default function AdminCategoryDetailPage() {
     if (!category) return;
     try {
       await adminApi.deleteCategory(category.id);
-      showToast('تم حذف التصنيف.', 'success');
+      showToast(t('admin.categories.toast.deleted'), 'success');
       navigate('/admin/categories');
     } catch {
-      showToast('لا يمكن حذف تصنيف مرتبط بدورات.', 'error');
+      showToast(t('admin.categories.toast.deleteError'), 'error');
       setDeleteOpen(false);
     }
   };
@@ -109,11 +114,11 @@ export default function AdminCategoryDetailPage() {
     return (
       <div className="page-grid admin-category-detail-page">
         <EmptyState
-          title="التصنيف غير موجود"
-          description="لم نتمكن من العثور على هذا التصنيف."
+          title={t('admin.categories.notFound.title')}
+          description={t('admin.categories.notFound.description')}
         />
         <Button variant="outline" onClick={() => navigate('/admin/categories')}>
-          العودة للتصنيفات
+          {t('admin.categories.backToCategories')}
         </Button>
       </div>
     );
@@ -125,7 +130,7 @@ export default function AdminCategoryDetailPage() {
     <div className="page-grid admin-category-detail-page">
       <Link to="/admin/categories" className="support-ticket-back">
         <ArrowRight size={18} aria-hidden="true" />
-        العودة للتصنيفات
+        {t('admin.categories.backToCategories')}
       </Link>
 
       <Card className="support-ticket-page-card">
@@ -153,9 +158,9 @@ export default function AdminCategoryDetailPage() {
 
       <ConfirmDialog
         isOpen={deleteOpen}
-        title="حذف التصنيف"
-        message={`هل أنت متأكد من حذف تصنيف "${category.nameAr}"؟`}
-        confirmLabel="حذف"
+        title={t('admin.categories.deleteTitle')}
+        message={t('admin.categories.deleteMessage', { name: category.nameAr })}
+        confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}
       />

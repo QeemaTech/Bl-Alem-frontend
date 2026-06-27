@@ -1,15 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Table2, XCircle } from '@/icons';
+import { useAdminUserLabels } from '../../../hooks/useAdminUserLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
 import { UserRowActions } from './UserRowActions';
-import { approvalLabels, approvalVariant, statusLabels, statusVariant } from './userShared';
 
-function CountBadge({ value }: { value: string | number }) {
+function CountBadge({ value, ariaLabel }: { value: string | number; ariaLabel: string }) {
   return (
-    <span className="admin-count-badge" aria-label={`العدد: ${value}`}>
+    <span className="admin-count-badge" aria-label={ariaLabel}>
       {value}
     </span>
   );
@@ -54,6 +56,10 @@ export function InstructorsTable({
   onActivate,
   onDelete,
 }: InstructorsTableProps) {
+  const { t, i18n } = useTranslation(['users', 'common']);
+  const { approvalLabels, statusLabels, approvalVariant, statusVariant } = useAdminUserLabels();
+  const cols = t('admin.instructors.table.columns', { returnObjects: true }) as Record<string, string>;
+
   return (
     <Card className="reports-table-card">
       <div className="section-heading reports-table-head">
@@ -61,9 +67,13 @@ export function InstructorsTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          قائمة المحاضرين
+          {t('admin.instructors.table.title')}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+        <span className="muted-count">
+          {t('common:table.recordCount', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table<InstructorTableRow>
         className="admin-users-table"
@@ -71,15 +81,15 @@ export function InstructorsTable({
         stickyHeader
         compact
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا يوجد محاضرون"
-        emptyDescription="أضف محاضراً جديداً أو انتظر طلبات التسجيل."
+        emptyTitle={t('admin.instructors.table.emptyTitle')}
+        emptyDescription={t('admin.instructors.table.emptyDescription')}
         data={items}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم المحاضر', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'fullName',
-            header: 'الاسم',
+            header: cols.fullName,
             width: '16rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -91,39 +101,49 @@ export function InstructorsTable({
           },
           {
             key: 'email',
-            header: 'البريد',
+            header: cols.email,
             width: '18rem',
             className: 'admin-col-email',
             truncate: false,
             hideOnMobile: true,
             render: (row) => <span dir="ltr" className="admin-cell-email">{row.email}</span>,
           },
-          { key: 'specialization', header: 'التخصص', width: '14rem', wrap: true, hideOnMobile: true },
+          { key: 'specialization', header: cols.specialization, width: '14rem', wrap: true, hideOnMobile: true },
           {
             key: 'courses',
-            header: 'الكورسات',
+            header: cols.courses,
             width: '6.5rem',
             align: 'center',
-            render: (row) => <CountBadge value={row.courses} />,
+            render: (row) => (
+              <CountBadge
+                value={row.courses}
+                ariaLabel={t('actions.countAria', { value: row.courses })}
+              />
+            ),
           },
           {
             key: 'students',
-            header: 'الطلاب',
+            header: cols.students,
             width: '6.5rem',
             align: 'center',
             hideOnMobile: true,
-            render: (row) => <CountBadge value={row.students} />,
+            render: (row) => (
+              <CountBadge
+                value={row.students}
+                ariaLabel={t('actions.countAria', { value: row.students })}
+              />
+            ),
           },
           {
             key: 'earnings',
-            header: 'الأرباح',
+            header: cols.earnings,
             width: '9rem',
             align: 'center',
             hideOnMobile: true,
           },
           {
             key: 'approvalStatus',
-            header: 'الاعتماد',
+            header: cols.approval,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -141,7 +161,7 @@ export function InstructorsTable({
           },
           {
             key: 'accountStatus',
-            header: 'الحساب',
+            header: cols.account,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -160,9 +180,9 @@ export function InstructorsTable({
           },
           {
             key: 'actions',
-            header: 'الإجراءات',
+            header: cols.actions,
             width: '26rem',
-            wrap: true,
+            minWidth: '26rem',
             truncate: false,
             render: (row) => {
               const instructor = row._raw;
@@ -172,21 +192,21 @@ export function InstructorsTable({
                   {approval === 'PENDING' ? (
                     <>
                       <Button variant="primary" size="sm" icon={<CheckCircle2 size={16} />} onClick={() => onApprove(instructor)}>
-                        اعتماد
+                        {t('actions.approve')}
                       </Button>
                       <Button variant="danger" size="sm" icon={<XCircle size={16} />} onClick={() => onReject(instructor)}>
-                        رفض
+                        {t('actions.reject')}
                       </Button>
                     </>
                   ) : null}
                   {['APPROVED', 'ACTIVE'].includes(String(approval)) && instructor.status === 'ACTIVE' ? (
                     <Button variant="secondary" size="sm" icon={<CheckCircle2 size={16} />} onClick={() => onSuspend(instructor)}>
-                      إيقاف
+                      {t('actions.suspend')}
                     </Button>
                   ) : null}
                   {['SUSPENDED', 'REJECTED'].includes(String(approval)) || instructor.status === 'SUSPENDED' ? (
                     <Button variant="secondary" size="sm" icon={<CheckCircle2 size={16} />} onClick={() => onActivate(instructor)}>
-                      تفعيل
+                      {t('actions.activate')}
                     </Button>
                   ) : null}
                 </>

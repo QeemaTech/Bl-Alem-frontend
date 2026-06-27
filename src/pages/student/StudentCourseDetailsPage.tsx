@@ -54,8 +54,13 @@ export default function StudentCourseDetailsPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState('');
+  const [pointsToUse, setPointsToUse] = useState('');
+  const [rewardPoints, setRewardPoints] = useState(0);
+  const [pointsPerEgp, setPointsPerEgp] = useState(1);
   const [walletBalance, setWalletBalance] = useState(0);
   const [paymentGateway, setPaymentGateway] = useState<'SIMULATED' | 'WALLET'>('SIMULATED');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const load = async () => {
     if (!id) return;
@@ -74,24 +79,70 @@ export default function StudentCourseDetailsPage() {
 
   useEffect(() => {
     if (checkoutOpen) {
-      studentApi.wallet().then((wallet) => setWalletBalance(Number(wallet?.balance || 0))).catch(() => setWalletBalance(0));
+      Promise.all([
+        studentApi.wallet().catch(() => ({ balance: 0 })),
+        studentApi.rewards().catch(() => ({ rewardPoints: 0 })),
+      ]).then(([wallet, rewards]) => {
+        setWalletBalance(Number(wallet?.balance || 0));
+        setRewardPoints(Number(rewards?.rewardPoints || 0));
+        setPointsPerEgp(Number(rewards?.pointsPerEgp || 1));
+      });
+      setCoupon(null);
+      setCouponError('');
+      setPointsToUse('');
     }
   }, [checkoutOpen]);
 
+  const price = Number(course?.discountPrice ?? course?.price ?? 0);
+  const basePrice = coupon ? Number(coupon.amount) : price;
+  const couponDiscount = coupon ? Number(coupon.discountAmount || 0) : 0;
+  const afterCoupon = Math.max(0, basePrice - couponDiscount);
+  const pointsNum = Math.max(0, Math.min(Number(pointsToUse || 0), rewardPoints));
+  const maxPointsDiscount = afterCoupon;
+  const rawPointsDiscount = pointsNum * pointsPerEgp;
+  const pointsDiscount = Math.min(maxPointsDiscount, rawPointsDiscount);
+  const effectivePointsUsed = pointsPerEgp > 0 ? Math.ceil(pointsDiscount / pointsPerEgp) : 0;
+  const finalPrice = Math.max(0, afterCoupon - pointsDiscount);
+
   const validateCoupon = async () => {
-    if (!id || !couponCode) return;
-    const data = await studentApi.validateCoupon({ code: couponCode, courseId: Number(id) });
-    setCoupon(data);
-    showToast('تم تطبيق كود الخصم.', 'success');
+    if (!id || !couponCode.trim()) return;
+    setCouponError('');
+    try {
+      const data = await studentApi.validateCoupon({ code: couponCode.trim(), courseId: Number(id) });
+      setCoupon(data);
+      if (data.pointsPerEgp) setPointsPerEgp(Number(data.pointsPerEgp));
+      showToast('تم تطبيق كود الخصم.', 'success');
+    } catch (error: unknown) {
+      setCoupon(null);
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'كود الخصم غير صالح.';
+      setCouponError(message);
+      showToast(message, 'error');
+    }
   };
 
   const checkout = async (event: FormEvent) => {
     event.preventDefault();
     if (!id) return;
-    await studentApi.checkout(id, { couponCode: couponCode || undefined, gateway: paymentGateway });
-    showToast('تم الاشتراك في الدورة بنجاح.', 'success');
-    setCheckoutOpen(false);
-    navigate('/student/my-courses');
+    if (paymentGateway === 'WALLET' && walletBalance < finalPrice) {
+      showToast('رصيد المحفظة غير كافٍ.', 'error');
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      await studentApi.checkout(id, {
+        couponCode: couponCode.trim() || undefined,
+        pointsToUse: effectivePointsUsed || undefined,
+        gateway: paymentGateway,
+      });
+      showToast('تم الاشتراك في الدورة بنجاح.', 'success');
+      setCheckoutOpen(false);
+      navigate('/student/my-courses');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'تعذّر إتمام الدفع.';
+      showToast(message, 'error');
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   if (loading) return <DashboardSkeleton />;
@@ -109,7 +160,6 @@ export default function StudentCourseDetailsPage() {
 
   const isEnrolled = Boolean(course.enrollmentStatus);
   const isCompleted = course.enrollmentStatus === 'COMPLETED' || Number(course.progress || 0) >= 100;
-  const price = Number(course.discountPrice ?? course.price ?? 0);
   const quizzes = course.quizzes || [];
 
   return (
@@ -370,15 +420,30 @@ export default function StudentCourseDetailsPage() {
 
       <Modal isOpen={checkoutOpen} title="إتمام الاشتراك" onClose={() => setCheckoutOpen(false)}>
         <form className="stack-sm" onSubmit={checkout}>
-          <Input label="كود الخصم" value={couponCode} onChange={(event) => setCouponCode(event.target.value)} placeholder="BI20" />
-          <Button type="button" variant="secondary" onClick={validateCoupon}>تطبيق الكوبون</Button>
-          <p>السعر النهائي: <strong>{coupon ? Number(coupon.finalAmount) : price} ج.م</strong></p>
-          <p>رصيد المحفظة: <strong>{walletBalance} ج.م</strong></p>
+          <div className="rounded-xl border border-outline bg-surface-container-low p-4 text-sm">
+            <div className="flex justify-between gap-3"><span>السعر الأصلي</span><strong>{basePrice} ج.م</strong></div>
+            {couponDiscount > 0 ? <div className="mt-2 flex justify-between gap-3 text-success"><span>خصم الكوبون</span><strong>-{couponDiscount} ج.م</strong></div> : null}
+            {pointsDiscount > 0 ? <div className="mt-2 flex justify-between gap-3 text-success"><span>خصم النقاط ({effectivePointsUsed})</span><strong>-{pointsDiscount.toFixed(2)} ج.م</strong></div> : null}
+            <div className="mt-3 flex justify-between gap-3 border-t border-outline pt-3"><span>السعر النهائي</span><strong>{finalPrice} ج.م</strong></div>
+          </div>
+          <Input label="كود الخصم (كوبون)" value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} placeholder="BI20" />
+          {couponError ? <p className="text-sm font-semibold text-error">{couponError}</p> : null}
+          <Button type="button" variant="secondary" onClick={validateCoupon} disabled={!couponCode.trim()}>تطبيق الكوبون</Button>
+          <Input
+            label={`نقاط المكافآت (متاح: ${rewardPoints} — ${pointsPerEgp} نقطة = 1 ج.م)`}
+            type="number"
+            min="0"
+            max={String(rewardPoints)}
+            value={pointsToUse}
+            onChange={(event) => setPointsToUse(event.target.value)}
+            placeholder="0"
+          />
+          <p className="text-sm text-on-surface-variant">رصيد المحفظة: <strong>{walletBalance} ج.م</strong></p>
           <div className="segmented-control">
             <button type="button" className={paymentGateway === 'SIMULATED' ? 'active' : ''} onClick={() => setPaymentGateway('SIMULATED')}>دفع تجريبي</button>
             <button type="button" className={paymentGateway === 'WALLET' ? 'active' : ''} onClick={() => setPaymentGateway('WALLET')}>من المحفظة</button>
           </div>
-          <Button fullWidth>تأكيد الاشتراك</Button>
+          <Button fullWidth loading={checkoutLoading}>تأكيد الاشتراك</Button>
         </form>
       </Modal>
     </div>

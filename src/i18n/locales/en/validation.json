@@ -1,0 +1,13 @@
+{
+  "required": {
+    "email": "Email is required",
+    "phone": "Phone number is required",
+    "password": "Password is required",
+    "fullName": "Full name is required",
+    "terms": "You must accept the terms and conditions"
+  },
+  "password": {
+    "minLength": "Password must be at least 8 characters",
+    "mismatch": "Passwords do not match"
+  }
+}

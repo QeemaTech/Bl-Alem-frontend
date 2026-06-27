@@ -1,4 +1,4 @@
-import { fmtNum } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 
 interface TooltipPayload {
   name?: string;
@@ -14,6 +14,8 @@ interface DashboardChartTooltipProps {
   valueLabel?: string;
   showPercent?: boolean;
   dual?: boolean;
+  studentsLabel?: string;
+  instructorsLabel?: string;
 }
 
 export function DashboardChartTooltip({
@@ -23,7 +25,11 @@ export function DashboardChartTooltip({
   valueLabel = '',
   showPercent,
   dual,
+  studentsLabel = 'Students',
+  instructorsLabel = 'Instructors',
 }: DashboardChartTooltipProps) {
+  const { fmtNum } = useDashboardFormatters();
+
   if (!active || !payload?.length) return null;
 
   if (dual) {
@@ -33,11 +39,11 @@ export function DashboardChartTooltip({
         <span className="admin-dash-tooltip-label">{label}</span>
         <span className="admin-dash-tooltip-row">
           <span className="admin-dash-tooltip-dot is-students" aria-hidden />
-          طلاب: <strong>{fmtNum(row?.students ?? 0)}</strong>
+          {studentsLabel}: <strong>{fmtNum(row?.students ?? 0)}</strong>
         </span>
         <span className="admin-dash-tooltip-row">
           <span className="admin-dash-tooltip-dot is-instructors" aria-hidden />
-          محاضرون: <strong>{fmtNum(row?.instructors ?? 0)}</strong>
+          {instructorsLabel}: <strong>{fmtNum(row?.instructors ?? 0)}</strong>
         </span>
       </div>
     );

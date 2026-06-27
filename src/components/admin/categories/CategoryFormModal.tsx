@@ -1,4 +1,6 @@
 import { FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAdminCategoryLabels } from '../../../hooks/useAdminCategoryLabels';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Modal } from '../../ui/Modal';
@@ -30,54 +32,59 @@ export function CategoryFormModal({
   onChange,
   onSubmit,
 }: CategoryFormModalProps) {
+  const { t } = useTranslation('categories');
+  const { statusLabels } = useAdminCategoryLabels();
+
   return (
     <Modal
       isOpen={isOpen}
-      title={editing ? 'تعديل التصنيف' : 'إضافة تصنيف'}
+      title={editing ? t('admin.categories.editCategory') : t('admin.categories.addCategory')}
       onClose={onClose}
     >
       <form className="stack-sm" onSubmit={onSubmit}>
         <Input
-          label="الاسم العربي"
+          label={t('admin.categories.form.nameAr')}
           value={form.nameAr}
           onChange={(e) => onChange({ ...form, nameAr: e.target.value })}
           required
         />
         <Input
-          label="الاسم الإنجليزي"
+          label={t('admin.categories.form.nameEn')}
           value={form.nameEn}
           onChange={(e) => onChange({ ...form, nameEn: e.target.value })}
         />
         <Input
-          label="الرابط (slug)"
+          label={t('admin.categories.form.slug')}
           value={form.slug}
           onChange={(e) => onChange({ ...form, slug: e.target.value })}
-          placeholder="programming"
+          placeholder={t('admin.categories.form.slugPlaceholder')}
           dir="ltr"
           disabled={Boolean(editing)}
         />
         <Input
-          label="الأيقونة"
+          label={t('admin.categories.form.icon')}
           value={form.icon}
           onChange={(e) => onChange({ ...form, icon: e.target.value })}
-          placeholder="code"
+          placeholder={t('admin.categories.form.iconPlaceholder')}
         />
         <Input
-          label="رابط الصورة (اختياري)"
+          label={t('admin.categories.form.image')}
           value={form.image}
           onChange={(e) => onChange({ ...form, image: e.target.value })}
-          placeholder="https://..."
+          placeholder={t('admin.categories.form.imagePlaceholder')}
         />
         <Select
-          label="الحالة"
+          label={t('admin.categories.form.status')}
           value={form.status}
           onChange={(e) => onChange({ ...form, status: e.target.value })}
           options={[
-            { label: 'فعّال', value: 'ACTIVE' },
-            { label: 'غير فعّال', value: 'INACTIVE' },
+            { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+            { label: statusLabels.INACTIVE, value: 'INACTIVE' },
           ]}
         />
-        <Button loading={submitting}>{editing ? 'حفظ التعديلات' : 'إنشاء التصنيف'}</Button>
+        <Button loading={submitting}>
+          {editing ? t('admin.categories.saveChanges') : t('admin.categories.createCategory')}
+        </Button>
       </form>
     </Modal>
   );

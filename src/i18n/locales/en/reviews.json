@@ -1,0 +1,84 @@
+{
+  "empty": "—",
+  "title": "Reviews",
+  "subtitle": "Review student ratings on courses",
+  "stats": {
+    "total": "Total reviews",
+    "average": "Average rating",
+    "fiveStar": "5-star ratings",
+    "lowRating": "Low ratings (1-2)"
+  },
+  "charts": {
+    "distribution": "Rating distribution",
+    "stars": "{{count}} stars",
+    "oneStar": "1 star"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by student, course, instructor, or comment...",
+    "rating": "Star count",
+    "allRatings": "All ratings"
+  },
+  "table": {
+    "title": "Student reviews",
+    "emptyTitle": "No reviews",
+    "emptyDescription": "No reviews have been added yet, or no results match the filters.",
+    "columns": {
+      "id": "Review #",
+      "student": "Student",
+      "course": "Course",
+      "instructor": "Instructor",
+      "rating": "Rating",
+      "comment": "Comment",
+      "date": "Date",
+      "actions": "Actions"
+    }
+  },
+  "labels": {
+    "studentFallback": "Student",
+    "starsAria": "{{rating}} out of 5",
+    "ratingOf": "{{rating}}/5"
+  },
+  "form": {},
+  "modal": {},
+  "actions": {
+    "exportExcel": "Export Excel",
+    "details": "Details",
+    "delete": "Delete",
+    "deleteReview": "Delete review",
+    "backToReviews": "Back to reviews"
+  },
+  "toast": {
+    "loadFailed": "Could not load reviews.",
+    "deleted": "Review deleted.",
+    "deleteFailed": "Could not delete review.",
+    "loadDetailFailed": "Could not load review."
+  },
+  "export": {
+    "sheetName": "Reviews",
+    "columns": {
+      "id": "Review #",
+      "student": "Student",
+      "email": "Email",
+      "course": "Course",
+      "instructor": "Instructor",
+      "rating": "Rating",
+      "comment": "Comment",
+      "createdAt": "Date"
+    }
+  },
+  "detail": {
+    "title": "Course review: {{course}}",
+    "student": "Student",
+    "course": "Course",
+    "courseId": "Course ID: {{id}}",
+    "instructor": "Instructor",
+    "comment": "Comment",
+    "noComment": "No written comment.",
+    "notFoundTitle": "Review not found",
+    "notFoundDescription": "We could not find this review."
+  },
+  "confirm": {
+    "deleteTitle": "Delete review",
+    "deleteMessage": "Are you sure you want to delete {{name}}'s review on course \"{{course}}\"?"
+  }
+}

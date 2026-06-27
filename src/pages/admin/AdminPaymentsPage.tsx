@@ -1,87 +1,60 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { CreditCard, Download, DollarSign, RefreshCw, TrendingUp } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { FilterBar } from '../../components/ui/FilterBar';
-import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
-import { useToast } from '../../components/ui/Toast';
+import { useAdminPaymentLabels } from '../../hooks/useAdminPaymentLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
 import { fmtMoney } from '../../utils/adminFormatters';
-
-const statusLabels: Record<string, string> = {
-  PAID: 'مدفوع',
-  PENDING: 'قيد الانتظار',
-  FAILED: 'فاشل',
-  REFUNDED: 'مسترد',
-};
-
-const gatewayLabels: Record<string, string> = {
-  SIMULATED: 'محاكاة',
-  WALLET: 'المحفظة',
-  STRIPE: 'Stripe',
-  PAYPAL: 'PayPal',
-};
-
-const statusVariant = (status: string) => {
-  if (status === 'PAID') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'FAILED') return 'rejected' as const;
-  if (status === 'REFUNDED') return 'warning' as const;
-  return 'default' as const;
-};
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-  : '—');
+import { formatDate, formatNumber } from '../../utils/localeFormat';
 
 const monthKey = (value: string) => {
   const d = new Date(value);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
-const monthLabel = (key: string) => {
-  const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short' });
-};
-
-const exportColumns = [
-  { key: 'id', header: 'رقم العملية' },
-  { key: 'student', header: 'الطالب' },
-  { key: 'email', header: 'البريد' },
-  { key: 'course', header: 'الكورس' },
-  { key: 'amount', header: 'المبلغ الأصلي' },
-  { key: 'discount', header: 'الخصم' },
-  { key: 'finalAmount', header: 'المبلغ النهائي' },
-  { key: 'gateway', header: 'بوابة الدفع' },
-  { key: 'transactionRef', header: 'مرجع العملية' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'التاريخ' },
-];
-
 export default function AdminPaymentsPage() {
-  const { showToast } = useToast();
+  const { t, i18n } = useTranslation(['payments', 'common']);
+  const {
+    statusLabels,
+    gatewayLabels,
+    fmtPaymentDate,
+    paymentStatusVariant,
+    empty,
+    lang,
+  } = useAdminPaymentLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [gatewayFilter, setGatewayFilter] = useState('');
-  const [selected, setSelected] = useState<any>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [refundTarget, setRefundTarget] = useState<any>(null);
+
+  const exportColumns = useMemo(() => {
+    const cols = t('export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'student', header: cols.student },
+      { key: 'email', header: cols.email },
+      { key: 'course', header: cols.course },
+      { key: 'amount', header: cols.amount },
+      { key: 'discount', header: cols.discount },
+      { key: 'finalAmount', header: cols.finalAmount },
+      { key: 'gateway', header: cols.gateway },
+      { key: 'transactionRef', header: cols.transactionRef },
+      { key: 'status', header: cols.status },
+      { key: 'createdAt', header: cols.createdAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -142,63 +115,63 @@ export default function AdminPaymentsPage() {
     return [...map.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-6)
-      .map(([key, value]) => ({ label: monthLabel(key), value }));
-  }, [items]);
+      .map(([key, value]) => {
+        const [y, m] = key.split('-').map(Number);
+        return {
+          label: formatDate(new Date(y, m - 1, 1), { year: 'numeric', month: 'short' }, lang),
+          value,
+        };
+      });
+  }, [items, lang]);
 
   const statusChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = statusLabels[i.status] || i.status;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.status;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: statusLabels[key] || key,
+      value,
+    }));
+  }, [items, statusLabels]);
 
   const gatewayOptions = useMemo(() => {
     const gateways = [...new Set(items.map((i) => i.gateway).filter(Boolean))];
     return [
-      { label: 'كل البوابات', value: '' },
+      { label: t('filters.allGateways'), value: '' },
       ...gateways.map((g) => ({ label: gatewayLabels[g] || g, value: g })),
     ];
-  }, [items]);
+  }, [items, t, gatewayLabels]);
+
+  const statusFilterOptions = useMemo(() => [
+    { label: t('filters.allStatuses'), value: '' },
+    { label: statusLabels.PAID, value: 'PAID' },
+    { label: statusLabels.PENDING, value: 'PENDING' },
+    { label: statusLabels.FAILED, value: 'FAILED' },
+    { label: statusLabels.REFUNDED, value: 'REFUNDED' },
+  ], [t, statusLabels]);
+
+  const tableCols = t('table.columns', { returnObjects: true }) as Record<string, string>;
 
   const tableRows = useMemo(() => filteredItems.map((row) => ({
     id: row.id,
-    student: row.user?.fullName || '—',
-    email: row.user?.email || '—',
-    course: row.course?.titleAr || row.course?.titleEn || '—',
+    student: row.user?.fullName || empty,
+    email: row.user?.email || empty,
+    course: row.course?.titleAr || row.course?.titleEn || empty,
     amount: fmtMoney(Number(row.amount)),
-    discount: Number(row.discountAmount) > 0 ? fmtMoney(Number(row.discountAmount)) : '—',
+    discount: Number(row.discountAmount) > 0 ? fmtMoney(Number(row.discountAmount)) : empty,
     finalAmount: fmtMoney(Number(row.finalAmount)),
-    gateway: gatewayLabels[row.gateway] || row.gateway || '—',
-    transactionRef: row.transactionRef || '—',
+    gateway: gatewayLabels[row.gateway] || row.gateway || empty,
+    transactionRef: row.transactionRef || empty,
     status: statusLabels[row.status] || row.status,
-    createdAt: fmtDate(row.createdAt),
+    createdAt: fmtPaymentDate(row.createdAt),
     _raw: row,
-  })), [filteredItems]);
-
-  const openDetail = (payment: any) => {
-    setSelected(payment);
-    setDetailOpen(true);
-  };
-
-  const handleRefund = async () => {
-    if (!refundTarget) return;
-    try {
-      await adminApi.refundPayment(refundTarget.id);
-      showToast('تم استرداد المبلغ بنجاح.', 'success');
-      setRefundTarget(null);
-      setDetailOpen(false);
-      setSelected(null);
-      await load();
-    } catch {
-      showToast('تعذّر استرداد المبلغ.', 'error');
-    }
-  };
+  })), [filteredItems, statusLabels, gatewayLabels, fmtPaymentDate, empty]);
 
   const handleExport = () => {
     exportTableToExcel(
-      'المدفوعات',
+      t('export.sheetName'),
       exportColumns,
       tableRows.map(({ _raw, ...row }) => row),
     );
@@ -207,139 +180,107 @@ export default function AdminPaymentsPage() {
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="المدفوعات" subtitle="مراجعة عمليات الدفع والاستردادات" />
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="chip-row">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي العمليات" value={String(stats.total)} icon={CreditCard} />
-        <StatCard title="مدفوعات ناجحة" value={String(stats.paidCount)} icon={DollarSign} />
-        <StatCard title="إجمالي الإيرادات" value={fmtMoney(stats.totalRevenue)} icon={TrendingUp} />
-        <StatCard title="قيد الانتظار" value={String(stats.pendingCount)} icon={RefreshCw} />
-        <StatCard title="فاشلة" value={String(stats.failedCount)} icon={CreditCard} />
-        <StatCard title="مستردة" value={String(stats.refundedCount)} icon={RefreshCw} />
+        <StatCard title={t('stats.total')} value={String(stats.total)} icon={CreditCard} />
+        <StatCard title={t('stats.paidCount')} value={String(stats.paidCount)} icon={DollarSign} />
+        <StatCard title={t('stats.totalRevenue')} value={fmtMoney(stats.totalRevenue)} icon={TrendingUp} />
+        <StatCard title={t('stats.pendingCount')} value={String(stats.pendingCount)} icon={RefreshCw} />
+        <StatCard title={t('stats.failedCount')} value={String(stats.failedCount)} icon={CreditCard} />
+        <StatCard title={t('stats.refundedCount')} value={String(stats.refundedCount)} icon={RefreshCw} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="الإيرادات الشهرية (مدفوعات ناجحة)" type="bar" data={monthlyChart} />
-        <ReportChart title="توزيع حالات الدفع" type="pie" data={statusChart} />
+        <ReportChart title={t('charts.monthlyRevenue')} type="bar" data={monthlyChart} />
+        <ReportChart title={t('charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالطالب، الكورس، أو مرجع العملية..."
+        searchPlaceholder={t('filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); setGatewayFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مدفوع', value: 'PAID' },
-            { label: 'قيد الانتظار', value: 'PENDING' },
-            { label: 'فاشل', value: 'FAILED' },
-            { label: 'مسترد', value: 'REFUNDED' },
-          ]}
+          options={statusFilterOptions}
         />
         <Select
-          label="بوابة الدفع"
+          label={t('filters.gateway')}
           value={gatewayFilter}
           onChange={(e) => setGatewayFilter(e.target.value)}
           options={gatewayOptions}
         />
       </FilterBar>
 
-      <Card>
+      <Card className="reports-table-card">
+        <div className="section-heading reports-table-head">
+          <h2>
+            <span className="reports-table-title-icon" aria-hidden="true">
+              <CreditCard size={20} />
+            </span>
+            {t('table.title')}
+          </h2>
+          <span className="muted-count">
+            {t('common:table.recordCount', {
+              count: formatNumber(filteredItems.length, undefined, i18n.language),
+            })}
+          </span>
+        </div>
         <Table
+          className="admin-users-table"
           loading={loading}
           data={tableRows}
-          emptyTitle="لا توجد مدفوعات"
-          emptyDescription="ستظهر عمليات الدفع هنا عند إتمامها."
+          stickyHeader
+          compact
+          fluid
+          maxHeight={560}
+          emptyTitle={t('table.emptyTitle')}
+          emptyDescription={t('table.emptyDescription')}
           columns={[
-            { key: 'id', header: 'رقم العملية' },
-            { key: 'student', header: 'الطالب' },
-            { key: 'course', header: 'الكورس' },
-            { key: 'finalAmount', header: 'المبلغ' },
-            { key: 'gateway', header: 'البوابة' },
+            { key: 'id', header: tableCols.id, width: '6.5rem', align: 'center' },
+            { key: 'student', header: tableCols.student, minWidth: '9rem' },
+            { key: 'course', header: tableCols.course, minWidth: '10rem', truncate: false },
+            { key: 'finalAmount', header: tableCols.finalAmount, width: '7rem', align: 'center' },
+            { key: 'gateway', header: tableCols.gateway, width: '7rem', align: 'center', hideOnMobile: true },
             {
               key: 'status',
-              header: 'الحالة',
+              header: tableCols.status,
+              width: '7.5rem',
+              align: 'center',
               render: (row) => (
-                <Badge variant={statusVariant(String(row._raw?.status))}>
+                <Badge variant={paymentStatusVariant(String(row._raw?.status))}>
                   {statusLabels[String(row._raw?.status)] || row.status}
                 </Badge>
               ),
             },
-            { key: 'createdAt', header: 'التاريخ' },
+            { key: 'createdAt', header: tableCols.createdAt, width: '9rem', align: 'center', hideOnMobile: true },
             {
               key: 'actions',
-              header: 'الإجراءات',
-              render: (row) => {
-                const payment = row._raw;
-                return (
-                  <div className="card-actions">
-                    <Button variant="ghost" size="sm" onClick={() => openDetail(payment)}>
-                      التفاصيل
-                    </Button>
-                    {payment.status === 'PAID' ? (
-                      <Button variant="danger" size="sm" onClick={() => setRefundTarget(payment)}>
-                        استرداد
-                      </Button>
-                    ) : null}
-                  </div>
-                );
-              },
+              header: tableCols.actions,
+              width: '8rem',
+              minWidth: '8rem',
+              truncate: false,
+              render: (row) => (
+                <div className="table-actions user-row-actions">
+                  <Link to={`/admin/payments/${row._raw.id}`} className="btn btn-ghost btn-sm">
+                    {t('actions.detail')}
+                  </Link>
+                </div>
+              ),
             },
           ]}
         />
       </Card>
-
-      <Modal
-        isOpen={detailOpen}
-        title="تفاصيل عملية الدفع"
-        onClose={() => { setDetailOpen(false); setSelected(null); }}
-      >
-        {selected ? (
-          <div className="stack-sm">
-            <div className="detail-row"><span>رقم العملية</span><strong>{selected.id}</strong></div>
-            <div className="detail-row"><span>الطالب</span><strong>{selected.user?.fullName || '—'}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.user?.email || '—'}</strong></div>
-            <div className="detail-row"><span>الكورس</span><strong>{selected.course?.titleAr || '—'}</strong></div>
-            <div className="detail-row"><span>المبلغ الأصلي</span><strong>{fmtMoney(Number(selected.amount))}</strong></div>
-            <div className="detail-row"><span>الخصم</span><strong>{fmtMoney(Number(selected.discountAmount))}</strong></div>
-            <div className="detail-row"><span>المبلغ النهائي</span><strong>{fmtMoney(Number(selected.finalAmount))}</strong></div>
-            <div className="detail-row"><span>بوابة الدفع</span><strong>{gatewayLabels[selected.gateway] || selected.gateway || '—'}</strong></div>
-            <div className="detail-row"><span>مرجع العملية</span><strong dir="ltr">{selected.transactionRef || '—'}</strong></div>
-            <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={statusVariant(selected.status)}>
-                {statusLabels[selected.status] || selected.status}
-              </Badge>
-            </div>
-            <div className="detail-row"><span>التاريخ</span><strong>{fmtDate(selected.createdAt)}</strong></div>
-            {selected.status === 'PAID' ? (
-              <Button variant="danger" onClick={() => setRefundTarget(selected)}>
-                استرداد المبلغ
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-      </Modal>
-
-      <ConfirmDialog
-        isOpen={Boolean(refundTarget)}
-        title="استرداد المبلغ"
-        message={`هل أنت متأكد من استرداد مبلغ ${fmtMoney(Number(refundTarget?.finalAmount || 0))} للطالب "${refundTarget?.user?.fullName}"؟`}
-        confirmLabel="تأكيد الاسترداد"
-        onConfirm={handleRefund}
-        onCancel={() => setRefundTarget(null)}
-      />
     </div>
   );
 }

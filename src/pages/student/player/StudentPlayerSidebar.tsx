@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   CheckCircle2, ChevronDown, ClipboardList, FileText, Lock, PlayCircle, Video,
 } from '@/icons';
@@ -28,12 +28,25 @@ interface StudentPlayerSidebarProps {
 }
 
 function ItemIcon({ item, state }: { item: CurriculumItem; state: 'done' | 'active' | 'locked' | 'default' }) {
-  if (state === 'done') return <CheckCircle2 size={16} className="curriculum-icon done" />;
-  if (state === 'locked') return <Lock size={16} className="curriculum-icon locked" />;
-  if (item.type === 'quiz') return <ClipboardList size={16} className="curriculum-icon" />;
-  if (item.type === 'resources') return <FileText size={16} className="curriculum-icon" />;
-  if (state === 'active') return <PlayCircle size={16} className="curriculum-icon active" />;
-  return <Video size={16} className="curriculum-icon" />;
+  const iconClass = [
+    'curriculum-icon',
+    state === 'done' ? 'done' : '',
+    state === 'active' ? 'active' : '',
+    state === 'locked' ? 'locked' : '',
+  ].filter(Boolean).join(' ');
+
+  let icon = <Video size={15} className={iconClass} />;
+  if (state === 'done') icon = <CheckCircle2 size={15} className={iconClass} />;
+  else if (state === 'locked') icon = <Lock size={15} className={iconClass} />;
+  else if (item.type === 'quiz') icon = <ClipboardList size={15} className={iconClass} />;
+  else if (item.type === 'resources') icon = <FileText size={15} className={iconClass} />;
+  else if (state === 'active') icon = <PlayCircle size={15} className={iconClass} />;
+
+  return (
+    <span className={`curriculum-icon-wrap ${state}`} aria-hidden>
+      {icon}
+    </span>
+  );
 }
 
 export function StudentPlayerSidebar({
@@ -165,20 +178,34 @@ export function StudentPlayerSidebar({
 
   return (
     <aside className="player-sidebar student-player-sidebar">
-      <div className="student-player-sidebar-head">
+      <header className="student-player-sidebar-head">
+        <div className="student-player-sidebar-head-top">
+          <span className="student-player-sidebar-kicker">محتوى الدورة</span>
+          <span className="student-player-sidebar-badge">{courseProgress.total} عنصر</span>
+        </div>
         <h3>{courseTitle}</h3>
         <div className="student-player-sidebar-overall">
-          <div className="student-player-sidebar-overall-label">
-            <span className="overall-count">{courseProgress.completed} / {courseProgress.total}</span>
-            <span className="overall-percent">{courseProgress.percent}% مكتمل</span>
+          <div
+            className="student-player-sidebar-ring"
+            style={{ '--progress': `${courseProgress.percent}%` } as CSSProperties}
+            aria-hidden
+          >
+            <span>{courseProgress.percent}%</span>
           </div>
-          <div className="student-curriculum-section-bar overall" aria-hidden>
-            <span style={{ width: `${courseProgress.percent}%` }} />
+          <div className="student-player-sidebar-overall-copy">
+            <div className="student-player-sidebar-overall-label">
+              <span className="overall-percent">{courseProgress.percent}% مكتمل</span>
+              <span className="overall-count">{courseProgress.completed} / {courseProgress.total}</span>
+            </div>
+            <div className="student-curriculum-section-bar overall" aria-hidden>
+              <span style={{ width: `${courseProgress.percent}%` }} />
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="student-player-curriculum">
+        <div className="student-player-curriculum-scroll">
         {curriculum.map(({ section, items, progress }) => {
           const isExpanded = expandedSections.has(section.id);
 
@@ -257,6 +284,7 @@ export function StudentPlayerSidebar({
             </div>
           );
         })}
+        </div>
       </div>
     </aside>
   );

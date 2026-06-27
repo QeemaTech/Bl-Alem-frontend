@@ -335,28 +335,40 @@ export default function InstructorQuizBuilderPage() {
 
   return (
     <div className="page-grid quiz-builder-page">
-      <PageHeader
-        title={quiz.titleAr || 'منشئ الاختبار'}
-        subtitle={`${questionStats.complete} من ${questionStats.total} أسئلة جاهزة${quiz.isReady ? '' : ' — أكمل الأسئلة لتفعيل الاختبار للطلاب'}`}
-        breadcrumb={[
-          { label: 'كورساتي', to: '/instructor/courses' },
-          { label: quiz.course?.titleAr || 'الكورس', to: builderUrl },
-          { label: quiz.titleAr || 'الاختبار' },
-        ]}
-        action={
-          <div className="chip-row">
-            <Button type="button" size="sm" variant="secondary" onClick={() => navigate(builderUrl)} icon={<ArrowRight size={16} />}>
+      <div className="reports-header quiz-builder-header">
+        <PageHeader
+          title={quiz.titleAr || 'منشئ الاختبار'}
+          subtitle={`${questionStats.complete} من ${questionStats.total} أسئلة جاهزة${quiz.isReady ? '' : ' — أكمل الأسئلة لتفعيل الاختبار للطلاب'}`}
+          breadcrumb={[
+            { label: 'كورساتي', to: '/instructor/courses' },
+            { label: quiz.course?.titleAr || 'الكورس', to: builderUrl },
+            { label: quiz.titleAr || 'الاختبار' },
+          ]}
+        />
+        <div className="quiz-builder-header-actions">
+          <div className="quiz-builder-header-actions-main">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(builderUrl)}
+              icon={<ArrowRight size={18} />}
+            >
               العودة لمنشئ الكورس
             </Button>
-            <Button type="button" size="sm" loading={savingQuiz} onClick={updateQuiz} icon={<Save size={16} />}>
+            <Button type="button" loading={savingQuiz} onClick={updateQuiz} icon={<Save size={18} />}>
               حفظ الإعدادات
             </Button>
-            <Button type="button" size="sm" variant="danger" onClick={() => setDeleteTarget({ type: 'quiz' })}>
-              حذف الاختبار
-            </Button>
           </div>
-        }
-      />
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => setDeleteTarget({ type: 'quiz' })}
+            icon={<Trash2 size={18} />}
+          >
+            حذف الاختبار
+          </Button>
+        </div>
+      </div>
 
       <Card className="quiz-settings-card">
         <div className="section-heading quiz-section-heading">

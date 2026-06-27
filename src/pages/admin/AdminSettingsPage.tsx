@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Award, RefreshCw, Save, Settings2, Shield, Upload, Wallet,
 } from '@/icons';
@@ -17,10 +18,23 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { useSiteSettings } from '../../store/SiteSettingsContext';
 import { mediaUrl, normalizeHexColor, normalizeStoredMediaPath } from '../../utils/mediaUrl';
-import { CURRENCY_OPTIONS, DEFAULT_CURRENCY, currencySuffix, getCurrencySymbol } from '../../utils/currency';
+import { DEFAULT_CURRENCY, currencySuffix, getCurrencySymbol } from '../../utils/currency';
 import { isSettingTruthy } from '../../utils/platformSettings';
 
 type FieldType = 'text' | 'number' | 'email' | 'url' | 'color' | 'select' | 'toggle' | 'textarea';
+
+interface SettingFieldDef {
+  key: string;
+  type: FieldType;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+interface SettingSectionDef {
+  id: string;
+  fields: SettingFieldDef[];
+}
 
 interface SettingField {
   key: string;
@@ -30,6 +44,7 @@ interface SettingField {
   options?: { label: string; value: string }[];
   min?: number;
   max?: number;
+  step?: number;
   placeholder?: string;
 }
 
@@ -59,7 +74,8 @@ const DEFAULTS: Record<string, string> = {
   defaultLanguage: 'ar',
   timezone: 'Africa/Cairo',
   minWithdrawalAmount: '100',
-  referralRewardAmount: '50',
+  referralRewardPoints: '5',
+  pointsPerEgp: '1',
   referralEnabled: 'true',
   maxUploadSizeMB: '200',
   maintenanceMode: 'false',
@@ -79,118 +95,98 @@ const DEFAULTS: Record<string, string> = {
   sessionTimeoutMinutes: '60',
 };
 
-const SECTIONS: SettingSection[] = [
+const SECTION_DEFS: SettingSectionDef[] = [
   {
     id: 'general',
-    label: 'عام',
-    title: 'الإعدادات العامة',
-    description: 'اسم المنصة، اللغة، وضوابط التسجيل والصيانة.',
     fields: [
-      { key: 'platformName', label: 'اسم المنصة', type: 'text', placeholder: 'BI-ALEM / بالعِلم' },
-      { key: 'platformTagline', label: 'الشعار النصي', type: 'text', helper: 'يظهر في الصفحة الرئيسية ونتائج البحث' },
-      {
-        key: 'defaultLanguage',
-        label: 'اللغة الافتراضية',
-        type: 'select',
-        options: [{ label: 'العربية', value: 'ar' }, { label: 'English', value: 'en' }],
-      },
-      {
-        key: 'timezone',
-        label: 'المنطقة الزمنية',
-        type: 'select',
-        options: [
-          { label: 'القاهرة (GMT+2)', value: 'Africa/Cairo' },
-          { label: 'الرياض (GMT+3)', value: 'Asia/Riyadh' },
-          { label: 'دبي (GMT+4)', value: 'Asia/Dubai' },
-          { label: 'UTC', value: 'UTC' },
-        ],
-      },
-      { key: 'maintenanceMode', label: 'وضع الصيانة', type: 'toggle', helper: 'عند التفعيل تُعرض رسالة صيانة للزوار' },
-      { key: 'registrationEnabled', label: 'تسجيل الطلاب', type: 'toggle' },
-      { key: 'instructorRegistrationEnabled', label: 'تسجيل المحاضرين', type: 'toggle' },
+      { key: 'platformName', type: 'text' },
+      { key: 'platformTagline', type: 'text' },
+      { key: 'defaultLanguage', type: 'select' },
+      { key: 'timezone', type: 'select' },
+      { key: 'maintenanceMode', type: 'toggle' },
+      { key: 'registrationEnabled', type: 'toggle' },
+      { key: 'instructorRegistrationEnabled', type: 'toggle' },
     ],
   },
   {
     id: 'branding',
-    label: 'الهوية',
-    title: 'الهوية البصرية',
-    description: 'الشعار، الألوان، والمظهر العام للمنصة.',
     fields: [
-      { key: 'logo', label: 'رابط الشعار', type: 'text', helper: 'ارفع صورة أو أدخل رابطاً مباشراً' },
-      { key: 'favicon', label: 'أيقونة المتصفح (Favicon)', type: 'text' },
-      { key: 'primaryColor', label: 'اللون الأساسي', type: 'color' },
-      { key: 'secondaryColor', label: 'اللون الثانوي', type: 'color' },
+      { key: 'logo', type: 'text' },
+      { key: 'favicon', type: 'text' },
+      { key: 'primaryColor', type: 'color' },
+      { key: 'secondaryColor', type: 'color' },
     ],
   },
   {
     id: 'financial',
-    label: 'مالي',
-    title: 'الإعدادات المالية',
-    description: 'العمولات، العملة، السحوبات، وبوابة الدفع.',
     fields: [
-      { key: 'platformCommissionPercentage', label: 'نسبة عمولة المنصة (%)', type: 'number', min: 0, max: 100 },
-      { key: 'currency', label: 'العملة', type: 'select', options: [...CURRENCY_OPTIONS] },
-      { key: 'taxPercentage', label: 'نسبة الضريبة (%)', type: 'number', min: 0, max: 100 },
-      { key: 'minWithdrawalAmount', label: `الحد الأدنى للسحب ${currencySuffix()}`, type: 'number', min: 0 },
-      { key: 'paymentGatewayPlaceholder', label: 'بوابة الدفع', type: 'text', helper: 'SIMULATED للتجربة — استبدلها بمزود حقيقي لاحقاً' },
+      { key: 'platformCommissionPercentage', type: 'number', min: 0, max: 100 },
+      { key: 'currency', type: 'select' },
+      { key: 'taxPercentage', type: 'number', min: 0, max: 100 },
+      { key: 'minWithdrawalAmount', type: 'number', min: 0 },
+      { key: 'paymentGatewayPlaceholder', type: 'text' },
     ],
   },
   {
     id: 'certificates',
-    label: 'شهادات',
-    title: 'الشهادات والإحالات',
-    description: 'بادئة الشهادات ومكافآت برنامج الإحالة.',
     fields: [
-      { key: 'certificatePrefix', label: 'بادئة الشهادات', type: 'text', placeholder: 'BI', helper: 'مثال: BI-2026-00001' },
-      { key: 'referralRewardAmount', label: `مكافأة الإحالة ${currencySuffix()}`, type: 'number', min: 0 },
-      { key: 'referralEnabled', label: 'تفعيل برنامج الإحالة', type: 'toggle' },
+      { key: 'certificatePrefix', type: 'text' },
+      { key: 'referralRewardPoints', type: 'number', min: 0 },
+      { key: 'pointsPerEgp', type: 'number', min: 0.01, step: 0.01 },
+      { key: 'referralEnabled', type: 'toggle' },
     ],
   },
   {
     id: 'contact',
-    label: 'تواصل',
-    title: 'التواصل والدعم',
-    description: 'قنوات التواصل مع الطلاب والمحاضرين.',
     fields: [
-      { key: 'supportEmail', label: 'بريد الدعم', type: 'email' },
-      { key: 'supportPhone', label: 'هاتف الدعم', type: 'text', placeholder: '+966500000000' },
-      { key: 'whatsappNumber', label: 'واتساب', type: 'text', placeholder: '+966500000000' },
-      { key: 'facebookUrl', label: 'فيسبوك', type: 'url', placeholder: 'https://facebook.com/...' },
-      { key: 'twitterUrl', label: 'X (تويتر)', type: 'url' },
-      { key: 'instagramUrl', label: 'إنستغرام', type: 'url' },
-      { key: 'linkedinUrl', label: 'لينكدإن', type: 'url' },
-      { key: 'youtubeUrl', label: 'يوتيوب', type: 'url' },
+      { key: 'supportEmail', type: 'email' },
+      { key: 'supportPhone', type: 'text' },
+      { key: 'whatsappNumber', type: 'text' },
+      { key: 'facebookUrl', type: 'url' },
+      { key: 'twitterUrl', type: 'url' },
+      { key: 'instagramUrl', type: 'url' },
+      { key: 'linkedinUrl', type: 'url' },
+      { key: 'youtubeUrl', type: 'url' },
     ],
   },
   {
     id: 'legal',
-    label: 'SEO',
-    title: 'SEO والصفحات القانونية',
-    description: 'تحسين محركات البحث وروابط الشروط والخصوصية.',
     fields: [
-      { key: 'metaTitle', label: 'عنوان SEO', type: 'text' },
-      { key: 'metaDescription', label: 'وصف SEO', type: 'textarea' },
-      { key: 'termsUrl', label: 'رابط الشروط والأحكام', type: 'text' },
-      { key: 'privacyUrl', label: 'رابط سياسة الخصوصية', type: 'text' },
-      { key: 'googleAnalyticsId', label: 'Google Analytics ID', type: 'text', placeholder: 'G-XXXXXXXXXX', helper: 'اختياري' },
+      { key: 'metaTitle', type: 'text' },
+      { key: 'metaDescription', type: 'textarea' },
+      { key: 'termsUrl', type: 'text' },
+      { key: 'privacyUrl', type: 'text' },
+      { key: 'googleAnalyticsId', type: 'text' },
     ],
   },
   {
     id: 'system',
-    label: 'تقني',
-    title: 'الإعدادات التقنية',
-    description: 'حدود الرفع، OTP، ومهلة الجلسة.',
     fields: [
-      { key: 'maxUploadSizeMB', label: 'الحد الأقصى لحجم الرفع (MB)', type: 'number', min: 1, max: 2048 },
-      { key: 'otpExpiryMinutes', label: 'مدة صلاحية OTP (دقيقة)', type: 'number', min: 1, max: 60 },
-      { key: 'sessionTimeoutMinutes', label: 'مهلة الجلسة (دقيقة)', type: 'number', min: 5, max: 1440 },
+      { key: 'maxUploadSizeMB', type: 'number', min: 1, max: 2048 },
+      { key: 'otpExpiryMinutes', type: 'number', min: 1, max: 60 },
+      { key: 'sessionTimeoutMinutes', type: 'number', min: 5, max: 1440 },
     ],
   },
 ];
 
-const ALL_KEYS = SECTIONS.flatMap((s) => s.fields.map((f) => f.key));
+function fieldText(
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  sectionId: string,
+  fieldKey: string,
+  prop: 'label' | 'helper' | 'placeholder',
+) {
+  const key = `admin.sections.${sectionId}.fields.${fieldKey}.${prop}`;
+  const value = t(key, { defaultValue: '' });
+  return value === key ? undefined : value;
+}
 
-function BrandPreview({ settings }: { settings: Record<string, string> }) {
+function BrandPreview({
+  settings,
+  t,
+}: {
+  settings: Record<string, string>;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
   const primary = normalizeHexColor(settings.primaryColor || '', '#22A6BC');
   const secondary = normalizeHexColor(settings.secondaryColor || '', '#1E293B');
   const logoSrc = mediaUrl(settings.logo);
@@ -199,27 +195,32 @@ function BrandPreview({ settings }: { settings: Record<string, string> }) {
     <div
       className="settings-brand-preview"
       style={{
-        background: `linear-gradient(180deg, color-mix(in srgb, ${primary} 10%, #fff), #fff)`,
+        background: `linear-gradient(180deg, color-mix(in srgb, ${primary} 10%, var(--color-surface-container)), var(--color-surface-container))`,
         borderColor: primary,
       }}
     >
       <div className="settings-brand-header">
         {logoSrc ? (
-          <img src={logoSrc} alt="معاينة الشعار" className="settings-brand-logo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          <img
+            src={logoSrc}
+            alt={t('admin.preview.logoAlt')}
+            className="settings-brand-logo"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
         ) : (
-          <div className="settings-brand-logo-placeholder">شعار</div>
+          <div className="settings-brand-logo-placeholder">{t('admin.preview.logoPlaceholder')}</div>
         )}
         <div>
-          <strong>{settings.platformName || 'اسم المنصة'}</strong>
-          <small>{settings.platformTagline || 'الشعار النصي'}</small>
+          <strong>{settings.platformName || t('admin.preview.platformNameFallback')}</strong>
+          <small>{settings.platformTagline || t('admin.preview.taglineFallback')}</small>
         </div>
       </div>
       <div className="settings-brand-swatches">
-        <span style={{ background: primary }}>أساسي</span>
-        <span style={{ background: secondary }}>ثانوي</span>
+        <span style={{ background: primary }}>{t('admin.preview.primary')}</span>
+        <span style={{ background: secondary }}>{t('admin.preview.secondary')}</span>
       </div>
       <button type="button" className="settings-brand-btn" style={{ backgroundColor: primary }}>
-        زر تجريبي
+        {t('admin.preview.sampleButton')}
       </button>
     </div>
   );
@@ -228,6 +229,11 @@ function BrandPreview({ settings }: { settings: Record<string, string> }) {
 function LogoUploadField({
   label,
   helper,
+  placeholder,
+  emptyLabel,
+  changeLabel,
+  uploadLabel,
+  removeLabel,
   value,
   uploading,
   onChange,
@@ -235,6 +241,11 @@ function LogoUploadField({
 }: {
   label: string;
   helper?: string;
+  placeholder: string;
+  emptyLabel: string;
+  changeLabel: string;
+  uploadLabel: string;
+  removeLabel: string;
   value: string;
   uploading: boolean;
   onChange: (v: string) => void;
@@ -254,7 +265,7 @@ function LogoUploadField({
             ) : (
               <div className="settings-logo-preview-empty">
                 <Upload size={28} />
-                <span>لا يوجد شعار</span>
+                <span>{emptyLabel}</span>
               </div>
             )}
           </div>
@@ -262,7 +273,7 @@ function LogoUploadField({
             <input
               className="input"
               value={value}
-              placeholder="/uploads/logo.png أو https://..."
+              placeholder={placeholder}
               onChange={(e) => onChange(e.target.value)}
             />
             {helper ? <small className="field-helper">{helper}</small> : null}
@@ -279,11 +290,11 @@ function LogoUploadField({
                 }}
               />
               <Button type="button" variant="secondary" loading={uploading} icon={<Upload size={16} />} onClick={() => inputRef.current?.click()}>
-                {previewSrc ? 'تغيير الصورة' : 'رفع شعار'}
+                {previewSrc ? changeLabel : uploadLabel}
               </Button>
               {previewSrc ? (
                 <Button type="button" variant="outline" onClick={() => onChange('')}>
-                  إزالة
+                  {removeLabel}
                 </Button>
               ) : null}
             </div>
@@ -294,11 +305,24 @@ function LogoUploadField({
   );
 }
 
-function ToggleField({ label, helper, checked, onChange }: {
+function ToggleField({
+  label,
+  helper,
+  checked,
+  onChange,
+  enabledLabel,
+  disabledLabel,
+  enabledHint,
+  disabledHint,
+}: {
   label: string;
   helper?: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  enabledLabel: string;
+  disabledLabel: string;
+  enabledHint: string;
+  disabledHint: string;
 }) {
   return (
     <div className="settings-toggle-field rounded-2xl border border-outline/80 bg-surface-container-low p-4">
@@ -320,16 +344,16 @@ function ToggleField({ label, helper, checked, onChange }: {
         >
           <span
             className={cn(
-              'absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-all duration-200',
+              'absolute top-1 h-6 w-6 rounded-full bg-surface-container shadow-md transition-all duration-200',
               checked ? 'start-7' : 'start-1',
             )}
           />
         </button>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <Badge variant={checked ? 'success' : 'warning'}>{checked ? 'مفعّل' : 'معطّل'}</Badge>
+        <Badge variant={checked ? 'success' : 'warning'}>{checked ? enabledLabel : disabledLabel}</Badge>
         <span className="text-xs text-on-surface-variant">
-          {checked ? 'ينعكس فوراً على المنصة' : 'غير مفعّل حالياً'}
+          {checked ? enabledHint : disabledHint}
         </span>
       </div>
     </div>
@@ -364,6 +388,7 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 }
 
 export default function AdminSettingsPage() {
+  const { t } = useTranslation('settings');
   const { showToast } = useToast();
   const { refreshSettings } = useSiteSettings();
   const [settings, setSettings] = useState<Record<string, string>>({ ...DEFAULTS });
@@ -373,6 +398,46 @@ export default function AdminSettingsPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+
+  const sections = useMemo<SettingSection[]>(() => SECTION_DEFS.map((section) => ({
+    id: section.id,
+    label: t(`admin.tabs.${section.id}`),
+    title: t(`admin.sections.${section.id}.title`),
+    description: t(`admin.sections.${section.id}.description`),
+    fields: section.fields.map((field) => {
+      const base: SettingField = {
+        ...field,
+        label: fieldText(t, section.id, field.key, 'label') || field.key,
+        helper: fieldText(t, section.id, field.key, 'helper'),
+        placeholder: fieldText(t, section.id, field.key, 'placeholder'),
+      };
+
+      if (field.key === 'defaultLanguage') {
+        base.options = [
+          { label: t('admin.options.language.ar'), value: 'ar' },
+          { label: t('admin.options.language.en'), value: 'en' },
+        ];
+      } else if (field.key === 'timezone') {
+        base.options = ['Africa/Cairo', 'Asia/Riyadh', 'Asia/Dubai', 'UTC'].map((value) => ({
+          label: t(`admin.options.timezone.${value}`),
+          value,
+        }));
+      } else if (field.key === 'currency') {
+        base.options = ['EGP', 'SAR', 'USD'].map((value) => ({
+          label: t(`admin.options.currency.${value}`),
+          value,
+        }));
+      } else if (field.key === 'minWithdrawalAmount') {
+        base.label = t(`admin.sections.${section.id}.fields.${field.key}.label`, {
+          suffix: currencySuffix(settings.currency || DEFAULT_CURRENCY),
+        });
+      }
+
+      return base;
+    }),
+  })), [t, settings.currency]);
+
+  const allKeys = useMemo(() => sections.flatMap((s) => s.fields.map((f) => f.key)), [sections]);
 
   const load = async () => {
     setLoading(true);
@@ -385,7 +450,7 @@ export default function AdminSettingsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const currentSection = SECTIONS.find((s) => s.id === activeTab) ?? SECTIONS[0];
+  const currentSection = sections.find((s) => s.id === activeTab) ?? sections[0];
   const sectionKeys = currentSection.fields.map((f) => f.key);
 
   const dirty = useMemo(
@@ -394,8 +459,8 @@ export default function AdminSettingsPage() {
   );
 
   const totalDirty = useMemo(
-    () => ALL_KEYS.some((key) => (settings[key] ?? '') !== (savedSnapshot[key] ?? '')),
-    [settings, savedSnapshot],
+    () => allKeys.some((key) => (settings[key] ?? '') !== (savedSnapshot[key] ?? '')),
+    [settings, savedSnapshot, allKeys],
   );
 
   const set = (key: string, value: string) => setSettings((c) => ({ ...c, [key]: value }));
@@ -403,19 +468,21 @@ export default function AdminSettingsPage() {
   const validateSection = (keys: string[]) => {
     const email = settings.supportEmail?.trim();
     if (keys.includes('supportEmail') && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showToast('بريد الدعم غير صالح.', 'error');
+      showToast(t('admin.toast.invalidEmail'), 'error');
       return false;
     }
     const commission = Number(settings.platformCommissionPercentage);
     if (keys.includes('platformCommissionPercentage') && (Number.isNaN(commission) || commission < 0 || commission > 100)) {
-      showToast('نسبة العمولة يجب أن تكون بين 0 و 100.', 'error');
+      showToast(t('admin.toast.invalidCommission'), 'error');
       return false;
     }
     const colorKeys = ['primaryColor', 'secondaryColor'].filter((k) => keys.includes(k));
     for (const key of colorKeys) {
       const val = settings[key]?.trim();
       if (val && !/^#?[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?$/.test(val)) {
-        showToast(`اللون ${key === 'primaryColor' ? 'الأساسي' : 'الثانوي'} يجب أن يكون بصيغة #RRGGBB.`, 'error');
+        showToast(t('admin.toast.invalidColor', {
+          color: key === 'primaryColor' ? t('admin.toast.primaryColor') : t('admin.toast.secondaryColor'),
+        }), 'error');
         return false;
       }
     }
@@ -440,9 +507,9 @@ export default function AdminSettingsPage() {
       setSettings((c) => ({ ...c, ...payload }));
       setSavedSnapshot((c) => ({ ...c, ...payload }));
       await refreshSettings();
-      showToast('تم حفظ الإعدادات وتطبيقها على المنصة.', 'success');
+      showToast(t('admin.toast.saved'), 'success');
     } catch {
-      showToast('تعذّر حفظ الإعدادات. تحقق من الاتصال وحاول مجدداً.', 'error');
+      showToast(t('admin.toast.saveFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -453,7 +520,7 @@ export default function AdminSettingsPage() {
     saveKeys(sectionKeys);
   };
 
-  const saveAll = () => saveKeys(ALL_KEYS);
+  const saveAll = () => saveKeys(allKeys);
 
   const resetSection = () => {
     setSettings((c) => {
@@ -474,9 +541,9 @@ export default function AdminSettingsPage() {
       await adminApi.updateSettings(payload);
       setSavedSnapshot((c) => ({ ...c, ...payload }));
       await refreshSettings();
-      showToast(key === 'logo' ? 'تم رفع الشعار وتطبيقه على المنصة.' : 'تم رفع الأيقونة وتطبيقها على المنصة.', 'success');
+      showToast(key === 'logo' ? t('admin.toast.logoUploaded') : t('admin.toast.faviconUploaded'), 'success');
     } catch {
-      showToast('تعذّر رفع الصورة. تأكد من أن Backend يعمل وأن الملف صورة صالحة.', 'error');
+      showToast(t('admin.toast.uploadFailed'), 'error');
     } finally {
       setBusy(false);
     }
@@ -485,38 +552,57 @@ export default function AdminSettingsPage() {
   if (loading) return <DashboardSkeleton />;
 
   const maintenance = isSettingTruthy(settings.maintenanceMode);
+  const logoUploadLabels = {
+    placeholder: t('admin.logoUpload.placeholder'),
+    empty: t('admin.logoUpload.empty'),
+    change: t('admin.logoUpload.changeImage'),
+    upload: t('admin.logoUpload.uploadLogo'),
+    remove: t('admin.logoUpload.remove'),
+  };
 
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="الإعدادات" subtitle="تهيئة شاملة لإعدادات المنصة — عام، مالي، تواصل، SEO، وتقني" />
+        <PageHeader title={t('admin.title')} subtitle={t('admin.subtitle')} />
         <div className="reports-actions">
           <Button variant="secondary" icon={<RefreshCw size={16} />} onClick={load} disabled={loading || saving}>
-            تحديث
+            {t('admin.actions.refresh')}
           </Button>
           <Button icon={<Save size={16} />} onClick={saveAll} loading={saving} disabled={!totalDirty}>
-            حفظ الكل
+            {t('admin.actions.saveAll')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إعدادات محفوظة" value={String(ALL_KEYS.filter((k) => savedSnapshot[k]?.trim()).length)} icon={Settings2} />
         <StatCard
-          title="حالة المنصة"
-          value={maintenance ? 'صيانة' : 'نشطة'}
-          icon={Shield}
-          hint={maintenance ? 'الزوار يرون رسالة صيانة' : 'المنصة متاحة للجميع'}
+          title={t('admin.stats.savedSettings')}
+          value={String(allKeys.filter((k) => savedSnapshot[k]?.trim()).length)}
+          icon={Settings2}
         />
-        <StatCard title="عمولة المنصة" value={`${savedSnapshot.platformCommissionPercentage || '0'}%`} icon={Wallet} />
-        <StatCard title="مكافأة الإحالة" value={`${savedSnapshot.referralRewardAmount || '0'} ${getCurrencySymbol(savedSnapshot.currency || DEFAULT_CURRENCY)}`} icon={Award} />
+        <StatCard
+          title={t('admin.stats.platformStatus')}
+          value={maintenance ? t('admin.stats.maintenance') : t('admin.stats.active')}
+          icon={Shield}
+          hint={maintenance ? t('admin.stats.maintenanceHint') : t('admin.stats.activeHint')}
+        />
+        <StatCard
+          title={t('admin.stats.commission')}
+          value={`${savedSnapshot.platformCommissionPercentage || '0'}%`}
+          icon={Wallet}
+        />
+        <StatCard
+          title={t('admin.stats.referralPoints')}
+          value={`${savedSnapshot.referralRewardPoints || '5'} ${t('admin.stats.pointsUnit')}`}
+          icon={Award}
+        />
       </div>
 
       <Tabs
         variant="pills"
         activeTab={activeTab}
         onChange={setActiveTab}
-        tabs={SECTIONS.map((s) => ({ id: s.id, label: s.label }))}
+        tabs={sections.map((s) => ({ id: s.id, label: s.label }))}
       />
 
       <div className="settings-layout settings-layout--full">
@@ -526,13 +612,13 @@ export default function AdminSettingsPage() {
               <h3>{currentSection.title}</h3>
               <p>{currentSection.description}</p>
             </div>
-            {dirty ? <Badge variant="warning">تغييرات غير محفوظة</Badge> : null}
+            {dirty ? <Badge variant="warning">{t('admin.actions.unsavedChanges')}</Badge> : null}
           </div>
 
           <form className="form-grid" onSubmit={saveSection}>
             {activeTab === 'branding' ? (
               <div className="settings-inline-preview">
-                <BrandPreview settings={settings} />
+                <BrandPreview settings={settings} t={t} />
               </div>
             ) : null}
             {currentSection.fields.map((field) => {
@@ -547,6 +633,10 @@ export default function AdminSettingsPage() {
                     helper={field.helper}
                     checked={isSettingTruthy(value)}
                     onChange={(v) => set(field.key, v ? 'true' : 'false')}
+                    enabledLabel={t('admin.toggle.enabled')}
+                    disabledLabel={t('admin.toggle.disabled')}
+                    enabledHint={t('admin.toggle.enabledHint')}
+                    disabledHint={t('admin.toggle.disabledHint')}
                   />
                 );
               }
@@ -599,6 +689,11 @@ export default function AdminSettingsPage() {
                     uploading={uploadingLogo}
                     onChange={(v) => set('logo', v)}
                     onUpload={(file) => uploadImageSetting('logo', file, setUploadingLogo)}
+                    placeholder={logoUploadLabels.placeholder}
+                    emptyLabel={logoUploadLabels.empty}
+                    changeLabel={logoUploadLabels.change}
+                    uploadLabel={logoUploadLabels.upload}
+                    removeLabel={logoUploadLabels.remove}
                   />
                 );
               }
@@ -608,11 +703,16 @@ export default function AdminSettingsPage() {
                   <LogoUploadField
                     key={field.key}
                     label={field.label}
-                    helper="ارفع أيقونة مربعة (PNG/WebP) — 32×32 أو 64×64"
+                    helper={field.helper}
                     value={value}
                     uploading={uploadingFavicon}
                     onChange={(v) => set('favicon', v)}
                     onUpload={(file) => uploadImageSetting('favicon', file, setUploadingFavicon)}
+                    placeholder={logoUploadLabels.placeholder}
+                    emptyLabel={logoUploadLabels.empty}
+                    changeLabel={logoUploadLabels.change}
+                    uploadLabel={logoUploadLabels.upload}
+                    removeLabel={logoUploadLabels.remove}
                   />
                 );
               }
@@ -642,6 +742,10 @@ export default function AdminSettingsPage() {
                       helper={field.helper}
                       checked={isSettingTruthy(value)}
                       onChange={(v) => set(field.key, v ? 'true' : 'false')}
+                      enabledLabel={t('admin.toggle.enabled')}
+                      disabledLabel={t('admin.toggle.disabled')}
+                      enabledHint={t('admin.toggle.enabledHint')}
+                      disabledHint={t('admin.toggle.disabledHint')}
                     />
                   );
                 })}
@@ -650,10 +754,10 @@ export default function AdminSettingsPage() {
 
             <div className="settings-form-actions">
               <Button type="button" variant="secondary" onClick={resetSection} disabled={!dirty || saving}>
-                تراجع
+                {t('admin.actions.revert')}
               </Button>
               <Button type="submit" loading={saving} disabled={!dirty}>
-                حفظ {currentSection.label}
+                {t('admin.actions.saveSection', { section: currentSection.label })}
               </Button>
             </div>
           </form>

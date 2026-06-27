@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Table2 } from '@/icons';
+import { useAdminUserLabels } from '../../../hooks/useAdminUserLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
 import { UserRowActions } from './UserRowActions';
-import { roleLabels, roleVariant, statusLabels, statusVariant } from './userShared';
 
 export interface UserTableRow extends Record<string, unknown> {
   id: number | string;
@@ -36,6 +38,10 @@ export function UsersTable({
   onToggleStatus,
   onDelete,
 }: UsersTableProps) {
+  const { t, i18n } = useTranslation(['users', 'common']);
+  const { roleLabels, statusLabels, roleVariant, statusVariant } = useAdminUserLabels();
+  const cols = t('admin.users.table.columns', { returnObjects: true }) as Record<string, string>;
+
   return (
     <Card className="reports-table-card">
       <div className="section-heading reports-table-head">
@@ -43,9 +49,13 @@ export function UsersTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          قائمة المستخدمين
+          {t('admin.users.table.title')}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+        <span className="muted-count">
+          {t('common:table.recordCount', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table<UserTableRow>
         className="admin-users-table"
@@ -53,15 +63,15 @@ export function UsersTable({
         stickyHeader
         compact
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا يوجد مستخدمون"
-        emptyDescription="أضف مستخدماً جديداً للبدء."
+        emptyTitle={t('admin.users.table.emptyTitle')}
+        emptyDescription={t('admin.users.table.emptyDescription')}
         data={items}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم المستخدم', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'fullName',
-            header: 'الاسم',
+            header: cols.fullName,
             width: '16rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -73,7 +83,7 @@ export function UsersTable({
           },
           {
             key: 'email',
-            header: 'البريد',
+            header: cols.email,
             width: '18rem',
             className: 'admin-col-email',
             truncate: false,
@@ -82,7 +92,7 @@ export function UsersTable({
           },
           {
             key: 'phone',
-            header: 'الهاتف',
+            header: cols.phone,
             width: '11rem',
             className: 'admin-col-phone',
             truncate: false,
@@ -91,7 +101,7 @@ export function UsersTable({
           },
           {
             key: 'role',
-            header: 'الدور',
+            header: cols.role,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -105,7 +115,7 @@ export function UsersTable({
           },
           {
             key: 'status',
-            header: 'الحالة',
+            header: cols.status,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -117,11 +127,11 @@ export function UsersTable({
               </Badge>
             ),
           },
-          { key: 'wallet', header: 'المحفظة', width: '8rem', align: 'center', hideOnMobile: true },
-          { key: 'activity', header: 'النشاط', width: '10rem', hideOnMobile: true },
+          { key: 'wallet', header: cols.wallet, width: '8rem', align: 'center', hideOnMobile: true },
+          { key: 'activity', header: cols.activity, width: '10rem', hideOnMobile: true },
           {
             key: 'joinedAt',
-            header: 'التسجيل',
+            header: cols.joinedAt,
             width: '10rem',
             className: 'admin-col-date',
             truncate: false,
@@ -129,9 +139,9 @@ export function UsersTable({
           },
           {
             key: 'actions',
-            header: 'الإجراءات',
-            width: '22rem',
-            wrap: true,
+            header: cols.actions,
+            width: '26rem',
+            minWidth: '26rem',
             truncate: false,
             render: (row) => (
               <UserRowActions

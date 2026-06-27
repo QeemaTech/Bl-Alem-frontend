@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from './EmptyState';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { formatNumber } from '../../utils/localeFormat';
 
 export interface TableColumn<T> {
   key: keyof T | string;
@@ -29,6 +31,7 @@ interface TableProps<T> {
   compact?: boolean;
   fluid?: boolean;
   showFooter?: boolean;
+  showHeadersWhenEmpty?: boolean;
   className?: string;
   onRowClick?: (row: T) => void;
   hideScrollNotice?: boolean;
@@ -139,10 +142,12 @@ export function Table<T extends Record<string, unknown>>({
   compact = false,
   fluid = false,
   showFooter = true,
+  showHeadersWhenEmpty = false,
   className = '',
   onRowClick,
   hideScrollNotice = false,
 }: TableProps<T>) {
+  const { t, i18n } = useTranslation('common');
   const normalizedColumns = columns as TableColumn<Record<string, unknown>>[];
   const isCompact = compact || normalizedColumns.length >= 6;
   const isWide = !fluid && normalizedColumns.length >= 8;
@@ -170,7 +175,7 @@ export function Table<T extends Record<string, unknown>>({
     );
   }
 
-  if (!data.length) {
+  if (!data.length && !showHeadersWhenEmpty) {
     return (
       <div className={`table-shell is-empty ${className}`.trim()}>
         <EmptyState title={emptyTitle} description={emptyDescription} />
@@ -184,11 +189,11 @@ export function Table<T extends Record<string, unknown>>({
   const primaryColumn = mobileColumns[0];
 
   return (
-    <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${className}`.trim()}>
+    <div className={`table-shell ${isCompact ? 'is-compact' : ''} ${fluid ? 'is-fluid' : ''} ${isWide ? 'is-wide' : ''} ${!data.length ? 'is-empty-with-headers' : ''} ${className}`.trim()}>
       {isWide && !hideScrollNotice ? (
         <div className="table-scroll-notice" aria-hidden="true">
           <span className="table-scroll-notice-icon">⇤⇥</span>
-          <span>مرّر أفقياً لعرض جميع الأعمدة</span>
+          <span>{t('table.scrollHint')}</span>
         </div>
       ) : null}
 
@@ -216,6 +221,13 @@ export function Table<T extends Record<string, unknown>>({
               </tr>
             </thead>
             <tbody className="data-table-body">
+              {!data.length ? (
+                <tr className="data-table-empty-row">
+                  <td colSpan={columnCount}>
+                    <EmptyState title={emptyTitle} description={emptyDescription} />
+                  </td>
+                </tr>
+              ) : null}
               {data.map((row, index) => {
                 const clickable = Boolean(onRowClick);
                 return (
@@ -250,7 +262,7 @@ export function Table<T extends Record<string, unknown>>({
 
       {showFooter ? (
         <div className="table-footer">
-          <span>{data.length.toLocaleString('ar-SA')} سجل</span>
+          <span>{t('table.recordCount', { count: formatNumber(data.length, undefined, i18n.language) })}</span>
         </div>
       ) : null}
 

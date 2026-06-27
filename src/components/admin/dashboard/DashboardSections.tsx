@@ -1,30 +1,21 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from '@/icons';
 import { Badge } from '../../ui/Badge';
 import { Card } from '../../ui/Card';
-import { fmtNum } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { InsightItem, OperationItem } from './dashboardTypes';
 import { TrendBadge } from './TrendBadge';
 
-const PRIORITY_LABELS = {
-  high: 'عالية',
-  medium: 'متوسطة',
-  low: 'منخفضة',
-} as const;
-
-const PRIORITY_VARIANT = {
-  high: 'danger',
-  medium: 'warning',
-  low: 'info',
-} as const;
-
 export function BusinessInsightsSection({ items }: { items: InsightItem[] }) {
+  const { t } = useTranslation('dashboard');
+
   return (
-    <section className="admin-dash-insights" aria-label="رؤى الأعمال">
+    <section className="admin-dash-insights" aria-label={t('admin.dashboard.insights.ariaLabel')}>
       <header className="admin-dash-section-head is-compact">
         <div>
-          <h2>رؤى الأعمال</h2>
-          <p>مؤشرات الأداء الرئيسية للمنصة</p>
+          <h2>{t('admin.dashboard.insights.title')}</h2>
+          <p>{t('admin.dashboard.insights.subtitle')}</p>
         </div>
       </header>
       <div className="admin-dash-insights-grid">
@@ -44,29 +35,47 @@ export function BusinessInsightsSection({ items }: { items: InsightItem[] }) {
 }
 
 export function OperationsCenter({ items }: { items: OperationItem[] }) {
+  const { t } = useTranslation('dashboard');
+  const { fmtNum } = useDashboardFormatters();
+
+  const priorityLabels = {
+    high: t('admin.dashboard.priority.high'),
+    medium: t('admin.dashboard.priority.medium'),
+    low: t('admin.dashboard.priority.low'),
+  } as const;
+
+  const priorityVariant = {
+    high: 'danger',
+    medium: 'warning',
+    low: 'info',
+  } as const;
+
   return (
-    <section className="admin-dash-operations" aria-label="مركز العمليات">
+    <section className="admin-dash-operations" aria-label={t('admin.dashboard.operations.ariaLabel')}>
       <header className="admin-dash-section-head is-compact">
         <div>
-          <h2>مركز العمليات</h2>
-          <p>مهام تحتاج متابعة فورية</p>
+          <h2>{t('admin.dashboard.operations.title')}</h2>
+          <p>{t('admin.dashboard.operations.subtitle')}</p>
         </div>
       </header>
       <div className="admin-dash-operations-grid">
         {items.map((item) => (
           <Link key={item.id} to={item.href} className="admin-dash-operation-card">
             <div className="admin-dash-operation-top">
-              <Badge variant={PRIORITY_VARIANT[item.priority]}>
-                {PRIORITY_LABELS[item.priority]}
+              <Badge variant={priorityVariant[item.priority]}>
+                {priorityLabels[item.priority]}
               </Badge>
-              <span className="admin-dash-operation-count" aria-label={`${item.count} عنصر`}>
+              <span
+                className="admin-dash-operation-count"
+                aria-label={t('admin.dashboard.operations.itemCount', { count: item.count })}
+              >
                 {fmtNum(item.count)}
               </span>
             </div>
             <strong>{item.title}</strong>
             <p>{item.description}</p>
             <span className="admin-dash-operation-link">
-              عرض التفاصيل
+              {t('admin.dashboard.operations.viewDetails')}
               <ArrowLeft size={16} aria-hidden />
             </span>
           </Link>

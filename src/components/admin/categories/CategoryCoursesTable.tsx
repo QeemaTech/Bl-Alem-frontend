@@ -1,38 +1,37 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { BookOpen, Eye } from '@/icons';
+import { useAdminCategoryLabels } from '../../../hooks/useAdminCategoryLabels';
+import { useAdminCourseLabels } from '../../../hooks/useAdminCourseLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
-import {
-  courseStatusLabels,
-  courseStatusVariant,
-  fmtCategoryDate,
-} from './categoryShared';
 
 interface CategoryCoursesTableProps {
   courses: any[];
 }
 
-const fmtMoney = (course: any) => {
-  const price = Number(course.discountPrice ?? course.price ?? 0);
-  if (!price) return 'مجاني';
-  return `${price.toLocaleString('ar-SA')} ج.م`;
-};
-
 export function CategoryCoursesTable({ courses }: CategoryCoursesTableProps) {
-  const rows = courses.map((course) => ({
+  const { t, i18n } = useTranslation(['categories', 'courses']);
+  const { fmtDate, empty } = useAdminCategoryLabels();
+  const { statusLabels, statusVariant, fmtMoney } = useAdminCourseLabels();
+  const cols = t('admin.categories.coursesTable.columns', { returnObjects: true }) as Record<string, string>;
+
+  const rows = useMemo(() => courses.map((course) => ({
     id: course.id,
     title: course.titleAr,
-    instructor: course.instructor?.fullName || '—',
+    instructor: course.instructor?.fullName || empty,
     students: String(course._count?.enrollments ?? course.totalStudents ?? 0),
     lessons: String(course._count?.lessons ?? 0),
     price: fmtMoney(course),
-    status: courseStatusLabels[course.status] || course.status,
-    updatedAt: fmtCategoryDate(course.updatedAt),
+    status: statusLabels[course.status] || course.status,
+    updatedAt: fmtDate(course.updatedAt),
     _raw: course,
-  }));
+  })), [courses, empty, fmtDate, fmtMoney, statusLabels]);
 
   return (
     <Card className="reports-table-card admin-category-courses-card">
@@ -41,22 +40,26 @@ export function CategoryCoursesTable({ courses }: CategoryCoursesTableProps) {
           <span className="reports-table-title-icon" aria-hidden="true">
             <BookOpen size={20} />
           </span>
-          الكورسات في هذا التصنيف
+          {t('admin.categories.coursesTable.title')}
         </h2>
-        <span className="muted-count">{courses.length.toLocaleString('ar-EG')} كورس</span>
+        <span className="muted-count">
+          {t('admin.categories.coursesTable.count', {
+            count: formatNumber(courses.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table
         className="admin-users-table"
         fluid
         hideScrollNotice
         data={rows}
-        emptyTitle="لا توجد كورسات"
-        emptyDescription="لم يتم ربط أي دورة بهذا التصنيف بعد."
+        emptyTitle={t('admin.categories.coursesTable.emptyTitle')}
+        emptyDescription={t('admin.categories.coursesTable.emptyDescription')}
         columns={[
-          { key: 'id', header: 'رقم الكورس', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'title',
-            header: 'العنوان',
+            header: cols.title,
             width: '16rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -66,34 +69,34 @@ export function CategoryCoursesTable({ courses }: CategoryCoursesTableProps) {
               </TableEntityLink>
             ),
           },
-          { key: 'instructor', header: 'المحاضر', width: '12rem', hideOnMobile: true },
-          { key: 'students', header: 'الطلاب', width: '6rem', align: 'center' },
-          { key: 'lessons', header: 'الدروس', width: '6rem', align: 'center', hideOnMobile: true },
-          { key: 'price', header: 'السعر', width: '8rem', align: 'center', hideOnMobile: true },
+          { key: 'instructor', header: cols.instructor, width: '12rem', hideOnMobile: true },
+          { key: 'students', header: cols.students, width: '6rem', align: 'center' },
+          { key: 'lessons', header: cols.lessons, width: '6rem', align: 'center', hideOnMobile: true },
+          { key: 'price', header: cols.price, width: '8rem', align: 'center', hideOnMobile: true },
           {
             key: 'status',
-            header: 'الحالة',
+            header: cols.status,
             width: '10rem',
             align: 'center',
             render: (row) => (
               <Badge
-                variant={courseStatusVariant(String(row._raw?.status))}
+                variant={statusVariant(String(row._raw?.status))}
                 dot
                 className="status-badge"
               >
-                {courseStatusLabels[String(row._raw?.status)] || row.status}
+                {statusLabels[String(row._raw?.status)] || row.status}
               </Badge>
             ),
           },
-          { key: 'updatedAt', header: 'آخر تحديث', width: '10rem', hideOnMobile: true },
+          { key: 'updatedAt', header: cols.updatedAt, width: '10rem', hideOnMobile: true },
           {
             key: 'actions',
-            header: 'الإجراءات',
+            header: cols.actions,
             width: '8rem',
             render: (row) => (
               <Link to={`/admin/courses/${row._raw.id}`}>
                 <Button variant="outline" size="sm" icon={<Eye size={16} />}>
-                  مراجعة
+                  {t('actions.review')}
                 </Button>
               </Link>
             ),

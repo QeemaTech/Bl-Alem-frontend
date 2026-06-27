@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Award, Bell, BellOff, BookOpen, CheckCheck, CreditCard, Gift, MessageCircle,
-  Radio, Sparkles,
+  Award, Bell, BellOff, BookOpen, CalendarDays, Check, CheckCheck, CreditCard, Gift,
+  MessageCircle, Radio, Sparkles,
 } from '@/icons';
-import type { LucideIcon } from '@/icons';
+import type { MaterialIcon } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -31,7 +31,7 @@ const typeLabels: Record<string, string> = {
   ADMIN: 'إداري',
 };
 
-const typeIcons: Record<string, LucideIcon> = {
+const typeIcons: Record<string, MaterialIcon> = {
   WELCOME: Sparkles,
   LIVE_SESSION: Radio,
   CERTIFICATE: Award,
@@ -115,6 +115,8 @@ export default function StudentNotificationsPage() {
     ];
   }, [items]);
 
+  const hasActiveFilters = Boolean(search.trim() || readFilter || typeFilter);
+
   const markRead = async (id: number) => {
     setBusyId(id);
     try {
@@ -146,16 +148,16 @@ export default function StudentNotificationsPage() {
   };
 
   return (
-    <div className="page-grid">
+    <div className="page-grid student-notifications-page">
       <div className="reports-header">
         <PageHeader
           title="الإشعارات"
           subtitle="تابع تحديثات الدورات والدعم والمكافآت والمجتمع"
         />
-        <div className="reports-actions">
+        <div className="reports-header-actions">
           <Button
-            variant="secondary"
-            icon={<CheckCheck size={16} />}
+            variant="outline"
+            icon={<CheckCheck size={18} />}
             onClick={markAllRead}
             loading={markingAll}
             disabled={!stats.unread || loading}
@@ -167,18 +169,25 @@ export default function StudentNotificationsPage() {
 
       <div className="stats-grid">
         <StatCard title="إجمالي الإشعارات" value={String(stats.total)} icon={Bell} />
-        <StatCard title="غير مقروء" value={String(stats.unread)} icon={BellOff} hint={stats.unread ? 'تحتاج متابعة' : 'لا جديد'} />
-        <StatCard title="اليوم" value={String(stats.today)} icon={Sparkles} />
+        <StatCard
+          title="غير مقروء"
+          value={String(stats.unread)}
+          icon={BellOff}
+          hint={stats.unread ? 'تحتاج متابعة' : 'لا جديد'}
+        />
+        <StatCard title="اليوم" value={String(stats.today)} icon={CalendarDays} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث في العنوان أو النص..."
+        searchPlaceholder="بحث بالعنوان أو النص..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setReadFilter(''); setTypeFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        ariaLabel="فلاتر الإشعارات"
       >
         <Select
-          label="الحالة"
+          label="حالة القراءة"
           value={readFilter}
           onChange={(e) => setReadFilter(e.target.value)}
           options={[
@@ -195,73 +204,95 @@ export default function StudentNotificationsPage() {
         />
       </FilterBar>
 
-      {loading ? (
-        <LoadingSkeleton variant="row" count={5} />
-      ) : filteredItems.length ? (
-        <div className="notifications-feed">
-          {filteredItems.map((item) => {
-            const Icon = typeIcons[item.type] || Bell;
-            const typeLabel = typeLabels[item.type] || 'إشعار';
-            return (
-              <article
-                key={item.id}
-                className={`notification-item ${item.isRead ? 'read' : 'unread'}`}
-              >
-                <div className={`notification-item-icon ${item.isRead ? 'read' : 'unread'}`}>
-                  <Icon size={20} />
-                </div>
-
-                <div className="notification-item-body">
-                  <div className="notification-item-top">
-                    <div className="notification-item-title-wrap">
-                      <h3>{item.titleAr}</h3>
-                      <Badge variant={item.isRead ? 'default' : 'info'}>
-                        {item.isRead ? 'مقروء' : 'جديد'}
-                      </Badge>
-                    </div>
-                    <span className="notification-item-type">{typeLabel}</span>
-                  </div>
-                  <p className="notification-item-text">{item.bodyAr}</p>
-                  <time className="notification-item-time" dateTime={item.createdAt}>
-                    {fmtRelative(item.createdAt)}
-                  </time>
-                </div>
-
-                <div className="notification-item-actions">
-                  {!item.isRead ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      loading={busyId === item.id}
-                      onClick={() => markRead(item.id)}
-                    >
-                      تعليم كمقروء
-                    </Button>
-                  ) : (
-                    <span className="notification-item-done">✓ مقروء</span>
-                  )}
-                </div>
-              </article>
-            );
-          })}
+      <Card className="reports-table-card">
+        <div className="section-heading reports-table-head">
+          <h2>
+            <span className="reports-table-title-icon" aria-hidden="true">
+              <Bell size={20} />
+            </span>
+            قائمة الإشعارات
+          </h2>
+          <span className="muted-count">
+            {filteredItems.length.toLocaleString('ar-EG')} إشعار
+          </span>
         </div>
-      ) : items.length ? (
-        <Card>
+
+        {loading ? (
+          <div className="student-notifications-list" aria-busy="true">
+            <LoadingSkeleton variant="row" count={5} />
+          </div>
+        ) : filteredItems.length ? (
+          <div className="student-notifications-list">
+            {filteredItems.map((item) => {
+              const Icon = typeIcons[item.type] || Bell;
+              const typeLabel = typeLabels[item.type] || 'إشعار';
+              return (
+                <article
+                  key={item.id}
+                  className={`student-notification-item ${item.isRead ? 'is-read' : 'is-unread'}`}
+                >
+                  <div
+                    className={`student-notification-icon ${item.isRead ? 'is-read' : 'is-unread'}`}
+                    aria-hidden="true"
+                  >
+                    <Icon size={20} />
+                  </div>
+
+                  <div className="student-notification-body">
+                    <div className="student-notification-top">
+                      <div className="student-notification-title-wrap">
+                        <h3>{item.titleAr}</h3>
+                        <Badge
+                          variant={item.isRead ? 'default' : 'info'}
+                          dot
+                          className="status-badge"
+                        >
+                          {item.isRead ? 'مقروء' : 'غير مقروء'}
+                        </Badge>
+                      </div>
+                      <span className="student-notification-type">{typeLabel}</span>
+                    </div>
+                    <p className="student-notification-text">{item.bodyAr}</p>
+                    <time className="student-notification-time" dateTime={item.createdAt}>
+                      {fmtRelative(item.createdAt)}
+                    </time>
+                  </div>
+
+                  <div className="student-notification-actions">
+                    {!item.isRead ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        loading={busyId === item.id}
+                        onClick={() => markRead(item.id)}
+                      >
+                        تعليم كمقروء
+                      </Button>
+                    ) : (
+                      <span className="student-notification-done">
+                        <Check size={14} aria-hidden="true" />
+                        مقروء
+                      </span>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : items.length ? (
           <EmptyState
             title="لا نتائج"
             description="جرّب تغيير الفلاتر أو البحث."
             icon={Bell}
           />
-        </Card>
-      ) : (
-        <Card>
+        ) : (
           <EmptyState
             title="لا توجد إشعارات"
             description="ستظهر إشعارات الدورات والدعم والمكافآت هنا."
             icon={Bell}
           />
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

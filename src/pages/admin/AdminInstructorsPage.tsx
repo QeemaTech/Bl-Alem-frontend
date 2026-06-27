@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, GraduationCap, Plus, Users, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { InstructorsTable } from '../../components/admin/users/InstructorsTable';
-import { approvalLabels, fmtDate, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -15,8 +15,8 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminUserLabels } from '../../hooks/useAdminUserLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -31,24 +31,18 @@ const emptyForm = {
   approvalStatus: 'PENDING',
 };
 
-const exportColumns = [
-  { key: 'id', header: 'رقم المحاضر' },
-  { key: 'fullName', header: 'الاسم' },
-  { key: 'email', header: 'البريد' },
-  { key: 'phone', header: 'الهاتف' },
-  { key: 'title', header: 'المسمى' },
-  { key: 'specialization', header: 'التخصص' },
-  { key: 'courses', header: 'الكورسات' },
-  { key: 'students', header: 'الطلاب' },
-  { key: 'earnings', header: 'الأرباح' },
-  { key: 'approvalStatus', header: 'حالة الاعتماد' },
-  { key: 'accountStatus', header: 'حالة الحساب' },
-  { key: 'joinedAt', header: 'تاريخ الانضمام' },
-];
-
 export default function AdminInstructorsPage() {
+  const { t } = useTranslation(['users', 'common']);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const {
+    approvalLabels,
+    statusLabels,
+    fmtDate,
+    fmtMoney,
+    empty,
+  } = useAdminUserLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -61,6 +55,24 @@ export default function AdminInstructorsPage() {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState('');
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.instructors.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'fullName', header: cols.fullName },
+      { key: 'email', header: cols.email },
+      { key: 'phone', header: cols.phone },
+      { key: 'title', header: cols.title },
+      { key: 'specialization', header: cols.specialization },
+      { key: 'courses', header: cols.courses },
+      { key: 'students', header: cols.students },
+      { key: 'earnings', header: cols.earnings },
+      { key: 'approvalStatus', header: cols.approvalStatus },
+      { key: 'accountStatus', header: cols.accountStatus },
+      { key: 'joinedAt', header: cols.joinedAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -107,27 +119,30 @@ export default function AdminInstructorsPage() {
   const approvalChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = approvalLabels[i.instructorProfile?.approvalStatus] || '—';
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.instructorProfile?.approvalStatus || 'UNKNOWN';
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: approvalLabels[key] || key,
+      value,
+    }));
+  }, [items, approvalLabels]);
 
   const tableRows = useMemo(() => filteredItems.map((row) => ({
     id: row.id,
     fullName: row.fullName,
     email: row.email,
-    phone: row.phone || '—',
-    title: row.instructorProfile?.title || '—',
-    specialization: row.instructorProfile?.specialization || '—',
+    phone: row.phone || empty,
+    title: row.instructorProfile?.title || empty,
+    specialization: row.instructorProfile?.specialization || empty,
     courses: String(row._count?.courses ?? 0),
     students: String(row.instructorProfile?.totalStudents ?? 0),
     earnings: fmtMoney(Number(row.instructorProfile?.totalEarnings || 0)),
-    approvalStatus: approvalLabels[row.instructorProfile?.approvalStatus] || '—',
+    approvalStatus: approvalLabels[row.instructorProfile?.approvalStatus] || empty,
     accountStatus: statusLabels[row.status] || row.status,
     joinedAt: fmtDate(row.createdAt),
     _raw: row,
-  })), [filteredItems]);
+  })), [filteredItems, approvalLabels, statusLabels, fmtDate, fmtMoney, empty]);
 
   const openCreate = () => {
     setEditing(null);
@@ -174,18 +189,18 @@ export default function AdminInstructorsPage() {
       if (editing) {
         if (form.password.trim()) payload.password = form.password;
         await adminApi.updateInstructor(editing.id, payload);
-        showToast('تم تحديث المحاضر.', 'success');
+        showToast(t('admin.instructors.toast.updated'), 'success');
       } else {
         payload.password = form.password.trim() || 'Password123!';
         await adminApi.createInstructor(payload);
-        showToast('تم إنشاء المحاضر.', 'success');
+        showToast(t('admin.instructors.toast.created'), 'success');
       }
       setFormOpen(false);
       setEditing(null);
       setForm(emptyForm);
       await load();
     } catch {
-      showToast('تعذّر حفظ بيانات المحاضر.', 'error');
+      showToast(t('admin.instructors.toast.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -193,7 +208,7 @@ export default function AdminInstructorsPage() {
 
   const handleApprove = async (instructor: any) => {
     await adminApi.approveInstructor(instructor.id);
-    showToast('تم اعتماد المحاضر.', 'success');
+    showToast(t('admin.instructors.toast.approved'), 'success');
     await load();
   };
 
@@ -201,7 +216,7 @@ export default function AdminInstructorsPage() {
     e.preventDefault();
     if (!rejectTarget) return;
     await adminApi.rejectInstructor(rejectTarget.id, rejectReason);
-    showToast('تم رفض المحاضر.', 'success');
+    showToast(t('admin.instructors.toast.rejected'), 'success');
     setRejectTarget(null);
     setRejectReason('');
     await load();
@@ -209,13 +224,13 @@ export default function AdminInstructorsPage() {
 
   const handleSuspend = async (instructor: any) => {
     await adminApi.suspendInstructor(instructor.id);
-    showToast('تم إيقاف المحاضر.', 'success');
+    showToast(t('admin.instructors.toast.suspended'), 'success');
     await load();
   };
 
   const handleActivate = async (instructor: any) => {
     await adminApi.activateInstructor(instructor.id);
-    showToast('تم تفعيل المحاضر.', 'success');
+    showToast(t('admin.instructors.toast.activated'), 'success');
     await load();
   };
 
@@ -223,77 +238,81 @@ export default function AdminInstructorsPage() {
     if (!deleteTarget) return;
     try {
       await adminApi.deleteInstructor(deleteTarget.id);
-      showToast('تم حذف المحاضر.', 'success');
+      showToast(t('admin.instructors.toast.deleted'), 'success');
       setDeleteTarget(null);
       await load();
     } catch {
-      showToast('لا يمكن حذف محاضر لديه دورات.', 'error');
+      showToast(t('admin.instructors.toast.deleteError'), 'error');
       setDeleteTarget(null);
     }
   };
 
   const handleExport = () => {
-    exportTableToExcel('المحاضرون', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('admin.instructors.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="المحاضرون" subtitle="إدارة حسابات المحاضرين واعتماد طلباتهم" />
+        <PageHeader title={t('admin.instructors.title')} subtitle={t('admin.instructors.subtitle')} />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={openCreate}>
-            إضافة محاضر
+            {t('admin.instructors.addInstructor')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي المحاضرين" value={String(stats.total)} icon={GraduationCap} />
-        <StatCard title="قيد المراجعة" value={String(stats.pending)} icon={Users} />
-        <StatCard title="معتمدون" value={String(stats.approved)} icon={GraduationCap} />
-        <StatCard title="مرفوضون / موقوفون" value={String(stats.rejected + stats.suspended)} icon={Users} />
-        <StatCard title="إجمالي الكورسات" value={String(stats.courses)} icon={BookOpen} />
-        <StatCard title="إجمالي الأرباح" value={fmtMoney(stats.earnings)} icon={Wallet} />
+        <StatCard title={t('admin.instructors.stats.total')} value={String(stats.total)} icon={GraduationCap} />
+        <StatCard title={t('admin.instructors.stats.pending')} value={String(stats.pending)} icon={Users} />
+        <StatCard title={t('admin.instructors.stats.approved')} value={String(stats.approved)} icon={GraduationCap} />
+        <StatCard title={t('admin.instructors.stats.rejectedSuspended')} value={String(stats.rejected + stats.suspended)} icon={Users} />
+        <StatCard title={t('admin.instructors.stats.totalCourses')} value={String(stats.courses)} icon={BookOpen} />
+        <StatCard title={t('admin.instructors.stats.totalEarnings')} value={fmtMoney(stats.earnings)} icon={Wallet} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع حالات الاعتماد" type="pie" data={approvalChart} />
+        <ReportChart title={t('admin.instructors.charts.approvalDistribution')} type="pie" data={approvalChart} />
       </div>
 
       <FilterBar
         className="filter-bar--modern"
         searchValue={search}
-        searchPlaceholder="بحث بالاسم، البريد، التخصص..."
+        searchPlaceholder={t('admin.instructors.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setApprovalFilter(''); setAccountFilter(''); }}
         resetDisabled={!hasActiveFilters}
         searchIconSize={20}
       >
         <Select
-          label="حالة الاعتماد"
+          label={t('filters.approvalStatus')}
           value={approvalFilter}
           onChange={(e) => setApprovalFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'قيد المراجعة', value: 'PENDING' },
-            { label: 'معتمد', value: 'APPROVED' },
-            { label: 'مرفوض', value: 'REJECTED' },
-            { label: 'موقوف', value: 'SUSPENDED' },
+            { label: t('filters.allStatuses'), value: '' },
+            { label: approvalLabels.PENDING, value: 'PENDING' },
+            { label: approvalLabels.APPROVED, value: 'APPROVED' },
+            { label: approvalLabels.REJECTED, value: 'REJECTED' },
+            { label: approvalLabels.SUSPENDED, value: 'SUSPENDED' },
           ]}
         />
         <Select
-          label="حالة الحساب"
+          label={t('filters.accountStatus')}
           value={accountFilter}
           onChange={(e) => setAccountFilter(e.target.value)}
           options={[
-            { label: 'كل الحسابات', value: '' },
-            { label: 'نشط', value: 'ACTIVE' },
-            { label: 'بانتظار التفعيل', value: 'PENDING' },
-            { label: 'موقوف', value: 'SUSPENDED' },
-            { label: 'مرفوض', value: 'REJECTED' },
+            { label: t('filters.allAccounts'), value: '' },
+            { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+            { label: statusLabels.PENDING, value: 'PENDING' },
+            { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+            { label: statusLabels.REJECTED, value: 'REJECTED' },
           ]}
         />
       </FilterBar>
@@ -312,67 +331,69 @@ export default function AdminInstructorsPage() {
 
       <Modal
         isOpen={formOpen}
-        title={editing ? 'تعديل المحاضر' : 'إضافة محاضر'}
+        title={editing ? t('admin.instructors.editInstructor') : t('admin.instructors.addInstructor')}
         onClose={() => { setFormOpen(false); setEditing(null); setForm(emptyForm); }}
       >
         <form className="stack-sm" onSubmit={saveInstructor}>
-          <Input label="الاسم الكامل" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
-          <Input label="البريد الإلكتروني" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          <Input label="الهاتف" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
+          <Input label={t('form.fullName')} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
+          <Input label={t('form.email')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          <Input label={t('form.phone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
           <Input
-            label={editing ? 'كلمة المرور (اتركها فارغة بدون تغيير)' : 'كلمة المرور'}
+            label={editing ? t('form.passwordOptional') : t('form.password')}
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required={!editing}
           />
-          <Input label="المسمى الوظيفي" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="خبير JavaScript" />
-          <Input label="التخصص" value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} />
-          <Input label="سنوات الخبرة" type="number" min="0" value={form.yearsOfExperience} onChange={(e) => setForm({ ...form, yearsOfExperience: e.target.value })} />
-          <Textarea label="نبذة" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+          <Input label={t('form.title')} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={t('form.titlePlaceholder')} />
+          <Input label={t('form.specialization')} value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} />
+          <Input label={t('form.yearsOfExperience')} type="number" min="0" value={form.yearsOfExperience} onChange={(e) => setForm({ ...form, yearsOfExperience: e.target.value })} />
+          <Textarea label={t('form.bio')} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
           <Select
-            label="حالة الحساب"
+            label={t('form.accountStatus')}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
             options={[
-              { label: 'نشط', value: 'ACTIVE' },
-              { label: 'بانتظار التفعيل', value: 'PENDING' },
-              { label: 'موقوف', value: 'SUSPENDED' },
-              { label: 'مرفوض', value: 'REJECTED' },
+              { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+              { label: statusLabels.PENDING, value: 'PENDING' },
+              { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+              { label: statusLabels.REJECTED, value: 'REJECTED' },
             ]}
           />
           <Select
-            label="حالة الاعتماد"
+            label={t('filters.approvalStatus')}
             value={form.approvalStatus}
             onChange={(e) => setForm({ ...form, approvalStatus: e.target.value })}
             options={[
-              { label: 'قيد المراجعة', value: 'PENDING' },
-              { label: 'معتمد', value: 'APPROVED' },
-              { label: 'مرفوض', value: 'REJECTED' },
-              { label: 'موقوف', value: 'SUSPENDED' },
+              { label: approvalLabels.PENDING, value: 'PENDING' },
+              { label: approvalLabels.APPROVED, value: 'APPROVED' },
+              { label: approvalLabels.REJECTED, value: 'REJECTED' },
+              { label: approvalLabels.SUSPENDED, value: 'SUSPENDED' },
             ]}
           />
-          <Button loading={submitting}>{editing ? 'حفظ التعديلات' : 'إنشاء المحاضر'}</Button>
+          <Button loading={submitting}>
+            {editing ? t('actions.saveChanges') : t('admin.instructors.createInstructor')}
+          </Button>
         </form>
       </Modal>
 
       <Modal
         isOpen={Boolean(rejectTarget)}
-        title="رفض المحاضر"
+        title={t('admin.instructors.rejectTitle')}
         onClose={() => { setRejectTarget(null); setRejectReason(''); }}
       >
         <form className="stack-sm" onSubmit={handleReject}>
-          <p>رفض طلب: <strong>{rejectTarget?.fullName}</strong></p>
-          <Textarea label="سبب الرفض" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} required />
-          <Button variant="danger">تأكيد الرفض</Button>
+          <p>{t('admin.instructors.rejectPrompt')} <strong>{rejectTarget?.fullName}</strong></p>
+          <Textarea label={t('form.rejectReason')} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} required />
+          <Button variant="danger">{t('actions.confirmReject')}</Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف المحاضر"
-        message={`هل أنت متأكد من حذف "${deleteTarget?.fullName}"؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmLabel="حذف"
+        title={t('admin.instructors.deleteTitle')}
+        message={t('admin.instructors.deleteMessage', { name: deleteTarget?.fullName })}
+        confirmLabel={t('actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

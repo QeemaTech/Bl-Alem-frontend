@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CreditCard, Download, Receipt, TrendingUp, Wallet } from '@/icons';
+import { CreditCard, Download, Receipt, Table2, TrendingUp, Wallet } from '@/icons';
 import { studentApi } from '../../api/student';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';
@@ -117,6 +117,8 @@ export default function StudentPaymentsPage() {
     return Object.entries(counts).map(([label, value]) => ({ label, value }));
   }, [items]);
 
+  const hasActiveFilters = Boolean(search.trim() || statusFilter || gatewayFilter);
+
   const handleExport = () => {
     exportTableToExcel('المدفوعات', exportColumns, filtered.map((row) => ({
       course: row.course?.titleAr || '—',
@@ -137,9 +139,11 @@ export default function StudentPaymentsPage() {
           title="المدفوعات"
           subtitle="سجل عمليات الدفع والاشتراك في الدورات"
         />
-        <Button variant="outline" icon={<Download size={16} />} onClick={handleExport} disabled={!filtered.length}>
-          تصدير Excel
-        </Button>
+        <div className="reports-header-actions">
+          <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!filtered.length}>
+            تصدير Excel
+          </Button>
+        </div>
       </div>
 
       <div className="stats-grid">
@@ -163,6 +167,8 @@ export default function StudentPaymentsPage() {
         searchPlaceholder="بحث بالدورة أو المرجع..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); setGatewayFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        ariaLabel="فلاتر المدفوعات"
       >
         <Select
           label="الحالة"
@@ -190,12 +196,19 @@ export default function StudentPaymentsPage() {
         />
       </FilterBar>
 
-      <Card>
-        <div className="section-heading">
-          <h2>سجل المدفوعات</h2>
-          <span className="muted-count">{filtered.length} عملية</span>
+      <Card className="reports-table-card">
+        <div className="section-heading reports-table-head">
+          <h2>
+            <span className="reports-table-title-icon" aria-hidden="true">
+              <Table2 size={20} />
+            </span>
+            سجل المدفوعات
+          </h2>
+          <span className="muted-count">{filtered.length.toLocaleString('ar-EG')} عملية</span>
         </div>
         <Table
+          fluid
+          hideScrollNotice
           data={filtered}
           emptyTitle="لا توجد مدفوعات"
           emptyDescription="ستظهر عمليات الاشتراك بعد إتمام الدفع."

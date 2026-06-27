@@ -1,0 +1,608 @@
+{
+  "empty": "—",
+  "labels": {
+    "role": {
+      "STUDENT": "Student",
+      "INSTRUCTOR": "Instructor",
+      "SUPER_ADMIN": "Admin"
+    },
+    "accountStatus": {
+      "ACTIVE": "Active",
+      "PENDING": "Pending activation",
+      "SUSPENDED": "Suspended",
+      "REJECTED": "Rejected"
+    },
+    "approval": {
+      "PENDING": "Pending review",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "SUSPENDED": "Suspended"
+    }
+  },
+  "activity": {
+    "courses": "{{count}} courses",
+    "enrollments": "{{count}} enrollments"
+  },
+  "actions": {
+    "detail": "Details",
+    "edit": "Edit",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "delete": "Delete",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmReject": "Confirm rejection",
+    "exportExcel": "Export Excel",
+    "saveChanges": "Save changes",
+    "countAria": "Count: {{value}}"
+  },
+  "filters": {
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "allAccounts": "All accounts",
+    "role": "Role",
+    "accountStatus": "Account status",
+    "approvalStatus": "Approval status"
+  },
+  "form": {
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "passwordOptional": "Password (leave blank to keep unchanged)",
+    "role": "Role",
+    "accountStatus": "Account status",
+    "title": "Job title",
+    "titlePlaceholder": "JavaScript expert",
+    "specialization": "Specialization",
+    "yearsOfExperience": "Years of experience",
+    "bio": "Bio",
+    "educationLevel": "Education level",
+    "educationLevelPlaceholder": "High school, university...",
+    "interests": "Interests (comma-separated)",
+    "interestsPlaceholder": "Programming, design",
+    "rejectReason": "Rejection reason"
+  },
+  "admin": {
+    "users": {
+      "title": "Users",
+      "subtitle": "Manage all platform accounts",
+      "addUser": "Add user",
+      "editUser": "Edit user",
+      "createUser": "Create user",
+      "deleteTitle": "Delete user",
+      "deleteMessage": "Are you sure you want to delete \"{{name}}\"? All their data will be removed.",
+      "stats": {
+        "total": "Total users",
+        "students": "Students",
+        "instructors": "Instructors",
+        "admins": "Admins",
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "charts": {
+        "roleDistribution": "Role distribution",
+        "statusDistribution": "Account status distribution"
+      },
+      "searchPlaceholder": "Search by name, email, or phone...",
+      "table": {
+        "title": "Users list",
+        "emptyTitle": "No users",
+        "emptyDescription": "Add a new user to get started.",
+        "columns": {
+          "id": "User ID",
+          "fullName": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "role": "Role",
+          "status": "Status",
+          "wallet": "Wallet",
+          "activity": "Activity",
+          "joinedAt": "Joined",
+          "actions": "Actions"
+        }
+      },
+      "export": {
+        "sheetName": "Users",
+        "columns": {
+          "id": "User ID",
+          "fullName": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "role": "Role",
+          "status": "Status",
+          "wallet": "Wallet",
+          "activity": "Activity",
+          "joinedAt": "Registration date"
+        }
+      },
+      "toast": {
+        "updated": "User updated.",
+        "created": "User created.",
+        "saveError": "Could not save user data.",
+        "activated": "Account activated.",
+        "suspended": "Account suspended.",
+        "deleted": "User deleted.",
+        "deleteError": "Could not delete user."
+      }
+    },
+    "instructors": {
+      "title": "Instructors",
+      "subtitle": "Manage instructor accounts and review applications",
+      "addInstructor": "Add instructor",
+      "editInstructor": "Edit instructor",
+      "createInstructor": "Create instructor",
+      "rejectTitle": "Reject instructor",
+      "rejectPrompt": "Reject application:",
+      "deleteTitle": "Delete instructor",
+      "deleteMessage": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "stats": {
+        "total": "Total instructors",
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejectedSuspended": "Rejected / suspended",
+        "totalCourses": "Total courses",
+        "totalEarnings": "Total earnings"
+      },
+      "charts": {
+        "approvalDistribution": "Approval status distribution"
+      },
+      "searchPlaceholder": "Search by name, email, specialization...",
+      "table": {
+        "title": "Instructors list",
+        "emptyTitle": "No instructors",
+        "emptyDescription": "Add a new instructor or wait for registration requests.",
+        "columns": {
+          "id": "Instructor ID",
+          "fullName": "Name",
+          "email": "Email",
+          "specialization": "Specialization",
+          "courses": "Courses",
+          "students": "Students",
+          "earnings": "Earnings",
+          "approval": "Approval",
+          "account": "Account",
+          "actions": "Actions"
+        }
+      },
+      "export": {
+        "sheetName": "Instructors",
+        "columns": {
+          "id": "Instructor ID",
+          "fullName": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "title": "Title",
+          "specialization": "Specialization",
+          "courses": "Courses",
+          "students": "Students",
+          "earnings": "Earnings",
+          "approvalStatus": "Approval status",
+          "accountStatus": "Account status",
+          "joinedAt": "Joined date"
+        }
+      },
+      "toast": {
+        "updated": "Instructor updated.",
+        "created": "Instructor created.",
+        "saveError": "Could not save instructor data.",
+        "approved": "Instructor approved.",
+        "rejected": "Instructor rejected.",
+        "suspended": "Instructor suspended.",
+        "activated": "Instructor activated.",
+        "deleted": "Instructor deleted.",
+        "deleteError": "Cannot delete an instructor with courses."
+      }
+    },
+    "students": {
+      "title": "Students",
+      "subtitle": "Manage student accounts and track learning activity",
+      "addStudent": "Add student",
+      "editStudent": "Edit student",
+      "createStudent": "Create student",
+      "deleteTitle": "Delete student",
+      "deleteMessage": "Are you sure you want to delete \"{{name}}\"? All their data will be removed.",
+      "stats": {
+        "total": "Total students",
+        "active": "Active",
+        "suspended": "Suspended",
+        "totalEnrollments": "Total enrollments",
+        "certificates": "Certificates",
+        "walletTotal": "Total wallet balances"
+      },
+      "charts": {
+        "statusDistribution": "Account status distribution"
+      },
+      "searchPlaceholder": "Search by name, email, or education level...",
+      "table": {
+        "title": "Students list",
+        "emptyTitle": "No students",
+        "emptyDescription": "Add a new student or wait for registrations.",
+        "columns": {
+          "id": "Student ID",
+          "fullName": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "educationLevel": "Level",
+          "enrollments": "Enrollments",
+          "certificates": "Certificates",
+          "wallet": "Wallet",
+          "status": "Status",
+          "joinedAt": "Joined",
+          "actions": "Actions"
+        }
+      },
+      "export": {
+        "sheetName": "Students",
+        "columns": {
+          "id": "Student ID",
+          "fullName": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "educationLevel": "Education level",
+          "enrollments": "Enrollments",
+          "payments": "Payments",
+          "certificates": "Certificates",
+          "wallet": "Wallet balance",
+          "status": "Status",
+          "joinedAt": "Joined date"
+        }
+      },
+      "toast": {
+        "updated": "Student updated.",
+        "created": "Student created.",
+        "saveError": "Could not save student data.",
+        "activated": "Account activated.",
+        "suspended": "Account suspended.",
+        "deleted": "Student deleted.",
+        "deleteError": "Could not delete student."
+      }
+    },
+    "detail": {
+      "back": {
+        "user": "Back to users",
+        "student": "Back to students",
+        "instructor": "Back to instructors"
+      },
+      "loadError": {
+        "user": "Could not load user data.",
+        "student": "Could not load student data.",
+        "instructor": "Could not load instructor data."
+      },
+      "editDialog": {
+        "user": "Edit user",
+        "student": "Edit student",
+        "instructor": "Edit instructor"
+      },
+      "deleteDialog": {
+        "user": "Delete user",
+        "student": "Delete student",
+        "instructor": "Delete instructor"
+      },
+      "deleteSuccess": {
+        "user": "User deleted.",
+        "student": "Student deleted.",
+        "instructor": "Instructor deleted."
+      },
+      "deleteError": {
+        "user": "Could not delete user.",
+        "student": "Could not delete student.",
+        "instructor": "Cannot delete an instructor with courses."
+      },
+      "deleteConfirmMessage": "Are you sure you want to delete \"{{name}}\"?",
+      "hero": {
+        "joined": "Joined {{date}}",
+        "resetPassword": "Reset password",
+        "sendNotification": "Send notification"
+      },
+      "preferredLanguage": {
+        "ar": "Arabic",
+        "en": "English"
+      },
+      "kpis": {
+        "totalCourses": "Total courses",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "certificates": "Certificates",
+        "avgScore": "Average score",
+        "completionPct": "Completion rate",
+        "avgAttendance": "Attendance rate",
+        "learningHours": "Learning hours",
+        "learningHoursHint": "Estimated from progress"
+      },
+      "charts": {
+        "courseDistribution": "Course distribution",
+        "progressOverTime": "Progress over time",
+        "monthlyCompletion": "Monthly completion",
+        "completionRates": "Completion rates",
+        "scoreSummary": "Score summary",
+        "quizResults": "Quiz results",
+        "monthlyPayments": "Monthly payments",
+        "paymentStatus": "Payment status",
+        "participationDistribution": "Participation distribution",
+        "interestsMap": "Interests map"
+      },
+      "sections": {
+        "coursePerformance": {
+          "title": "Course performance",
+          "subtitle": "Compare completion rates and scores per course"
+        },
+        "quizzes": {
+          "title": "Quizzes",
+          "subtitle": "Quiz performance analysis"
+        },
+        "certificates": {
+          "title": "Certificates",
+          "subtitle": "Certificates issued to the user"
+        },
+        "payments": {
+          "title": "Payments & revenue",
+          "subtitle": "Financial summary and payment activity"
+        },
+        "activity": {
+          "title": "Activity & sessions",
+          "subtitle": "Latest account activity"
+        },
+        "attendance": {
+          "title": "Attendance & participation",
+          "subtitle": "Learning participation indicators derived from progress"
+        },
+        "skills": {
+          "title": "Skills & interests",
+          "subtitle": "Student interests and platform activity distribution"
+        },
+        "badges": {
+          "title": "Badges & achievements",
+          "subtitle": "Achievements from certificates and reward points"
+        },
+        "timeline": {
+          "title": "Activity timeline",
+          "subtitle": "Key events in chronological order"
+        },
+        "studentProfile": "Student profile",
+        "instructorProfile": "Instructor profile",
+        "referrals": "Referrals & rewards",
+        "statsSummary": "Statistics summary"
+      },
+      "enrollmentStatus": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started",
+        "cancelled": "Cancelled"
+      },
+      "quizResult": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "inProgress": "In progress"
+      },
+      "quizStats": {
+        "attempts": "Attempts",
+        "passed": "Passed",
+        "failed": "Failed",
+        "avgScore": "Average score"
+      },
+      "quizScoreBar": {
+        "highest": "Highest",
+        "average": "Average",
+        "lowest": "Lowest"
+      },
+      "learningDonut": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "quizDonut": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "inProgress": "In progress"
+      },
+      "attendanceBar": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "categoryChart": {
+        "courses": "Courses",
+        "payments": "Payments",
+        "certificates": "Certificates",
+        "quizzes": "Quizzes"
+      },
+      "paymentKpis": {
+        "totalPaid": "Total paid",
+        "pending": "Pending",
+        "refunded": "Refunded",
+        "revenue": "Revenue"
+      },
+      "activityPanel": {
+        "lastUpdated": "Last updated",
+        "registeredAt": "Registration date",
+        "preferredLanguage": "Preferred language",
+        "walletBalance": "Wallet balance",
+        "rewardPoints": "Reward points",
+        "referralCode": "Referral code"
+      },
+      "certificates": {
+        "defaultTitle": "Certificate",
+        "issued": "Issued",
+        "issuedBadge": "Issued",
+        "download": "Download",
+        "emptyTitle": "No certificates",
+        "emptyDescription": "The user has not earned any certificates yet."
+      },
+      "skills": {
+        "educationLevel": "Education level: {{level}}",
+        "studentInterests": "Student interests",
+        "activityDistribution": "Activity distribution",
+        "userActivity": "User activity",
+        "emptyTitle": "No skills or interests",
+        "emptyDescription": "No interests recorded and not enough activity to show distribution."
+      },
+      "badges": {
+        "certificate": "Certificate",
+        "reward100Title": "100+ reward points",
+        "reward100Subtitle": "{{count}} points",
+        "activeLearnerTitle": "Active learner",
+        "activeLearnerSubtitle": "{{count}} completed courses",
+        "emptyTitle": "No badges yet",
+        "emptyDescription": "Achievements will appear when courses are completed or points are earned."
+      },
+      "timeline": {
+        "joined": "Joined the platform",
+        "joinedDescription": "New account registration — {{email}}",
+        "purchase": "Purchase",
+        "paymentDescription": "Payment #{{id}}",
+        "enrollment": "Course enrollment",
+        "quizPassed": "Quiz passed",
+        "quizAttempt": "Quiz attempt",
+        "certificateIssued": "Certificate issued",
+        "emptyTitle": "No activity",
+        "emptyDescription": "No activity has been recorded on this account yet."
+      },
+      "profiles": {
+        "educationLevel": "Education level",
+        "interests": "Interests",
+        "bio": "Bio",
+        "approvalStatus": "Approval status",
+        "specialization": "Specialization",
+        "title": "Job title",
+        "yearsOfExperience": "Years of experience",
+        "totalStudents": "Total students",
+        "totalEarnings": "Total earnings"
+      },
+      "referrals": {
+        "made": "Referrals made",
+        "rewardPoints": "Reward points",
+        "referredBy": "Referred by: {{name}} ({{email}})"
+      },
+      "summary": {
+        "courseEnrollments": "Course enrollments",
+        "learningPaths": "Learning paths",
+        "instructorCourses": "Courses (instructor)",
+        "payments": "Payments",
+        "certificates": "Certificates",
+        "quizzes": "Quizzes",
+        "reviews": "Reviews",
+        "liveSessions": "Live sessions",
+        "supportTickets": "Support tickets",
+        "notifications": "Notifications"
+      },
+      "walletTx": {
+        "CREDIT": "Credit",
+        "DEBIT": "Debit"
+      },
+      "subscriptionStatus": {
+        "ACTIVE": "Active",
+        "CANCELLED": "Cancelled",
+        "EXPIRED": "Expired"
+      },
+      "tables": {
+        "courses": "Courses table",
+        "coursesSearch": "Search by course name...",
+        "coursesEmpty": "No courses",
+        "columns": {
+          "course": "Course",
+          "progress": "Progress",
+          "avgScore": "Avg. score",
+          "status": "Status",
+          "enrolledAt": "Enrolled",
+          "quiz": "Quiz",
+          "score": "Score",
+          "result": "Result",
+          "date": "Date",
+          "item": "Item",
+          "amount": "Amount",
+          "id": "#",
+          "type": "Type",
+          "reason": "Reason",
+          "path": "Path",
+          "students": "Students",
+          "price": "Price",
+          "referred": "Referred",
+          "email": "Email",
+          "points": "Points",
+          "subject": "Subject",
+          "replies": "Replies",
+          "bank": "Bank",
+          "plan": "Plan",
+          "coupon": "Coupon",
+          "payment": "Payment",
+          "rating": "Rating",
+          "session": "Session",
+          "appointment": "Appointment",
+          "title": "Title",
+          "comments": "Comments"
+        },
+        "quizLog": "Quiz log",
+        "quizSearch": "Search quizzes...",
+        "quizEmpty": "No quiz attempts",
+        "paymentsLog": "Payment log",
+        "paymentsSearch": "Search payments...",
+        "paymentsEmpty": "No payments",
+        "learningPathsTitle": "Learning paths table ({{count}})",
+        "learningPathsSearch": "Search by path name...",
+        "learningPathsEmpty": "No learning paths",
+        "walletTxTitle": "Wallet transactions ({{count}})",
+        "walletTxSearch": "Search transactions...",
+        "walletTxEmpty": "No wallet transactions",
+        "instructorCoursesTitle": "Instructor courses ({{count}})",
+        "instructorCoursesEmpty": "No courses",
+        "referrals": "Referrals table",
+        "referralsEmpty": "No referrals",
+        "supportTicketsTitle": "Support tickets ({{count}})",
+        "supportTicketsEmpty": "No support tickets",
+        "withdrawalsTitle": "Withdrawal requests ({{count}})",
+        "withdrawalsEmpty": "No withdrawal requests",
+        "subscriptionsTitle": "Subscriptions ({{count}})",
+        "subscriptionsEmpty": "No subscriptions",
+        "couponUsagesTitle": "Coupon usage ({{count}})",
+        "couponUsagesEmpty": "No coupon usage",
+        "reviewsTitle": "Reviews ({{count}})",
+        "reviewsEmpty": "No reviews",
+        "liveSessionsTitle": "Live sessions ({{count}})",
+        "liveSessionsEmpty": "No live sessions",
+        "communityPostsTitle": "Community posts ({{count}})",
+        "communityPostsEmpty": "No community posts",
+        "rewardTxTitle": "Points log ({{count}})",
+        "rewardTxEmpty": "No points history"
+      },
+      "tableToolbar": {
+        "sortBy": "Sort by",
+        "noSort": "No sorting",
+        "direction": "Direction",
+        "asc": "Ascending",
+        "desc": "Descending",
+        "rowsPerPage": "Rows per page"
+      },
+      "modals": {
+        "resetPassword": {
+          "title": "Reset password",
+          "newPassword": "New password",
+          "submit": "Update password"
+        },
+        "notify": {
+          "title": "Send notification",
+          "type": "Notification type",
+          "titleField": "Title",
+          "body": "Message body",
+          "submit": "Send notification"
+        },
+        "reject": {
+          "title": "Reject instructor"
+        },
+        "newPasswordOptional": "New password (optional)"
+      },
+      "toast": {
+        "saved": "Changes saved.",
+        "saveError": "Could not save data.",
+        "activated": "Account activated.",
+        "suspended": "Account suspended.",
+        "approved": "Instructor approved.",
+        "rejected": "Instructor rejected.",
+        "passwordUpdated": "Password updated.",
+        "passwordError": "Could not update password.",
+        "notificationSent": "Notification sent.",
+        "notificationError": "Could not send notification."
+      }
+    }
+  }
+}

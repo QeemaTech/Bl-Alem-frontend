@@ -1,0 +1,121 @@
+{
+  "title": "الإشعارات",
+  "empty": "لا توجد إشعارات",
+  "markAllRead": "تعليم الكل كمقروء",
+  "unread": "غير مقروء",
+  "admin": {
+    "title": "الإشعارات",
+    "subtitle": "إدارة وإرسال إشعارات المنصة للمستخدمين",
+    "exportExcel": "تصدير Excel",
+    "sendNotification": "إرسال إشعار",
+    "backToList": "العودة للإشعارات",
+    "empty": "—",
+    "stats": {
+      "total": "إجمالي الإشعارات",
+      "unread": "غير مقروء",
+      "read": "مقروء",
+      "adminSent": "إشعارات إدارية"
+    },
+    "filters": {
+      "ariaLabel": "فلاتر الإشعارات",
+      "searchPlaceholder": "بحث بالعنوان، النص، المستلم، أو البريد...",
+      "type": "النوع",
+      "allTypes": "كل الأنواع",
+      "readStatus": "حالة القراءة",
+      "recipientRole": "دور المستلم",
+      "all": "الكل",
+      "students": "طلاب",
+      "instructors": "محاضرين",
+      "admins": "مشرفين"
+    },
+    "table": {
+      "emptyTitle": "لا توجد إشعارات",
+      "emptyDescription": "لم يتم إرسال أي إشعارات بعد.",
+      "columns": {
+        "id": "رقم الإشعار",
+        "recipient": "المستلم",
+        "email": "البريد",
+        "role": "الدور",
+        "title": "العنوان",
+        "body": "النص",
+        "type": "النوع",
+        "readStatus": "حالة القراءة",
+        "status": "الحالة",
+        "createdAt": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "export": {
+      "sheetName": "الإشعارات",
+      "columns": {
+        "id": "رقم الإشعار",
+        "recipient": "المستلم",
+        "email": "البريد",
+        "role": "الدور",
+        "title": "العنوان",
+        "body": "النص",
+        "type": "النوع",
+        "readStatus": "حالة القراءة",
+        "createdAt": "التاريخ"
+      }
+    },
+    "actions": {
+      "detail": "التفاصيل"
+    },
+    "sendModal": {
+      "title": "إرسال إشعار",
+      "targetType": "الفئة المستهدفة",
+      "targetAll": "جميع المستخدمين",
+      "targetStudents": "الطلاب",
+      "targetInstructors": "المحاضرون",
+      "targetSpecificUser": "مستخدم محدد",
+      "userId": "معرف المستخدم",
+      "notificationType": "نوع الإشعار",
+      "titleField": "العنوان",
+      "body": "نص الإشعار",
+      "submit": "إرسال الإشعار"
+    },
+    "detail": {
+      "notFoundTitle": "الإشعار غير موجود",
+      "notFoundDescription": "لم نتمكن من العثور على هذا الإشعار.",
+      "type": "النوع",
+      "sentAt": "تاريخ الإرسال"
+    },
+    "toast": {
+      "loadFailed": "تعذّر تحميل الإشعارات.",
+      "loadDetailFailed": "تعذّر تحميل الإشعار.",
+      "titleBodyRequired": "العنوان ونص الإشعار مطلوبان.",
+      "userIdRequired": "معرف المستخدم مطلوب.",
+      "sentSuccess": "تم إرسال الإشعار إلى {{count}} مستخدم.",
+      "sendFailed": "تعذّر إرسال الإشعار."
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "ترحيب",
+        "LIVE_SESSION": "جلسة مباشرة",
+        "CERTIFICATE": "شهادة",
+        "REWARD": "مكافأة",
+        "PAYMENT": "دفع",
+        "COMMUNITY": "مجتمع",
+        "SUBSCRIPTION": "اشتراك",
+        "EARNING": "أرباح",
+        "REVIEW": "تقييم",
+        "WITHDRAWAL": "سحب",
+        "COURSE": "كورس",
+        "INSTRUCTOR_REQUEST": "طلب محاضر",
+        "COURSE_REVIEW": "مراجعة كورس",
+        "SUPPORT": "دعم فني",
+        "ADMIN": "إداري"
+      },
+      "role": {
+        "STUDENT": "طالب",
+        "INSTRUCTOR": "محاضر",
+        "SUPER_ADMIN": "مشرف"
+      },
+      "readStatus": {
+        "read": "مقروء",
+        "unread": "غير مقروء"
+      }
+    }
+  }
+}

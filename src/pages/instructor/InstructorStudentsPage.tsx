@@ -56,9 +56,11 @@ export default function InstructorStudentsPage() {
 
   const filteredStudents = useMemo(() => {
     let result = students;
-    if (statusFilter) result = result.filter((s) => s.status === statusFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (statusFilter) {
+      result = result.filter((s) => String(s.status) === statusFilter);
+    }
+    const q = search.trim().toLowerCase();
+    if (q) {
       result = result.filter((s) =>
         [s.user?.fullName, s.user?.email, s.course?.titleAr, enrollmentLabels[s.status]]
           .some((v) => String(v || '').toLowerCase().includes(q)),
@@ -66,6 +68,8 @@ export default function InstructorStudentsPage() {
     }
     return result;
   }, [students, statusFilter, search]);
+
+  const hasActiveFilters = Boolean(search.trim() || statusFilter || courseId);
 
   const stats = useMemo(() => {
     const uniqueStudents = new Set(students.map((s) => s.user?.id)).size;
@@ -119,16 +123,6 @@ export default function InstructorStudentsPage() {
           title="طلابي"
           subtitle="تابع تقدم الطلاب المشتركين في كورساتك"
         />
-        <div className="admin-list-header-actions">
-          <Button
-            variant="outline"
-            icon={<Download size={18} aria-hidden="true" />}
-            onClick={handleExport}
-            disabled={!filteredStudents.length}
-          >
-            تصدير Excel
-          </Button>
-        </div>
       </div>
 
       <div className="admin-list-stats stats-grid instructor-students-stats">
@@ -171,7 +165,19 @@ export default function InstructorStudentsPage() {
         searchPlaceholder="بحث بالطالب، البريد، أو الكورس..."
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); handleCourseChange(''); }}
+        resetDisabled={!hasActiveFilters}
         searchIconSize={20}
+        extraActions={(
+          <Button
+            type="button"
+            variant="outline"
+            icon={<Download size={18} aria-hidden="true" />}
+            onClick={handleExport}
+            disabled={!filteredStudents.length}
+          >
+            تصدير Excel
+          </Button>
+        )}
       >
         <Select
           label="الكورس"
@@ -198,7 +204,11 @@ export default function InstructorStudentsPage() {
       <Card className="admin-table-card instructor-students-table-card">
         <div className="section-heading instructor-students-table-head">
           <h2>قائمة الطلاب</h2>
-          <CountBadge value={filteredStudents.length} />
+          <CountBadge value={
+            hasActiveFilters
+              ? `${filteredStudents.length}/${students.length}`
+              : filteredStudents.length
+          } />
         </div>
         {loading ? (
           <div className="instructor-students-loading">
@@ -210,8 +220,9 @@ export default function InstructorStudentsPage() {
             loading={false}
             data={tableRows}
             hideScrollNotice
+            showHeadersWhenEmpty={hasActiveFilters}
             onRowClick={(row) => goToStudent((row.user as any)?.id)}
-            emptyTitle="لا يوجد طلاب"
+            emptyTitle={hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا يوجد طلاب'}
             columns={[
               {
                 key: 'user',
@@ -295,9 +306,9 @@ export default function InstructorStudentsPage() {
               },
             ]}
           />
-        ) : students.length ? (
+        ) : hasActiveFilters ? (
           <div className="instructor-students-empty">
-            <EmptyState title="لا نتائج" description="جرّب تغيير الفلاتر أو البحث." icon={Users} />
+            <EmptyState title="لا توجد نتائج مطابقة" description="جرّب تغيير البحث أو حالة الاشتراك أو الكورس." icon={Users} />
           </div>
         ) : (
           <div className="instructor-students-empty">

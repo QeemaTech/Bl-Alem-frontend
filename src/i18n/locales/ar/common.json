@@ -1,0 +1,130 @@
+{
+  "actions": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "remove": "إزالة",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "submit": "إرسال",
+    "retry": "إعادة المحاولة",
+    "viewAll": "عرض الكل",
+    "browse": "تصفح",
+    "copy": "نسخ",
+    "upload": "رفع",
+    "change": "تغيير",
+    "logout": "تسجيل الخروج",
+    "login": "دخول",
+    "register": "إنشاء حساب",
+    "continue": "متابعة",
+    "start": "بدء",
+    "send": "إرسال",
+    "search": "بحث",
+    "filter": "تصفية",
+    "reset": "إعادة تعيين",
+    "loading": "جاري التحميل...",
+    "content": "المحتوى",
+    "completeProfile": "إكمال الملف الشخصي",
+    "editProfileResubmit": "تعديل الملف وإعادة الإرسال"
+  },
+  "status": {
+    "all": "الكل",
+    "draft": "مسودة",
+    "published": "منشور",
+    "pending": "قيد المراجعة",
+    "pendingReview": "قيد المراجعة",
+    "rejected": "مرفوض",
+    "suspended": "موقوف",
+    "live": "مباشر",
+    "upcoming": "قادمة",
+    "online": "متصل",
+    "new": "جديد"
+  },
+  "filter": {
+    "searchLabel": "بحث",
+    "searchPlaceholder": "بحث...",
+    "ariaLabel": "فلاتر البحث",
+    "reset": "إعادة تعيين"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "صفحة",
+    "of": "من"
+  },
+  "table": {
+    "noData": "لا توجد بيانات",
+    "actions": "إجراءات",
+    "recordCount": "{{count}} سجل",
+    "scrollHint": "مرّر أفقياً لعرض جميع الأعمدة"
+  },
+  "chart": {
+    "total": "الإجمالي",
+    "value": "القيمة",
+    "noData": "لا توجد بيانات كافية للعرض"
+  },
+  "dialog": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "logoutTitle": "تسجيل الخروج",
+    "logoutMessage": "هل أنت متأكد من تسجيل الخروج؟",
+    "logoutConfirm": "خروج"
+  },
+  "theme": {
+    "light": "الوضع الفاتح",
+    "dark": "الوضع الداكن",
+    "toggle": "تبديل المظهر"
+  },
+  "language": {
+    "label": "اللغة",
+    "ar": "العربية",
+    "en": "English",
+    "switchTo": "تبديل إلى {{lang}}",
+    "ariaLabel": "تبديل اللغة"
+  },
+  "sidebar": {
+    "ariaLabel": "القائمة الجانبية",
+    "closeDrawer": "إغلاق القائمة",
+    "openMenu": "فتح القائمة",
+    "expand": "فتح القائمة الجانبية",
+    "collapse": "طيّ القائمة الجانبية",
+    "profile": "الملف الشخصي",
+    "profileSettings": "إعدادات الملف الشخصي",
+    "profileOf": "الملف الشخصي — {{name}}",
+    "user": "المستخدم",
+    "badgeNew": "{{count}} جديد",
+    "unknownInitial": "؟"
+  },
+  "breadcrumb": {
+    "ariaLabel": "مسار التنقل"
+  },
+  "header": {
+    "greeting": "مرحباً {{name}}، تابع يومك التعليمي من هنا.",
+    "greetingAdmin": "مرحباً {{name}}، أدِر المنصة من هنا.",
+    "greetingInstructor": "مرحباً {{name}}، أدِر دوراتك من هنا.",
+    "greetingFallback": "بك",
+    "notifications": "الإشعارات",
+    "profile": "الملف الشخصي"
+  },
+  "empty": {
+    "defaultTitle": "لا توجد بيانات"
+  },
+  "or": "أو",
+  "currency": {
+    "egp": "ج.م"
+  },
+  "units": {
+    "course": "كورس",
+    "courses": "كورسات",
+    "student": "طالب",
+    "students": "طلاب",
+    "sale": "عملية بيع"
+  }
+}

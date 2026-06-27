@@ -1,0 +1,88 @@
+/* Legacy CSS variable bridge → MD3 design tokens (light + dark via html.dark) */
+:root {
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-hover);
+  --primary-hover: var(--color-primary-hover);
+  --primary-light: var(--color-primary-container);
+  --primary-50: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-container));
+  --primary-container: var(--color-primary-container);
+
+  --secondary: var(--color-secondary);
+  --text: var(--color-on-surface);
+  --muted: var(--color-on-surface-variant);
+  --border: var(--color-outline);
+  --card: var(--color-surface-container);
+  --background: var(--color-surface);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-container-high);
+
+  --success: var(--color-success);
+  --success-light: var(--color-success-container);
+  --danger: var(--color-error);
+  --warning: var(--color-warning);
+  --info: var(--color-info);
+
+  --shadow-sm: var(--shadow-1);
+  --shadow-md: var(--shadow-2);
+  --shadow-lg: var(--shadow-3);
+  --shadow: var(--shadow-2);
+
+  --transition: 200ms ease;
+}
+
+html.dark {
+  --primary-50: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface-container));
+}
+
+/* Smooth theme switching */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    fill 220ms ease,
+    stroke 220ms ease !important;
+}
+
+html.theme-transition svg text,
+html.theme-transition .recharts-surface {
+  transition: fill 220ms ease, stroke 220ms ease !important;
+}
+
+/* Chart tooltips & legends (legacy pages.css overrides) */
+.chart-tooltip {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+
+.recharts-default-tooltip {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+.chart-donut-value {
+  fill: var(--text);
+}
+
+.chart-donut-label {
+  fill: var(--muted);
+}
+
+.chart-bar-y-tick {
+  color: var(--text);
+}
+
+.chart-legend-label {
+  color: var(--text);
+}
+
+.chart-legend-meta {
+  color: var(--muted);
+}

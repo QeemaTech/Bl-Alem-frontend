@@ -1,0 +1,64 @@
+{
+  "sections": {
+    "learning": "Learning",
+    "account": "Account",
+    "support": "Support",
+    "training": "Training management",
+    "platform": "Platform administration"
+  },
+  "student": {
+    "dashboard": "Home",
+    "courses": "Available courses",
+    "learningPaths": "Learning paths",
+    "myCourses": "My courses",
+    "live": "Live sessions",
+    "community": "Community",
+    "certificates": "Certificates",
+    "payments": "Payments",
+    "rewards": "Rewards",
+    "notifications": "Notifications",
+    "support": "Support"
+  },
+  "instructor": {
+    "dashboard": "Home",
+    "courses": "My courses",
+    "addCourse": "Add course",
+    "live": "Live sessions",
+    "students": "Students",
+    "reviews": "Reviews",
+    "earnings": "Earnings",
+    "notifications": "Notifications",
+    "support": "Support"
+  },
+  "admin": {
+    "dashboard": "Home",
+    "users": "Users",
+    "students": "Students",
+    "instructors": "Instructors",
+    "categories": "Categories",
+    "learningPaths": "Learning paths",
+    "courses": "Courses",
+    "live": "Live sessions",
+    "payments": "Payments",
+    "coupons": "Coupons",
+    "rewards": "Rewards",
+    "certificates": "Certificates",
+    "reviews": "Reviews",
+    "notifications": "Notifications",
+    "support": "Technical support",
+    "withdrawals": "Withdrawals",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "sidebarTitles": {
+    "studentLearning": "Learning space",
+    "instructorTraining": "Training management",
+    "platformAdmin": "Platform administration"
+  },
+  "aria": {
+    "studentSidebar": "Student menu",
+    "instructorSidebar": "Instructor menu",
+    "studentNav": "Learning space",
+    "instructorNav": "Training management"
+  }
+}

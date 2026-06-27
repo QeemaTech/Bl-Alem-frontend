@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Award, BookOpen, Download, Plus, Users, Wallet } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { StudentsTable } from '../../components/admin/users/StudentsTable';
-import { fmtDate, formatInterests, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -15,8 +15,8 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminUserLabels } from '../../hooks/useAdminUserLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -29,23 +29,18 @@ const emptyForm = {
   status: 'ACTIVE',
 };
 
-const exportColumns = [
-  { key: 'id', header: 'رقم الطالب' },
-  { key: 'fullName', header: 'الاسم' },
-  { key: 'email', header: 'البريد' },
-  { key: 'phone', header: 'الهاتف' },
-  { key: 'educationLevel', header: 'المستوى التعليمي' },
-  { key: 'enrollments', header: 'الاشتراكات' },
-  { key: 'payments', header: 'المدفوعات' },
-  { key: 'certificates', header: 'الشهادات' },
-  { key: 'wallet', header: 'رصيد المحفظة' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'joinedAt', header: 'تاريخ الانضمام' },
-];
-
 export default function AdminStudentsPage() {
+  const { t } = useTranslation(['users', 'common']);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const {
+    statusLabels,
+    fmtDate,
+    fmtMoney,
+    formatInterests,
+    empty,
+  } = useAdminUserLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -55,6 +50,23 @@ export default function AdminStudentsPage() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.students.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'fullName', header: cols.fullName },
+      { key: 'email', header: cols.email },
+      { key: 'phone', header: cols.phone },
+      { key: 'educationLevel', header: cols.educationLevel },
+      { key: 'enrollments', header: cols.enrollments },
+      { key: 'payments', header: cols.payments },
+      { key: 'certificates', header: cols.certificates },
+      { key: 'wallet', header: cols.wallet },
+      { key: 'status', header: cols.status },
+      { key: 'joinedAt', header: cols.joinedAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -98,18 +110,21 @@ export default function AdminStudentsPage() {
   const statusChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = statusLabels[i.status] || i.status;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.status;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: statusLabels[key] || key,
+      value,
+    }));
+  }, [items, statusLabels]);
 
   const tableRows = useMemo(() => filteredItems.map((row) => ({
     id: row.id,
     fullName: row.fullName,
     email: row.email,
-    phone: row.phone || '—',
-    educationLevel: row.studentProfile?.educationLevel || '—',
+    phone: row.phone || empty,
+    educationLevel: row.studentProfile?.educationLevel || empty,
     enrollments: String(row._count?.enrollments ?? 0),
     payments: String(row._count?.payments ?? 0),
     certificates: String(row._count?.certificates ?? 0),
@@ -117,7 +132,7 @@ export default function AdminStudentsPage() {
     status: statusLabels[row.status] || row.status,
     joinedAt: fmtDate(row.createdAt),
     _raw: row,
-  })), [filteredItems]);
+  })), [filteredItems, statusLabels, fmtDate, fmtMoney, empty]);
 
   const openCreate = () => {
     setEditing(null);
@@ -127,6 +142,7 @@ export default function AdminStudentsPage() {
 
   const openEdit = (student: any) => {
     setEditing(student);
+    const interestsFormatted = formatInterests(student.studentProfile?.interests);
     setForm({
       fullName: student.fullName,
       email: student.email,
@@ -134,9 +150,7 @@ export default function AdminStudentsPage() {
       password: '',
       bio: student.studentProfile?.bio || '',
       educationLevel: student.studentProfile?.educationLevel || '',
-      interests: formatInterests(student.studentProfile?.interests) === '—'
-        ? ''
-        : formatInterests(student.studentProfile?.interests),
+      interests: interestsFormatted === empty ? '' : interestsFormatted,
       status: student.status,
     });
     setFormOpen(true);
@@ -160,18 +174,18 @@ export default function AdminStudentsPage() {
       if (editing) {
         if (form.password.trim()) payload.password = form.password;
         await adminApi.updateStudent(editing.id, payload);
-        showToast('تم تحديث الطالب.', 'success');
+        showToast(t('admin.students.toast.updated'), 'success');
       } else {
         payload.password = form.password.trim() || 'Password123!';
         await adminApi.createStudent(payload);
-        showToast('تم إنشاء الطالب.', 'success');
+        showToast(t('admin.students.toast.created'), 'success');
       }
       setFormOpen(false);
       setEditing(null);
       setForm(emptyForm);
       await load();
     } catch {
-      showToast('تعذّر حفظ بيانات الطالب.', 'error');
+      showToast(t('admin.students.toast.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +194,10 @@ export default function AdminStudentsPage() {
   const toggleStatus = async (student: any) => {
     const next = student.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     await adminApi.userStatus(student.id, next);
-    showToast(next === 'ACTIVE' ? 'تم تفعيل الحساب.' : 'تم إيقاف الحساب.', 'success');
+    showToast(
+      next === 'ACTIVE' ? t('admin.students.toast.activated') : t('admin.students.toast.suspended'),
+      'success',
+    );
     await load();
   };
 
@@ -188,65 +205,69 @@ export default function AdminStudentsPage() {
     if (!deleteTarget) return;
     try {
       await adminApi.deleteStudent(deleteTarget.id);
-      showToast('تم حذف الطالب.', 'success');
+      showToast(t('admin.students.toast.deleted'), 'success');
       setDeleteTarget(null);
       await load();
     } catch {
-      showToast('تعذّر حذف الطالب.', 'error');
+      showToast(t('admin.students.toast.deleteError'), 'error');
       setDeleteTarget(null);
     }
   };
 
   const handleExport = () => {
-    exportTableToExcel('الطلاب', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('admin.students.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="الطلاب" subtitle="إدارة حسابات الطلاب ومتابعة نشاطهم التعليمي" />
+        <PageHeader title={t('admin.students.title')} subtitle={t('admin.students.subtitle')} />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={openCreate}>
-            إضافة طالب
+            {t('admin.students.addStudent')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الطلاب" value={String(stats.total)} icon={Users} />
-        <StatCard title="نشطون" value={String(stats.active)} icon={Users} />
-        <StatCard title="موقوفون" value={String(stats.suspended)} icon={Users} />
-        <StatCard title="إجمالي الاشتراكات" value={String(stats.enrollments)} icon={BookOpen} />
-        <StatCard title="الشهادات" value={String(stats.certificates)} icon={Award} />
-        <StatCard title="إجمالي أرصدة المحافظ" value={fmtMoney(stats.walletTotal)} icon={Wallet} />
+        <StatCard title={t('admin.students.stats.total')} value={String(stats.total)} icon={Users} />
+        <StatCard title={t('admin.students.stats.active')} value={String(stats.active)} icon={Users} />
+        <StatCard title={t('admin.students.stats.suspended')} value={String(stats.suspended)} icon={Users} />
+        <StatCard title={t('admin.students.stats.totalEnrollments')} value={String(stats.enrollments)} icon={BookOpen} />
+        <StatCard title={t('admin.students.stats.certificates')} value={String(stats.certificates)} icon={Award} />
+        <StatCard title={t('admin.students.stats.walletTotal')} value={fmtMoney(stats.walletTotal)} icon={Wallet} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع حالات الحسابات" type="pie" data={statusChart} />
+        <ReportChart title={t('admin.students.charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         className="filter-bar--modern"
         searchValue={search}
-        searchPlaceholder="بحث بالاسم، البريد، أو المستوى التعليمي..."
+        searchPlaceholder={t('admin.students.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
         resetDisabled={!hasActiveFilters}
         searchIconSize={20}
       >
         <Select
-          label="حالة الحساب"
+          label={t('filters.accountStatus')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'نشط', value: 'ACTIVE' },
-            { label: 'بانتظار التفعيل', value: 'PENDING' },
-            { label: 'موقوف', value: 'SUSPENDED' },
-            { label: 'مرفوض', value: 'REJECTED' },
+            { label: t('filters.allStatuses'), value: '' },
+            { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+            { label: statusLabels.PENDING, value: 'PENDING' },
+            { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+            { label: statusLabels.REJECTED, value: 'REJECTED' },
           ]}
         />
       </FilterBar>
@@ -262,43 +283,45 @@ export default function AdminStudentsPage() {
 
       <Modal
         isOpen={formOpen}
-        title={editing ? 'تعديل الطالب' : 'إضافة طالب'}
+        title={editing ? t('admin.students.editStudent') : t('admin.students.addStudent')}
         onClose={() => { setFormOpen(false); setEditing(null); setForm(emptyForm); }}
       >
         <form className="stack-sm" onSubmit={saveStudent}>
-          <Input label="الاسم الكامل" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
-          <Input label="البريد الإلكتروني" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          <Input label="الهاتف" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
+          <Input label={t('form.fullName')} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
+          <Input label={t('form.email')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          <Input label={t('form.phone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
           <Input
-            label={editing ? 'كلمة المرور (اتركها فارغة بدون تغيير)' : 'كلمة المرور'}
+            label={editing ? t('form.passwordOptional') : t('form.password')}
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required={!editing}
           />
-          <Input label="المستوى التعليمي" value={form.educationLevel} onChange={(e) => setForm({ ...form, educationLevel: e.target.value })} placeholder="ثانوي، جامعي..." />
-          <Input label="الاهتمامات (مفصولة بفاصلة)" value={form.interests} onChange={(e) => setForm({ ...form, interests: e.target.value })} placeholder="البرمجة، التصميم" />
-          <Textarea label="نبذة" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+          <Input label={t('form.educationLevel')} value={form.educationLevel} onChange={(e) => setForm({ ...form, educationLevel: e.target.value })} placeholder={t('form.educationLevelPlaceholder')} />
+          <Input label={t('form.interests')} value={form.interests} onChange={(e) => setForm({ ...form, interests: e.target.value })} placeholder={t('form.interestsPlaceholder')} />
+          <Textarea label={t('form.bio')} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
           <Select
-            label="حالة الحساب"
+            label={t('form.accountStatus')}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
             options={[
-              { label: 'نشط', value: 'ACTIVE' },
-              { label: 'بانتظار التفعيل', value: 'PENDING' },
-              { label: 'موقوف', value: 'SUSPENDED' },
-              { label: 'مرفوض', value: 'REJECTED' },
+              { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+              { label: statusLabels.PENDING, value: 'PENDING' },
+              { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+              { label: statusLabels.REJECTED, value: 'REJECTED' },
             ]}
           />
-          <Button loading={submitting}>{editing ? 'حفظ التعديلات' : 'إنشاء الطالب'}</Button>
+          <Button loading={submitting}>
+            {editing ? t('actions.saveChanges') : t('admin.students.createStudent')}
+          </Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف الطالب"
-        message={`هل أنت متأكد من حذف "${deleteTarget?.fullName}"؟ سيتم حذف جميع بياناته.`}
-        confirmLabel="حذف"
+        title={t('admin.students.deleteTitle')}
+        message={t('admin.students.deleteMessage', { name: deleteTarget?.fullName })}
+        confirmLabel={t('actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

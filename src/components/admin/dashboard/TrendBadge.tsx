@@ -1,5 +1,5 @@
 import { TrendingDown, TrendingUp } from '@/icons';
-import { fmtPct } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 
 interface TrendBadgeProps {
   value: number;
@@ -7,6 +7,7 @@ interface TrendBadgeProps {
 }
 
 export function TrendBadge({ value, label }: TrendBadgeProps) {
+  const { fmtPct } = useDashboardFormatters();
   const up = value >= 0;
   return (
     <span className={`dash-trend ${up ? 'is-up' : 'is-down'}`}>

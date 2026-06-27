@@ -1,0 +1,109 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "SCHEDULED": "Scheduled",
+      "LIVE": "Live now",
+      "ENDED": "Ended",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "durationShort": "{{count}}m",
+  "durationMinutes": "{{count}} min",
+  "title": "Live sessions",
+  "subtitle": "Manage and monitor live streaming sessions on the platform",
+  "stats": {
+    "total": "Total sessions",
+    "scheduled": "Scheduled",
+    "live": "Live now",
+    "ended": "Ended",
+    "cancelled": "Cancelled"
+  },
+  "charts": {
+    "statusDistribution": "Session status distribution"
+  },
+  "filters": {
+    "allStatuses": "All statuses",
+    "status": "Status",
+    "searchPlaceholder": "Search by title, course, or instructor..."
+  },
+  "table": {
+    "emptyTitle": "No sessions",
+    "emptyDescription": "Live sessions will appear here when scheduled.",
+    "columns": {
+      "title": "Title",
+      "course": "Course",
+      "instructor": "Instructor",
+      "startAt": "Start time",
+      "duration": "Duration",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "export": {
+    "sheetName": "Live-Sessions",
+    "columns": {
+      "id": "Session ID",
+      "title": "Title",
+      "course": "Course",
+      "instructor": "Instructor",
+      "startAt": "Start time",
+      "duration": "Duration (min)",
+      "meetingUrl": "Meeting URL",
+      "status": "Status"
+    }
+  },
+  "actions": {
+    "detail": "Details",
+    "edit": "Edit",
+    "join": "Join",
+    "joinSession": "Join session",
+    "start": "Start",
+    "end": "End",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "exportExcel": "Export Excel",
+    "saveChanges": "Save changes",
+    "confirmCancel": "Confirm cancellation"
+  },
+  "detail": {
+    "title": "Session details",
+    "fields": {
+      "id": "Session ID",
+      "title": "Title",
+      "course": "Course",
+      "instructor": "Instructor",
+      "email": "Email",
+      "startAt": "Start time",
+      "duration": "Duration",
+      "meetingUrl": "Meeting URL",
+      "status": "Status",
+      "description": "Description"
+    }
+  },
+  "form": {
+    "editTitle": "Edit session",
+    "titleLabel": "Session title",
+    "startAtLabel": "Start time",
+    "durationLabel": "Duration (minutes)",
+    "meetingUrlLabel": "Meeting URL",
+    "meetingUrlPlaceholder": "https://meet.example.com/...",
+    "statusLabel": "Status",
+    "descriptionLabel": "Description"
+  },
+  "cancel": {
+    "title": "Cancel session",
+    "message": "Are you sure you want to cancel session \"{{title}}\"?"
+  },
+  "delete": {
+    "title": "Delete session",
+    "message": "Are you sure you want to delete session \"{{title}}\"? This action cannot be undone."
+  },
+  "toast": {
+    "updated": "Session updated.",
+    "started": "Session started.",
+    "ended": "Session ended.",
+    "cancelled": "Session cancelled.",
+    "deleted": "Session deleted."
+  }
+}

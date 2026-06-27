@@ -92,7 +92,7 @@ export default function InstructorSectionFormPage() {
             <Button type="button" variant="outline" onClick={() => navigate(builderPath)}>
               إلغاء
             </Button>
-            <Button loading={submitting}>{isEdit ? 'حفظ التعديلات' : 'إضافة السيشن'}</Button>
+            <Button type="submit" loading={submitting}>{isEdit ? 'حفظ التعديلات' : 'إضافة السيشن'}</Button>
           </div>
         </form>
       </Card>

@@ -1,0 +1,90 @@
+{
+  "empty": "—",
+  "title": "Certificates",
+  "subtitle": "Manage and issue course completion certificates",
+  "stats": {
+    "total": "Total certificates",
+    "thisMonth": "Issued this month",
+    "withPdf": "PDF available",
+    "pending": "Pending issuance"
+  },
+  "charts": {},
+  "filters": {
+    "searchPlaceholder": "Search by certificate number, student, course, or instructor...",
+    "pdf": "PDF file",
+    "all": "All",
+    "available": "Available",
+    "unavailable": "Unavailable"
+  },
+  "table": {
+    "emptyTitle": "No certificates",
+    "emptyDescription": "Certificates will appear here after they are issued to students.",
+    "columns": {
+      "certificateNumber": "Certificate number",
+      "student": "Student",
+      "email": "Email",
+      "course": "Course",
+      "instructor": "Instructor",
+      "pdfStatus": "PDF",
+      "verifyUrl": "Verification link",
+      "issuedAt": "Issue date",
+      "actions": "Actions"
+    }
+  },
+  "labels": {
+    "pdfStatus": {
+      "available": "Available",
+      "unavailable": "Unavailable"
+    },
+    "progress": "Progress: {{percent}}%"
+  },
+  "form": {},
+  "modal": {
+    "detailTitle": "Certificate details",
+    "issueTitle": "Issue new certificate",
+    "eligibleIntro": "The following students completed courses but have not received a certificate yet:",
+    "detail": {
+      "certificateNumber": "Certificate number",
+      "student": "Student",
+      "email": "Email",
+      "course": "Course",
+      "instructor": "Instructor",
+      "issuedAt": "Issue date",
+      "pdf": "PDF file"
+    }
+  },
+  "actions": {
+    "exportExcel": "Export Excel",
+    "issue": "Issue certificate",
+    "issueOne": "Issue",
+    "details": "Details",
+    "verify": "Verify",
+    "verifyCertificate": "Verify certificate",
+    "downloadPdf": "Download PDF",
+    "regeneratePdf": "Regenerate PDF",
+    "copyVerifyLink": "Copy verification link"
+  },
+  "toast": {
+    "issued": "Certificate issued successfully.",
+    "regenerated": "PDF regenerated with the current template.",
+    "linkCopied": "Link copied."
+  },
+  "export": {
+    "sheetName": "Certificates",
+    "columns": {
+      "certificateNumber": "Certificate number",
+      "student": "Student",
+      "email": "Email",
+      "course": "Course",
+      "instructor": "Instructor",
+      "pdfStatus": "PDF file",
+      "verifyUrl": "Verification link",
+      "issuedAt": "Issue date"
+    }
+  },
+  "eligibleEmpty": {
+    "title": "No eligible students",
+    "description": "All students who completed their courses already have certificates."
+  },
+  "confirm": {}
+}

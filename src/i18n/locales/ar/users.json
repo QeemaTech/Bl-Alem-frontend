@@ -1,0 +1,606 @@
+{
+  "empty": "—",
+  "labels": {
+    "role": {
+      "STUDENT": "طالب",
+      "INSTRUCTOR": "محاضر",
+      "SUPER_ADMIN": "مشرف"
+    },
+    "accountStatus": {
+      "ACTIVE": "نشط",
+      "PENDING": "بانتظار التفعيل",
+      "SUSPENDED": "موقوف",
+      "REJECTED": "مرفوض"
+    },
+    "approval": {
+      "PENDING": "قيد المراجعة",
+      "APPROVED": "معتمد",
+      "REJECTED": "مرفوض",
+      "SUSPENDED": "موقوف"
+    }
+  },
+  "activity": {
+    "courses": "{{count}} كورس",
+    "enrollments": "{{count}} اشتراك"
+  },
+  "actions": {
+    "detail": "التفاصيل",
+    "edit": "تعديل",
+    "suspend": "إيقاف",
+    "activate": "تفعيل",
+    "delete": "حذف",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "confirmReject": "تأكيد الرفض",
+    "exportExcel": "تصدير Excel",
+    "saveChanges": "حفظ التعديلات",
+    "countAria": "العدد: {{value}}"
+  },
+  "filters": {
+    "allRoles": "كل الأدوار",
+    "allStatuses": "كل الحالات",
+    "allAccounts": "كل الحسابات",
+    "role": "الدور",
+    "accountStatus": "حالة الحساب",
+    "approvalStatus": "حالة الاعتماد"
+  },
+  "form": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "password": "كلمة المرور",
+    "passwordOptional": "كلمة المرور (اتركها فارغة بدون تغيير)",
+    "title": "المسمى الوظيفي",
+    "titlePlaceholder": "خبير JavaScript",
+    "specialization": "التخصص",
+    "yearsOfExperience": "سنوات الخبرة",
+    "bio": "نبذة",
+    "educationLevel": "المستوى التعليمي",
+    "educationLevelPlaceholder": "ثانوي، جامعي...",
+    "interests": "الاهتمامات (مفصولة بفاصلة)",
+    "interestsPlaceholder": "البرمجة، التصميم",
+    "rejectReason": "سبب الرفض"
+  },
+  "admin": {
+    "users": {
+      "title": "المستخدمون",
+      "subtitle": "إدارة جميع حسابات المنصة",
+      "addUser": "إضافة مستخدم",
+      "editUser": "تعديل المستخدم",
+      "createUser": "إنشاء المستخدم",
+      "deleteTitle": "حذف المستخدم",
+      "deleteMessage": "هل أنت متأكد من حذف \"{{name}}\"؟ سيتم حذف جميع بياناته.",
+      "stats": {
+        "total": "إجمالي المستخدمين",
+        "students": "الطلاب",
+        "instructors": "المحاضرون",
+        "admins": "المشرفون",
+        "active": "نشطون",
+        "suspended": "موقوفون"
+      },
+      "charts": {
+        "roleDistribution": "توزيع الأدوار",
+        "statusDistribution": "توزيع حالات الحسابات"
+      },
+      "searchPlaceholder": "بحث بالاسم، البريد، أو الهاتف...",
+      "table": {
+        "title": "قائمة المستخدمين",
+        "emptyTitle": "لا يوجد مستخدمون",
+        "emptyDescription": "أضف مستخدماً جديداً للبدء.",
+        "columns": {
+          "id": "رقم المستخدم",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "phone": "الهاتف",
+          "role": "الدور",
+          "status": "الحالة",
+          "wallet": "المحفظة",
+          "activity": "النشاط",
+          "joinedAt": "التسجيل",
+          "actions": "الإجراءات"
+        }
+      },
+      "export": {
+        "sheetName": "المستخدمون",
+        "columns": {
+          "id": "رقم المستخدم",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "phone": "الهاتف",
+          "role": "الدور",
+          "status": "الحالة",
+          "wallet": "المحفظة",
+          "activity": "النشاط",
+          "joinedAt": "تاريخ التسجيل"
+        }
+      },
+      "toast": {
+        "updated": "تم تحديث المستخدم.",
+        "created": "تم إنشاء المستخدم.",
+        "saveError": "تعذّر حفظ بيانات المستخدم.",
+        "activated": "تم تفعيل الحساب.",
+        "suspended": "تم إيقاف الحساب.",
+        "deleted": "تم حذف المستخدم.",
+        "deleteError": "تعذّر حذف المستخدم."
+      }
+    },
+    "instructors": {
+      "title": "المحاضرون",
+      "subtitle": "إدارة حسابات المحاضرين واعتماد طلباتهم",
+      "addInstructor": "إضافة محاضر",
+      "editInstructor": "تعديل المحاضر",
+      "createInstructor": "إنشاء المحاضر",
+      "rejectTitle": "رفض المحاضر",
+      "rejectPrompt": "رفض طلب:",
+      "deleteTitle": "حذف المحاضر",
+      "deleteMessage": "هل أنت متأكد من حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "stats": {
+        "total": "إجمالي المحاضرين",
+        "pending": "قيد المراجعة",
+        "approved": "معتمدون",
+        "rejectedSuspended": "مرفوضون / موقوفون",
+        "totalCourses": "إجمالي الكورسات",
+        "totalEarnings": "إجمالي الأرباح"
+      },
+      "charts": {
+        "approvalDistribution": "توزيع حالات الاعتماد"
+      },
+      "searchPlaceholder": "بحث بالاسم، البريد، التخصص...",
+      "table": {
+        "title": "قائمة المحاضرين",
+        "emptyTitle": "لا يوجد محاضرون",
+        "emptyDescription": "أضف محاضراً جديداً أو انتظر طلبات التسجيل.",
+        "columns": {
+          "id": "رقم المحاضر",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "specialization": "التخصص",
+          "courses": "الكورسات",
+          "students": "الطلاب",
+          "earnings": "الأرباح",
+          "approval": "الاعتماد",
+          "account": "الحساب",
+          "actions": "الإجراءات"
+        }
+      },
+      "export": {
+        "sheetName": "المحاضرون",
+        "columns": {
+          "id": "رقم المحاضر",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "phone": "الهاتف",
+          "title": "المسمى",
+          "specialization": "التخصص",
+          "courses": "الكورسات",
+          "students": "الطلاب",
+          "earnings": "الأرباح",
+          "approvalStatus": "حالة الاعتماد",
+          "accountStatus": "حالة الحساب",
+          "joinedAt": "تاريخ الانضمام"
+        }
+      },
+      "toast": {
+        "updated": "تم تحديث المحاضر.",
+        "created": "تم إنشاء المحاضر.",
+        "saveError": "تعذّر حفظ بيانات المحاضر.",
+        "approved": "تم اعتماد المحاضر.",
+        "rejected": "تم رفض المحاضر.",
+        "suspended": "تم إيقاف المحاضر.",
+        "activated": "تم تفعيل المحاضر.",
+        "deleted": "تم حذف المحاضر.",
+        "deleteError": "لا يمكن حذف محاضر لديه دورات."
+      }
+    },
+    "students": {
+      "title": "الطلاب",
+      "subtitle": "إدارة حسابات الطلاب ومتابعة نشاطهم التعليمي",
+      "addStudent": "إضافة طالب",
+      "editStudent": "تعديل الطالب",
+      "createStudent": "إنشاء الطالب",
+      "deleteTitle": "حذف الطالب",
+      "deleteMessage": "هل أنت متأكد من حذف \"{{name}}\"؟ سيتم حذف جميع بياناته.",
+      "stats": {
+        "total": "إجمالي الطلاب",
+        "active": "نشطون",
+        "suspended": "موقوفون",
+        "totalEnrollments": "إجمالي الاشتراكات",
+        "certificates": "الشهادات",
+        "walletTotal": "إجمالي أرصدة المحافظ"
+      },
+      "charts": {
+        "statusDistribution": "توزيع حالات الحسابات"
+      },
+      "searchPlaceholder": "بحث بالاسم، البريد، أو المستوى التعليمي...",
+      "table": {
+        "title": "قائمة الطلاب",
+        "emptyTitle": "لا يوجد طلاب",
+        "emptyDescription": "أضف طالباً جديداً أو انتظر التسجيلات.",
+        "columns": {
+          "id": "رقم الطالب",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "phone": "الهاتف",
+          "educationLevel": "المستوى",
+          "enrollments": "الاشتراكات",
+          "certificates": "الشهادات",
+          "wallet": "المحفظة",
+          "status": "الحالة",
+          "joinedAt": "الانضمام",
+          "actions": "الإجراءات"
+        }
+      },
+      "export": {
+        "sheetName": "الطلاب",
+        "columns": {
+          "id": "رقم الطالب",
+          "fullName": "الاسم",
+          "email": "البريد",
+          "phone": "الهاتف",
+          "educationLevel": "المستوى التعليمي",
+          "enrollments": "الاشتراكات",
+          "payments": "المدفوعات",
+          "certificates": "الشهادات",
+          "wallet": "رصيد المحفظة",
+          "status": "الحالة",
+          "joinedAt": "تاريخ الانضمام"
+        }
+      },
+      "toast": {
+        "updated": "تم تحديث الطالب.",
+        "created": "تم إنشاء الطالب.",
+        "saveError": "تعذّر حفظ بيانات الطالب.",
+        "activated": "تم تفعيل الحساب.",
+        "suspended": "تم إيقاف الحساب.",
+        "deleted": "تم حذف الطالب.",
+        "deleteError": "تعذّر حذف الطالب."
+      }
+    },
+    "detail": {
+      "back": {
+        "user": "العودة للمستخدمين",
+        "student": "العودة للطلاب",
+        "instructor": "العودة للمحاضرين"
+      },
+      "loadError": {
+        "user": "تعذّر تحميل بيانات المستخدم.",
+        "student": "تعذّر تحميل بيانات الطالب.",
+        "instructor": "تعذّر تحميل بيانات المحاضر."
+      },
+      "editDialog": {
+        "user": "تعديل المستخدم",
+        "student": "تعديل الطالب",
+        "instructor": "تعديل المحاضر"
+      },
+      "deleteDialog": {
+        "user": "حذف المستخدم",
+        "student": "حذف الطالب",
+        "instructor": "حذف المحاضر"
+      },
+      "deleteSuccess": {
+        "user": "تم حذف المستخدم.",
+        "student": "تم حذف الطالب.",
+        "instructor": "تم حذف المحاضر."
+      },
+      "deleteError": {
+        "user": "تعذّر حذف المستخدم.",
+        "student": "تعذّر حذف الطالب.",
+        "instructor": "لا يمكن حذف محاضر لديه دورات."
+      },
+      "deleteConfirmMessage": "هل أنت متأكد من حذف \"{{name}}\"؟",
+      "hero": {
+        "joined": "انضم {{date}}",
+        "resetPassword": "إعادة كلمة المرور",
+        "sendNotification": "إرسال إشعار"
+      },
+      "preferredLanguage": {
+        "ar": "العربية",
+        "en": "English"
+      },
+      "kpis": {
+        "totalCourses": "إجمالي الدورات",
+        "completed": "مكتملة",
+        "inProgress": "قيد التعلم",
+        "certificates": "الشهادات",
+        "avgScore": "متوسط الدرجات",
+        "completionPct": "نسبة الإكمال",
+        "avgAttendance": "معدل الحضور",
+        "learningHours": "ساعات التعلم",
+        "learningHoursHint": "تقدير من التقدم"
+      },
+      "charts": {
+        "courseDistribution": "توزيع الدورات",
+        "progressOverTime": "التقدم عبر الزمن",
+        "monthlyCompletion": "الإكمال الشهري",
+        "completionRates": "نسب الإكمال",
+        "scoreSummary": "ملخص الدرجات",
+        "quizResults": "نتائج الاختبارات",
+        "monthlyPayments": "المدفوعات الشهرية",
+        "paymentStatus": "حالات الدفع",
+        "participationDistribution": "توزيع المشاركة",
+        "interestsMap": "خريطة الاهتمامات"
+      },
+      "sections": {
+        "coursePerformance": {
+          "title": "أداء الدورات",
+          "subtitle": "مقارنة نسب الإكمال والدرجات لكل دورة"
+        },
+        "quizzes": {
+          "title": "الاختبارات",
+          "subtitle": "تحليل الأداء في الاختبارات"
+        },
+        "certificates": {
+          "title": "الشهادات",
+          "subtitle": "الشهادات الصادرة للمستخدم"
+        },
+        "payments": {
+          "title": "المدفوعات والإيرادات",
+          "subtitle": "ملخص مالي وحركة الدفع"
+        },
+        "activity": {
+          "title": "النشاط والجلسات",
+          "subtitle": "آخر نشاط مسجّل على الحساب"
+        },
+        "attendance": {
+          "title": "الحضور والمشاركة",
+          "subtitle": "مؤشرات مشاركة تعليمية مستمدة من التقدم"
+        },
+        "skills": {
+          "title": "المهارات والاهتمامات",
+          "subtitle": "اهتمامات الطالب وتوزيع النشاط على المنصة"
+        },
+        "badges": {
+          "title": "الشارات والإنجازات",
+          "subtitle": "إنجازات مستمدة من الشهادات والنقاط"
+        },
+        "timeline": {
+          "title": "الخط الزمني للنشاط",
+          "subtitle": "أهم الأحداث مرتبة زمنياً"
+        },
+        "studentProfile": "بيانات الطالب",
+        "instructorProfile": "بيانات المحاضر",
+        "referrals": "الإحالات والمكافآت",
+        "statsSummary": "ملخص الإحصائيات"
+      },
+      "enrollmentStatus": {
+        "completed": "مكتمل",
+        "inProgress": "قيد التعلم",
+        "notStarted": "لم يبدأ",
+        "cancelled": "ملغي"
+      },
+      "quizResult": {
+        "passed": "ناجح",
+        "failed": "راسب",
+        "inProgress": "قيد التنفيذ"
+      },
+      "quizStats": {
+        "attempts": "المحاولات",
+        "passed": "ناجح",
+        "failed": "راسب",
+        "avgScore": "متوسط الدرجة"
+      },
+      "quizScoreBar": {
+        "highest": "الأعلى",
+        "average": "المتوسط",
+        "lowest": "الأدنى"
+      },
+      "learningDonut": {
+        "completed": "مكتملة",
+        "inProgress": "قيد التعلم",
+        "notStarted": "لم يبدأ"
+      },
+      "quizDonut": {
+        "passed": "ناجح",
+        "failed": "راسب",
+        "inProgress": "قيد التنفيذ"
+      },
+      "attendanceBar": {
+        "completed": "إكمال",
+        "inProgress": "قيد التعلم",
+        "notStarted": "لم يبدأ"
+      },
+      "categoryChart": {
+        "courses": "كورسات",
+        "payments": "مدفوعات",
+        "certificates": "شهادات",
+        "quizzes": "اختبارات"
+      },
+      "paymentKpis": {
+        "totalPaid": "إجمالي المدفوع",
+        "pending": "معلق",
+        "refunded": "مسترد",
+        "revenue": "الإيراد"
+      },
+      "activityPanel": {
+        "lastUpdated": "آخر تحديث",
+        "registeredAt": "تاريخ التسجيل",
+        "preferredLanguage": "اللغة المفضلة",
+        "walletBalance": "رصيد المحفظة",
+        "rewardPoints": "نقاط المكافآت",
+        "referralCode": "كود الإحالة"
+      },
+      "certificates": {
+        "defaultTitle": "شهادة",
+        "issued": "صدرت {{date}}",
+        "issuedBadge": "صادرة",
+        "download": "تحميل",
+        "emptyTitle": "لا توجد شهادات",
+        "emptyDescription": "لم يحصل المستخدم على شهادات بعد."
+      },
+      "skills": {
+        "educationLevel": "المستوى التعليمي: {{level}}",
+        "studentInterests": "اهتمامات الطالب",
+        "activityDistribution": "توزيع النشاط",
+        "userActivity": "نشاط المستخدم",
+        "emptyTitle": "لا توجد مهارات أو اهتمامات",
+        "emptyDescription": "لم يُسجَّل للطالب اهتمامات بعد، ولا يوجد نشاط كافٍ لعرض التوزيع."
+      },
+      "badges": {
+        "certificate": "شهادة",
+        "reward100Title": "100+ نقطة مكافأة",
+        "reward100Subtitle": "{{count}} نقطة",
+        "activeLearnerTitle": "متعلّم نشط",
+        "activeLearnerSubtitle": "{{count}} دورات مكتملة",
+        "emptyTitle": "لا توجد شارات بعد",
+        "emptyDescription": "ستظهر الإنجازات عند إكمال الدورات أو كسب النقاط."
+      },
+      "timeline": {
+        "joined": "انضم للمنصة",
+        "joinedDescription": "تسجيل حساب جديد — {{email}}",
+        "purchase": "عملية شراء",
+        "paymentDescription": "دفعة #{{id}}",
+        "enrollment": "اشتراك في دورة",
+        "quizPassed": "اجتياز اختبار",
+        "quizAttempt": "محاولة اختبار",
+        "certificateIssued": "إصدار شهادة",
+        "emptyTitle": "لا يوجد نشاط",
+        "emptyDescription": "لم يُسجَّل نشاط على هذا الحساب بعد."
+      },
+      "profiles": {
+        "educationLevel": "المستوى التعليمي",
+        "interests": "الاهتمامات",
+        "bio": "نبذة",
+        "approvalStatus": "حالة الاعتماد",
+        "specialization": "التخصص",
+        "title": "المسمى",
+        "yearsOfExperience": "سنوات الخبرة",
+        "totalStudents": "إجمالي الطلاب",
+        "totalEarnings": "إجمالي الأرباح"
+      },
+      "referrals": {
+        "made": "إحالات قام بها",
+        "rewardPoints": "نقاط المكافآت",
+        "referredBy": "أُحيل بواسطة: {{name}} ({{email}})"
+      },
+      "summary": {
+        "courseEnrollments": "اشتراكات كورسات",
+        "learningPaths": "مسارات تعليمية",
+        "instructorCourses": "كورسات (محاضر)",
+        "payments": "مدفوعات",
+        "certificates": "شهادات",
+        "quizzes": "اختبارات",
+        "reviews": "تقييمات",
+        "liveSessions": "جلسات مباشرة",
+        "supportTickets": "تذاكر دعم",
+        "notifications": "إشعارات"
+      },
+      "walletTx": {
+        "CREDIT": "إيداع",
+        "DEBIT": "سحب"
+      },
+      "subscriptionStatus": {
+        "ACTIVE": "نشط",
+        "CANCELLED": "ملغي",
+        "EXPIRED": "منتهي"
+      },
+      "tables": {
+        "courses": "جدول الدورات",
+        "coursesSearch": "بحث باسم الدورة...",
+        "coursesEmpty": "لا توجد دورات",
+        "columns": {
+          "course": "الدورة",
+          "progress": "التقدم",
+          "avgScore": "متوسط الدرجة",
+          "status": "الحالة",
+          "enrolledAt": "تاريخ الاشتراك",
+          "quiz": "الاختبار",
+          "score": "الدرجة",
+          "result": "النتيجة",
+          "date": "التاريخ",
+          "item": "العنصر",
+          "amount": "المبلغ",
+          "id": "#",
+          "type": "النوع",
+          "reason": "السبب",
+          "path": "المسار",
+          "students": "الطلاب",
+          "price": "السعر",
+          "referred": "المُحال",
+          "email": "البريد",
+          "points": "النقاط",
+          "subject": "الموضوع",
+          "replies": "الردود",
+          "bank": "البنك",
+          "plan": "الخطة",
+          "coupon": "الكوبون",
+          "payment": "الدفعة",
+          "rating": "التقييم",
+          "session": "الجلسة",
+          "appointment": "الموعد",
+          "title": "العنوان",
+          "comments": "التعليقات"
+        },
+        "quizLog": "سجل الاختبارات",
+        "quizSearch": "بحث في الاختبارات...",
+        "quizEmpty": "لا توجد محاولات اختبار",
+        "paymentsLog": "سجل المدفوعات",
+        "paymentsSearch": "بحث في المدفوعات...",
+        "paymentsEmpty": "لا توجد مدفوعات",
+        "learningPathsTitle": "جدول المسارات التعليمية ({{count}})",
+        "learningPathsSearch": "بحث باسم المسار...",
+        "learningPathsEmpty": "لا توجد مسارات",
+        "walletTxTitle": "جدول حركات المحفظة ({{count}})",
+        "walletTxSearch": "بحث في الحركات...",
+        "walletTxEmpty": "لا توجد حركات محفظة",
+        "instructorCoursesTitle": "جدول كورسات المحاضر ({{count}})",
+        "instructorCoursesEmpty": "لا توجد كورسات",
+        "referrals": "جدول الإحالات",
+        "referralsEmpty": "لا توجد إحالات",
+        "supportTicketsTitle": "جدول تذاكر الدعم ({{count}})",
+        "supportTicketsEmpty": "لا توجد تذاكر دعم",
+        "withdrawalsTitle": "جدول طلبات السحب ({{count}})",
+        "withdrawalsEmpty": "لا توجد طلبات سحب",
+        "subscriptionsTitle": "جدول الاشتراكات ({{count}})",
+        "subscriptionsEmpty": "لا توجد اشتراكات",
+        "couponUsagesTitle": "جدول استخدام الكوبونات ({{count}})",
+        "couponUsagesEmpty": "لا يوجد استخدام للكوبونات",
+        "reviewsTitle": "جدول التقييمات ({{count}})",
+        "reviewsEmpty": "لا توجد تقييمات",
+        "liveSessionsTitle": "جدول الجلسات المباشرة ({{count}})",
+        "liveSessionsEmpty": "لا توجد جلسات",
+        "communityPostsTitle": "جدول منشورات المجتمع ({{count}})",
+        "communityPostsEmpty": "لا توجد منشورات",
+        "rewardTxTitle": "جدول سجل النقاط ({{count}})",
+        "rewardTxEmpty": "لا يوجد سجل نقاط"
+      },
+      "tableToolbar": {
+        "sortBy": "الترتيب حسب",
+        "noSort": "بدون ترتيب",
+        "direction": "الاتجاه",
+        "asc": "تصاعدي",
+        "desc": "تنازلي",
+        "rowsPerPage": "عدد الصفوف"
+      },
+      "modals": {
+        "resetPassword": {
+          "title": "إعادة تعيين كلمة المرور",
+          "newPassword": "كلمة المرور الجديدة",
+          "submit": "تحديث كلمة المرور"
+        },
+        "notify": {
+          "title": "إرسال إشعار",
+          "type": "نوع الإشعار",
+          "titleField": "العنوان",
+          "body": "نص الإشعار",
+          "submit": "إرسال الإشعار"
+        },
+        "reject": {
+          "title": "رفض المحاضر"
+        },
+        "newPasswordOptional": "كلمة مرور جديدة (اختياري)"
+      },
+      "toast": {
+        "saved": "تم حفظ التعديلات.",
+        "saveError": "تعذّر حفظ البيانات.",
+        "activated": "تم تفعيل الحساب.",
+        "suspended": "تم إيقاف الحساب.",
+        "approved": "تم اعتماد المحاضر.",
+        "rejected": "تم رفض المحاضر.",
+        "passwordUpdated": "تم تحديث كلمة المرور.",
+        "passwordError": "تعذّر تحديث كلمة المرور.",
+        "notificationSent": "تم إرسال الإشعار.",
+        "notificationError": "تعذّر إرسال الإشعار."
+      }
+    }
+  }
+}

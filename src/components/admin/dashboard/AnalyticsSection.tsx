@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { DashboardAnalytics } from './dashboardTypes';
 import { DonutChart } from './DonutChart';
 import { RevenueChart } from './RevenueChart';
@@ -8,28 +9,30 @@ interface AnalyticsSectionProps {
 }
 
 export function AnalyticsSection({ analytics }: AnalyticsSectionProps) {
+  const { t } = useTranslation('dashboard');
+
   return (
-    <section className="admin-dash-analytics" aria-label="تحليلات المنصة">
+    <section className="admin-dash-analytics" aria-label={t('admin.dashboard.analytics.ariaLabel')}>
       <div className="admin-dash-section-head">
         <div>
-          <h2>التحليلات</h2>
-          <p>نظرة شاملة على الأداء خلال آخر 12 شهراً</p>
+          <h2>{t('admin.dashboard.analytics.title')}</h2>
+          <p>{t('admin.dashboard.analytics.subtitle')}</p>
         </div>
       </div>
       <div className="admin-dash-analytics-grid">
         <RevenueChart data={analytics.revenueTrend} growth={analytics.revenueGrowth} />
         <UserGrowthChart data={analytics.userGrowth} />
         <DonutChart
-          title="نشاط الكورسات"
-          subtitle="حسب الحالة"
+          title={t('admin.dashboard.analytics.courseActivity')}
+          subtitle={t('admin.dashboard.analytics.byStatus')}
           data={analytics.courseActivity}
-          ariaLabel="توزيع حالات الكورسات"
+          ariaLabel={t('admin.dashboard.analytics.courseStatusAria')}
         />
         <DonutChart
-          title="توزيع الاشتراكات"
-          subtitle="حسب الحالة"
+          title={t('admin.dashboard.analytics.subscriptionDistribution')}
+          subtitle={t('admin.dashboard.analytics.byStatus')}
           data={analytics.subscriptionDistribution}
-          ariaLabel="توزيع الاشتراكات"
+          ariaLabel={t('admin.dashboard.analytics.subscriptionAria')}
         />
       </div>
     </section>

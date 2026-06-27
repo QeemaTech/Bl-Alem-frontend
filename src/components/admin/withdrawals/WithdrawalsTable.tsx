@@ -1,14 +1,13 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Banknote, Table2 } from '@/icons';
+import { useAdminWithdrawalLabels } from '../../../hooks/useAdminWithdrawalLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { WithdrawalActionButtons } from './WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from './WithdrawalStatusBadge';
-import {
-  fmtWithdrawalDate,
-  fmtWithdrawalMoney,
-  type WithdrawalActionType,
-  type WithdrawalItem,
-} from './types';
+import type { WithdrawalActionType, WithdrawalItem } from './types';
 
 interface WithdrawalsTableProps {
   items: WithdrawalItem[];
@@ -29,14 +28,76 @@ export function WithdrawalsTable({
   onReject,
   onConfirmTransfer,
 }: WithdrawalsTableProps) {
-  const rows = items.map((item) => ({
+  const { t, i18n } = useTranslation(['withdrawals', 'common']);
+  const { fmtWithdrawalDate, fmtWithdrawalMoney, empty } = useAdminWithdrawalLabels();
+
+  const columns = useMemo(() => {
+    const cols = t('admin.table.columns', { returnObjects: true, ns: 'withdrawals' }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id, width: '6.5rem', align: 'center' as const },
+      { key: 'instructorName', header: cols.instructor, width: '16%' },
+      {
+        key: 'instructorEmail',
+        header: cols.email,
+        width: '16%',
+        truncate: true,
+        hideOnMobile: true,
+      },
+      {
+        key: 'amountLabel',
+        header: cols.amount,
+        width: '11%',
+        align: 'center' as const,
+        render: (row: { amountLabel: string }) => (
+          <span className="withdrawal-amount-cell">
+            <Banknote size={16} aria-hidden="true" />
+            <strong>{row.amountLabel}</strong>
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        header: cols.status,
+        width: '10.5rem',
+        minWidth: '10.5rem',
+        align: 'center' as const,
+        truncate: false,
+        className: 'wd-col-status',
+        render: (row: { _raw: WithdrawalItem }) => <WithdrawalStatusBadge status={String(row._raw.status)} />,
+      },
+      { key: 'dateLabel', header: cols.date, width: '15%' },
+      {
+        key: 'actions',
+        header: cols.actions,
+        width: '32%',
+        wrap: true,
+        truncate: false,
+        render: (row: { _raw: WithdrawalItem }) => (
+          <WithdrawalActionButtons
+            item={row._raw}
+            loadingAction={loadingAction}
+            onDetail={onDetail}
+            onApprove={onApprove}
+            onReject={onReject}
+            onConfirmTransfer={onConfirmTransfer}
+          />
+        ),
+      },
+    ];
+  }, [t, loadingAction, onDetail, onApprove, onReject, onConfirmTransfer]);
+
+  const rows = useMemo(() => items.map((item) => ({
     ...item,
-    instructorName: item.instructor?.fullName || '—',
-    instructorEmail: item.instructor?.email || '—',
+    instructorName: item.instructor?.fullName || empty,
+    instructorEmail: item.instructor?.email || empty,
     amountLabel: fmtWithdrawalMoney(item.amount),
     dateLabel: fmtWithdrawalDate(item.createdAt),
     _raw: item,
-  }));
+  })), [items, empty, fmtWithdrawalMoney, fmtWithdrawalDate]);
+
+  const recordCount = t('common:table.recordCount', {
+    count: formatNumber(items.length, undefined, i18n.language),
+  });
 
   return (
     <Card className="reports-table-card">
@@ -45,9 +106,9 @@ export function WithdrawalsTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          طلبات السحب
+          {t('admin.table.title', { ns: 'withdrawals' })}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} سجل</span>
+        <span className="muted-count">{recordCount}</span>
       </div>
       <Table
         loading={loading}
@@ -56,60 +117,10 @@ export function WithdrawalsTable({
         fluid
         hideScrollNotice
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا توجد طلبات سحب"
-        emptyDescription="لم يتم إرسال أي طلبات سحب من المحاضرين بعد، أو لا توجد نتائج مطابقة للفلاتر."
+        emptyTitle={t('admin.table.emptyTitle', { ns: 'withdrawals' })}
+        emptyDescription={t('admin.table.emptyDescription', { ns: 'withdrawals' })}
         data={rows}
-        columns={[
-          { key: 'id', header: 'رقم الطلب', width: '6.5rem', align: 'center' },
-          { key: 'instructorName', header: 'المحاضر', width: '16%' },
-          {
-            key: 'instructorEmail',
-            header: 'البريد',
-            width: '16%',
-            truncate: true,
-            hideOnMobile: true,
-          },
-          {
-            key: 'amountLabel',
-            header: 'المبلغ',
-            width: '11%',
-            align: 'center',
-            render: (row) => (
-              <span className="withdrawal-amount-cell">
-                <Banknote size={16} aria-hidden="true" />
-                <strong>{row.amountLabel}</strong>
-              </span>
-            ),
-          },
-          {
-            key: 'status',
-            header: 'الحالة',
-            width: '10.5rem',
-            minWidth: '10.5rem',
-            align: 'center',
-            truncate: false,
-            className: 'wd-col-status',
-            render: (row) => <WithdrawalStatusBadge status={String(row._raw.status)} />,
-          },
-          { key: 'dateLabel', header: 'التاريخ', width: '15%' },
-          {
-            key: 'actions',
-            header: 'الإجراءات',
-            width: '32%',
-            wrap: true,
-            truncate: false,
-            render: (row) => (
-              <WithdrawalActionButtons
-                item={row._raw}
-                loadingAction={loadingAction}
-                onDetail={onDetail}
-                onApprove={onApprove}
-                onReject={onReject}
-                onConfirmTransfer={onConfirmTransfer}
-              />
-            ),
-          },
-        ]}
+        columns={columns}
       />
     </Card>
   );

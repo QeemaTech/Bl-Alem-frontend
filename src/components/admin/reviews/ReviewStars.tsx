@@ -1,4 +1,5 @@
 import { Star } from '@/icons';
+import { useAdminReviewLabels } from '../../../hooks/useAdminReviewLabels';
 
 interface ReviewStarsProps {
   rating: number;
@@ -7,10 +8,11 @@ interface ReviewStarsProps {
 }
 
 export function ReviewStars({ rating, size = 16, showScore = true }: ReviewStarsProps) {
+  const { starsAriaLabel, ratingOf } = useAdminReviewLabels();
   const value = Math.max(0, Math.min(5, Number(rating) || 0));
 
   return (
-    <span className="review-stars" aria-label={`${value} من 5`}>
+    <span className="review-stars" aria-label={starsAriaLabel(value)}>
       {Array.from({ length: 5 }).map((_, index) => {
         const filled = index < value;
         return (
@@ -23,7 +25,7 @@ export function ReviewStars({ rating, size = 16, showScore = true }: ReviewStars
           />
         );
       })}
-      {showScore ? <strong className="review-stars-score">{value}/5</strong> : null}
+      {showScore ? <strong className="review-stars-score">{ratingOf(value)}</strong> : null}
     </span>
   );
 }

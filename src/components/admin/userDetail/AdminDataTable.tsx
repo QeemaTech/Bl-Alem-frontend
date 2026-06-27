@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { MaterialIcon } from '@/icons';
 import { Search } from '@/icons';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { Table, type TableColumn } from '../../ui/Table';
+import { formatNumber } from '../../../utils/localeFormat';
 
 interface AdminDataTableProps<T extends Record<string, unknown>> {
   columns: TableColumn<T>[];
@@ -16,6 +19,9 @@ interface AdminDataTableProps<T extends Record<string, unknown>> {
   pageSize?: number;
   className?: string;
   compact?: boolean;
+  title?: string;
+  icon?: MaterialIcon;
+  layout?: 'default' | 'split';
 }
 
 export function AdminDataTable<T extends Record<string, unknown>>({
@@ -24,12 +30,17 @@ export function AdminDataTable<T extends Record<string, unknown>>({
   loading,
   emptyTitle,
   emptyDescription,
-  searchPlaceholder = 'بحث...',
+  searchPlaceholder,
   searchKeys,
   pageSize: defaultPageSize = 10,
   className = '',
   compact = false,
+  title,
+  icon: Icon,
+  layout = 'default',
 }: AdminDataTableProps<T>) {
+  const { t, i18n } = useTranslation(['users', 'common']);
+  const lang = i18n.language;
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState('');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -66,24 +77,36 @@ export function AdminDataTable<T extends Record<string, unknown>>({
   const currentPage = Math.min(page, totalPages);
   const pageRows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  const defaultSearchPlaceholder = searchPlaceholder ?? t('common:filter.searchPlaceholder');
+
   return (
-    <div className={`admin-data-table ${compact ? 'is-compact' : ''} ${className}`.trim()}>
+    <div className={`admin-data-table ${compact ? 'is-compact' : ''} ${layout === 'split' ? 'is-split-panel' : ''} ${className}`.trim()}>
+      {title ? (
+        <div className="admin-data-table-head">
+          {Icon ? (
+            <span className="admin-data-table-head-icon" aria-hidden="true">
+              <Icon size={20} />
+            </span>
+          ) : null}
+          <h3>{title}</h3>
+        </div>
+      ) : null}
       <div className={`admin-data-table-toolbar ${compact ? 'is-compact' : ''}`.trim()}>
         <Input
-          label="بحث"
-          placeholder={searchPlaceholder}
+          label={t('common:filter.searchLabel')}
+          placeholder={defaultSearchPlaceholder}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          icon={<Search size={16} />}
+          icon={<Search size={18} />}
         />
-        {!compact ? (
+        {!compact && layout !== 'split' ? (
           <>
             <Select
-              label="الترتيب حسب"
+              label={t('users:admin.detail.tableToolbar.sortBy')}
               value={sortKey}
               onChange={(e) => { setSortKey(e.target.value); setPage(1); }}
               options={[
-                { label: 'بدون ترتيب', value: '' },
+                { label: t('users:admin.detail.tableToolbar.noSort'), value: '' },
                 ...sortableKeys.map((key) => {
                   const col = columns.find((c) => String(c.key) === key);
                   return { label: col?.header || key, value: key };
@@ -91,16 +114,16 @@ export function AdminDataTable<T extends Record<string, unknown>>({
               ]}
             />
             <Select
-              label="الاتجاه"
+              label={t('users:admin.detail.tableToolbar.direction')}
               value={sortDir}
               onChange={(e) => setSortDir(e.target.value as 'asc' | 'desc')}
               options={[
-                { label: 'تصاعدي', value: 'asc' },
-                { label: 'تنازلي', value: 'desc' },
+                { label: t('users:admin.detail.tableToolbar.asc'), value: 'asc' },
+                { label: t('users:admin.detail.tableToolbar.desc'), value: 'desc' },
               ]}
             />
             <Select
-              label="عدد الصفوف"
+              label={t('users:admin.detail.tableToolbar.rowsPerPage')}
               value={String(pageSize)}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
               options={[
@@ -121,9 +144,11 @@ export function AdminDataTable<T extends Record<string, unknown>>({
         stickyHeader
         maxHeight={420}
         showFooter={false}
+        showHeadersWhenEmpty
+        fluid
       />
       <div className="admin-data-table-footer">
-        <span>{filtered.length.toLocaleString('ar-SA')} سجل</span>
+        <span>{t('common:table.recordCount', { count: formatNumber(filtered.length, undefined, lang) })}</span>
         <div className="admin-data-table-pagination">
           <Button
             type="button"
@@ -132,7 +157,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
             disabled={currentPage <= 1}
             onClick={() => setPage((p) => p - 1)}
           >
-            السابق
+            {t('common:pagination.previous')}
           </Button>
           <span>{currentPage} / {totalPages}</span>
           <Button
@@ -142,7 +167,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
             disabled={currentPage >= totalPages}
             onClick={() => setPage((p) => p + 1)}
           >
-            التالي
+            {t('common:pagination.next')}
           </Button>
         </div>
       </div>

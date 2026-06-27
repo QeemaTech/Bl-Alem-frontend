@@ -1,0 +1,125 @@
+{
+  "empty": "—",
+  "title": "Rewards & referrals",
+  "subtitle": "Manage student referral codes and reward points — separate from coupons",
+  "info": "When a new student registers with a valid referral code, points are automatically added to the referrer. Students can redeem earned points at checkout — after applying the referral code.",
+  "stats": {
+    "totalCodes": "Total referral codes",
+    "activeCodes": "Active codes",
+    "disabledCodes": "Disabled codes",
+    "totalPoints": "Total available points",
+    "redeemedPoints": "Redeemed points",
+    "pendingReferrals": "Pending referrals"
+  },
+  "charts": {},
+  "tabs": {
+    "students": "Referral codes ({{count}})",
+    "history": "Referral history ({{count}})"
+  },
+  "filters": {
+    "studentSearchPlaceholder": "Search by name, email, or referral code...",
+    "historySearchPlaceholder": "Search by code, referrer, or invitee...",
+    "codeStatus": "Code status",
+    "status": "Status",
+    "all": "All",
+    "active": "Active",
+    "disabled": "Disabled"
+  },
+  "table": {
+    "studentsTitle": "Referral codes",
+    "historyTitle": "Referral history",
+    "studentCount": "{{count}} students",
+    "referralCount": "{{count}} referrals",
+    "studentsEmptyTitle": "No students",
+    "studentsEmptyDescription": "Referral codes will appear when students register.",
+    "historyEmptyTitle": "No referrals",
+    "historyEmptyDescription": "No referrals have been recorded yet.",
+    "columns": {
+      "fullName": "Student",
+      "email": "Email",
+      "referralCode": "Referral code",
+      "codeStatus": "Code status",
+      "rewardPoints": "Points",
+      "successfulReferrals": "Successful referrals",
+      "createdAt": "Created",
+      "referrer": "Referrer",
+      "referredUser": "Invitee",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "user": "Invitee",
+      "points": "Points",
+      "type": "Type",
+      "reason": "Reason"
+    }
+  },
+  "labels": {
+    "referralStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REWARDED": "Rewarded",
+      "REJECTED": "Rejected"
+    },
+    "codeStatus": {
+      "active": "Active",
+      "disabled": "Disabled"
+    }
+  },
+  "form": {},
+  "modal": {
+    "loading": "Loading...",
+    "historyTitle": "Reward history: {{name}}",
+    "loadingHistory": "Loading history...",
+    "referralCode": "Referral code",
+    "availablePoints": "Available points",
+    "codeStatus": "Code status",
+    "referrals": "Referrals ({{count}})",
+    "noReferrals": "No referrals recorded.",
+    "pointTransactions": "Point transactions"
+  },
+  "actions": {
+    "view": "View",
+    "disable": "Disable",
+    "enable": "Enable",
+    "resetPoints": "Reset points",
+    "exportExcel": "Export Excel"
+  },
+  "toast": {
+    "loadFailed": "Could not load rewards data.",
+    "loadHistoryFailed": "Could not load student history.",
+    "disabled": "Referral code disabled.",
+    "enabled": "Referral code enabled.",
+    "reset": "Points reset.",
+    "actionFailed": "Could not complete action."
+  },
+  "export": {
+    "studentsSheet": "Referral codes",
+    "historySheet": "Referral history",
+    "studentsColumns": {
+      "fullName": "Student",
+      "email": "Email",
+      "referralCode": "Referral code",
+      "status": "Code status",
+      "rewardPoints": "Points",
+      "successfulReferrals": "Successful referrals",
+      "createdAt": "Created"
+    },
+    "historyColumns": {
+      "referrer": "Referrer",
+      "referredUser": "Invitee",
+      "code": "Referral code",
+      "rewardPoints": "Points",
+      "status": "Status",
+      "createdAt": "Date"
+    }
+  },
+  "confirm": {
+    "disableTitle": "Disable referral code",
+    "disableMessage": "Disable referral code for {{name}}? Others will no longer be able to use it — earned points remain.",
+    "enableTitle": "Enable referral code",
+    "enableMessage": "Enable referral code for {{name}}?",
+    "resetTitle": "Reset points",
+    "resetMessage": "Reset reward points for {{name}}? This action cannot be undone.",
+    "resetConfirm": "Reset"
+  }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Area,
   AreaChart,
@@ -15,7 +16,7 @@ import {
 import type { MaterialIcon } from '@/icons';
 import { Card } from '../../ui/Card';
 import { EmptyState } from '../../ui/EmptyState';
-import { fmtMoney, fmtNum, fmtPct } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { DashboardAnalytics } from './dashboardTypes';
 import { Sparkline } from './Sparkline';
 import { TrendBadge } from './TrendBadge';
@@ -55,14 +56,17 @@ interface RevenueAnalyticsProps {
 }
 
 export function RevenueAnalyticsSection({ revenue, hasPayments }: RevenueAnalyticsProps) {
+  const { t } = useTranslation('dashboard');
+  const { fmtMoney, fmtPct } = useDashboardFormatters();
+
   if (!hasPayments && revenue.total <= 0) {
     return (
       <Card className="admin-dash-side-card">
-        <h3>تحليلات الإيرادات</h3>
+        <h3>{t('admin.dashboard.revenue.title')}</h3>
         <EmptyState
           icon={CreditCard}
-          title="لا توجد مدفوعات بعد"
-          description="ستظهر هنا الإيرادات والاتجاهات عند تسجيل أول عملية دفع."
+          title={t('admin.dashboard.revenue.emptyTitle')}
+          description={t('admin.dashboard.revenue.emptyDesc')}
         />
       </Card>
     );
@@ -71,28 +75,28 @@ export function RevenueAnalyticsSection({ revenue, hasPayments }: RevenueAnalyti
   const metrics = [
     {
       id: 'total',
-      label: 'إجمالي الإيرادات',
+      label: t('admin.dashboard.revenue.total'),
       value: fmtMoney(revenue.total),
       trend: revenue.totalTrend,
       sparkline: revenue.monthlySparkline,
     },
     {
       id: 'monthly',
-      label: 'إيرادات الشهر',
+      label: t('admin.dashboard.revenue.monthly'),
       value: fmtMoney(revenue.monthly),
       trend: revenue.monthlyTrend,
       sparkline: revenue.monthlySparkline,
     },
     {
       id: 'expected',
-      label: 'الإيرادات المتوقعة',
+      label: t('admin.dashboard.revenue.expected'),
       value: fmtMoney(revenue.expected),
       trend: revenue.expectedTrend,
       sparkline: revenue.expectedSparkline,
     },
     {
       id: 'refund',
-      label: 'معدل الاسترداد',
+      label: t('admin.dashboard.revenue.refundRate'),
       value: fmtPct(revenue.refundRate, false),
       trend: revenue.refundTrend,
       sparkline: revenue.monthlySparkline.map((v) => Math.round(v * 0.02)),
@@ -100,8 +104,8 @@ export function RevenueAnalyticsSection({ revenue, hasPayments }: RevenueAnalyti
   ];
 
   return (
-    <Card className="admin-dash-side-card" aria-label="تحليلات الإيرادات">
-      <h3>تحليلات الإيرادات</h3>
+    <Card className="admin-dash-side-card" aria-label={t('admin.dashboard.revenue.ariaLabel')}>
+      <h3>{t('admin.dashboard.revenue.title')}</h3>
       <div className="admin-dash-side-metrics">
         {metrics.map((metric) => (
           <div key={metric.id} className="admin-dash-side-metric">
@@ -123,15 +127,36 @@ interface UserAnalyticsProps {
 }
 
 export function UserAnalyticsSection({ users }: UserAnalyticsProps) {
+  const { t } = useTranslation('dashboard');
+  const { fmtNum } = useDashboardFormatters();
+
   const rows = [
-    { id: 'dau', label: 'المستخدمون اليوميون', value: users.dau, trend: users.dauTrend, data: users.dauSparkline },
-    { id: 'wau', label: 'المستخدمون الأسبوعيون', value: users.wau, trend: users.wauTrend, data: users.wauSparkline },
-    { id: 'mau', label: 'المستخدمون الشهريون', value: users.mau, trend: users.mauTrend, data: users.mauSparkline },
+    {
+      id: 'dau',
+      label: t('admin.dashboard.users.dau'),
+      value: users.dau,
+      trend: users.dauTrend,
+      data: users.dauSparkline,
+    },
+    {
+      id: 'wau',
+      label: t('admin.dashboard.users.wau'),
+      value: users.wau,
+      trend: users.wauTrend,
+      data: users.wauSparkline,
+    },
+    {
+      id: 'mau',
+      label: t('admin.dashboard.users.mau'),
+      value: users.mau,
+      trend: users.mauTrend,
+      data: users.mauSparkline,
+    },
   ];
 
   return (
-    <Card className="admin-dash-side-card" aria-label="تحليلات المستخدمين">
-      <h3>تحليلات المستخدمين</h3>
+    <Card className="admin-dash-side-card" aria-label={t('admin.dashboard.users.ariaLabel')}>
+      <h3>{t('admin.dashboard.users.title')}</h3>
       <div className="admin-dash-user-metrics">
         {rows.map((row) => (
           <div key={row.id} className="admin-dash-user-metric">
@@ -148,25 +173,52 @@ export function UserAnalyticsSection({ users }: UserAnalyticsProps) {
   );
 }
 
-const QUICK_ACTIONS: { label: string; description: string; href: string; icon: MaterialIcon }[] = [
-  { label: 'إضافة كورس', description: 'إنشاء أو مراجعة المحتوى', href: '/admin/courses', icon: BookOpen },
-  { label: 'اعتماد محاضر', description: 'مراجعة الطلبات المعلّقة', href: '/admin/instructors', icon: CoPresent },
-  { label: 'إنشاء كوبون', description: 'حملات ترويجية جديدة', href: '/admin/coupons', icon: Gift },
-  { label: 'عرض التقارير', description: 'تقارير مفصّلة', href: '/admin/reports', icon: BarChart3 },
-  { label: 'إدارة المستخدمين', description: 'طلاب ومحاضرون', href: '/admin/users', icon: UsersRound },
-];
-
 export function QuickActionsSection() {
+  const { t } = useTranslation('dashboard');
+
+  const quickActions: { label: string; description: string; href: string; icon: MaterialIcon }[] = [
+    {
+      label: t('admin.dashboard.quickActions.addCourse'),
+      description: t('admin.dashboard.quickActions.addCourseDesc'),
+      href: '/admin/courses',
+      icon: BookOpen,
+    },
+    {
+      label: t('admin.dashboard.quickActions.approveInstructor'),
+      description: t('admin.dashboard.quickActions.approveInstructorDesc'),
+      href: '/admin/instructors',
+      icon: CoPresent,
+    },
+    {
+      label: t('admin.dashboard.quickActions.createCoupon'),
+      description: t('admin.dashboard.quickActions.createCouponDesc'),
+      href: '/admin/coupons',
+      icon: Gift,
+    },
+    {
+      label: t('admin.dashboard.quickActions.viewReports'),
+      description: t('admin.dashboard.quickActions.viewReportsDesc'),
+      href: '/admin/reports',
+      icon: BarChart3,
+    },
+    {
+      label: t('admin.dashboard.quickActions.manageUsers'),
+      description: t('admin.dashboard.quickActions.manageUsersDesc'),
+      href: '/admin/users',
+      icon: UsersRound,
+    },
+  ];
+
   return (
-    <section className="admin-dash-actions" aria-label="إجراءات سريعة">
+    <section className="admin-dash-actions" aria-label={t('admin.dashboard.quickActions.ariaLabel')}>
       <header className="admin-dash-section-head is-compact">
         <div>
-          <h2>إجراءات سريعة</h2>
-          <p>اختصارات للمهام الإدارية الشائعة</p>
+          <h2>{t('admin.dashboard.quickActions.title')}</h2>
+          <p>{t('admin.dashboard.quickActions.subtitle')}</p>
         </div>
       </header>
       <div className="admin-dash-actions-grid">
-        {QUICK_ACTIONS.map((action) => {
+        {quickActions.map((action) => {
           const Icon = action.icon;
           return (
             <Link key={action.href} to={action.href} className="admin-dash-action-card">

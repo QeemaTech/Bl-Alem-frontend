@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowDown, ArrowUp, BookOpen, Check, Save, Search } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -11,6 +12,12 @@ import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
 import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminLearningPathLabels } from '../../hooks/useAdminLearningPathLabels';
+import {
+  localizedCategoryName,
+  localizedCourseTitle,
+  localizedPathTitle,
+} from '../../utils/localizedContent';
 
 const emptyForm = {
   titleAr: '',
@@ -27,22 +34,25 @@ type PathCourseLink = {
   course?: {
     id: number;
     titleAr: string;
+    titleEn?: string;
     instructor?: { fullName?: string };
-    category?: { nameAr?: string };
+    category?: { nameAr?: string; nameEn?: string };
   };
 };
 
 export default function AdminLearningPathEditorPage() {
+  const { t, i18n } = useTranslation(['learningPaths', 'common']);
   const { id } = useParams<{ id: string }>();
   const isNew = id === 'new';
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { statusLabels } = useAdminLearningPathLabels();
 
   const [loading, setLoading] = useState(true);
   const [savingInfo, setSavingInfo] = useState(false);
   const [savingCourses, setSavingCourses] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [pathTitle, setPathTitle] = useState('');
+  const [pathMeta, setPathMeta] = useState({ titleAr: '', titleEn: '' });
   const [allCourses, setAllCourses] = useState<any[]>([]);
   const [courseSearch, setCourseSearch] = useState('');
   const [selectedLinks, setSelectedLinks] = useState<PathCourseLink[]>([]);
@@ -65,7 +75,7 @@ export default function AdminLearningPathEditorPage() {
       coverImage: path.coverImage || '',
       status: path.status || 'ACTIVE',
     });
-    setPathTitle(path.titleAr || '');
+    setPathMeta({ titleAr: path.titleAr || '', titleEn: path.titleEn || '' });
     setAllCourses(courses);
     const sorted = [...(path.courses || [])].sort((a: PathCourseLink, b: PathCourseLink) => (a.order ?? 0) - (b.order ?? 0));
     setSelectedLinks(sorted);
@@ -76,7 +86,7 @@ export default function AdminLearningPathEditorPage() {
     if (isNew) {
       setLoading(true);
       loadCourses()
-        .catch(() => showToast('تعذّر تحميل الدورات.', 'error'))
+        .catch(() => showToast(t('admin.editor.toast.loadCoursesError'), 'error'))
         .finally(() => setLoading(false));
       return;
     }
@@ -90,22 +100,39 @@ export default function AdminLearningPathEditorPage() {
     setPathId(numericId);
     loadPath(numericId)
       .catch(() => {
-        showToast('تعذّر تحميل المسار.', 'error');
+        showToast(t('admin.editor.toast.loadPathError'), 'error');
         navigate('/admin/learning-paths', { replace: true });
       })
       .finally(() => setLoading(false));
-  }, [id, isNew, loadPath, loadCourses, navigate, showToast]);
+  }, [id, isNew, loadPath, loadCourses, navigate, showToast, t]);
 
   const selectedCourseIds = useMemo(
     () => new Set(selectedLinks.map((item) => item.courseId)),
     [selectedLinks],
   );
 
+  const courseById = useMemo(
+    () => new Map(allCourses.map((course) => [course.id, course])),
+    [allCourses],
+  );
+
+  const displayPathTitle = useMemo(
+    () => localizedPathTitle(
+      { titleAr: form.titleAr || pathMeta.titleAr, titleEn: form.titleEn || pathMeta.titleEn },
+      i18n.language,
+    ),
+    [form.titleAr, form.titleEn, pathMeta.titleAr, pathMeta.titleEn, i18n.language],
+  );
+
+  const resolveCourse = (courseId: number, fallback?: PathCourseLink['course']) => (
+    courseById.get(courseId) || fallback
+  );
+
   const filteredCourses = useMemo(() => {
     const q = courseSearch.trim().toLowerCase();
     if (!q) return allCourses;
     return allCourses.filter((course) =>
-      [course.titleAr, course.titleEn, course.instructor?.fullName, course.category?.nameAr]
+      [course.titleAr, course.titleEn, course.instructor?.fullName, course.category?.nameAr, course.category?.nameEn]
         .some((v) => String(v || '').toLowerCase().includes(q)),
     );
   }, [allCourses, courseSearch]);
@@ -149,7 +176,7 @@ export default function AdminLearningPathEditorPage() {
   const savePathInfo = async (e?: FormEvent) => {
     e?.preventDefault();
     if (!form.titleAr.trim()) {
-      showToast('عنوان المسار مطلوب.', 'error');
+      showToast(t('admin.editor.toast.titleRequired'), 'error');
       return;
     }
     setSavingInfo(true);
@@ -166,11 +193,11 @@ export default function AdminLearningPathEditorPage() {
         const created = await adminApi.createLearningPath(payload);
         targetPathId = created.id;
         setPathId(created.id);
-        setPathTitle(created.titleAr || form.titleAr.trim());
+        setPathMeta({ titleAr: created.titleAr || form.titleAr.trim(), titleEn: created.titleEn || form.titleEn.trim() });
         navigate(`/admin/learning-paths/${created.id}`, { replace: true });
       } else {
         await adminApi.updateLearningPath(targetPathId, payload);
-        setPathTitle(form.titleAr.trim());
+        setPathMeta({ titleAr: form.titleAr.trim(), titleEn: form.titleEn.trim() });
       }
 
       if (selectedLinks.length && targetPathId) {
@@ -178,11 +205,11 @@ export default function AdminLearningPathEditorPage() {
       }
 
       showToast(
-        isNew ? 'تم إنشاء المسار وحفظ الدورات.' : 'تم حفظ بيانات المسار.',
+        isNew ? t('admin.editor.toast.created') : t('admin.editor.toast.saved'),
         'success',
       );
     } catch {
-      showToast('تعذّر حفظ المسار.', 'error');
+      showToast(t('admin.editor.toast.saveError'), 'error');
     } finally {
       setSavingInfo(false);
     }
@@ -203,6 +230,7 @@ export default function AdminLearningPathEditorPage() {
         course: {
           id: course.id,
           titleAr: course.titleAr,
+          titleEn: course.titleEn,
           instructor: course.instructor,
           category: course.category,
         },
@@ -222,7 +250,7 @@ export default function AdminLearningPathEditorPage() {
 
   const saveCourses = async () => {
     if (!form.titleAr.trim()) {
-      showToast('أدخل عنوان المسار أولاً.', 'warning');
+      showToast(t('admin.editor.toast.enterTitleFirst'), 'warning');
       return;
     }
     setSavingCourses(true);
@@ -238,17 +266,17 @@ export default function AdminLearningPathEditorPage() {
         });
         targetPathId = created.id;
         setPathId(created.id);
-        setPathTitle(created.titleAr || form.titleAr.trim());
+        setPathMeta({ titleAr: created.titleAr || form.titleAr.trim(), titleEn: created.titleEn || form.titleEn.trim() });
         navigate(`/admin/learning-paths/${created.id}`, { replace: true });
       }
       if (!targetPathId) {
-        showToast('تعذّر إنشاء المسار.', 'error');
+        showToast(t('admin.editor.toast.createError'), 'error');
         return;
       }
       await syncCourses(targetPathId);
-      showToast('تم حفظ دورات المسار.', 'success');
+      showToast(t('admin.editor.toast.coursesSaved'), 'success');
     } catch {
-      showToast('تعذّر حفظ الدورات.', 'error');
+      showToast(t('admin.editor.toast.saveCoursesError'), 'error');
     } finally {
       setSavingCourses(false);
     }
@@ -267,64 +295,64 @@ export default function AdminLearningPathEditorPage() {
     <div className="page-grid learning-path-editor">
       <div className="learning-path-editor-top">
         <Link to="/admin/learning-paths" className="admin-detail-back">
-          ← العودة للمسارات
+          {t('admin.editor.backToPaths')}
         </Link>
         <div className="learning-path-editor-heading">
           <div>
-            <h1>{isNew ? 'مسار تعليمي جديد' : `إدارة المسار: ${pathTitle || form.titleAr}`}</h1>
-            <p>
+            <h1>
               {isNew
-                ? 'أدخل بيانات المسار واختر الدورات من القائمة أدناه.'
-                : 'عدّل بيانات المسار واختر الدورات المرتبطة به.'}
-            </p>
+                ? t('admin.editor.newTitle')
+                : t('admin.editor.editTitle', { title: displayPathTitle })}
+            </h1>
+            <p>{isNew ? t('admin.editor.newSubtitle') : t('admin.editor.editSubtitle')}</p>
           </div>
           {!isNew ? (
             <Badge variant={form.status === 'ACTIVE' ? 'success' : 'warning'}>
-              {form.status === 'ACTIVE' ? 'فعّال' : 'غير فعّال'}
+              {statusLabels[form.status] || form.status}
             </Badge>
           ) : null}
         </div>
       </div>
 
       <Card>
-        <h2>معلومات المسار</h2>
+        <h2>{t('admin.editor.infoSection')}</h2>
         <form className="stack-sm learning-path-info-form" onSubmit={savePathInfo}>
           <Input
-            label="العنوان العربي"
+            label={t('admin.editor.form.titleAr')}
             value={form.titleAr}
             onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
             required
           />
           <Input
-            label="العنوان الإنجليزي"
+            label={t('admin.editor.form.titleEn')}
             value={form.titleEn}
             onChange={(e) => setForm({ ...form, titleEn: e.target.value })}
           />
           <Textarea
-            label="وصف المسار"
+            label={t('admin.editor.form.description')}
             value={form.descriptionAr}
             onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
           />
           <Input
-            label="رابط الغلاف"
+            label={t('admin.editor.form.coverImage')}
             value={form.coverImage}
             onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
           />
           <Select
-            label="الحالة"
+            label={t('admin.editor.form.status')}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
             options={[
-              { label: 'فعّال', value: 'ACTIVE' },
-              { label: 'غير فعّال', value: 'INACTIVE' },
+              { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+              { label: statusLabels.INACTIVE, value: 'INACTIVE' },
             ]}
           />
           <div className="card-actions">
             <Button type="button" variant="ghost" onClick={() => navigate('/admin/learning-paths')}>
-              إلغاء
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" loading={savingInfo} icon={<Save size={18} />}>
-              {isNew ? 'حفظ المسار' : 'حفظ البيانات'}
+              {isNew ? t('actions.savePath') : t('actions.saveData')}
             </Button>
           </div>
         </form>
@@ -333,18 +361,20 @@ export default function AdminLearningPathEditorPage() {
       {selectedLinks.length ? (
         <Card>
           <div className="section-heading">
-            <h2>الدورات المختارة ({selectedLinks.length})</h2>
+            <h2>{t('admin.editor.selectedSection', { count: selectedLinks.length })}</h2>
             <Button type="button" size="sm" loading={savingCourses} onClick={saveCourses} icon={<Save size={16} />}>
-              حفظ الدورات
+              {t('actions.saveCourses')}
             </Button>
           </div>
           <div className="learning-path-selected-list">
-            {selectedLinks.map((item, index) => (
+            {selectedLinks.map((item, index) => {
+              const course = resolveCourse(item.courseId, item.course);
+              return (
               <div key={item.courseId} className="learning-path-selected-item">
                 <span className="learning-path-order">{index + 1}</span>
                 <div className="learning-path-selected-info">
-                  <strong>{item.course?.titleAr || '—'}</strong>
-                  <small>{item.course?.instructor?.fullName || '—'}</small>
+                  <strong>{localizedCourseTitle(course, i18n.language)}</strong>
+                  <small>{course?.instructor?.fullName || '—'}</small>
                 </div>
                 <div className="card-actions">
                   <Button type="button" size="sm" variant="ghost" onClick={() => moveCourse(index, 'up')} disabled={index === 0}>
@@ -359,26 +389,27 @@ export default function AdminLearningPathEditorPage() {
                   >
                     <ArrowDown size={14} />
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => toggleCourse({ id: item.courseId, ...item.course })}>
-                    إزالة
+                  <Button type="button" size="sm" variant="outline" onClick={() => toggleCourse(course || { id: item.courseId, ...item.course })}>
+                    {t('actions.remove')}
                   </Button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </Card>
       ) : null}
 
       <Card>
         <div className="section-heading">
-          <h2>اختيار الدورات</h2>
-          <span className="learning-path-hint">اضغطي على الدورة لإضافتها أو إزالتها من المسار</span>
+          <h2>{t('admin.editor.pickSection')}</h2>
+          <span className="learning-path-hint">{t('admin.editor.pickHint')}</span>
         </div>
         <div className="learning-path-course-search">
           <Search size={18} />
           <input
             type="search"
-            placeholder="بحث باسم الكورس أو المحاضر..."
+            placeholder={t('admin.editor.searchPlaceholder')}
             value={courseSearch}
             onChange={(e) => setCourseSearch(e.target.value)}
           />
@@ -398,10 +429,10 @@ export default function AdminLearningPathEditorPage() {
                     {selected ? <Check size={16} /> : null}
                   </span>
                   <div className="learning-path-course-body">
-                    <strong>{course.titleAr}</strong>
+                    <strong>{localizedCourseTitle(course, i18n.language)}</strong>
                     <small>{course.instructor?.fullName || '—'}</small>
-                    {course.category?.nameAr ? (
-                      <Badge variant="default">{course.category.nameAr}</Badge>
+                    {localizedCategoryName(course.category, i18n.language) !== '—' ? (
+                      <Badge variant="default">{localizedCategoryName(course.category, i18n.language)}</Badge>
                     ) : null}
                   </div>
                   <BookOpen size={20} className="learning-path-course-icon" />
@@ -411,13 +442,13 @@ export default function AdminLearningPathEditorPage() {
           </div>
         ) : (
           <EmptyState
-            title="لا توجد دورات منشورة"
-            description="انشري كورسات أولاً لتتمكني من إضافتها للمسار."
+            title={t('admin.editor.emptyCoursesTitle')}
+            description={t('admin.editor.emptyCoursesDescription')}
           />
         )}
         <div className="card-actions learning-path-save-bar">
           <Button type="button" loading={savingCourses} onClick={saveCourses} icon={<Save size={18} />}>
-            حفظ الدورات المختارة
+            {t('actions.saveSelectedCourses')}
           </Button>
         </div>
       </Card>

@@ -120,7 +120,7 @@ export default function InstructorQuizCreatePage() {
             <Button type="button" variant="outline" onClick={() => navigate(builderPath)}>
               إلغاء
             </Button>
-            <Button loading={submitting}>إنشاء والانتقال للأسئلة</Button>
+            <Button type="submit" loading={submitting}>إنشاء والانتقال للأسئلة</Button>
           </div>
         </form>
       </Card>

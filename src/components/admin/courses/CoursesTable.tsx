@@ -1,16 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Table2 } from '@/icons';
+import { useAdminCourseLabels } from '../../../hooks/useAdminCourseLabels';
+import { formatNumber } from '../../../utils/localeFormat';
 import { Badge } from '../../ui/Badge';
 import { Card } from '../../ui/Card';
 import { Table } from '../../ui/Table';
 import { TableEntityLink } from '../../ui/TableEntityLink';
 import { CourseRowActions } from './CourseRowActions';
-import {
-  fmtCourseDate,
-  fmtMoney,
-  levelLabels,
-  statusLabels,
-  statusVariant,
-} from './courseShared';
 
 export interface CourseTableRow extends Record<string, unknown> {
   id: number | string;
@@ -47,6 +43,10 @@ export function CoursesTable({
   onSuspend,
   onDelete,
 }: CoursesTableProps) {
+  const { t, i18n } = useTranslation(['courses', 'common']);
+  const { statusLabels, statusVariant } = useAdminCourseLabels();
+  const cols = t('admin.courses.table.columns', { returnObjects: true }) as Record<string, string>;
+
   return (
     <Card className="reports-table-card">
       <div className="section-heading reports-table-head">
@@ -54,9 +54,13 @@ export function CoursesTable({
           <span className="reports-table-title-icon" aria-hidden="true">
             <Table2 size={20} />
           </span>
-          قائمة الكورسات
+          {t('admin.courses.table.title')}
         </h2>
-        <span className="muted-count">{items.length.toLocaleString('ar-EG')} كورس</span>
+        <span className="muted-count">
+          {t('admin.courses.table.count', {
+            count: formatNumber(items.length, undefined, i18n.language),
+          })}
+        </span>
       </div>
       <Table<CourseTableRow>
         className="admin-users-table admin-courses-table"
@@ -66,15 +70,15 @@ export function CoursesTable({
         fluid
         hideScrollNotice
         maxHeight="min(72vh, 760px)"
-        emptyTitle="لا توجد كورسات"
-        emptyDescription="ستظهر الدورات هنا عند إنشائها من قبل المحاضرين."
+        emptyTitle={t('admin.courses.table.emptyTitle')}
+        emptyDescription={t('admin.courses.table.emptyDescription')}
         data={items}
         onRowClick={(row) => onDetail(row._raw)}
         columns={[
-          { key: 'id', header: 'رقم الكورس', width: '6.5rem', align: 'center' },
+          { key: 'id', header: cols.id, width: '6.5rem', align: 'center' },
           {
             key: 'title',
-            header: 'العنوان',
+            header: cols.title,
             width: '16rem',
             className: 'col-primary admin-col-name',
             truncate: false,
@@ -86,7 +90,7 @@ export function CoursesTable({
           },
           {
             key: 'instructor',
-            header: 'المحاضر',
+            header: cols.instructor,
             width: '12rem',
             className: 'admin-col-name',
             truncate: false,
@@ -94,39 +98,39 @@ export function CoursesTable({
           },
           {
             key: 'category',
-            header: 'التصنيف',
+            header: cols.category,
             width: '10rem',
             hideOnMobile: true,
           },
           {
             key: 'level',
-            header: 'المستوى',
+            header: cols.level,
             width: '7rem',
             align: 'center',
             hideOnMobile: true,
           },
           {
             key: 'price',
-            header: 'السعر',
+            header: cols.price,
             width: '8rem',
             align: 'center',
           },
           {
             key: 'students',
-            header: 'الطلاب',
+            header: cols.students,
             width: '6rem',
             align: 'center',
           },
           {
             key: 'lessons',
-            header: 'الدروس',
+            header: cols.lessons,
             width: '6rem',
             align: 'center',
             hideOnMobile: true,
           },
           {
             key: 'status',
-            header: 'الحالة',
+            header: cols.status,
             width: '10.5rem',
             minWidth: '10.5rem',
             align: 'center',
@@ -144,7 +148,7 @@ export function CoursesTable({
           },
           {
             key: 'updatedAt',
-            header: 'آخر تحديث',
+            header: cols.updatedAt,
             width: '10rem',
             className: 'admin-col-date',
             truncate: false,
@@ -152,7 +156,7 @@ export function CoursesTable({
           },
           {
             key: 'actions',
-            header: 'الإجراءات',
+            header: cols.actions,
             width: '24rem',
             wrap: true,
             truncate: false,
@@ -172,20 +176,4 @@ export function CoursesTable({
       />
     </Card>
   );
-}
-
-export function buildCourseTableRows(courses: any[]): CourseTableRow[] {
-  return courses.map((row) => ({
-    id: row.id,
-    title: row.titleAr,
-    instructor: row.instructor?.fullName || '—',
-    category: row.category?.nameAr || '—',
-    level: levelLabels[row.level] || row.level,
-    price: fmtMoney(row),
-    students: String(row.totalStudents ?? row._count?.enrollments ?? 0),
-    lessons: String(row._count?.lessons ?? 0),
-    status: statusLabels[row.status] || row.status,
-    updatedAt: fmtCourseDate(row.updatedAt),
-    _raw: row,
-  }));
 }

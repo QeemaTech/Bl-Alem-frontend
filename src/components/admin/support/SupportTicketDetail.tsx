@@ -1,9 +1,10 @@
 import { FormEvent } from 'react';
+import { useAdminSupportLabels } from '../../../hooks/useAdminSupportLabels';
 import { CheckCircle2, XCircle } from '@/icons';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Textarea } from '../../ui/Textarea';
-import { fmtSupportDate, roleLabels, statusLabels, statusVariant } from './supportTicketShared';
 
 interface SupportTicketDetailProps {
   ticket: any;
@@ -22,6 +23,14 @@ export function SupportTicketDetail({
   onSendReply,
   onUpdateStatus,
 }: SupportTicketDetailProps) {
+  const { t } = useTranslation('support');
+  const {
+    getStatusLabel,
+    getRoleLabel,
+    fmtSupportDate,
+    statusVariant,
+  } = useAdminSupportLabels();
+
   return (
     <div className="support-ticket-detail">
       <div className="support-ticket-detail-header">
@@ -30,14 +39,14 @@ export function SupportTicketDetail({
           <h2>{ticket.subject}</h2>
         </div>
         <Badge variant={statusVariant(ticket.status)}>
-          {statusLabels[ticket.status]}
+          {getStatusLabel(ticket.status)}
         </Badge>
       </div>
 
       <div className="support-ticket-user-card">
         <strong>{ticket.user?.fullName}</strong>
         <span>{ticket.user?.email}</span>
-        <span>{roleLabels[ticket.user?.role] || ticket.user?.role}</span>
+        <span>{getRoleLabel(ticket.user?.role) || ticket.user?.role}</span>
         {ticket.user?.phone ? <span>{ticket.user.phone}</span> : null}
       </div>
 
@@ -54,32 +63,32 @@ export function SupportTicketDetail({
               className={`support-reply ${item.user?.role === 'SUPER_ADMIN' ? 'is-admin' : 'is-user'}`}
             >
               <small>
-                {item.user?.fullName} ({roleLabels[item.user?.role] || item.user?.role}) · {fmtSupportDate(item.createdAt)}
+                {item.user?.fullName} ({getRoleLabel(item.user?.role) || item.user?.role}) · {fmtSupportDate(item.createdAt)}
               </small>
               <p>{item.message}</p>
             </div>
           ))
         ) : (
-          <p className="support-ticket-no-replies">لا توجد ردود بعد.</p>
+          <p className="support-ticket-no-replies">{t('admin.detail.noReplies')}</p>
         )}
       </div>
 
       {ticket.status !== 'CLOSED' ? (
         <form className="support-ticket-reply-form" onSubmit={onSendReply}>
           <Textarea
-            label="رد الدعم"
+            label={t('admin.detail.replyLabel')}
             value={reply}
             onChange={(e) => onReplyChange(e.target.value)}
-            placeholder="اكتب ردك للمستخدم..."
+            placeholder={t('admin.detail.replyPlaceholder')}
             required
           />
           <div className="support-ticket-actions">
             <Button type="submit" loading={submitting} disabled={!reply.trim()}>
-              إرسال الرد
+              {t('admin.detail.sendReply')}
             </Button>
             {ticket.status === 'OPEN' ? (
               <Button type="button" variant="outline" onClick={() => onUpdateStatus('IN_PROGRESS')} loading={submitting}>
-                بدء المعالجة
+                {t('admin.detail.startProcessing')}
               </Button>
             ) : null}
             <Button
@@ -89,16 +98,16 @@ export function SupportTicketDetail({
               loading={submitting}
               icon={<XCircle size={16} />}
             >
-              إغلاق التذكرة
+              {t('admin.detail.closeTicket')}
             </Button>
           </div>
         </form>
       ) : (
         <div className="support-ticket-closed-notice">
           <CheckCircle2 size={18} />
-          <span>تم إغلاق هذه التذكرة.</span>
+          <span>{t('admin.detail.closedNotice')}</span>
           <Button variant="outline" size="sm" onClick={() => onUpdateStatus('OPEN')} loading={submitting}>
-            إعادة فتح
+            {t('admin.detail.reopen')}
           </Button>
         </div>
       )}

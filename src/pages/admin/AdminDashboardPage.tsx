@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../api/admin';
 import { AdminDashboardSkeleton } from '../../components/admin/dashboard/AdminDashboardSkeleton';
@@ -7,6 +8,8 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const [data, setData] = useState<AdminDashboardApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -31,11 +34,11 @@ export default function AdminDashboardPage() {
     return (
       <div className="page-grid">
         <EmptyState
-          title="تعذّر تحميل لوحة التحكم"
-          description="حدث خطأ أثناء جلب بيانات المنصة. تحقق من الاتصال ثم أعد المحاولة."
+          title={t('admin.loadErrorTitle')}
+          description={t('admin.loadErrorDesc')}
         />
         <Button variant="outline" onClick={load}>
-          إعادة المحاولة
+          {tc('actions.retry')}
         </Button>
       </div>
     );

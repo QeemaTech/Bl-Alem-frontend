@@ -86,7 +86,7 @@ export default function StudentCommunityPage() {
   }, [posts, user?.id]);
 
   const chartData = useMemo(() => [
-    { label: 'بردود', value: stats.answered },
+    { label: 'تم الرد', value: stats.answered },
     { label: 'بانتظار رد', value: stats.unanswered },
   ].filter((d) => d.value > 0), [stats.answered, stats.unanswered]);
 
@@ -289,7 +289,7 @@ export default function StudentCommunityPage() {
         <StatCard title="المنشورات" value={String(stats.total)} icon={MessageCircle} />
         <StatCard title="التعليقات" value={String(stats.comments)} icon={MessagesSquare} />
         <StatCard title="منشوراتي" value={String(stats.mine)} icon={UserRound} />
-        <StatCard title="بردود" value={String(stats.answered)} icon={MessageSquare} hint={`${stats.unanswered} بانتظار رد`} />
+        <StatCard title="تم الرد" value={String(stats.answered)} icon={MessageSquare} hint={`${stats.unanswered} بانتظار رد`} />
       </div>
 
       {chartData.length ? (
@@ -310,7 +310,7 @@ export default function StudentCommunityPage() {
           onChange={(e) => setReplyFilter(e.target.value)}
           options={[
             { label: 'الكل', value: '' },
-            { label: 'بردود', value: 'answered' },
+            { label: 'تم الرد', value: 'answered' },
             { label: 'بانتظار رد', value: 'unanswered' },
           ]}
         />

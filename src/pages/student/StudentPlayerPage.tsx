@@ -144,19 +144,23 @@ export default function StudentPlayerPage() {
 
   return (
     <div className="page-grid student-player-page">
-      <PageHeader
-        title={data.course.titleAr}
-        subtitle={`${completedIds.size} من ${lessons.length} دروس — ${progress}%`}
-        breadcrumb={[
-          { label: 'كورساتي', to: '/student/my-courses' },
-          { label: data.course.titleAr },
-        ]}
-        action={(
+      <div className="reports-header student-player-page-header">
+        <PageHeader
+          title={data.course.titleAr}
+          subtitle={`${completedIds.size} من ${lessons.length} دروس — ${progress}%`}
+          breadcrumb={[
+            { label: 'كورساتي', to: '/student/my-courses' },
+            { label: data.course.titleAr },
+          ]}
+        />
+        <div className="reports-header-actions">
           <Link to="/student/my-courses">
-            <Button variant="outline" size="sm">العودة لكورساتي</Button>
+            <Button variant="outline" size="sm" icon={<ChevronRight size={16} />}>
+              العودة لكورساتي
+            </Button>
           </Link>
-        )}
-      />
+        </div>
+      </div>
 
       <div className="stats-grid student-player-stats">
         <StatCard title="التقدم الكلي" value={`${progress}%`} icon={PlayCircle} />

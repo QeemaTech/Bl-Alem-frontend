@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, Route, Target, UserRound,
+  ArrowRight, BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, Route, Target,
+  UserRound,
 } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { CourseCard } from '../../components/ui/CourseCard';
+import { LearningPathCourseCard } from '../../components/student/LearningPathCourseCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { FilterBar } from '../../components/ui/FilterBar';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
@@ -208,45 +209,78 @@ export default function StudentLearningPathsPage() {
 
     return (
       <div className="page-grid student-learning-path-detail">
-        <PageHeader
-          title={path.titleAr}
-          subtitle={path.descriptionAr || 'مسار تعليمي منظم'}
-          breadcrumb={[
-            { label: 'المسارات', to: '/student/learning-paths' },
-            { label: path.titleAr },
-          ]}
-          action={
+        <div className="reports-header student-learning-path-detail-header">
+          <PageHeader
+            title={path.titleAr}
+            subtitle={path.descriptionAr || 'مسار تعليمي منظم'}
+            breadcrumb={[
+              { label: 'المسارات التعليمية', to: '/student/learning-paths' },
+              { label: path.titleAr },
+            ]}
+          />
+          <div className="reports-header-actions">
             <Link to="/student/learning-paths">
-              <Button variant="outline" size="sm">العودة للمسارات</Button>
+              <Button variant="outline" size="sm" icon={<ArrowRight size={16} />}>
+                العودة للمسارات
+              </Button>
             </Link>
-          }
-        />
+          </div>
+        </div>
 
-        <div className="stats-grid">
+        <div className="stats-grid student-learning-path-detail-stats">
           <StatCard title="دورات المسار" value={String(pathStats.total)} icon={BookOpen} />
           <StatCard title="مسجّلة" value={String(pathStats.enrolled)} icon={PlayCircle} />
           <StatCard title="مكتملة" value={String(pathStats.completed)} icon={CheckCircle2} />
           <StatCard title="تقدم المسار" value={`${pathStats.progress}%`} icon={Target} />
         </div>
 
-        {pathStats.enrolled < pathStats.total ? (
-          <Card className="student-path-progress-card">
-            <div className="section-heading">
-              <h3>اشترك في كل دورات المسار</h3>
-              <Button loading={enrolling} onClick={enrollAll} icon={<GraduationCap size={16} />}>
+        <div className="student-learning-path-detail-insights">
+          <Card className="student-path-journey-card">
+            <div className="student-path-journey-head">
+              <span className="student-path-journey-icon"><Route size={22} /></span>
+              <div className="student-path-journey-copy">
+                <strong>التقدم الكلي للمسار</strong>
+                <p>
+                  {pathStats.completed === pathStats.total && pathStats.total > 0
+                    ? 'أحسنت! أكملت جميع دورات هذا المسار.'
+                    : pathStats.enrolled > 0
+                      ? `${pathStats.completed} من ${pathStats.total} دورات مكتملة — استمر في التعلّم.`
+                      : 'اشترك في دورات المسار لبدء رحلتك التعليمية.'}
+                </p>
+              </div>
+              <span className="student-path-journey-percent">{pathStats.progress}%</span>
+            </div>
+            <ProgressBar value={pathStats.progress} label="نسبة الإكمال" size="md" />
+            {pathStats.total ? (
+              <p className="student-path-journey-foot">
+                {pathStats.enrolled} مسجّلة · {pathStats.completed} مكتملة · {pathStats.total} إجمالاً
+              </p>
+            ) : null}
+          </Card>
+
+          {pathStats.enrolled < pathStats.total ? (
+            <Card className="student-path-enroll-card">
+              <div className="student-path-enroll-icon" aria-hidden>
+                <GraduationCap size={26} />
+              </div>
+              <div className="student-path-enroll-copy">
+                <strong>اشترك في جميع دورات المسار</strong>
+                <p>سيتم تسجيلك في كل دورات المسار المتاحة دفعة واحدة.</p>
+              </div>
+              <Button
+                loading={enrolling}
+                onClick={enrollAll}
+                icon={<GraduationCap size={16} />}
+                className="student-path-enroll-btn"
+              >
                 اشترك الآن
               </Button>
-            </div>
-            <p>سيتم تسجيلك في كل دورات المسار المتاحة دفعة واحدة.</p>
-          </Card>
-        ) : null}
-
-        <Card className="student-path-progress-card">
-          <ProgressBar value={pathStats.progress} label="التقدم الكلي للمسار" size="md" />
-        </Card>
+            </Card>
+          ) : null}
+        </div>
 
         <Card className="student-path-timeline">
-          <div className="section-heading">
+          <div className="section-heading student-path-timeline-heading">
             <h2><Route size={18} /> مسار الدورات</h2>
             <span className="muted-count">{courses.length} خطوة</span>
           </div>
@@ -256,8 +290,13 @@ export default function StudentLearningPathsPage() {
               const done = enrollment && (enrollment.status === 'COMPLETED' || enrollment.progressPercentage >= 100);
               const enrolled = Boolean(enrollment);
               return (
-                <div key={item.id} className={`student-path-step ${done ? 'done' : enrolled ? 'active' : ''}`}>
-                  <span className="student-path-step-num">{index + 1}</span>
+                <div
+                  key={item.id}
+                  className={`student-path-step ${done ? 'done' : enrolled ? 'active' : ''}`}
+                >
+                  <span className="student-path-step-num" aria-hidden>
+                    {done ? <CheckCircle2 size={18} /> : index + 1}
+                  </span>
                   <div className="student-path-step-body">
                     <strong>{item.course?.titleAr}</strong>
                     <span><UserRound size={12} /> {item.course?.instructor?.fullName || '—'}</span>
@@ -274,30 +313,31 @@ export default function StudentLearningPathsPage() {
           </div>
         </Card>
 
-        <div className="course-list-grid">
-          {courses.map((item: any, index: number) => {
-            const enrollment = enrollmentMap.get(item.courseId);
-            const done = enrollment && (enrollment.status === 'COMPLETED' || enrollment.progressPercentage >= 100);
-            return (
-              <CourseCard
-                key={item.id}
-                title={`${index + 1}. ${item.course?.titleAr}`}
-                category={item.course?.category?.nameAr || 'دورة'}
-                instructor={item.course?.instructor?.fullName}
-                imageUrl={item.course?.coverImage}
-                price={Number(item.course?.discountPrice ?? item.course?.price ?? 0)}
-                rating={Number(item.course?.ratingAverage || 0)}
-                duration={`${item.course?._count?.lessons || 0} دروس`}
-                progress={enrollment ? enrollment.progressPercentage : undefined}
-                actionLabel={done ? 'مراجعة' : enrollment ? 'استكمال' : 'عرض الدورة'}
-                onAction={() => {
-                  if (enrollment) navigate(`/student/player/${item.courseId}`);
-                  else navigate(`/student/courses/${item.courseId}`);
-                }}
-              />
-            );
-          })}
-        </div>
+        <section className="student-learning-path-courses-section">
+          <div className="section-heading student-learning-path-courses-heading">
+            <h2><BookOpen size={18} /> دورات المسار</h2>
+            <span className="muted-count">{courses.length} دورة</span>
+          </div>
+          <div className="course-list-grid student-learning-path-courses-grid">
+            {courses.map((item: any, index: number) => {
+              const enrollment = enrollmentMap.get(item.courseId);
+              return (
+                <LearningPathCourseCard
+                  key={item.id}
+                  stepNumber={index + 1}
+                  course={item.course}
+                  enrollment={enrollment}
+                  style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+                  onPrimaryAction={() => {
+                    if (enrollment) navigate(`/student/player/${item.courseId}`);
+                    else navigate(`/student/courses/${item.courseId}`);
+                  }}
+                  onViewDetails={() => navigate(`/student/courses/${item.courseId}`)}
+                />
+              );
+            })}
+          </div>
+        </section>
       </div>
     );
   }

@@ -1,0 +1,90 @@
+{
+  "empty": "—",
+  "title": "الشهادات",
+  "subtitle": "إدارة وإصدار شهادات إتمام الدورات",
+  "stats": {
+    "total": "إجمالي الشهادات",
+    "thisMonth": "صادرة هذا الشهر",
+    "withPdf": "ملف PDF متاح",
+    "pending": "بانتظار الإصدار"
+  },
+  "charts": {},
+  "filters": {
+    "searchPlaceholder": "بحث برقم الشهادة، الطالب، الكورس، أو المحاضر...",
+    "pdf": "ملف PDF",
+    "all": "الكل",
+    "available": "متاح",
+    "unavailable": "غير متاح"
+  },
+  "table": {
+    "emptyTitle": "لا توجد شهادات",
+    "emptyDescription": "ستظهر الشهادات هنا بعد إصدارها للطلاب.",
+    "columns": {
+      "certificateNumber": "رقم الشهادة",
+      "student": "الطالب",
+      "email": "البريد",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "pdfStatus": "PDF",
+      "verifyUrl": "رابط التحقق",
+      "issuedAt": "تاريخ الإصدار",
+      "actions": "الإجراءات"
+    }
+  },
+  "labels": {
+    "pdfStatus": {
+      "available": "متاح",
+      "unavailable": "غير متاح"
+    },
+    "progress": "نسبة الإنجاز: {{percent}}%"
+  },
+  "form": {},
+  "modal": {
+    "detailTitle": "تفاصيل الشهادة",
+    "issueTitle": "إصدار شهادة جديدة",
+    "eligibleIntro": "الطلاب التاليون أكملوا الدورات ولم يصدر لهم شهادة بعد:",
+    "detail": {
+      "certificateNumber": "رقم الشهادة",
+      "student": "الطالب",
+      "email": "البريد",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "issuedAt": "تاريخ الإصدار",
+      "pdf": "ملف PDF"
+    }
+  },
+  "actions": {
+    "exportExcel": "تصدير Excel",
+    "issue": "إصدار شهادة",
+    "issueOne": "إصدار",
+    "details": "التفاصيل",
+    "verify": "تحقق",
+    "verifyCertificate": "التحقق من الشهادة",
+    "downloadPdf": "تحميل PDF",
+    "regeneratePdf": "إعادة توليد PDF",
+    "copyVerifyLink": "نسخ رابط التحقق"
+  },
+  "toast": {
+    "issued": "تم إصدار الشهادة بنجاح.",
+    "regenerated": "تم إعادة توليد ملف PDF بالقالب الحالي.",
+    "linkCopied": "تم نسخ الرابط."
+  },
+  "export": {
+    "sheetName": "الشهادات",
+    "columns": {
+      "certificateNumber": "رقم الشهادة",
+      "student": "الطالب",
+      "email": "البريد",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "pdfStatus": "ملف PDF",
+      "verifyUrl": "رابط التحقق",
+      "issuedAt": "تاريخ الإصدار"
+    }
+  },
+  "eligibleEmpty": {
+    "title": "لا يوجد طلاب مؤهلون",
+    "description": "جميع الطلاب الذين أكملوا دوراتهم لديهم شهادات بالفعل."
+  },
+  "confirm": {}
+}

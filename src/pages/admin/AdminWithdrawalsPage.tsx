@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { adminApi } from '../../api/admin';
 import { WithdrawalActionButtons } from '../../components/admin/withdrawals/WithdrawalActionButtons';
 import { WithdrawalStatusBadge } from '../../components/admin/withdrawals/WithdrawalStatusBadge';
@@ -7,9 +8,6 @@ import { WithdrawalsSummaryCards } from '../../components/admin/withdrawals/With
 import { WithdrawalsTable } from '../../components/admin/withdrawals/WithdrawalsTable';
 import { WithdrawTransferForm } from '../../components/admin/withdrawals/WithdrawTransferForm';
 import {
-  fmtWithdrawalDate,
-  fmtWithdrawalMoney,
-  WITHDRAWAL_STATUS_LABELS,
   type WithdrawalActionType,
   type WithdrawalItem,
 } from '../../components/admin/withdrawals/types';
@@ -19,6 +17,7 @@ import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminWithdrawalLabels } from '../../hooks/useAdminWithdrawalLabels';
 import { Download } from '@/icons';
 import { exportTableToExcel } from '../../utils/exportExcel';
 import { mediaUrl, normalizeStoredMediaPath } from '../../utils/mediaUrl';
@@ -29,21 +28,16 @@ const EMPTY_FILTERS: WithdrawalsFilters = {
   dateTo: '',
 };
 
-const exportColumns = [
-  { key: 'id', header: 'رقم الطلب' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'email', header: 'البريد' },
-  { key: 'amount', header: 'المبلغ (ج.م)' },
-  { key: 'bankName', header: 'البنك' },
-  { key: 'accountName', header: 'اسم الحساب' },
-  { key: 'iban', header: 'IBAN' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'تاريخ الطلب' },
-  { key: 'notes', header: 'ملاحظات' },
-];
-
 export default function AdminWithdrawalsPage() {
+  const { t } = useTranslation(['withdrawals', 'common']);
   const { showToast } = useToast();
+  const {
+    fmtWithdrawalDate,
+    fmtWithdrawalMoney,
+    getStatusLabel,
+    empty,
+  } = useAdminWithdrawalLabels();
+
   const [items, setItems] = useState<WithdrawalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<WithdrawalsFilters>(EMPTY_FILTERS);
@@ -59,12 +53,28 @@ export default function AdminWithdrawalsPage() {
   const [submittingReject, setSubmittingReject] = useState(false);
   const [loadingAction, setLoadingAction] = useState<{ id: number; type: WithdrawalActionType } | null>(null);
 
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.export.columns', { returnObjects: true, ns: 'withdrawals' }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'instructor', header: cols.instructor },
+      { key: 'email', header: cols.email },
+      { key: 'amount', header: cols.amount },
+      { key: 'bankName', header: cols.bankName },
+      { key: 'accountName', header: cols.accountName },
+      { key: 'iban', header: cols.iban },
+      { key: 'status', header: cols.status },
+      { key: 'createdAt', header: cols.createdAt },
+      { key: 'notes', header: cols.notes },
+    ];
+  }, [t]);
+
   const load = async () => {
     setLoading(true);
     try {
       setItems(await adminApi.withdrawals());
     } catch {
-      showToast('تعذّر تحميل طلبات السحب.', 'error');
+      showToast(t('admin.toast.loadFailed', { ns: 'withdrawals' }), 'error');
     } finally {
       setLoading(false);
     }
@@ -97,18 +107,22 @@ export default function AdminWithdrawalsPage() {
   }), [items]);
 
   const handleExport = () => {
-    exportTableToExcel('السحوبات', exportColumns, filteredItems.map((row) => ({
-      id: row.id,
-      instructor: row.instructor?.fullName || '—',
-      email: row.instructor?.email || '—',
-      amount: fmtWithdrawalMoney(row.amount),
-      bankName: row.bankName || '—',
-      accountName: row.accountName || '—',
-      iban: row.iban || '—',
-      status: WITHDRAWAL_STATUS_LABELS[row.status as keyof typeof WITHDRAWAL_STATUS_LABELS] || row.status,
-      createdAt: fmtWithdrawalDate(row.createdAt),
-      notes: row.notes || '—',
-    })));
+    exportTableToExcel(
+      t('admin.export.sheetName', { ns: 'withdrawals' }),
+      exportColumns,
+      filteredItems.map((row) => ({
+        id: row.id,
+        instructor: row.instructor?.fullName || empty,
+        email: row.instructor?.email || empty,
+        amount: fmtWithdrawalMoney(row.amount),
+        bankName: row.bankName || empty,
+        accountName: row.accountName || empty,
+        iban: row.iban || empty,
+        status: getStatusLabel(row.status),
+        createdAt: fmtWithdrawalDate(row.createdAt),
+        notes: row.notes || empty,
+      })),
+    );
   };
 
   const resetPaidModal = () => {
@@ -131,7 +145,7 @@ export default function AdminWithdrawalsPage() {
     setLoadingAction({ id: selected.id, type: 'approve' });
     try {
       await adminApi.approveWithdrawal(selected.id);
-      showToast('تم اعتماد طلب السحب. يمكنك الآن تأكيد التحويل.', 'success');
+      showToast(t('admin.toast.approved', { ns: 'withdrawals' }), 'success');
       setConfirmApproveOpen(false);
       const refreshed = await adminApi.withdrawals();
       setItems(refreshed);
@@ -140,7 +154,7 @@ export default function AdminWithdrawalsPage() {
       else setSelected(null);
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر اعتماد الطلب.';
+        || t('admin.toast.approveFailed', { ns: 'withdrawals' });
       showToast(message, 'error');
     } finally {
       setLoadingAction(null);
@@ -165,12 +179,12 @@ export default function AdminWithdrawalsPage() {
         transferProofImage = normalizeStoredMediaPath(uploaded?.url || '');
       }
       await adminApi.markWithdrawalPaid(selected.id, { transferProofImage });
-      showToast('تم تأكيد الدفع للمحاضر.', 'success');
+      showToast(t('admin.toast.paid', { ns: 'withdrawals' }), 'success');
       resetPaidModal();
       load();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر تأكيد الدفع.';
+        || t('admin.toast.paidFailed', { ns: 'withdrawals' });
       showToast(message, 'error');
     } finally {
       setSubmittingPaid(false);
@@ -185,14 +199,14 @@ export default function AdminWithdrawalsPage() {
     setLoadingAction({ id: selected.id, type: 'reject' });
     try {
       await adminApi.rejectWithdrawal(selected.id, rejectNotes || undefined);
-      showToast('تم رفض طلب السحب.', 'success');
+      showToast(t('admin.toast.rejected', { ns: 'withdrawals' }), 'success');
       setRejectOpen(false);
       setRejectNotes('');
       setSelected(null);
       load();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر رفض الطلب.';
+        || t('admin.toast.rejectFailed', { ns: 'withdrawals' });
       showToast(message, 'error');
     } finally {
       setSubmittingReject(false);
@@ -204,8 +218,8 @@ export default function AdminWithdrawalsPage() {
     <div className="admin-withdrawals-page page-grid">
       <div className="reports-header">
         <PageHeader
-          title="إدارة السحوبات"
-          subtitle="مراجعة واعتماد طلبات سحب أرباح المحاضرين بأمان ووضوح"
+          title={t('admin.title', { ns: 'withdrawals' })}
+          subtitle={t('admin.subtitle', { ns: 'withdrawals' })}
         />
         <div className="reports-header-actions">
           <Button
@@ -214,7 +228,7 @@ export default function AdminWithdrawalsPage() {
             onClick={handleExport}
             disabled={!filteredItems.length}
           >
-            تصدير Excel
+            {t('admin.exportExcel', { ns: 'withdrawals' })}
           </Button>
         </div>
       </div>
@@ -237,30 +251,30 @@ export default function AdminWithdrawalsPage() {
         onConfirmTransfer={openPaidModal}
       />
 
-      <Modal isOpen={detailOpen} title="تفاصيل طلب السحب" onClose={() => { setDetailOpen(false); setSelected(null); }}>
+      <Modal isOpen={detailOpen} title={t('admin.detail.title', { ns: 'withdrawals' })} onClose={() => { setDetailOpen(false); setSelected(null); }}>
         {selected ? (
           <div className="stack-sm withdrawal-detail wd-detail-modal">
-            <div className="detail-row"><span>رقم الطلب</span><strong>#{selected.id}</strong></div>
-            <div className="detail-row"><span>المحاضر</span><strong>{selected.instructor?.fullName}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.instructor?.email}</strong></div>
-            <div className="detail-row"><span>الهاتف</span><strong>{selected.instructor?.phone || '—'}</strong></div>
-            <div className="detail-row"><span>المبلغ</span><strong>{fmtWithdrawalMoney(selected.amount)}</strong></div>
-            <div className="detail-row"><span>البنك</span><strong>{selected.bankName || '—'}</strong></div>
-            <div className="detail-row"><span>اسم الحساب</span><strong>{selected.accountName || '—'}</strong></div>
-            <div className="detail-row"><span>IBAN</span><strong dir="ltr">{selected.iban || '—'}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.requestId', { ns: 'withdrawals' })}</span><strong>#{selected.id}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.instructor', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.fullName}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.email', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.email}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.phone', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.phone || empty}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.amount', { ns: 'withdrawals' })}</span><strong>{fmtWithdrawalMoney(selected.amount)}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.bank', { ns: 'withdrawals' })}</span><strong>{selected.bankName || empty}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.accountName', { ns: 'withdrawals' })}</span><strong>{selected.accountName || empty}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.iban', { ns: 'withdrawals' })}</span><strong dir="ltr">{selected.iban || empty}</strong></div>
             <div className="detail-row">
-              <span>الحالة</span>
+              <span>{t('admin.detail.status', { ns: 'withdrawals' })}</span>
               <WithdrawalStatusBadge status={selected.status} />
             </div>
-            <div className="detail-row"><span>تاريخ الطلب</span><strong>{fmtWithdrawalDate(selected.createdAt)}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.requestDate', { ns: 'withdrawals' })}</span><strong>{fmtWithdrawalDate(selected.createdAt)}</strong></div>
             {selected.notes ? (
-              <div className="detail-row"><span>ملاحظات</span><strong>{selected.notes}</strong></div>
+              <div className="detail-row"><span>{t('admin.detail.notes', { ns: 'withdrawals' })}</span><strong>{selected.notes}</strong></div>
             ) : null}
             {selected.transferProofImage ? (
               <div className="withdrawal-proof-block">
-                <strong>صورة التحويل</strong>
+                <strong>{t('admin.detail.transferProof', { ns: 'withdrawals' })}</strong>
                 <a href={mediaUrl(selected.transferProofImage)} target="_blank" rel="noreferrer">
-                  <img src={mediaUrl(selected.transferProofImage)} alt="صورة التحويل" className="withdrawal-proof-image" />
+                  <img src={mediaUrl(selected.transferProofImage)} alt={t('admin.detail.transferProofAlt', { ns: 'withdrawals' })} className="withdrawal-proof-image" />
                 </a>
               </div>
             ) : null}
@@ -283,34 +297,36 @@ export default function AdminWithdrawalsPage() {
 
       <Modal
         isOpen={rejectOpen}
-        title="تأكيد رفض طلب السحب"
+        title={t('admin.rejectModal.title', { ns: 'withdrawals' })}
         onClose={() => !submittingReject && (setRejectOpen(false), setRejectNotes(''), setSelected(null))}
       >
         <form className="stack-sm wd-reject-form" onSubmit={handleReject}>
           <p>
-            هل أنت متأكد من رفض طلب سحب بمبلغ{' '}
-            <strong>{fmtWithdrawalMoney(selected?.amount || 0)}</strong> للمحاضر{' '}
-            <strong>{selected?.instructor?.fullName}</strong>؟
+            {t('admin.rejectModal.message', {
+              amount: fmtWithdrawalMoney(selected?.amount || 0),
+              name: selected?.instructor?.fullName,
+              ns: 'withdrawals',
+            })}
           </p>
           <Textarea
-            label="سبب الرفض (اختياري)"
+            label={t('admin.rejectModal.reasonLabel', { ns: 'withdrawals' })}
             value={rejectNotes}
             onChange={(e) => setRejectNotes(e.target.value)}
-            placeholder="اكتب سبب الرفض ليظهر للمحاضر..."
+            placeholder={t('admin.rejectModal.reasonPlaceholder', { ns: 'withdrawals' })}
             disabled={submittingReject}
           />
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={() => { setRejectOpen(false); setRejectNotes(''); setSelected(null); }} disabled={submittingReject}>
-              إلغاء
+              {t('actions.cancel', { ns: 'common' })}
             </Button>
             <Button type="submit" variant="danger" loading={submittingReject}>
-              تأكيد الرفض
+              {t('admin.rejectModal.confirm', { ns: 'withdrawals' })}
             </Button>
           </div>
         </form>
       </Modal>
 
-      <Modal isOpen={paidOpen} title="تأكيد التحويل" onClose={() => !submittingPaid && resetPaidModal()}>
+      <Modal isOpen={paidOpen} title={t('admin.transferModal.title', { ns: 'withdrawals' })} onClose={() => !submittingPaid && resetPaidModal()}>
         <WithdrawTransferForm
           item={selected}
           preview={transferPreview}
@@ -327,9 +343,13 @@ export default function AdminWithdrawalsPage() {
 
       <ConfirmDialog
         isOpen={confirmApproveOpen}
-        title="اعتماد طلب السحب"
-        message={`هل تريد اعتماد طلب سحب بمبلغ ${fmtWithdrawalMoney(selected?.amount || 0)} للمحاضر ${selected?.instructor?.fullName}؟ سيتم خصم المبلغ من رصيده المتاح.`}
-        confirmLabel="اعتماد"
+        title={t('admin.approveDialog.title', { ns: 'withdrawals' })}
+        message={t('admin.approveDialog.message', {
+          amount: fmtWithdrawalMoney(selected?.amount || 0),
+          name: selected?.instructor?.fullName,
+          ns: 'withdrawals',
+        })}
+        confirmLabel={t('admin.approveDialog.confirm', { ns: 'withdrawals' })}
         onConfirm={handleApprove}
         onCancel={() => { setConfirmApproveOpen(false); setSelected(null); }}
       />

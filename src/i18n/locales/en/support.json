@@ -1,0 +1,98 @@
+{
+  "title": "Support",
+  "newTicket": "New ticket",
+  "empty": "No tickets",
+  "status": {
+    "open": "Open",
+    "closed": "Closed",
+    "pending": "In progress"
+  },
+  "admin": {
+    "title": "Technical support",
+    "subtitle": "Manage support tickets and reply to users",
+    "exportExcel": "Export Excel",
+    "backToList": "Back to support tickets",
+    "backToSupport": "Back to technical support",
+    "stats": {
+      "total": "Total tickets",
+      "open": "Open",
+      "inProgress": "In progress",
+      "closed": "Closed"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by subject, message, user, or email...",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "title": "Support tickets",
+      "ticketCount": "{{count}} ticket",
+      "ticketCount_other": "{{count}} tickets",
+      "emptyTitle": "No tickets",
+      "emptyDescription": "No support tickets have been submitted yet.",
+      "columns": {
+        "id": "Ticket ID",
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "subject": "Subject",
+        "message": "Message",
+        "repliesCount": "Replies",
+        "status": "Status",
+        "createdAt": "Date",
+        "updatedAt": "Last updated",
+        "actions": "Actions"
+      }
+    },
+    "export": {
+      "sheetName": "Support tickets",
+      "columns": {
+        "id": "Ticket ID",
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "subject": "Subject",
+        "message": "Message",
+        "repliesCount": "Replies",
+        "status": "Status",
+        "createdAt": "Created at",
+        "updatedAt": "Last updated"
+      }
+    },
+    "actions": {
+      "view": "View"
+    },
+    "detail": {
+      "notFoundTitle": "Ticket not found",
+      "notFoundDescription": "We could not find this ticket.",
+      "noReplies": "No replies yet.",
+      "replyLabel": "Support reply",
+      "replyPlaceholder": "Write your reply to the user...",
+      "sendReply": "Send reply",
+      "startProcessing": "Start processing",
+      "closeTicket": "Close ticket",
+      "closedNotice": "This ticket has been closed.",
+      "reopen": "Reopen"
+    },
+    "toast": {
+      "loadFailed": "Failed to load ticket.",
+      "loadListFailed": "Failed to load tickets.",
+      "statusUpdated": "Ticket status updated.",
+      "statusUpdateFailed": "Failed to update status.",
+      "replySent": "Reply sent.",
+      "replyFailed": "Failed to send reply."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "Open",
+        "IN_PROGRESS": "In progress",
+        "CLOSED": "Closed"
+      },
+      "role": {
+        "STUDENT": "Student",
+        "INSTRUCTOR": "Instructor",
+        "SUPER_ADMIN": "Admin"
+      }
+    }
+  }
+}

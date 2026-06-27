@@ -1,0 +1,7 @@
+{
+  "generic": "Something went wrong, please try again",
+  "network": "Could not connect to the server",
+  "unauthorized": "Unauthorized",
+  "notFound": "Not found",
+  "loadFailed": "Could not load data"
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Bar,
   BarChart,
@@ -9,7 +10,7 @@ import {
 } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { DashboardChartTooltip } from './DashboardChartTooltip';
-import { fmtNum } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { DualTrendPoint } from './dashboardTypes';
 import { useChartTheme } from './useChartTheme';
 
@@ -18,20 +19,24 @@ interface UserGrowthChartProps {
 }
 
 export function UserGrowthChart({ data }: UserGrowthChartProps) {
+  const { t } = useTranslation('dashboard');
+  const { fmtNum } = useDashboardFormatters();
   const theme = useChartTheme();
   const totalStudents = data.reduce((sum, item) => sum + item.students, 0);
   const totalInstructors = data.reduce((sum, item) => sum + item.instructors, 0);
+  const studentsLabel = t('admin.dashboard.charts.students');
+  const instructorsLabel = t('admin.dashboard.charts.instructors');
 
   return (
     <ChartCard
-      title="نمو المستخدمين"
-      subtitle="طلاب مقابل محاضرين"
+      title={t('admin.dashboard.charts.userGrowth')}
+      subtitle={t('admin.dashboard.charts.studentsVsInstructors')}
       total={fmtNum(totalStudents + totalInstructors)}
-      ariaLabel="مخطط نمو المستخدمين الجدد"
+      ariaLabel={t('admin.dashboard.charts.userGrowthAria')}
     >
       <div className="admin-dash-bar-legend" aria-hidden>
-        <span><i className="is-students" /> طلاب</span>
-        <span><i className="is-instructors" /> محاضرون</span>
+        <span><i className="is-students" /> {studentsLabel}</span>
+        <span><i className="is-instructors" /> {instructorsLabel}</span>
       </div>
       <div className="admin-dash-bar-chart" style={{ height: 260 }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -51,10 +56,18 @@ export function UserGrowthChart({ data }: UserGrowthChartProps) {
               tickFormatter={(v) => fmtNum(Number(v))}
               width={36}
             />
-            <Tooltip content={<DashboardChartTooltip dual />} />
+            <Tooltip
+              content={(
+                <DashboardChartTooltip
+                  dual
+                  studentsLabel={studentsLabel}
+                  instructorsLabel={instructorsLabel}
+                />
+              )}
+            />
             <Bar
               dataKey="students"
-              name="طلاب"
+              name={studentsLabel}
               fill={theme.primary}
               radius={[4, 4, 0, 0]}
               maxBarSize={14}
@@ -62,7 +75,7 @@ export function UserGrowthChart({ data }: UserGrowthChartProps) {
             />
             <Bar
               dataKey="instructors"
-              name="محاضرون"
+              name={instructorsLabel}
               fill={theme.secondary}
               radius={[4, 4, 0, 0]}
               maxBarSize={14}

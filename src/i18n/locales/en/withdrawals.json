@@ -1,0 +1,118 @@
+{
+  "empty": "—",
+  "admin": {
+    "title": "Withdrawals management",
+    "subtitle": "Review and approve instructor withdrawal requests safely and clearly",
+    "exportExcel": "Export Excel",
+    "stats": {
+      "ariaLabel": "Withdrawals summary",
+      "total": "Total requests",
+      "pending": "Pending review",
+      "approved": "Approved",
+      "approvedHint": "Awaiting transfer",
+      "paid": "Paid",
+      "rejected": "Rejected"
+    },
+    "filters": {
+      "ariaLabel": "Withdrawal filters",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "dateFrom": "From date",
+      "dateTo": "To date",
+      "reset": "Clear filters"
+    },
+    "table": {
+      "title": "Withdrawal requests",
+      "emptyTitle": "No withdrawal requests",
+      "emptyDescription": "No withdrawal requests from instructors yet, or no results match the filters.",
+      "columns": {
+        "id": "Request ID",
+        "instructor": "Instructor",
+        "email": "Email",
+        "amount": "Amount",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      }
+    },
+    "export": {
+      "sheetName": "Withdrawals",
+      "columns": {
+        "id": "Request ID",
+        "instructor": "Instructor",
+        "email": "Email",
+        "amount": "Amount (EGP)",
+        "bankName": "Bank",
+        "accountName": "Account name",
+        "iban": "IBAN",
+        "status": "Status",
+        "createdAt": "Request date",
+        "notes": "Notes"
+      }
+    },
+    "actions": {
+      "detail": "Details",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmTransfer": "Confirm transfer"
+    },
+    "detail": {
+      "title": "Withdrawal request details",
+      "requestId": "Request ID",
+      "instructor": "Instructor",
+      "email": "Email",
+      "phone": "Phone",
+      "amount": "Amount",
+      "bank": "Bank",
+      "accountName": "Account name",
+      "iban": "IBAN",
+      "status": "Status",
+      "requestDate": "Request date",
+      "notes": "Notes",
+      "transferProof": "Transfer proof",
+      "transferProofAlt": "Transfer proof image"
+    },
+    "rejectModal": {
+      "title": "Confirm withdrawal rejection",
+      "message": "Are you sure you want to reject a withdrawal of {{amount}} for instructor {{name}}?",
+      "reasonLabel": "Rejection reason (optional)",
+      "reasonPlaceholder": "Enter a rejection reason for the instructor...",
+      "confirm": "Confirm rejection"
+    },
+    "approveDialog": {
+      "title": "Approve withdrawal request",
+      "message": "Approve a withdrawal of {{amount}} for instructor {{name}}? The amount will be deducted from their available balance.",
+      "confirm": "Approve"
+    },
+    "transferModal": {
+      "title": "Confirm transfer",
+      "lead": "Confirm transfer of {{amount}} to instructor {{name}}",
+      "bank": "Bank",
+      "accountName": "Account name",
+      "iban": "IBAN",
+      "previewAlt": "Transfer receipt preview",
+      "replaceImage": "Replace image",
+      "remove": "Remove",
+      "dropzoneTitle": "Attach transfer proof",
+      "dropzoneHint": "Drag an image here or click to choose — PNG or JPG (optional)",
+      "confirmPayment": "Confirm payment"
+    },
+    "toast": {
+      "loadFailed": "Failed to load withdrawal requests.",
+      "approved": "Withdrawal request approved. You can now confirm the transfer.",
+      "approveFailed": "Failed to approve request.",
+      "paid": "Payment confirmed for instructor.",
+      "paidFailed": "Failed to confirm payment.",
+      "rejected": "Withdrawal request rejected.",
+      "rejectFailed": "Failed to reject request."
+    },
+    "labels": {
+      "status": {
+        "PENDING": "Pending review",
+        "APPROVED": "Approved",
+        "PAID": "Paid",
+        "REJECTED": "Rejected"
+      }
+    }
+  }
+}

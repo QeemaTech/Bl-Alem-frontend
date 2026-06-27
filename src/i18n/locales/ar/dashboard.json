@@ -1,0 +1,315 @@
+{
+  "layouts": {
+    "studentPanel": "لوحة الطالب",
+    "instructorPanel": "لوحة المحاضر",
+    "adminPanel": "لوحة المشرف العام"
+  },
+  "student": {
+    "title": "لوحة الطالب",
+    "subtitle": "مرحباً {{name}}، تابع يومك التعليمي من هنا",
+    "continueLearning": "استكمال التعلم",
+    "browseCourses": "تصفح الكورسات",
+    "referralCopied": "تم نسخ كود الإحالة",
+    "quickLinks": {
+      "myCourses": "كورساتي",
+      "courses": "الكورسات",
+      "live": "الجلسات المباشرة",
+      "certificates": "الشهادات",
+      "support": "الدعم"
+    },
+    "stats": {
+      "inProgress": "قيد التعلم",
+      "completed": "مكتملة",
+      "enrolled": "مسجل",
+      "completionRate": "نسبة الإكمال"
+    },
+    "time": {
+      "now": "الآن",
+      "minutesAgo": "منذ {{count}} د",
+      "hoursAgo": "منذ {{count}} س"
+    },
+    "referral": {
+      "welcomeTitle": "مرحباً بك! كود الإحالة الخاص بك جاهز للمشاركة",
+      "shareHint": "شارك الكود مع أصدقائك واحصل على مكافآت عند تسجيلهم",
+      "copyAria": "نسخ كود الإحالة"
+    },
+    "stats": {
+      "myCourses": "كورساتي",
+      "activeHint": "{{count}} نشطة",
+      "completed": "مكتملة",
+      "completionHint": "{{rate}}% إنجاز",
+      "certificates": "شهاداتي",
+      "walletBalance": "رصيد المحفظة"
+    },
+    "search": {
+      "placeholder": "ابحث عن دورة أو مهارة...",
+      "chartTitle": "حالة التعلم"
+    },
+    "continue": {
+      "title": "استكمال التعلم",
+      "progress": "التقدم",
+      "continueNow": "استكمال الآن",
+      "emptyTitle": "لا توجد دورة قيد التعلم",
+      "emptyDesc": "ابدأ بالاشتراك في دورة من صفحة الكورسات المتاحة.",
+      "courseFallback": "دورة"
+    },
+    "rewards": {
+      "title": "المكافآت والمحفظة",
+      "points": "نقاط المكافآت",
+      "pointsUnit": "نقطة",
+      "wallet": "رصيد المحفظة",
+      "referralCopy": "كود الإحالة — انسخ وشارك",
+      "viewRewards": "المكافآت والإحالات",
+      "viewProfile": "الملف الشخصي"
+    },
+    "sessions": {
+      "title": "الجلسات القادمة",
+      "liveNow": "مباشر الآن",
+      "scheduled": "مجدولة",
+      "join": "انضمام"
+    }
+  },
+  "instructor": {
+    "homeTitle": "الصفحة الرئيسية",
+    "homeSubtitle": "لوحة المحاضر",
+    "welcomeNamed": "مرحباً {{name}}، أدر دوراتك من لوحة واحدة",
+    "welcomeDefault": "أدر دوراتك، طلابك، جلساتك وأرباحك من لوحة واحدة",
+    "addCourse": "إضافة كورس",
+    "heroBadge": "مرحباً أيها المحاضر",
+    "heroTitle": "كل ما تحتاجه لإدارة التدريب في مكان واحد",
+    "heroDesc": "تابع جلسات اليوم، مبيعاتك، وتقييمات الطلاب بسهولة.",
+    "liveSession": "جلسة مباشرة",
+    "growthLabel": "أنت على مسار رائع!",
+    "growthDesc": "نمو الأرباح هذا الشهر",
+    "stats": {
+      "monthEarnings": "أرباح الشهر",
+      "students": "الطلاب",
+      "published": "المنشورة",
+      "upcomingSessions": "جلسات قادمة"
+    },
+    "quickActions": {
+      "title": "إجراءات سريعة",
+      "subtitle": "اختصارات للمهام اليومية",
+      "addCourse": "إضافة كورس",
+      "addCourseDesc": "إنشاء دورة جديدة",
+      "myCourses": "كورساتي",
+      "myCoursesDesc": "إدارة محتواك",
+      "liveSession": "جلسة مباشرة",
+      "liveSessionDesc": "جدولة أو بدء بث",
+      "earnings": "الأرباح",
+      "earningsDesc": "متابعة الإيرادات"
+    },
+    "sections": {
+      "todaySessions": "جلسات اليوم",
+      "bestSelling": "أفضل الكورسات مبيعاً",
+      "latestReviews": "آخر التقييمات",
+      "welcome": "ترحيب"
+    },
+    "empty": {
+      "noSessionsToday": "لا توجد جلسات اليوم",
+      "noSessionsTodayDesc": "ستظهر جلساتك المجدولة لهذا اليوم هنا.",
+      "noSales": "لا توجد مبيعات",
+      "noSalesDesc": "ستظهر أفضل الكورسات مبيعاً بعد أول عملية شراء.",
+      "noReviews": "لا توجد تقييمات",
+      "noReviewsDesc": "ستظهر تقييمات الطلاب هنا."
+    },
+    "session": {
+      "start": "بدء الجلسة",
+      "startSuccess": "تم بدء الجلسة بنجاح",
+      "startFail": "تعذر بدء الجلسة"
+    },
+    "sales": {
+      "salesAndStudents": "{{sales}} عملية بيع — {{students}} طالب"
+    },
+    "reviews": {
+      "starsAria": "{{rating}} من 5"
+    },
+    "approval": {
+      "pendingTitle": "حسابك قيد المراجعة",
+      "pendingDesc": "سيقوم المشرف العام بمراجعة حسابك. يمكنك إكمال ملفك الشخصي الآن، وسيتم تفعيل إدارة الكورسات بعد الموافقة.",
+      "coursesDisabledTitle": "إدارة الكورسات غير مفعّلة",
+      "coursesDisabledDesc": "ستتوفر أزرار إضافة الكورسات بعد اعتماد حسابك.",
+      "rejectedTitle": "تم رفض طلب المحاضر",
+      "rejectedDesc": "يرجى تحديث بياناتك وإعادة الإرسال للمراجعة."
+    }
+  },
+  "admin": {
+    "loadErrorTitle": "تعذّر تحميل لوحة التحكم",
+    "loadErrorDesc": "حدث خطأ أثناء جلب بيانات المنصة. تحقق من الاتصال ثم أعد المحاولة.",
+    "kpisTitle": "مؤشرات الأداء",
+    "kpisSubtitle": "ثمانية مؤشرات مع اتجاهات ورسوم مصغّرة",
+    "kpisAria": "مؤشرات الأداء الرئيسية",
+    "noPendingReviews": "لا توجد مراجعات معلّقة حالياً.",
+    "noOpenTickets": "لا توجد تذاكر دعم مفتوحة.",
+    "resourceUnavailable": {
+      "title": "غير متوفر",
+      "subtitle": "القسم \"{{resource}}\" غير متاح أو تم نقله إلى صفحة مخصصة."
+    },
+    "dashboard": {
+      "skeletonAria": "جاري تحميل لوحة التحكم",
+      "hero": {
+        "ariaLabel": "نظرة عامة على لوحة التحكم",
+        "platformHealthy": "المنصة تعمل بشكل طبيعي",
+        "needsAttention": "يتطلب انتباهك",
+        "greetingNamed": "مرحباً، {{name}}",
+        "greetingDefault": "مرحباً بك",
+        "maintenance": "الصيانة: {{status}}",
+        "maintenanceOn": "مفعّلة",
+        "maintenanceOff": "غير مفعّلة",
+        "studentRegistration": "تسجيل الطلاب: {{status}}",
+        "instructorRegistration": "تسجيل المحاضرين: {{status}}",
+        "open": "مفتوح",
+        "closed": "مغلق",
+        "reviewCourses": "مراجعة الكورسات",
+        "instructorRequests": "طلبات المحاضرين",
+        "metricsAria": "ملخص سريع",
+        "totalRevenue": "إجمالي الإيرادات",
+        "activeStudents": "الطلاب النشطون",
+        "activeInstructors": "المحاضرون النشطون",
+        "publishedCourses": "الكورسات المنشورة",
+        "maintenanceAlert": "وضع الصيانة مفعّل — قد يكون الوصول محدوداً للزوار."
+      },
+      "analytics": {
+        "ariaLabel": "تحليلات المنصة",
+        "title": "التحليلات",
+        "subtitle": "نظرة شاملة على الأداء خلال آخر 12 شهراً",
+        "courseActivity": "نشاط الكورسات",
+        "subscriptionDistribution": "توزيع الاشتراكات",
+        "byStatus": "حسب الحالة",
+        "courseStatusAria": "توزيع حالات الكورسات",
+        "subscriptionAria": "توزيع الاشتراكات"
+      },
+      "charts": {
+        "revenueTrend": "اتجاه الإيرادات",
+        "last12Months": "آخر 12 شهراً",
+        "revenueAria": "مخطط اتجاه الإيرادات الشهري",
+        "yearlyGrowth": "نمو سنوي",
+        "revenueSeries": "الإيرادات",
+        "userGrowth": "نمو المستخدمين",
+        "studentsVsInstructors": "طلاب مقابل محاضرين",
+        "userGrowthAria": "مخطط نمو المستخدمين الجدد",
+        "students": "طلاب",
+        "instructors": "محاضرون",
+        "total": "الإجمالي"
+      },
+      "kpis": {
+        "totalUsers": "إجمالي المستخدمين",
+        "students": "الطلاب",
+        "instructors": "المحاضرون",
+        "courses": "الكورسات",
+        "revenue": "الإيرادات",
+        "activeSubscriptions": "الاشتراكات النشطة",
+        "pendingReviews": "مراجعات معلّقة",
+        "supportTickets": "تذاكر الدعم"
+      },
+      "trends": {
+        "vsLastMonth": "عن الشهر الماضي",
+        "vsLastWeek": "عن الأسبوع الماضي"
+      },
+      "courseStatus": {
+        "published": "منشورة",
+        "pending": "قيد المراجعة",
+        "rejected": "مرفوضة"
+      },
+      "subscriptionStatus": {
+        "active": "نشطة",
+        "expired": "منتهية",
+        "cancelled": "ملغاة"
+      },
+      "quickActions": {
+        "ariaLabel": "إجراءات سريعة",
+        "title": "إجراءات سريعة",
+        "subtitle": "اختصارات للمهام الإدارية الشائعة",
+        "addCourse": "إضافة كورس",
+        "addCourseDesc": "إنشاء أو مراجعة المحتوى",
+        "approveInstructor": "اعتماد محاضر",
+        "approveInstructorDesc": "مراجعة الطلبات المعلّقة",
+        "createCoupon": "إنشاء كوبون",
+        "createCouponDesc": "حملات ترويجية جديدة",
+        "viewReports": "عرض التقارير",
+        "viewReportsDesc": "تقارير مفصّلة",
+        "manageUsers": "إدارة المستخدمين",
+        "manageUsersDesc": "طلاب ومحاضرون"
+      },
+      "insights": {
+        "ariaLabel": "رؤى الأعمال",
+        "title": "رؤى الأعمال",
+        "subtitle": "مؤشرات الأداء الرئيسية للمنصة",
+        "bestSeller": "الأكثر مبيعاً",
+        "topInstructor": "أنشط محاضر",
+        "topCategory": "أعلى فئة إيراداً",
+        "avgRating": "متوسط تقييم الكورسات",
+        "conversion": "معدل التحويل الشهري",
+        "retention": "احتفاظ الطلاب",
+        "defaultCourse": "أساسيات البرمجة",
+        "defaultInstructor": "د. أحمد محمود",
+        "defaultCategory": "التقنية والبرمجة",
+        "enrollments": "{{count}} اشتراك",
+        "activeCourses": "{{count}} كورسات نشطة",
+        "reviewCount": "{{count}} تقييم",
+        "conversionSupporting": "من الزيارات إلى الاشتراك",
+        "retentionSupporting": "خلال 90 يوماً"
+      },
+      "operations": {
+        "ariaLabel": "مركز العمليات",
+        "title": "مركز العمليات",
+        "subtitle": "مهام تحتاج متابعة فورية",
+        "viewDetails": "عرض التفاصيل",
+        "itemCount": "{{count}} عنصر",
+        "instructorRequests": "طلبات المحاضرين",
+        "courseReviews": "مراجعات الكورسات",
+        "openSupport": "تذاكر الدعم المفتوحة",
+        "failedPayments": "مدفوعات فاشلة",
+        "awaitingApproval": "بانتظار الموافقة",
+        "underReview": "قيد المراجعة",
+        "needsFollowUp": "تحتاج متابعة",
+        "last24Hours": "آخر 24 ساعة"
+      },
+      "priority": {
+        "high": "عالية",
+        "medium": "متوسطة",
+        "low": "منخفضة"
+      },
+      "activity": {
+        "ariaLabel": "النشاط الأخير",
+        "title": "النشاط الأخير",
+        "subtitle": "آخر التحديثات على المنصة",
+        "emptyTitle": "لا يوجد نشاط حديث",
+        "emptyDesc": "ستظهر هنا التسجيلات والمدفوعات والتذاكر فور حدوثها.",
+        "newInstructorRequest": "طلب محاضر جديد",
+        "coursePendingReview": "كورس بانتظار المراجعة",
+        "courseDescription": "{{title}} — {{instructor}}",
+        "paymentFailed": "فشل دفع",
+        "newPayment": "دفعة جديدة",
+        "paymentDescription": "{{name}} — {{amount}}",
+        "supportTicket": "تذكرة دعم",
+        "instructorFallback": "محاضر",
+        "userFallback": "مستخدم",
+        "types": {
+          "registration": "تسجيل",
+          "course": "كورس",
+          "payment": "دفع",
+          "support": "دعم",
+          "instructor": "محاضر"
+        }
+      },
+      "revenue": {
+        "title": "تحليلات الإيرادات",
+        "ariaLabel": "تحليلات الإيرادات",
+        "emptyTitle": "لا توجد مدفوعات بعد",
+        "emptyDesc": "ستظهر هنا الإيرادات والاتجاهات عند تسجيل أول عملية دفع.",
+        "total": "إجمالي الإيرادات",
+        "monthly": "إيرادات الشهر",
+        "expected": "الإيرادات المتوقعة",
+        "refundRate": "معدل الاسترداد"
+      },
+      "users": {
+        "title": "تحليلات المستخدمين",
+        "ariaLabel": "تحليلات المستخدمين",
+        "dau": "المستخدمون اليوميون",
+        "wau": "المستخدمون الأسبوعيون",
+        "mau": "المستخدمون الشهريون"
+      }
+    }
+  }
+}

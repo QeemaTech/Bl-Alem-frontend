@@ -1,0 +1,109 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "SCHEDULED": "مجدولة",
+      "LIVE": "مباشر الآن",
+      "ENDED": "منتهية",
+      "CANCELLED": "ملغاة"
+    }
+  },
+  "durationShort": "{{count}} د",
+  "durationMinutes": "{{count}} دقيقة",
+  "title": "الجلسات المباشرة",
+  "subtitle": "إدارة ومراقبة جلسات البث المباشر على المنصة",
+  "stats": {
+    "total": "إجمالي الجلسات",
+    "scheduled": "مجدولة",
+    "live": "مباشر الآن",
+    "ended": "منتهية",
+    "cancelled": "ملغاة"
+  },
+  "charts": {
+    "statusDistribution": "توزيع حالات الجلسات"
+  },
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "status": "الحالة",
+    "searchPlaceholder": "بحث بالعنوان، الكورس، أو المحاضر..."
+  },
+  "table": {
+    "emptyTitle": "لا توجد جلسات",
+    "emptyDescription": "ستظهر الجلسات المباشرة هنا عند جدولتها.",
+    "columns": {
+      "title": "العنوان",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "startAt": "موعد البدء",
+      "duration": "المدة",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    }
+  },
+  "export": {
+    "sheetName": "الجلسات-المباشرة",
+    "columns": {
+      "id": "رقم الجلسة",
+      "title": "العنوان",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "startAt": "موعد البدء",
+      "duration": "المدة (دقيقة)",
+      "meetingUrl": "رابط الاجتماع",
+      "status": "الحالة"
+    }
+  },
+  "actions": {
+    "detail": "التفاصيل",
+    "edit": "تعديل",
+    "join": "انضمام",
+    "joinSession": "انضمام للجلسة",
+    "start": "بدء",
+    "end": "إنهاء",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "exportExcel": "تصدير Excel",
+    "saveChanges": "حفظ التعديلات",
+    "confirmCancel": "تأكيد الإلغاء"
+  },
+  "detail": {
+    "title": "تفاصيل الجلسة",
+    "fields": {
+      "id": "رقم الجلسة",
+      "title": "العنوان",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "email": "البريد",
+      "startAt": "موعد البدء",
+      "duration": "المدة",
+      "meetingUrl": "رابط الاجتماع",
+      "status": "الحالة",
+      "description": "الوصف"
+    }
+  },
+  "form": {
+    "editTitle": "تعديل الجلسة",
+    "titleLabel": "عنوان الجلسة",
+    "startAtLabel": "موعد البدء",
+    "durationLabel": "المدة (دقيقة)",
+    "meetingUrlLabel": "رابط الاجتماع",
+    "meetingUrlPlaceholder": "https://meet.example.com/...",
+    "statusLabel": "الحالة",
+    "descriptionLabel": "الوصف"
+  },
+  "cancel": {
+    "title": "إلغاء الجلسة",
+    "message": "هل أنت متأكد من إلغاء جلسة \"{{title}}\"؟"
+  },
+  "delete": {
+    "title": "حذف الجلسة",
+    "message": "هل أنت متأكد من حذف جلسة \"{{title}}\"؟ لا يمكن التراجع عن هذا الإجراء."
+  },
+  "toast": {
+    "updated": "تم تحديث الجلسة.",
+    "started": "تم بدء الجلسة.",
+    "ended": "تم إنهاء الجلسة.",
+    "cancelled": "تم إلغاء الجلسة.",
+    "deleted": "تم حذف الجلسة."
+  }
+}

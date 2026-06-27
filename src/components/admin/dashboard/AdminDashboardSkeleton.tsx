@@ -1,6 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 export function AdminDashboardSkeleton() {
+  const { t } = useTranslation('dashboard');
+
   return (
-    <div className="admin-dashboard page-grid" aria-busy="true" aria-label="جاري تحميل لوحة التحكم">
+    <div className="admin-dashboard page-grid" aria-busy="true" aria-label={t('admin.dashboard.skeletonAria')}>
       <div className="skeleton admin-dash-skeleton-hero" />
       <div className="admin-dash-analytics-grid">
         {Array.from({ length: 4 }).map((_, i) => (

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Eye, Upload, XCircle } from '@/icons';
 import { Button } from '../../ui/Button';
 import type { WithdrawalActionType, WithdrawalItem } from './types';
@@ -29,6 +30,7 @@ export function WithdrawalActionButtons({
   onReject,
   onConfirmTransfer,
 }: WithdrawalActionButtonsProps) {
+  const { t } = useTranslation('withdrawals');
   const busy = Boolean(loadingAction);
 
   return (
@@ -41,7 +43,7 @@ export function WithdrawalActionButtons({
           onClick={() => onDetail(item)}
           disabled={busy}
         >
-          التفاصيل
+          {t('admin.actions.detail')}
         </Button>
       ) : null}
 
@@ -55,7 +57,7 @@ export function WithdrawalActionButtons({
             onClick={() => onApprove(item)}
             disabled={busy && !isLoading(loadingAction, item.id, 'approve')}
           >
-            اعتماد
+            {t('admin.actions.approve')}
           </Button>
           <Button
             variant="danger"
@@ -64,7 +66,7 @@ export function WithdrawalActionButtons({
             onClick={() => onReject(item)}
             disabled={busy}
           >
-            رفض
+            {t('admin.actions.reject')}
           </Button>
         </>
       ) : null}
@@ -79,7 +81,7 @@ export function WithdrawalActionButtons({
             onClick={() => onConfirmTransfer(item)}
             disabled={busy && !isLoading(loadingAction, item.id, 'paid')}
           >
-            تأكيد التحويل
+            {t('admin.actions.confirmTransfer')}
           </Button>
           <Button
             variant="danger"
@@ -88,7 +90,7 @@ export function WithdrawalActionButtons({
             onClick={() => onReject(item)}
             disabled={busy}
           >
-            رفض
+            {t('admin.actions.reject')}
           </Button>
         </>
       ) : null}

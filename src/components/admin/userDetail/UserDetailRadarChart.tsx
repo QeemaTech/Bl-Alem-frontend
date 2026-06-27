@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -6,7 +7,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
-import { CHART_COLORS } from '../../reports/ReportChart';
+import { useChartTheme } from '../../../hooks/useChartTheme';
 import type { ChartItem } from '../../reports/ReportChart';
 
 interface UserDetailRadarChartProps {
@@ -17,6 +18,8 @@ interface UserDetailRadarChartProps {
 }
 
 export function UserDetailRadarChart({ title, data, height = 280, embedded = false }: UserDetailRadarChartProps) {
+  const { t } = useTranslation('common');
+  const theme = useChartTheme();
   const cardClass = `report-chart-card${embedded ? ' is-embedded' : ''}`;
 
   if (!data.length) {
@@ -24,7 +27,7 @@ export function UserDetailRadarChart({ title, data, height = 280, embedded = fal
     return (
       <div className={cardClass}>
         <h3>{title}</h3>
-        <div className="report-chart-empty">لا توجد بيانات كافية للعرض</div>
+        <div className="report-chart-empty">{t('chart.noData')}</div>
       </div>
     );
   }
@@ -39,8 +42,8 @@ export function UserDetailRadarChart({ title, data, height = 280, embedded = fal
       <div className="chart-line-wrap" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={chartData} margin={{ top: 16, right: 24, bottom: 8, left: 24 }}>
-            <PolarGrid stroke="#E2E8F0" />
-            <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#64748B' }} />
+            <PolarGrid stroke={theme.grid} />
+            <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: theme.text }} />
             <Tooltip
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
@@ -55,8 +58,8 @@ export function UserDetailRadarChart({ title, data, height = 280, embedded = fal
             />
             <Radar
               dataKey="value"
-              stroke={CHART_COLORS[0]}
-              fill={CHART_COLORS[0]}
+              stroke={theme.primary}
+              fill={theme.primary}
               fillOpacity={0.22}
               isAnimationActive={false}
             />

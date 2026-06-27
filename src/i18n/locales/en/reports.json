@@ -1,0 +1,171 @@
+{
+  "title": "Reports",
+  "subtitle": "Platform performance statistics and analytics",
+  "tabs": {
+    "revenue": "Revenue",
+    "users": "Users",
+    "courses": "Courses",
+    "instructors": "Instructors",
+    "enrollments": "Enrollments"
+  },
+  "tabTitles": {
+    "revenue": "Revenue report",
+    "users": "Users report",
+    "courses": "Courses report",
+    "instructors": "Instructors report",
+    "enrollments": "Enrollments report"
+  },
+  "summary": {
+    "revenue": {
+      "totalRevenue": "Total revenue (EGP)",
+      "paymentsCount": "Payments count",
+      "monthRevenue": "Current month revenue",
+      "monthPayments": "Current month payments",
+      "avgPayment": "Average payment",
+      "totalDiscount": "Total discounts",
+      "refundedCount": "Refunded transactions",
+      "refundedAmount": "Refunded amount"
+    },
+    "users": {
+      "total": "Total users",
+      "students": "Students",
+      "instructors": "Instructors",
+      "admins": "Admins",
+      "active": "Active accounts",
+      "suspended": "Suspended accounts",
+      "newThisMonth": "New this month"
+    },
+    "courses": {
+      "total": "Total courses",
+      "published": "Published",
+      "pending": "Pending review",
+      "draft": "Drafts",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    },
+    "instructors": {
+      "total": "Total instructors",
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    },
+    "enrollments": {
+      "total": "Total enrollments",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "avgProgress": "Average progress %",
+      "completionRate": "Completion rate %"
+    }
+  },
+  "table": {
+    "revenue": {
+      "title": "Payment details",
+      "columns": {
+        "id": "Transaction ID",
+        "student": "Student",
+        "email": "Email",
+        "course": "Course",
+        "amount": "Amount (EGP)",
+        "discount": "Discount",
+        "gateway": "Payment gateway",
+        "date": "Date"
+      }
+    },
+    "users": {
+      "title": "Users list",
+      "columns": {
+        "fullName": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Registration date"
+      }
+    },
+    "courses": {
+      "title": "Top enrolled courses",
+      "columns": {
+        "titleAr": "Course",
+        "instructor": "Instructor",
+        "category": "Category",
+        "status": "Status",
+        "price": "Price (EGP)",
+        "enrollments": "Enrollments"
+      }
+    },
+    "instructors": {
+      "title": "Instructor details",
+      "columns": {
+        "fullName": "Name",
+        "email": "Email",
+        "specialization": "Specialization",
+        "approvalStatus": "Approval status",
+        "coursesCount": "Courses count",
+        "totalEarnings": "Earnings (EGP)",
+        "joinedAt": "Join date"
+      }
+    },
+    "enrollments": {
+      "title": "Enrollment details",
+      "columns": {
+        "student": "Student",
+        "course": "Course",
+        "status": "Status",
+        "progress": "Progress %",
+        "enrolledAt": "Enrollment date",
+        "completedAt": "Completion date"
+      }
+    }
+  },
+  "charts": {
+    "revenue": {
+      "monthly": "Monthly revenue",
+      "gateway": "Revenue by payment gateway"
+    },
+    "users": {
+      "registrations": "Monthly registrations",
+      "roles": "Role distribution",
+      "status": "Account status"
+    },
+    "courses": {
+      "status": "Courses by status",
+      "category": "Courses by category"
+    },
+    "instructors": {
+      "approval": "Instructor approval status",
+      "monthly": "Monthly instructor sign-ups"
+    },
+    "enrollments": {
+      "monthly": "Monthly enrollments",
+      "status": "Enrollments by status"
+    }
+  },
+  "dataLabels": {
+    "students": "Students",
+    "instructors": "Instructors",
+    "admins": "Admins",
+    "active": "Active",
+    "suspended": "Suspended",
+    "others": "Others",
+    "published": "Published",
+    "pendingReview": "Pending review",
+    "draft": "Draft",
+    "rejected": "Rejected",
+    "approved": "Approved",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "unspecified": "Unspecified"
+  },
+  "export": {
+    "button": "Export Excel",
+    "summarySheet": "Summary",
+    "detailsSheet": "Details",
+    "summaryItem": "Item",
+    "summaryValue": "Value"
+  },
+  "empty": {
+    "title": "No data",
+    "description": "No records found for this report."
+  }
+}

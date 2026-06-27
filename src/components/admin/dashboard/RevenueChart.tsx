@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   CartesianGrid,
   Line,
@@ -7,9 +8,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { DEFAULT_CURRENCY, getCurrencySymbol } from '@/utils/currency';
 import { ChartCard } from './ChartCard';
 import { DashboardChartTooltip } from './DashboardChartTooltip';
-import { fmtMoney, fmtNum } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { TrendPoint } from './dashboardTypes';
 import { TrendBadge } from './TrendBadge';
 import { useChartTheme } from './useChartTheme';
@@ -20,16 +22,19 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data, growth }: RevenueChartProps) {
+  const { t, i18n } = useTranslation('dashboard');
+  const { fmtMoney, fmtNum } = useDashboardFormatters();
   const theme = useChartTheme();
   const total = data.reduce((sum, item) => sum + item.value, 0);
+  const currencySymbol = getCurrencySymbol(DEFAULT_CURRENCY, i18n.language);
 
   return (
     <ChartCard
-      title="اتجاه الإيرادات"
-      subtitle="آخر 12 شهراً"
+      title={t('admin.dashboard.charts.revenueTrend')}
+      subtitle={t('admin.dashboard.charts.last12Months')}
       total={fmtMoney(total / 12)}
-      ariaLabel="مخطط اتجاه الإيرادات الشهري"
-      action={<TrendBadge value={growth} label="نمو سنوي" />}
+      ariaLabel={t('admin.dashboard.charts.revenueAria')}
+      action={<TrendBadge value={growth} label={t('admin.dashboard.charts.yearlyGrowth')} />}
     >
       <div className="admin-dash-line-chart" style={{ height: 280 }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -49,11 +54,11 @@ export function RevenueChart({ data, growth }: RevenueChartProps) {
               tickFormatter={(v) => fmtNum(Number(v))}
               width={44}
             />
-            <Tooltip content={<DashboardChartTooltip valueLabel="ج.م" />} />
+            <Tooltip content={<DashboardChartTooltip valueLabel={currencySymbol} />} />
             <Line
               type="monotone"
               dataKey="value"
-              name="الإيرادات"
+              name={t('admin.dashboard.charts.revenueSeries')}
               stroke={theme.primary}
               strokeWidth={2.5}
               dot={{ r: 3, fill: theme.primary, strokeWidth: 2, stroke: theme.surface }}

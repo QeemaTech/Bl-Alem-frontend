@@ -1,64 +1,40 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, CheckCheck } from '@/icons';
-import { instructorApi } from '../../api/instructor';
-import { Button } from '../../components/ui/Button';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { useToast } from '../../components/ui/Toast';
-import { NotificationCard } from '../../components/instructor/notifications/NotificationCard';
-import { NotificationFilters } from '../../components/instructor/notifications/NotificationFilters';
-import type { NotificationFiltersState } from '../../components/instructor/notifications/NotificationFilters';
-import { NotificationStats } from '../../components/instructor/notifications/NotificationStats';
 import {
-  IMPORTANT_TYPES,
+  Bell, BellOff, CalendarDays, Check, CheckCheck,
+} from '@/icons';
+import type { MaterialIcon } from '@/icons';
+import { instructorApi } from '../../api/instructor';
+import {
   NOTIFICATION_TYPE_LABELS,
+  TYPE_VISUAL,
+  fmtRelativeTime,
   type InstructorNotification,
 } from '../../components/instructor/notifications/types';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { FilterBar } from '../../components/ui/FilterBar';
+import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Select } from '../../components/ui/Select';
+import { StatCard } from '../../components/ui/StatCard';
+import { useToast } from '../../components/ui/Toast';
 
-const DEFAULT_FILTERS: NotificationFiltersState = {
-  search: '',
-  readFilter: '',
-  typeFilter: '',
-  dateFilter: '',
-};
-
-const matchesDateFilter = (createdAt: string, filter: string) => {
-  if (!filter) return true;
-  const date = new Date(createdAt);
-  const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  if (filter === 'today') return date >= todayStart;
-  if (filter === 'week') {
-    const weekAgo = new Date(now);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return date >= weekAgo;
-  }
-  if (filter === 'month') {
-    const monthAgo = new Date(now);
-    monthAgo.setDate(monthAgo.getDate() - 30);
-    return date >= monthAgo;
-  }
-  return true;
-};
-
-const fmtLastUpdated = (value: Date | null) => {
-  if (!value) return '—';
-  return value.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
-};
+const getTypeIcon = (type: string): MaterialIcon => TYPE_VISUAL[type]?.icon || Bell;
 
 export default function InstructorNotificationsPage() {
   const { showToast } = useToast();
   const [items, setItems] = useState<InstructorNotification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<NotificationFiltersState>(DEFAULT_FILTERS);
+  const [search, setSearch] = useState('');
+  const [readFilter, setReadFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const load = async () => {
-    const data = await instructorApi.notifications();
-    setItems(data);
-    setLastUpdated(new Date());
+    setItems(await instructorApi.notifications());
   };
 
   useEffect(() => {
@@ -68,21 +44,18 @@ export default function InstructorNotificationsPage() {
 
   const filteredItems = useMemo(() => {
     let result = items;
-    if (filters.readFilter === 'read') result = result.filter((i) => i.isRead);
-    if (filters.readFilter === 'unread') result = result.filter((i) => !i.isRead);
-    if (filters.typeFilter) result = result.filter((i) => i.type === filters.typeFilter);
-    if (filters.dateFilter) {
-      result = result.filter((i) => matchesDateFilter(i.createdAt, filters.dateFilter));
-    }
-    if (filters.search.trim()) {
-      const q = filters.search.trim().toLowerCase();
+    if (readFilter === 'read') result = result.filter((i) => i.isRead);
+    if (readFilter === 'unread') result = result.filter((i) => !i.isRead);
+    if (typeFilter) result = result.filter((i) => i.type === typeFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
       result = result.filter((i) =>
         [i.titleAr, i.bodyAr, NOTIFICATION_TYPE_LABELS[i.type], String(i.id)]
           .some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result;
-  }, [items, filters]);
+  }, [items, readFilter, typeFilter, search]);
 
   const stats = useMemo(() => {
     const todayStart = new Date();
@@ -90,7 +63,6 @@ export default function InstructorNotificationsPage() {
     return {
       total: items.length,
       unread: items.filter((i) => !i.isRead).length,
-      attention: items.filter((i) => !i.isRead && IMPORTANT_TYPES.has(i.type)).length,
       today: items.filter((i) => new Date(i.createdAt) >= todayStart).length,
     };
   }, [items]);
@@ -102,6 +74,8 @@ export default function InstructorNotificationsPage() {
       ...types.map((type) => ({ label: NOTIFICATION_TYPE_LABELS[type] || type, value: type })),
     ];
   }, [items]);
+
+  const hasActiveFilters = Boolean(search.trim() || readFilter || typeFilter);
 
   const markRead = async (id: number) => {
     setBusyId(id);
@@ -133,82 +107,152 @@ export default function InstructorNotificationsPage() {
     }
   };
 
-  const updateFilters = (patch: Partial<NotificationFiltersState>) => {
-    setFilters((current) => ({ ...current, ...patch }));
-  };
-
   return (
-    <div className="instructor-notifications-page">
-      <header className="ntf-page-header">
-        <div className="ntf-page-header-row">
-          <div className="ntf-page-title-wrap">
-            <h1>إشعارات المدرب</h1>
-            <span className="ntf-count-badge">{stats.total}</span>
-          </div>
-          <div className="ntf-page-actions">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<CheckCheck size={16} />}
-              onClick={markAllRead}
-              loading={markingAll}
-              disabled={!stats.unread || loading}
-            >
-              تعليم الكل كمقروء
-            </Button>
-          </div>
+    <div className="page-grid student-notifications-page instructor-notifications-page">
+      <div className="reports-header">
+        <PageHeader
+          title="الإشعارات"
+          subtitle="تابع تحديثات الكورسات والأرباح والجلسات والتقييمات"
+        />
+        <div className="reports-header-actions">
+          <Button
+            variant="outline"
+            icon={<CheckCheck size={18} />}
+            onClick={markAllRead}
+            loading={markingAll}
+            disabled={!stats.unread || loading}
+          >
+            تعليم الكل كمقروء
+          </Button>
         </div>
-        <div className="ntf-page-header-meta">
-          <p>تابع تحديثات الكورسات والأرباح والجلسات والتقييمات</p>
-          <span className="ntf-last-updated">
-            آخر تحديث: {fmtLastUpdated(lastUpdated)}
+      </div>
+
+      <div className="stats-grid">
+        <StatCard title="إجمالي الإشعارات" value={String(stats.total)} icon={Bell} />
+        <StatCard
+          title="غير مقروء"
+          value={String(stats.unread)}
+          icon={BellOff}
+          hint={stats.unread ? 'تحتاج متابعة' : 'لا جديد'}
+        />
+        <StatCard title="اليوم" value={String(stats.today)} icon={CalendarDays} />
+      </div>
+
+      <FilterBar
+        searchValue={search}
+        searchPlaceholder="بحث بالعنوان أو النص..."
+        onSearchChange={setSearch}
+        onReset={() => { setSearch(''); setReadFilter(''); setTypeFilter(''); }}
+        resetDisabled={!hasActiveFilters}
+        ariaLabel="فلاتر الإشعارات"
+      >
+        <Select
+          label="حالة القراءة"
+          value={readFilter}
+          onChange={(e) => setReadFilter(e.target.value)}
+          options={[
+            { label: 'الكل', value: '' },
+            { label: 'غير مقروء', value: 'unread' },
+            { label: 'مقروء', value: 'read' },
+          ]}
+        />
+        <Select
+          label="النوع"
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          options={typeOptions}
+        />
+      </FilterBar>
+
+      <Card className="reports-table-card">
+        <div className="section-heading reports-table-head">
+          <h2>
+            <span className="reports-table-title-icon" aria-hidden="true">
+              <Bell size={20} />
+            </span>
+            قائمة الإشعارات
+          </h2>
+          <span className="muted-count">
+            {filteredItems.length.toLocaleString('ar-EG')} إشعار
           </span>
         </div>
-      </header>
 
-      <NotificationStats stats={stats} />
+        {loading ? (
+          <div className="student-notifications-list" aria-busy="true">
+            <LoadingSkeleton variant="row" count={5} />
+          </div>
+        ) : filteredItems.length ? (
+          <div className="student-notifications-list">
+            {filteredItems.map((item) => {
+              const Icon = getTypeIcon(item.type);
+              const typeLabel = NOTIFICATION_TYPE_LABELS[item.type] || 'إشعار';
+              return (
+                <article
+                  key={item.id}
+                  className={`student-notification-item ${item.isRead ? 'is-read' : 'is-unread'}`}
+                >
+                  <div
+                    className={`student-notification-icon ${item.isRead ? 'is-read' : 'is-unread'}`}
+                    aria-hidden="true"
+                  >
+                    <Icon size={20} />
+                  </div>
 
-      <NotificationFilters
-        filters={filters}
-        typeOptions={typeOptions}
-        onChange={updateFilters}
-        onReset={() => setFilters(DEFAULT_FILTERS)}
-      />
+                  <div className="student-notification-body">
+                    <div className="student-notification-top">
+                      <div className="student-notification-title-wrap">
+                        <h3>{item.titleAr}</h3>
+                        <Badge
+                          variant={item.isRead ? 'default' : 'info'}
+                          dot
+                          className="status-badge"
+                        >
+                          {item.isRead ? 'مقروء' : 'غير مقروء'}
+                        </Badge>
+                      </div>
+                      <span className="student-notification-type">{typeLabel}</span>
+                    </div>
+                    <p className="student-notification-text">{item.bodyAr}</p>
+                    <time className="student-notification-time" dateTime={item.createdAt}>
+                      {fmtRelativeTime(item.createdAt)}
+                    </time>
+                  </div>
 
-      {loading ? (
-        <div className="ntf-list" aria-busy="true" aria-label="جاري التحميل">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="ntf-skeleton-row" />
-          ))}
-        </div>
-      ) : filteredItems.length ? (
-        <div className="ntf-list">
-          {filteredItems.map((item) => (
-            <NotificationCard
-              key={item.id}
-              item={item}
-              busy={busyId === item.id}
-              onMarkRead={markRead}
-            />
-          ))}
-        </div>
-      ) : items.length ? (
-        <div className="ntf-empty-card">
+                  <div className="student-notification-actions">
+                    {!item.isRead ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        loading={busyId === item.id}
+                        onClick={() => markRead(item.id)}
+                      >
+                        تعليم كمقروء
+                      </Button>
+                    ) : (
+                      <span className="student-notification-done">
+                        <Check size={14} aria-hidden="true" />
+                        مقروء
+                      </span>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : items.length ? (
           <EmptyState
             title="لا نتائج"
             description="جرّب تغيير الفلاتر أو البحث."
             icon={Bell}
           />
-        </div>
-      ) : (
-        <div className="ntf-empty-card">
+        ) : (
           <EmptyState
             title="لا توجد إشعارات"
             description="ستظهر تحديثات الكورسات والأرباح والجلسات هنا."
             icon={Bell}
           />
-        </div>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

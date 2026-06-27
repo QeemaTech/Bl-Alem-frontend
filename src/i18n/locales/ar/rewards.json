@@ -1,0 +1,125 @@
+{
+  "empty": "—",
+  "title": "المكافآت والإحالات",
+  "subtitle": "إدارة أكواد إحالة الطلاب ونقاط المكافآت — منفصلة عن الكوبونات",
+  "info": "عند تسجيل طالب جديد بكود إحالة صالح، تُضاف النقاط تلقائياً للمُحيل. يمكن للطلاب استبدال النقاط المكتسبة عند الشراء — بعد تطبيق كود الإحالة.",
+  "stats": {
+    "totalCodes": "إجمالي أكواد الإحالة",
+    "activeCodes": "أكواد مفعّلة",
+    "disabledCodes": "أكواد معطّلة",
+    "totalPoints": "إجمالي النقاط المتاحة",
+    "redeemedPoints": "النقاط المُستبدلة",
+    "pendingReferrals": "إحالات قيد الانتظار"
+  },
+  "charts": {},
+  "tabs": {
+    "students": "أكواد الإحالة ({{count}})",
+    "history": "سجل الإحالات ({{count}})"
+  },
+  "filters": {
+    "studentSearchPlaceholder": "بحث بالاسم، البريد، أو كود الإحالة...",
+    "historySearchPlaceholder": "بحث بالكود، المُحيل، أو المدعو...",
+    "codeStatus": "حالة الكود",
+    "status": "الحالة",
+    "all": "الكل",
+    "active": "مفعّل",
+    "disabled": "معطّل"
+  },
+  "table": {
+    "studentsTitle": "أكواد الإحالة",
+    "historyTitle": "سجل الإحالات",
+    "studentCount": "{{count}} طالب",
+    "referralCount": "{{count}} إحالة",
+    "studentsEmptyTitle": "لا يوجد طلاب",
+    "studentsEmptyDescription": "ستظهر أكواد الإحالة عند تسجيل الطلاب.",
+    "historyEmptyTitle": "لا توجد إحالات",
+    "historyEmptyDescription": "لم يتم تسجيل أي إحالات بعد.",
+    "columns": {
+      "fullName": "الطالب",
+      "email": "البريد",
+      "referralCode": "كود الإحالة",
+      "codeStatus": "حالة الكود",
+      "rewardPoints": "النقاط",
+      "successfulReferrals": "إحالات ناجحة",
+      "createdAt": "تاريخ الإنشاء",
+      "referrer": "المُحيل",
+      "referredUser": "المدعو",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "actions": "الإجراءات",
+      "user": "المدعو",
+      "points": "النقاط",
+      "type": "النوع",
+      "reason": "السبب"
+    }
+  },
+  "labels": {
+    "referralStatus": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "معتمدة",
+      "REWARDED": "مُكافأ",
+      "REJECTED": "مرفوضة"
+    },
+    "codeStatus": {
+      "active": "مفعّل",
+      "disabled": "معطّل"
+    }
+  },
+  "form": {},
+  "modal": {
+    "loading": "جاري التحميل...",
+    "historyTitle": "سجل المكافآت: {{name}}",
+    "loadingHistory": "جاري تحميل السجل...",
+    "referralCode": "كود الإحالة",
+    "availablePoints": "النقاط المتاحة",
+    "codeStatus": "حالة الكود",
+    "referrals": "الإحالات ({{count}})",
+    "noReferrals": "لا توجد إحالات مسجّلة.",
+    "pointTransactions": "حركات النقاط"
+  },
+  "actions": {
+    "view": "عرض",
+    "disable": "تعطيل",
+    "enable": "تفعيل",
+    "resetPoints": "إعادة النقاط",
+    "exportExcel": "تصدير Excel"
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل بيانات المكافآت.",
+    "loadHistoryFailed": "تعذّر تحميل سجل الطالب.",
+    "disabled": "تم تعطيل كود الإحالة.",
+    "enabled": "تم تفعيل كود الإحالة.",
+    "reset": "تم إعادة تعيين النقاط.",
+    "actionFailed": "تعذّر تنفيذ الإجراء."
+  },
+  "export": {
+    "studentsSheet": "أكواد الإحالة",
+    "historySheet": "سجل الإحالات",
+    "studentsColumns": {
+      "fullName": "الطالب",
+      "email": "البريد",
+      "referralCode": "كود الإحالة",
+      "status": "حالة الكود",
+      "rewardPoints": "النقاط",
+      "successfulReferrals": "إحالات ناجحة",
+      "createdAt": "تاريخ الإنشاء"
+    },
+    "historyColumns": {
+      "referrer": "المُحيل",
+      "referredUser": "المدعو",
+      "code": "كود الإحالة",
+      "rewardPoints": "النقاط",
+      "status": "الحالة",
+      "createdAt": "التاريخ"
+    }
+  },
+  "confirm": {
+    "disableTitle": "تعطيل كود الإحالة",
+    "disableMessage": "هل تريد تعطيل كود الإحالة للطالب {{name}}؟ لن يتمكن الآخرون من استخدامه — النقاط المكتسبة تبقى.",
+    "enableTitle": "تفعيل كود الإحالة",
+    "enableMessage": "هل تريد تفعيل كود الإحالة للطالب {{name}}؟",
+    "resetTitle": "إعادة تعيين النقاط",
+    "resetMessage": "هل تريد تصفير نقاط المكافآت للطالب {{name}}؟ هذا الإجراء لا يمكن التراجع عنه.",
+    "resetConfirm": "إعادة التعيين"
+  }
+}

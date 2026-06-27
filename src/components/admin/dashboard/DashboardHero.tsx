@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   CheckCircle2,
@@ -9,7 +10,7 @@ import {
 } from '@/icons';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
-import { fmtDateAr, fmtMoney, fmtNum } from './dashboardFormat';
+import { useDashboardFormatters } from '../../../hooks/useDashboardAnalytics';
 import type { DashboardAnalytics } from './dashboardTypes';
 import { TrendBadge } from './TrendBadge';
 import type { PlatformSettings } from '../../../utils/platformSettings';
@@ -46,64 +47,87 @@ function HeroMetric({
 }
 
 export function DashboardHero({ userName, platform, hero }: DashboardHeroProps) {
+  const { t } = useTranslation('dashboard');
+  const { fmtDateLong, fmtMoney, fmtNum } = useDashboardFormatters();
   const isHealthy = !platform.maintenanceMode && platform.registrationEnabled;
-  const greeting = userName ? `مرحباً، ${userName}` : 'مرحباً بك';
+  const greeting = userName
+    ? t('admin.dashboard.hero.greetingNamed', { name: userName })
+    : t('admin.dashboard.hero.greetingDefault');
+  const openClosed = (enabled: boolean) => (
+    enabled ? t('admin.dashboard.hero.open') : t('admin.dashboard.hero.closed')
+  );
 
   return (
-    <section className="admin-dash-hero" aria-label="نظرة عامة على لوحة التحكم">
+    <section className="admin-dash-hero" aria-label={t('admin.dashboard.hero.ariaLabel')}>
       <div className="admin-dash-hero-main">
         <div className="admin-dash-hero-text">
           <Badge variant={isHealthy ? 'success' : 'warning'} dot>
-            {isHealthy ? 'المنصة تعمل بشكل طبيعي' : 'يتطلب انتباهك'}
+            {isHealthy
+              ? t('admin.dashboard.hero.platformHealthy')
+              : t('admin.dashboard.hero.needsAttention')}
           </Badge>
           <h1>{greeting}</h1>
-          <p>{fmtDateAr(new Date())}</p>
+          <p>{fmtDateLong(new Date())}</p>
           <div className="admin-dash-hero-status">
-            <span>
-              <Shield size={16} aria-hidden />
-              الصيانة: {platform.maintenanceMode ? 'مفعّلة' : 'غير مفعّلة'}
+            <span className="admin-dash-hero-status-item">
+              <span className="admin-dash-hero-status-icon" aria-hidden>
+                <Shield size={16} />
+              </span>
+              {t('admin.dashboard.hero.maintenance', {
+                status: platform.maintenanceMode
+                  ? t('admin.dashboard.hero.maintenanceOn')
+                  : t('admin.dashboard.hero.maintenanceOff'),
+              })}
             </span>
-            <span>
-              <GraduationCap size={16} aria-hidden />
-              تسجيل الطلاب: {platform.registrationEnabled ? 'مفتوح' : 'مغلق'}
+            <span className="admin-dash-hero-status-item">
+              <span className="admin-dash-hero-status-icon" aria-hidden>
+                <GraduationCap size={16} />
+              </span>
+              {t('admin.dashboard.hero.studentRegistration', {
+                status: openClosed(platform.registrationEnabled),
+              })}
             </span>
-            <span>
-              <CoPresent size={16} aria-hidden />
-              تسجيل المحاضرين: {platform.instructorRegistrationEnabled ? 'مفتوح' : 'مغلق'}
+            <span className="admin-dash-hero-status-item">
+              <span className="admin-dash-hero-status-icon" aria-hidden>
+                <CoPresent size={16} />
+              </span>
+              {t('admin.dashboard.hero.instructorRegistration', {
+                status: openClosed(platform.instructorRegistrationEnabled),
+              })}
             </span>
           </div>
         </div>
         <div className="admin-dash-hero-actions">
           <Link to="/admin/courses">
-            <Button variant="secondary">مراجعة الكورسات</Button>
+            <Button variant="secondary">{t('admin.dashboard.hero.reviewCourses')}</Button>
           </Link>
           <Link to="/admin/instructors">
-            <Button variant="outline">طلبات المحاضرين</Button>
+            <Button variant="outline">{t('admin.dashboard.hero.instructorRequests')}</Button>
           </Link>
         </div>
       </div>
 
-      <div className="admin-dash-hero-metrics" role="list" aria-label="ملخص سريع">
+      <div className="admin-dash-hero-metrics" role="list" aria-label={t('admin.dashboard.hero.metricsAria')}>
         <HeroMetric
-          label="إجمالي الإيرادات"
+          label={t('admin.dashboard.hero.totalRevenue')}
           value={fmtMoney(hero.revenue.value)}
           trend={hero.revenue.trend}
           icon={CreditCard}
         />
         <HeroMetric
-          label="الطلاب النشطون"
+          label={t('admin.dashboard.hero.activeStudents')}
           value={fmtNum(hero.students.value)}
           trend={hero.students.trend}
           icon={GraduationCap}
         />
         <HeroMetric
-          label="المحاضرون النشطون"
+          label={t('admin.dashboard.hero.activeInstructors')}
           value={fmtNum(hero.instructors.value)}
           trend={hero.instructors.trend}
           icon={CoPresent}
         />
         <HeroMetric
-          label="الكورسات المنشورة"
+          label={t('admin.dashboard.hero.publishedCourses')}
           value={fmtNum(hero.courses.value)}
           trend={hero.courses.trend}
           icon={BookOpen}
@@ -113,7 +137,7 @@ export function DashboardHero({ userName, platform, hero }: DashboardHeroProps) 
       {platform.maintenanceMode ? (
         <div className="admin-dash-hero-alert" role="status">
           <CheckCircle2 size={18} aria-hidden />
-          <span>وضع الصيانة مفعّل — قد يكون الوصول محدوداً للزوار.</span>
+          <span>{t('admin.dashboard.hero.maintenanceAlert')}</span>
         </div>
       ) : null}
     </section>

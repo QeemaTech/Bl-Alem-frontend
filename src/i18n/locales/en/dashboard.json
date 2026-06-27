@@ -1,0 +1,315 @@
+{
+  "layouts": {
+    "studentPanel": "Student dashboard",
+    "instructorPanel": "Instructor dashboard",
+    "adminPanel": "Admin dashboard"
+  },
+  "student": {
+    "title": "Student dashboard",
+    "subtitle": "Welcome {{name}}, track your learning day from here",
+    "continueLearning": "Continue learning",
+    "browseCourses": "Browse courses",
+    "referralCopied": "Referral code copied",
+    "quickLinks": {
+      "myCourses": "My courses",
+      "courses": "Courses",
+      "live": "Live sessions",
+      "certificates": "Certificates",
+      "support": "Support"
+    },
+    "stats": {
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "enrolled": "Enrolled",
+      "completionRate": "Completion rate"
+    },
+    "time": {
+      "now": "Now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago"
+    },
+    "referral": {
+      "welcomeTitle": "Welcome! Your referral code is ready to share",
+      "shareHint": "Share the code with friends and earn rewards when they sign up",
+      "copyAria": "Copy referral code"
+    },
+    "stats": {
+      "myCourses": "My courses",
+      "activeHint": "{{count}} active",
+      "completed": "Completed",
+      "completionHint": "{{rate}}% completion",
+      "certificates": "My certificates",
+      "walletBalance": "Wallet balance"
+    },
+    "search": {
+      "placeholder": "Search for a course or skill...",
+      "chartTitle": "Learning status"
+    },
+    "continue": {
+      "title": "Continue learning",
+      "progress": "Progress",
+      "continueNow": "Continue now",
+      "emptyTitle": "No course in progress",
+      "emptyDesc": "Start by enrolling in a course from the available courses page.",
+      "courseFallback": "Course"
+    },
+    "rewards": {
+      "title": "Rewards and wallet",
+      "points": "Reward points",
+      "pointsUnit": "points",
+      "wallet": "Wallet balance",
+      "referralCopy": "Referral code — copy and share",
+      "viewRewards": "Rewards and referrals",
+      "viewProfile": "Profile"
+    },
+    "sessions": {
+      "title": "Upcoming sessions",
+      "liveNow": "Live now",
+      "scheduled": "Scheduled",
+      "join": "Join"
+    }
+  },
+  "instructor": {
+    "homeTitle": "Home",
+    "homeSubtitle": "Instructor dashboard",
+    "welcomeNamed": "Welcome {{name}}, manage your courses from one dashboard",
+    "welcomeDefault": "Manage your courses, students, sessions, and earnings from one dashboard",
+    "addCourse": "Add course",
+    "heroBadge": "Welcome, instructor",
+    "heroTitle": "Everything you need to manage training in one place",
+    "heroDesc": "Track today's sessions, your sales, and student reviews with ease.",
+    "liveSession": "Live session",
+    "growthLabel": "You're on a great track!",
+    "growthDesc": "Earnings growth this month",
+    "stats": {
+      "monthEarnings": "Monthly earnings",
+      "students": "Students",
+      "published": "Published",
+      "upcomingSessions": "Upcoming sessions"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "subtitle": "Shortcuts for daily tasks",
+      "addCourse": "Add course",
+      "addCourseDesc": "Create a new course",
+      "myCourses": "My courses",
+      "myCoursesDesc": "Manage your content",
+      "liveSession": "Live session",
+      "liveSessionDesc": "Schedule or start a stream",
+      "earnings": "Earnings",
+      "earningsDesc": "Track revenue"
+    },
+    "sections": {
+      "todaySessions": "Today's sessions",
+      "bestSelling": "Best-selling courses",
+      "latestReviews": "Latest reviews",
+      "welcome": "Welcome"
+    },
+    "empty": {
+      "noSessionsToday": "No sessions today",
+      "noSessionsTodayDesc": "Your scheduled sessions for today will appear here.",
+      "noSales": "No sales yet",
+      "noSalesDesc": "Best-selling courses will appear after the first purchase.",
+      "noReviews": "No reviews yet",
+      "noReviewsDesc": "Student reviews will appear here."
+    },
+    "session": {
+      "start": "Start session",
+      "startSuccess": "Session started successfully",
+      "startFail": "Could not start session"
+    },
+    "sales": {
+      "salesAndStudents": "{{sales}} sales — {{students}} students"
+    },
+    "reviews": {
+      "starsAria": "{{rating}} out of 5"
+    },
+    "approval": {
+      "pendingTitle": "Your account is under review",
+      "pendingDesc": "An admin will review your account. You can complete your profile now; course management will be enabled after approval.",
+      "coursesDisabledTitle": "Course management disabled",
+      "coursesDisabledDesc": "Add course buttons will be available after your account is approved.",
+      "rejectedTitle": "Instructor application rejected",
+      "rejectedDesc": "Please update your information and resubmit for review."
+    }
+  },
+  "admin": {
+    "loadErrorTitle": "Could not load dashboard",
+    "loadErrorDesc": "An error occurred while fetching platform data. Check your connection and try again.",
+    "kpisTitle": "Performance indicators",
+    "kpisSubtitle": "Eight KPIs with trends and sparklines",
+    "kpisAria": "Key performance indicators",
+    "noPendingReviews": "No pending reviews at the moment.",
+    "noOpenTickets": "No open support tickets.",
+    "resourceUnavailable": {
+      "title": "Not available",
+      "subtitle": "The \"{{resource}}\" section is unavailable or has been moved to a dedicated page."
+    },
+    "dashboard": {
+      "skeletonAria": "Loading dashboard",
+      "hero": {
+        "ariaLabel": "Dashboard overview",
+        "platformHealthy": "Platform running normally",
+        "needsAttention": "Requires your attention",
+        "greetingNamed": "Welcome, {{name}}",
+        "greetingDefault": "Welcome",
+        "maintenance": "Maintenance: {{status}}",
+        "maintenanceOn": "enabled",
+        "maintenanceOff": "disabled",
+        "studentRegistration": "Student registration: {{status}}",
+        "instructorRegistration": "Instructor registration: {{status}}",
+        "open": "open",
+        "closed": "closed",
+        "reviewCourses": "Review courses",
+        "instructorRequests": "Instructor requests",
+        "metricsAria": "Quick summary",
+        "totalRevenue": "Total revenue",
+        "activeStudents": "Active students",
+        "activeInstructors": "Active instructors",
+        "publishedCourses": "Published courses",
+        "maintenanceAlert": "Maintenance mode is enabled — visitor access may be limited."
+      },
+      "analytics": {
+        "ariaLabel": "Platform analytics",
+        "title": "Analytics",
+        "subtitle": "Performance overview for the last 12 months",
+        "courseActivity": "Course activity",
+        "subscriptionDistribution": "Subscription distribution",
+        "byStatus": "By status",
+        "courseStatusAria": "Course status distribution",
+        "subscriptionAria": "Subscription distribution"
+      },
+      "charts": {
+        "revenueTrend": "Revenue trend",
+        "last12Months": "Last 12 months",
+        "revenueAria": "Monthly revenue trend chart",
+        "yearlyGrowth": "Yearly growth",
+        "revenueSeries": "Revenue",
+        "userGrowth": "User growth",
+        "studentsVsInstructors": "Students vs instructors",
+        "userGrowthAria": "New user growth chart",
+        "students": "Students",
+        "instructors": "Instructors",
+        "total": "Total"
+      },
+      "kpis": {
+        "totalUsers": "Total users",
+        "students": "Students",
+        "instructors": "Instructors",
+        "courses": "Courses",
+        "revenue": "Revenue",
+        "activeSubscriptions": "Active subscriptions",
+        "pendingReviews": "Pending reviews",
+        "supportTickets": "Support tickets"
+      },
+      "trends": {
+        "vsLastMonth": "vs last month",
+        "vsLastWeek": "vs last week"
+      },
+      "courseStatus": {
+        "published": "Published",
+        "pending": "Pending review",
+        "rejected": "Rejected"
+      },
+      "subscriptionStatus": {
+        "active": "Active",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "quickActions": {
+        "ariaLabel": "Quick actions",
+        "title": "Quick actions",
+        "subtitle": "Shortcuts for common admin tasks",
+        "addCourse": "Add course",
+        "addCourseDesc": "Create or review content",
+        "approveInstructor": "Approve instructor",
+        "approveInstructorDesc": "Review pending requests",
+        "createCoupon": "Create coupon",
+        "createCouponDesc": "New promotional campaigns",
+        "viewReports": "View reports",
+        "viewReportsDesc": "Detailed reports",
+        "manageUsers": "Manage users",
+        "manageUsersDesc": "Students and instructors"
+      },
+      "insights": {
+        "ariaLabel": "Business insights",
+        "title": "Business insights",
+        "subtitle": "Key platform performance indicators",
+        "bestSeller": "Best seller",
+        "topInstructor": "Top instructor",
+        "topCategory": "Top revenue category",
+        "avgRating": "Average course rating",
+        "conversion": "Monthly conversion rate",
+        "retention": "Student retention",
+        "defaultCourse": "Programming basics",
+        "defaultInstructor": "Dr. Ahmed Mahmoud",
+        "defaultCategory": "Technology & programming",
+        "enrollments": "{{count}} enrollments",
+        "activeCourses": "{{count}} active courses",
+        "reviewCount": "{{count}} reviews",
+        "conversionSupporting": "From visits to enrollment",
+        "retentionSupporting": "Over 90 days"
+      },
+      "operations": {
+        "ariaLabel": "Operations center",
+        "title": "Operations center",
+        "subtitle": "Tasks requiring immediate attention",
+        "viewDetails": "View details",
+        "itemCount": "{{count}} items",
+        "instructorRequests": "Instructor requests",
+        "courseReviews": "Course reviews",
+        "openSupport": "Open support tickets",
+        "failedPayments": "Failed payments",
+        "awaitingApproval": "Awaiting approval",
+        "underReview": "Under review",
+        "needsFollowUp": "Needs follow-up",
+        "last24Hours": "Last 24 hours"
+      },
+      "priority": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "activity": {
+        "ariaLabel": "Recent activity",
+        "title": "Recent activity",
+        "subtitle": "Latest platform updates",
+        "emptyTitle": "No recent activity",
+        "emptyDesc": "Registrations, payments, and tickets will appear here as they happen.",
+        "newInstructorRequest": "New instructor request",
+        "coursePendingReview": "Course pending review",
+        "courseDescription": "{{title}} — {{instructor}}",
+        "paymentFailed": "Payment failed",
+        "newPayment": "New payment",
+        "paymentDescription": "{{name}} — {{amount}}",
+        "supportTicket": "Support ticket",
+        "instructorFallback": "Instructor",
+        "userFallback": "User",
+        "types": {
+          "registration": "Registration",
+          "course": "Course",
+          "payment": "Payment",
+          "support": "Support",
+          "instructor": "Instructor"
+        }
+      },
+      "revenue": {
+        "title": "Revenue analytics",
+        "ariaLabel": "Revenue analytics",
+        "emptyTitle": "No payments yet",
+        "emptyDesc": "Revenue and trends will appear here after the first payment.",
+        "total": "Total revenue",
+        "monthly": "Monthly revenue",
+        "expected": "Expected revenue",
+        "refundRate": "Refund rate"
+      },
+      "users": {
+        "title": "User analytics",
+        "ariaLabel": "User analytics",
+        "dau": "Daily active users",
+        "wau": "Weekly active users",
+        "mau": "Monthly active users"
+      }
+    }
+  }
+}

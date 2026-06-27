@@ -1,0 +1,109 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "PAID": "مدفوع",
+      "PENDING": "قيد الانتظار",
+      "FAILED": "فاشل",
+      "REFUNDED": "مسترد"
+    },
+    "gateway": {
+      "SIMULATED": "محاكاة",
+      "WALLET": "المحفظة",
+      "STRIPE": "Stripe",
+      "PAYPAL": "PayPal"
+    },
+    "itemType": {
+      "COURSE": "دورة",
+      "LEARNING_PATH": "مسار تعليمي"
+    }
+  },
+  "title": "المدفوعات",
+  "subtitle": "مراجعة عمليات الدفع والاستردادات",
+  "backToPayments": "العودة للمدفوعات",
+  "notFound": {
+    "title": "عملية الدفع غير موجودة",
+    "description": "لم نتمكن من العثور على هذه العملية."
+  },
+  "stats": {
+    "total": "إجمالي العمليات",
+    "paidCount": "مدفوعات ناجحة",
+    "totalRevenue": "إجمالي الإيرادات",
+    "pendingCount": "قيد الانتظار",
+    "failedCount": "فاشلة",
+    "refundedCount": "مستردة"
+  },
+  "charts": {
+    "monthlyRevenue": "الإيرادات الشهرية (مدفوعات ناجحة)",
+    "statusDistribution": "توزيع حالات الدفع"
+  },
+  "filters": {
+    "allStatuses": "كل الحالات",
+    "allGateways": "كل البوابات",
+    "status": "الحالة",
+    "gateway": "بوابة الدفع",
+    "searchPlaceholder": "بحث بالطالب، الكورس، أو مرجع العملية..."
+  },
+  "table": {
+    "title": "جدول المدفوعات",
+    "emptyTitle": "لا توجد مدفوعات",
+    "emptyDescription": "ستظهر عمليات الدفع هنا عند إتمامها.",
+    "columns": {
+      "id": "رقم العملية",
+      "student": "الطالب",
+      "course": "الكورس",
+      "finalAmount": "المبلغ",
+      "gateway": "البوابة",
+      "status": "الحالة",
+      "createdAt": "التاريخ",
+      "actions": "الإجراءات"
+    }
+  },
+  "export": {
+    "sheetName": "المدفوعات",
+    "columns": {
+      "id": "رقم العملية",
+      "student": "الطالب",
+      "email": "البريد",
+      "course": "الكورس",
+      "amount": "المبلغ الأصلي",
+      "discount": "الخصم",
+      "finalAmount": "المبلغ النهائي",
+      "gateway": "بوابة الدفع",
+      "transactionRef": "مرجع العملية",
+      "status": "الحالة",
+      "createdAt": "التاريخ"
+    }
+  },
+  "actions": {
+    "detail": "التفاصيل",
+    "exportExcel": "تصدير Excel"
+  },
+  "detail": {
+    "heading": "عملية دفع",
+    "studentSection": "بيانات الطالب",
+    "productSection": "المنتج المدفوع",
+    "paymentSection": "تفاصيل الدفع",
+    "fields": {
+      "name": "الاسم",
+      "email": "البريد",
+      "phone": "الهاتف",
+      "type": "النوع",
+      "title": "العنوان",
+      "instructor": "المحاضر",
+      "amount": "المبلغ الأصلي",
+      "discount": "الخصم",
+      "pointsUsed": "نقاط مستخدمة",
+      "finalAmount": "المبلغ النهائي",
+      "coupon": "كوبون الخصم",
+      "gateway": "بوابة الدفع",
+      "transactionRef": "مرجع العملية",
+      "platformShare": "نصيب المنصة",
+      "instructorShare": "نصيب المحاضر",
+      "createdAt": "تاريخ العملية"
+    }
+  },
+  "toast": {
+    "loadError": "تعذّر تحميل عملية الدفع."
+  }
+}

@@ -1,0 +1,105 @@
+/* Student dashboard — overview search/chart + course grids */
+.student-dashboard-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+  gap: clamp(10px, 1.5vw, 14px);
+  align-items: stretch;
+}
+
+.student-dashboard-search {
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.student-dashboard .dashboard-search-card {
+  padding: 12px 14px !important;
+}
+
+.student-dashboard .home-search-bar {
+  margin-bottom: 0;
+}
+
+.student-dashboard .category-chips {
+  gap: 6px;
+}
+
+.student-dashboard .category-chip {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.student-dashboard-chart-card {
+  padding: 10px 12px !important;
+  min-width: 0;
+  height: 100%;
+}
+
+.student-dashboard-chart-card .report-chart-card {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.student-dashboard-chart-card .chart-pie-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.student-dashboard-chart-card .chart-pie-canvas {
+  min-height: 140px;
+  max-height: 160px;
+}
+
+.student-dashboard-chart-card .chart-legend {
+  gap: 6px;
+}
+
+.student-dashboard-chart-card .chart-legend-item {
+  padding: 6px 8px;
+}
+
+.student-dashboard .dashboard-courses {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: clamp(10px, 1.1vw, 14px);
+}
+
+.student-dashboard .dashboard-courses .student-course-card {
+  height: 100%;
+}
+
+.student-dashboard-community-cta {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px !important;
+}
+
+@media (min-width: 1440px) {
+  .student-dashboard .dashboard-courses {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .student-dashboard-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-chart-card .chart-pie-layout {
+    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .student-dashboard .dashboard-courses {
+    grid-template-columns: 1fr;
+  }
+}

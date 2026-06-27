@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Trash2 } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -12,6 +13,7 @@ import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { useToast } from '../../components/ui/Toast';
 
 export default function AdminReviewDetailPage() {
+  const { t } = useTranslation('reviews');
   const { reviewId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -27,25 +29,25 @@ export default function AdminReviewDetailPage() {
       try {
         setReview(await adminApi.review(reviewId));
       } catch {
-        showToast('تعذّر تحميل التقييم.', 'error');
+        showToast(t('toast.loadDetailFailed'), 'error');
         setReview(null);
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [reviewId]);
+  }, [reviewId, t, showToast]);
 
   const handleDelete = async () => {
     if (!review) return;
     setDeleting(true);
     try {
       await adminApi.deleteReview(review.id);
-      showToast('تم حذف التقييم.', 'success');
+      showToast(t('toast.deleted'), 'success');
       navigate('/admin/reviews');
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر حذف التقييم.';
+        || t('toast.deleteFailed');
       showToast(message, 'error');
     } finally {
       setDeleting(false);
@@ -59,11 +61,11 @@ export default function AdminReviewDetailPage() {
     return (
       <div className="page-grid admin-review-detail-page">
         <EmptyState
-          title="التقييم غير موجود"
-          description="لم نتمكن من العثور على هذا التقييم."
+          title={t('detail.notFoundTitle')}
+          description={t('detail.notFoundDescription')}
         />
         <Button variant="outline" onClick={() => navigate('/admin/reviews')}>
-          العودة للتقييمات
+          {t('actions.backToReviews')}
         </Button>
       </div>
     );
@@ -74,14 +76,14 @@ export default function AdminReviewDetailPage() {
       <div className="admin-review-detail-toolbar">
         <Link to="/admin/reviews" className="support-ticket-back">
           <ArrowRight size={18} aria-hidden="true" />
-          العودة للتقييمات
+          {t('actions.backToReviews')}
         </Link>
         <Button
           variant="danger"
           icon={<Trash2 size={18} />}
           onClick={() => setDeleteOpen(true)}
         >
-          حذف التقييم
+          {t('actions.deleteReview')}
         </Button>
       </div>
 
@@ -91,9 +93,12 @@ export default function AdminReviewDetailPage() {
 
       <ConfirmDialog
         isOpen={deleteOpen}
-        title="حذف التقييم"
-        message={`هل أنت متأكد من حذف تقييم ${review.user?.fullName || 'الطالب'} على كورس "${review.course?.titleAr || '—'}"؟`}
-        confirmLabel="حذف"
+        title={t('confirm.deleteTitle')}
+        message={t('confirm.deleteMessage', {
+          name: review.user?.fullName || t('labels.studentFallback'),
+          course: review.course?.titleAr || t('empty'),
+        })}
+        confirmLabel={t('actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => !deleting && setDeleteOpen(false)}
         loading={deleting}

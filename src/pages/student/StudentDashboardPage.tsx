@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Award, Bell, BookOpen, Calendar, Copy, Crown, Gift, GraduationCap, Headphones,
-  MessageCircle, PlayCircle, Radio, Route, Search, Sparkles, TrendingUp, Video, Wallet, X,
+  MessageCircle, PlayCircle, Radio, Route, Search, Star, TrendingUp, Video, Wallet, X,
 } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { CourseCard } from '../../components/ui/CourseCard';
+import { StudentCourseCard } from '../../components/student/StudentCourseCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -17,9 +18,10 @@ import { ReportChart } from '../../components/reports/ReportChart';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../store/AuthContext';
+import { formatDateTime, formatRelativeTimeMinutes } from '../../utils/localeFormat';
 import { formatMoney } from '../../utils/formatMoney';
 
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
+const fmtDate = (value: string) => formatDateTime(value, {
   month: 'short',
   day: 'numeric',
   hour: '2-digit',
@@ -29,23 +31,12 @@ const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
 const fmtRelative = (value: string) => {
   const diffMs = Date.now() - new Date(value).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'الآن';
-  if (mins < 60) return `منذ ${mins} د`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `منذ ${hours} س`;
-  return fmtDate(value);
+  return formatRelativeTimeMinutes(mins);
 };
 
-const quickLinks = [
-  { label: 'كورساتي', path: '/student/my-courses', icon: PlayCircle },
-  { label: 'الكورسات', path: '/student/courses', icon: BookOpen },
-  { label: 'الجلسات المباشرة', path: '/student/live', icon: Radio },
-  { label: 'الشهادات', path: '/student/certificates', icon: Award },
-  { label: 'المحفظة', path: '/student/wallet', icon: Wallet },
-  { label: 'الدعم', path: '/student/support', icon: Headphones },
-];
-
 export default function StudentDashboardPage() {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -75,13 +66,21 @@ export default function StudentDashboardPage() {
     navigate(`/student/courses?${params.toString()}`);
   };
 
+  const quickLinks = useMemo(() => [
+    { label: t('student.quickLinks.myCourses'), path: '/student/my-courses', icon: PlayCircle },
+    { label: t('student.quickLinks.courses'), path: '/student/courses', icon: BookOpen },
+    { label: t('student.quickLinks.live'), path: '/student/live', icon: Radio },
+    { label: t('student.quickLinks.certificates'), path: '/student/certificates', icon: Award },
+    { label: t('student.quickLinks.support'), path: '/student/support', icon: Headphones },
+  ], [t]);
+
   const chartData = useMemo(() => {
     if (!data) return [];
     return [
-      { label: 'قيد التعلم', value: data.activeCourses ?? 0 },
-      { label: 'مكتملة', value: data.completedCourses ?? 0 },
+      { label: t('student.stats.inProgress'), value: data.activeCourses ?? 0 },
+      { label: t('student.stats.completed'), value: data.completedCourses ?? 0 },
     ].filter((d) => d.value > 0);
-  }, [data]);
+  }, [data, t]);
 
   const unreadCount = useMemo(
     () => (data?.latestNotifications || []).filter((n: any) => !n.isRead).length,
@@ -96,22 +95,32 @@ export default function StudentDashboardPage() {
 
   if (loading) return <DashboardSkeleton />;
 
-  const firstName = user?.fullName?.split(' ')[0] || 'بك';
+  const firstName = user?.fullName?.split(' ')[0] || tc('header.greetingFallback');
   const continueCourse = data?.continueLearning;
   const referralCode = welcomeReferral || data?.rewardsSummary?.referralCode || user?.referralCode || '';
 
   const copyReferralCode = async (code: string) => {
     if (!code) return;
     await navigator.clipboard.writeText(code);
-    showToast('تم نسخ كود الإحالة', 'success');
+    showToast(t('student.referralCopied'), 'success');
   };
 
   return (
     <div className="page-grid student-dashboard">
-      <PageHeader
-        title="لوحة الطالب"
-        subtitle={`مرحباً ${user?.fullName || firstName}، تابع يومك التعليمي من هنا`}
-      />
+      <div className="reports-header student-dashboard-header">
+        <PageHeader
+          title={t('student.title')}
+          subtitle={t('student.subtitle', { name: user?.fullName || firstName })}
+        />
+        <div className="reports-header-actions">
+          <Link to="/student/my-courses">
+            <Button icon={<PlayCircle size={16} />}>{t('student.continueLearning')}</Button>
+          </Link>
+          <Link to="/student/courses">
+            <Button variant="secondary">{t('student.browseCourses')}</Button>
+          </Link>
+        </div>
+      </div>
 
       {welcomeReferral ? (
         <div className="flex items-start gap-3 rounded-2xl border border-success/30 bg-success-container/50 p-4 text-on-success-container">
@@ -119,74 +128,57 @@ export default function StudentDashboardPage() {
             <Gift size={22} />
           </span>
           <div className="min-w-0 flex-1">
-            <strong className="block font-bold">مرحباً بك! كود الإحالة الخاص بك جاهز للمشاركة</strong>
+            <strong className="block font-bold">{t('student.referral.welcomeTitle')}</strong>
             <span dir="ltr" className="mt-1 block text-lg font-extrabold tracking-widest">{welcomeReferral}</span>
-            <span className="mt-0.5 block text-xs opacity-80">شارك الكود مع أصدقائك واحصل على مكافآت عند تسجيلهم</span>
+            <span className="mt-0.5 block text-xs opacity-80">{t('student.referral.shareHint')}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <button type="button" aria-label="نسخ كود الإحالة" className="icon-btn" onClick={() => copyReferralCode(welcomeReferral)}>
+            <button type="button" aria-label={t('student.referral.copyAria')} className="icon-btn" onClick={() => copyReferralCode(welcomeReferral)}>
               <Copy size={18} />
             </button>
-            <button type="button" aria-label="إغلاق" className="icon-btn" onClick={() => setWelcomeReferral(null)}>
+            <button type="button" aria-label={tc('actions.close')} className="icon-btn" onClick={() => setWelcomeReferral(null)}>
               <X size={18} />
             </button>
           </div>
         </div>
       ) : null}
 
-      <section className="hero-card dashboard-hero student-dashboard-hero">
-        <div className="student-dashboard-hero-text">
-          <span><Sparkles size={14} /> مرحباً {firstName}</span>
-          <h2>تابع تعلمك، جلساتك، ومكافآتك من لوحة واحدة.</h2>
-          <p>كل المحتوى هنا داخلي بعد تسجيل الدخول — ابدأ من حيث توقفت.</p>
-        </div>
-        <div className="dashboard-hero-actions">
-          <Link to="/student/my-courses">
-            <Button icon={<PlayCircle size={16} />}>استكمال التعلم</Button>
-          </Link>
-          <Link to="/student/courses">
-            <Button variant="secondary">تصفح الكورسات</Button>
-          </Link>
-        </div>
-      </section>
-
-      <div className="stats-grid dashboard-stats">
+      <div className="stats-grid dashboard-stats student-dashboard-stats">
         <StatCard
-          title="كورساتي"
+          title={t('student.stats.myCourses')}
           value={String(data?.totalEnrolledCourses ?? 0)}
           icon={BookOpen}
-          hint={`${data?.activeCourses ?? 0} نشطة`}
+          hint={t('student.stats.activeHint', { count: data?.activeCourses ?? 0 })}
         />
-        <StatCard title="مكتملة" value={String(data?.completedCourses ?? 0)} icon={GraduationCap} hint={`${completionRate}% إنجاز`} />
-        <StatCard title="شهاداتي" value={String(data?.certificatesCount ?? 0)} icon={Award} />
         <StatCard
-          title="رصيد المحفظة"
+          title={t('student.stats.completed')}
+          value={String(data?.completedCourses ?? 0)}
+          icon={GraduationCap}
+          hint={t('student.stats.completionHint', { rate: completionRate })}
+        />
+        <StatCard title={t('student.stats.certificates')} value={String(data?.certificatesCount ?? 0)} icon={Award} />
+        <StatCard
+          title={t('student.stats.walletBalance')}
           value={formatMoney(data?.rewardsSummary?.walletBalance ?? 0)}
           icon={Wallet}
         />
       </div>
 
       <div className="student-dashboard-overview">
-        {chartData.length ? (
-          <Card className="student-dashboard-chart-card">
-            <ReportChart title="حالة التعلم" type="pie" data={chartData} height={220} />
-          </Card>
-        ) : null}
-
         <Card className="dashboard-search-card student-dashboard-search">
           <form className="home-search-bar" onSubmit={handleSearch}>
             <Search size={20} />
             <input
               type="search"
-              placeholder="ابحث عن دورة أو مهارة..."
+              placeholder={t('student.search.placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <Button type="submit" size="sm">بحث</Button>
+            <Button type="submit" size="sm">{tc('actions.search')}</Button>
           </form>
           <div className="category-chips">
             <button type="button" className="category-chip active" onClick={() => navigate('/student/courses')}>
-              الكل
+              {tc('status.all')}
             </button>
             {(data?.categories || []).map((cat: any) => (
               <button
@@ -200,6 +192,12 @@ export default function StudentDashboardPage() {
             ))}
           </div>
         </Card>
+
+        {chartData.length ? (
+          <Card className="student-dashboard-chart-card">
+            <ReportChart title={t('student.search.chartTitle')} type="pie" data={chartData} height={168} />
+          </Card>
+        ) : null}
       </div>
 
       <div className="student-dashboard-quick-links">
@@ -213,7 +211,7 @@ export default function StudentDashboardPage() {
 
       <div className="content-grid wide dashboard-panels">
         <Card variant="highlighted" className="dashboard-panel student-continue-panel">
-          <h2><PlayCircle size={20} /> استكمال التعلم</h2>
+          <h2><PlayCircle size={20} /> {t('student.continue.title')}</h2>
           <div className="dashboard-panel-body">
             {continueCourse ? (
               <div className="student-continue-block">
@@ -225,24 +223,24 @@ export default function StudentDashboardPage() {
                   )}
                 </div>
                 <div className="student-continue-info">
-                  <Badge variant="info">{continueCourse.course?.category?.nameAr || 'دورة'}</Badge>
+                  <Badge variant="info">{continueCourse.course?.category?.nameAr || t('student.continue.courseFallback')}</Badge>
                   <h3>{continueCourse.course?.titleAr}</h3>
                   <p>{continueCourse.course?.instructor?.fullName}</p>
                   <ProgressBar
                     value={Number(continueCourse.progressPercentage || 0)}
-                    label="التقدم"
+                    label={t('student.continue.progress')}
                     size="md"
                   />
                 </div>
                 <Link to={`/student/player/${continueCourse.courseId}`}>
-                  <Button fullWidth icon={<PlayCircle size={18} />}>استكمال الآن</Button>
+                  <Button fullWidth icon={<PlayCircle size={18} />}>{t('student.continue.continueNow')}</Button>
                 </Link>
               </div>
             ) : (
               <EmptyState
-                title="لا توجد دورة قيد التعلم"
-                description="ابدأ بالاشتراك في دورة من صفحة الكورسات المتاحة."
-                actionLabel="تصفح الكورسات"
+                title={t('student.continue.emptyTitle')}
+                description={t('student.continue.emptyDesc')}
+                actionLabel={t('student.browseCourses')}
                 onAction={() => navigate('/student/courses')}
               />
             )}
@@ -250,12 +248,19 @@ export default function StudentDashboardPage() {
         </Card>
 
         <Card className="dashboard-panel dashboard-rewards">
-          <h2><Gift size={20} /> المكافآت والمحفظة</h2>
+          <h2><Gift size={20} /> {t('student.rewards.title')}</h2>
           <div className="dashboard-panel-body">
+            <div className="rewards-wallet-highlight">
+              <Star size={24} />
+              <div>
+                <span>{t('student.rewards.points')}</span>
+                <strong>{data?.rewardsSummary?.rewardPoints ?? 0} {t('student.rewards.pointsUnit')}</strong>
+              </div>
+            </div>
             <div className="rewards-wallet-highlight">
               <Wallet size={24} />
               <div>
-                <span>رصيد المحفظة</span>
+                <span>{t('student.rewards.wallet')}</span>
                 <strong>{formatMoney(data?.rewardsSummary?.walletBalance ?? 0)}</strong>
               </div>
             </div>
@@ -264,15 +269,15 @@ export default function StudentDashboardPage() {
               className="rewards-referral-box"
               onClick={() => copyReferralCode(referralCode)}
             >
-              <span>كود الإحالة — انسخ وشارك</span>
+              <span>{t('student.rewards.referralCopy')}</span>
               <div className="rewards-referral-row">
                 <code>{referralCode || '—'}</code>
                 <Copy size={18} />
               </div>
             </button>
             <div className="dashboard-panel-footer">
-              <Link to="/student/wallet"><Button fullWidth variant="secondary" icon={<Wallet size={16} />}>المحفظة</Button></Link>
-              <Link to="/student/rewards"><Button fullWidth variant="ghost" icon={<Gift size={16} />}>المكافآت والإحالات</Button></Link>
+              <Link to="/student/rewards"><Button fullWidth variant="secondary" icon={<Gift size={16} />}>{t('student.rewards.viewRewards')}</Button></Link>
+              <Link to="/student/profile"><Button fullWidth variant="ghost" icon={<Wallet size={16} />}>{t('student.rewards.viewProfile')}</Button></Link>
             </div>
           </div>
         </Card>
@@ -281,7 +286,7 @@ export default function StudentDashboardPage() {
       <div className="content-grid wide dashboard-panels">
         <Card className="dashboard-panel">
           <div className="dashboard-panel-title-row">
-            <h2><Calendar size={20} /> الجلسات القادمة</h2>
+            <h2><Calendar size={20} /> {t('student.sessions.title')}</h2>
             {(data?.upcomingLiveSessions?.length ?? 0) > 0 ? (
               <Badge variant="info">{data.upcomingLiveSessions.length}</Badge>
             ) : null}
@@ -295,16 +300,16 @@ export default function StudentDashboardPage() {
                       <div className="chip-row">
                         <h4>{session.titleAr}</h4>
                         {session.status === 'LIVE' ? (
-                          <Badge variant="live">مباشر الآن</Badge>
+                          <Badge variant="live">{t('student.sessions.liveNow')}</Badge>
                         ) : (
-                          <Badge variant="info">مجدولة</Badge>
+                          <Badge variant="info">{t('student.sessions.scheduled')}</Badge>
                         )}
                       </div>
                       <p>{session.course?.titleAr}</p>
                       <p><Calendar size={14} /> {fmtDate(session.startAt)}</p>
                     </div>
                     <Link to="/student/live">
-                      <Button size="sm" variant="outline" icon={<Video size={14} />}>انضمام</Button>
+                      <Button size="sm" variant="outline" icon={<Video size={14} />}>{t('student.sessions.join')}</Button>
                     </Link>
                   </div>
                 ))}
@@ -383,17 +388,11 @@ export default function StudentDashboardPage() {
         <div className="course-list-grid dashboard-courses">
           {(data?.popularCourses || []).length ? (
             data.popularCourses.map((course: any) => (
-              <CourseCard
+              <StudentCourseCard
                 key={course.id}
-                title={course.titleAr}
-                category={course.category?.nameAr || 'دورة'}
-                instructor={course.instructor?.fullName}
-                imageUrl={course.coverImage}
-                price={Number(course.discountPrice ?? course.price)}
-                rating={Number(course.ratingAverage || 0)}
-                duration={`${course._count?.lessons || 0} دروس`}
-                actionLabel="عرض التفاصيل"
-                onAction={() => navigate(`/student/courses/${course.id}`)}
+                course={course}
+                isEnrolled={false}
+                onPrimaryAction={() => navigate(`/student/courses/${course.id}`)}
               />
             ))
           ) : (
@@ -412,17 +411,11 @@ export default function StudentDashboardPage() {
         <div className="course-list-grid dashboard-courses">
           {(data?.recommendedCourses || []).length ? (
             data.recommendedCourses.map((course: any) => (
-              <CourseCard
+              <StudentCourseCard
                 key={course.id}
-                title={course.titleAr}
-                category={course.category?.nameAr || 'دورة'}
-                instructor={course.instructor?.fullName}
-                imageUrl={course.coverImage}
-                price={Number(course.discountPrice ?? course.price)}
-                rating={Number(course.ratingAverage || 0)}
-                duration={`${course._count?.lessons || 0} دروس`}
-                actionLabel="عرض التفاصيل"
-                onAction={() => navigate(`/student/courses/${course.id}`)}
+                course={course}
+                isEnrolled={false}
+                onPrimaryAction={() => navigate(`/student/courses/${course.id}`)}
               />
             ))
           ) : (

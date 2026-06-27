@@ -1,4 +1,5 @@
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, DollarSign, Image, Layers, Save, Upload,
@@ -17,31 +18,6 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { formatMoney } from '../../utils/formatMoney';
 import { mediaUrl } from '../../utils/mediaUrl';
-
-const STEPS = [
-  { id: '1', label: 'البيانات الأساسية', icon: BookOpen },
-  { id: '2', label: 'تفاصيل التعلم', icon: Layers },
-  { id: '3', label: 'التسعير', icon: DollarSign },
-  { id: '4', label: 'المراجعة', icon: CheckCircle2 },
-];
-
-const levelLabels: Record<string, string> = {
-  BEGINNER: 'مبتدئ',
-  INTERMEDIATE: 'متوسط',
-  ADVANCED: 'متقدم',
-};
-
-const typeLabels: Record<string, string> = {
-  RECORDED: 'مسجل',
-  LIVE: 'مباشر',
-  MIXED: 'مختلط',
-};
-
-const languageOptions = [
-  { label: 'العربية', value: 'ar' },
-  { label: 'English', value: 'en' },
-  { label: 'العربية والإنجليزية', value: 'ar-en' },
-];
 
 const initial = {
   titleAr: '',
@@ -72,22 +48,24 @@ function CoverUploadField({
   onUpload: (file: File) => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation('courses');
+  const { t: tc } = useTranslation('common');
   const inputRef = useRef<HTMLInputElement>(null);
   const previewSrc = mediaUrl(value);
 
   return (
     <div className="course-cover-field">
       <label className="field">
-        <span>صورة الغلاف</span>
+        <span>{t('form.cover.label')}</span>
         <div className="course-cover-dropzone">
           <div className="course-cover-preview">
             {previewSrc ? (
-              <img src={previewSrc} alt="معاينة غلاف الكورس" />
+              <img src={previewSrc} alt={t('form.cover.previewAlt')} />
             ) : (
               <div className="course-cover-empty">
                 <Image size={32} />
-                <span>لم تُرفع صورة بعد</span>
-                <small>PNG أو JPG — يُفضّل 1280×720</small>
+                <span>{t('form.cover.empty')}</span>
+                <small>{t('form.cover.hint')}</small>
               </div>
             )}
           </div>
@@ -110,16 +88,16 @@ function CoverUploadField({
               icon={<Upload size={16} />}
               onClick={() => inputRef.current?.click()}
             >
-              {previewSrc ? 'تغيير الصورة' : 'رفع صورة الغلاف'}
+              {previewSrc ? t('form.cover.change') : t('form.cover.upload')}
             </Button>
             {previewSrc ? (
               <Button type="button" variant="outline" onClick={onRemove}>
-                إزالة
+                {tc('actions.remove')}
               </Button>
             ) : null}
           </div>
         </div>
-        <small className="field-helper">صورة جذابة تزيد من معدل التسجيل في الكورس.</small>
+        <small className="field-helper">{t('form.cover.helper')}</small>
       </label>
     </div>
   );
@@ -128,6 +106,8 @@ function CoverUploadField({
 const linesToList = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean);
 
 export default function InstructorCourseFormPage() {
+  const { t } = useTranslation('courses');
+  const { t: tc } = useTranslation('common');
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
@@ -143,6 +123,22 @@ export default function InstructorCourseFormPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [confirmSave, setConfirmSave] = useState(false);
   const [saveMode, setSaveMode] = useState<'stay' | 'builder'>('builder');
+
+  const steps = useMemo(() => [
+    { id: '1', label: t('form.steps.basic'), icon: BookOpen },
+    { id: '2', label: t('form.steps.details'), icon: Layers },
+    { id: '3', label: t('form.steps.pricing'), icon: DollarSign },
+    { id: '4', label: t('form.steps.review'), icon: CheckCircle2 },
+  ], [t]);
+
+  const languageOptions = useMemo(() => [
+    { label: t('form.languages.ar'), value: 'ar' },
+    { label: t('form.languages.en'), value: 'en' },
+    { label: t('form.languages.ar-en'), value: 'ar-en' },
+  ], [t]);
+
+  const levelLabel = (level: string) => t(`form.levels.${level}`, { defaultValue: level });
+  const typeLabel = (type: string) => t(`form.types.${type}`, { defaultValue: type });
 
   useEffect(() => {
     instructorApi.categories().then(setCategories);
@@ -335,11 +331,11 @@ export default function InstructorCourseFormPage() {
   return (
     <div className="page-grid course-form-page">
       <PageHeader
-        title={isEdit ? 'تعديل الكورس' : 'إنشاء كورس جديد'}
-        subtitle="أكمل الخطوات الأربع لحفظ الكورس كمسودة ثم أضف المحتوى"
+        title={isEdit ? t('form.editTitle') : t('form.createTitle')}
+        subtitle={t('form.subtitle')}
         breadcrumb={[
-          { label: 'كورساتي', to: '/instructor/courses' },
-          { label: isEdit ? 'تعديل' : 'إنشاء' },
+          { label: t('management.title'), to: '/instructor/courses' },
+          { label: isEdit ? tc('actions.edit') : tc('actions.create') },
         ]}
       />
 
@@ -351,7 +347,7 @@ export default function InstructorCourseFormPage() {
       </div>
 
       <nav className="wizard-steps course-wizard-steps" aria-label="خطوات إنشاء الكورس">
-        {STEPS.map((s) => {
+        {steps.map((s) => {
           const Icon = s.icon;
           const num = Number(s.id);
           const current = Number(step);
@@ -583,14 +579,16 @@ export default function InstructorCourseFormPage() {
                 </div>
                 <div className="course-review-body">
                   <div className="course-review-head">
-                    <h3>{form.titleAr || 'عنوان الكورس'}</h3>
-                    <Badge variant="default">مسودة</Badge>
+                    <div className="course-review-title-row">
+                      <Badge variant="default">مسودة</Badge>
+                      <h3>{form.titleAr || 'عنوان الكورس'}</h3>
+                    </div>
                   </div>
                   <p className="course-review-desc">{form.shortDescriptionAr || '—'}</p>
                   <div className="course-review-meta">
                     <span>{categoryName}</span>
-                    <span>{levelLabels[form.level] || form.level}</span>
-                    <span>{typeLabels[form.type] || form.type}</span>
+                    <span>{levelLabel(form.level)}</span>
+                    <span>{typeLabel(form.type)}</span>
                     <span>{languageOptions.find((l) => l.value === form.language)?.label || form.language}</span>
                   </div>
                   {form.introVideo ? (
@@ -625,14 +623,14 @@ export default function InstructorCourseFormPage() {
             size="lg"
             className="course-form-prev-btn"
             disabled={step === '1'}
-            icon={<ArrowRight size={18} />}
+            icon={<ArrowLeft size={18} />}
             onClick={goPrev}
           >
             السابق
           </Button>
           <div className="course-form-actions-group">
             {step !== '4' ? (
-              <Button type="button" size="lg" icon={<ArrowLeft size={18} />} onClick={goNext}>
+              <Button type="button" size="lg" icon={<ArrowRight size={18} />} onClick={goNext}>
                 التالي
               </Button>
             ) : (

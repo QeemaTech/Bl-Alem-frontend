@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Download, Plus, Shield, UserCheck, Users } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { UsersTable } from '../../components/admin/users/UsersTable';
-import { fmtDate, roleLabels, statusLabels } from '../../components/admin/users/userShared';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -14,8 +14,8 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminUserLabels } from '../../hooks/useAdminUserLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-import { fmtMoney } from '../../utils/adminFormatters';
 
 const emptyForm = {
   fullName: '',
@@ -24,24 +24,21 @@ const emptyForm = {
   password: '',
   role: 'STUDENT',
   status: 'ACTIVE',
-  preferredLanguage: 'ar',
 };
 
-const exportColumns = [
-  { key: 'id', header: 'رقم المستخدم' },
-  { key: 'fullName', header: 'الاسم' },
-  { key: 'email', header: 'البريد' },
-  { key: 'phone', header: 'الهاتف' },
-  { key: 'role', header: 'الدور' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'wallet', header: 'المحفظة' },
-  { key: 'activity', header: 'النشاط' },
-  { key: 'joinedAt', header: 'تاريخ التسجيل' },
-];
-
 export default function AdminUsersPage() {
+  const { t } = useTranslation(['users', 'common']);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const {
+    roleLabels,
+    statusLabels,
+    fmtDate,
+    fmtMoney,
+    activityLabel,
+    empty,
+  } = useAdminUserLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -52,6 +49,21 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.users.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'fullName', header: cols.fullName },
+      { key: 'email', header: cols.email },
+      { key: 'phone', header: cols.phone },
+      { key: 'role', header: cols.role },
+      { key: 'status', header: cols.status },
+      { key: 'wallet', header: cols.wallet },
+      { key: 'activity', header: cols.activity },
+      { key: 'joinedAt', header: cols.joinedAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -89,39 +101,39 @@ export default function AdminUsersPage() {
   const roleChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = roleLabels[i.role] || i.role;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.role;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: roleLabels[key] || key,
+      value,
+    }));
+  }, [items, roleLabels]);
 
   const statusChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = statusLabels[i.status] || i.status;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.status;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
-
-  const activityLabel = (user: any) => {
-    if (user.role === 'INSTRUCTOR') return `${user._count?.courses ?? 0} كورس`;
-    if (user.role === 'STUDENT') return `${user._count?.enrollments ?? 0} اشتراك`;
-    return '—';
-  };
+    return Object.entries(counts).map(([key, value]) => ({
+      label: statusLabels[key] || key,
+      value,
+    }));
+  }, [items, statusLabels]);
 
   const tableRows = useMemo(() => filteredItems.map((row) => ({
     id: row.id,
     fullName: row.fullName,
     email: row.email,
-    phone: row.phone || '—',
+    phone: row.phone || empty,
     role: roleLabels[row.role] || row.role,
     status: statusLabels[row.status] || row.status,
     wallet: fmtMoney(Number(row.wallet?.balance || 0)),
     activity: activityLabel(row),
     joinedAt: fmtDate(row.createdAt),
     _raw: row,
-  })), [filteredItems]);
+  })), [filteredItems, roleLabels, statusLabels, fmtDate, fmtMoney, activityLabel, empty]);
 
   const openCreate = () => {
     setEditing(null);
@@ -138,7 +150,6 @@ export default function AdminUsersPage() {
       password: '',
       role: user.role,
       status: user.status,
-      preferredLanguage: user.preferredLanguage || 'ar',
     });
     setFormOpen(true);
   };
@@ -155,23 +166,23 @@ export default function AdminUsersPage() {
         phone: form.phone.trim() || null,
         role: form.role,
         status: form.status,
-        preferredLanguage: form.preferredLanguage,
+        preferredLanguage: editing?.preferredLanguage || 'ar',
       };
       if (editing) {
         if (form.password.trim()) payload.password = form.password;
         await adminApi.updateUser(editing.id, payload);
-        showToast('تم تحديث المستخدم.', 'success');
+        showToast(t('admin.users.toast.updated'), 'success');
       } else {
         payload.password = form.password.trim() || 'Password123!';
         await adminApi.createUser(payload);
-        showToast('تم إنشاء المستخدم.', 'success');
+        showToast(t('admin.users.toast.created'), 'success');
       }
       setFormOpen(false);
       setEditing(null);
       setForm(emptyForm);
       await load();
     } catch {
-      showToast('تعذّر حفظ بيانات المستخدم.', 'error');
+      showToast(t('admin.users.toast.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +191,10 @@ export default function AdminUsersPage() {
   const toggleStatus = async (user: any) => {
     const next = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     await adminApi.userStatus(user.id, next);
-    showToast(next === 'ACTIVE' ? 'تم تفعيل الحساب.' : 'تم إيقاف الحساب.', 'success');
+    showToast(
+      next === 'ACTIVE' ? t('admin.users.toast.activated') : t('admin.users.toast.suspended'),
+      'success',
+    );
     await load();
   };
 
@@ -188,77 +202,81 @@ export default function AdminUsersPage() {
     if (!deleteTarget) return;
     try {
       await adminApi.deleteUser(deleteTarget.id);
-      showToast('تم حذف المستخدم.', 'success');
+      showToast(t('admin.users.toast.deleted'), 'success');
       setDeleteTarget(null);
       await load();
     } catch {
-      showToast('تعذّر حذف المستخدم.', 'error');
+      showToast(t('admin.users.toast.deleteError'), 'error');
       setDeleteTarget(null);
     }
   };
 
   const handleExport = () => {
-    exportTableToExcel('المستخدمون', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('admin.users.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="المستخدمون" subtitle="إدارة جميع حسابات المنصة" />
+        <PageHeader title={t('admin.users.title')} subtitle={t('admin.users.subtitle')} />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={openCreate}>
-            إضافة مستخدم
+            {t('admin.users.addUser')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي المستخدمين" value={String(stats.total)} icon={Users} />
-        <StatCard title="الطلاب" value={String(stats.students)} icon={UserCheck} />
-        <StatCard title="المحاضرون" value={String(stats.instructors)} icon={Users} />
-        <StatCard title="المشرفون" value={String(stats.admins)} icon={Shield} />
-        <StatCard title="نشطون" value={String(stats.active)} icon={UserCheck} />
-        <StatCard title="موقوفون" value={String(stats.suspended)} icon={Users} />
+        <StatCard title={t('admin.users.stats.total')} value={String(stats.total)} icon={Users} />
+        <StatCard title={t('admin.users.stats.students')} value={String(stats.students)} icon={UserCheck} />
+        <StatCard title={t('admin.users.stats.instructors')} value={String(stats.instructors)} icon={Users} />
+        <StatCard title={t('admin.users.stats.admins')} value={String(stats.admins)} icon={Shield} />
+        <StatCard title={t('admin.users.stats.active')} value={String(stats.active)} icon={UserCheck} />
+        <StatCard title={t('admin.users.stats.suspended')} value={String(stats.suspended)} icon={Users} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع الأدوار" type="pie" data={roleChart} />
-        <ReportChart title="توزيع حالات الحسابات" type="pie" data={statusChart} />
+        <ReportChart title={t('admin.users.charts.roleDistribution')} type="pie" data={roleChart} />
+        <ReportChart title={t('admin.users.charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         className="filter-bar--modern"
         searchValue={search}
-        searchPlaceholder="بحث بالاسم، البريد، أو الهاتف..."
+        searchPlaceholder={t('admin.users.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setRoleFilter(''); setStatusFilter(''); }}
         resetDisabled={!hasActiveFilters}
         searchIconSize={20}
       >
         <Select
-          label="الدور"
+          label={t('filters.role')}
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
           options={[
-            { label: 'كل الأدوار', value: '' },
-            { label: 'طالب', value: 'STUDENT' },
-            { label: 'محاضر', value: 'INSTRUCTOR' },
-            { label: 'مشرف', value: 'SUPER_ADMIN' },
+            { label: t('filters.allRoles'), value: '' },
+            { label: roleLabels.STUDENT, value: 'STUDENT' },
+            { label: roleLabels.INSTRUCTOR, value: 'INSTRUCTOR' },
+            { label: roleLabels.SUPER_ADMIN, value: 'SUPER_ADMIN' },
           ]}
         />
         <Select
-          label="الحالة"
+          label={t('filters.accountStatus')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'نشط', value: 'ACTIVE' },
-            { label: 'بانتظار التفعيل', value: 'PENDING' },
-            { label: 'موقوف', value: 'SUSPENDED' },
-            { label: 'مرفوض', value: 'REJECTED' },
+            { label: t('filters.allStatuses'), value: '' },
+            { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+            { label: statusLabels.PENDING, value: 'PENDING' },
+            { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+            { label: statusLabels.REJECTED, value: 'REJECTED' },
           ]}
         />
       </FilterBar>
@@ -274,60 +292,53 @@ export default function AdminUsersPage() {
 
       <Modal
         isOpen={formOpen}
-        title={editing ? 'تعديل المستخدم' : 'إضافة مستخدم'}
+        title={editing ? t('admin.users.editUser') : t('admin.users.addUser')}
         onClose={() => { setFormOpen(false); setEditing(null); setForm(emptyForm); }}
       >
         <form className="stack-sm" onSubmit={saveUser}>
-          <Input label="الاسم الكامل" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
-          <Input label="البريد الإلكتروني" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-          <Input label="الهاتف" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
+          <Input label={t('form.fullName')} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
+          <Input label={t('form.email')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          <Input label={t('form.phone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} dir="ltr" />
           <Input
-            label={editing ? 'كلمة المرور (اتركها فارغة بدون تغيير)' : 'كلمة المرور'}
+            label={editing ? t('form.passwordOptional') : t('form.password')}
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required={!editing}
           />
           <Select
-            label="الدور"
+            label={t('form.role')}
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
             options={[
-              { label: 'طالب', value: 'STUDENT' },
-              { label: 'محاضر', value: 'INSTRUCTOR' },
-              { label: 'مشرف', value: 'SUPER_ADMIN' },
+              { label: roleLabels.STUDENT, value: 'STUDENT' },
+              { label: roleLabels.INSTRUCTOR, value: 'INSTRUCTOR' },
+              { label: roleLabels.SUPER_ADMIN, value: 'SUPER_ADMIN' },
             ]}
             disabled={Boolean(editing)}
           />
           <Select
-            label="حالة الحساب"
+            label={t('form.accountStatus')}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
             options={[
-              { label: 'نشط', value: 'ACTIVE' },
-              { label: 'بانتظار التفعيل', value: 'PENDING' },
-              { label: 'موقوف', value: 'SUSPENDED' },
-              { label: 'مرفوض', value: 'REJECTED' },
+              { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+              { label: statusLabels.PENDING, value: 'PENDING' },
+              { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
+              { label: statusLabels.REJECTED, value: 'REJECTED' },
             ]}
           />
-          <Select
-            label="اللغة المفضلة"
-            value={form.preferredLanguage}
-            onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}
-            options={[
-              { label: 'العربية', value: 'ar' },
-              { label: 'English', value: 'en' },
-            ]}
-          />
-          <Button loading={submitting}>{editing ? 'حفظ التعديلات' : 'إنشاء المستخدم'}</Button>
+          <Button loading={submitting}>
+            {editing ? t('actions.saveChanges') : t('admin.users.createUser')}
+          </Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف المستخدم"
-        message={`هل أنت متأكد من حذف "${deleteTarget?.fullName}"؟ سيتم حذف جميع بياناته.`}
-        confirmLabel="حذف"
+        title={t('admin.users.deleteTitle')}
+        message={t('admin.users.deleteMessage', { name: deleteTarget?.fullName })}
+        confirmLabel={t('actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

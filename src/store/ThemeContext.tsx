@@ -26,8 +26,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
 
   const applyTheme = useCallback((next: 'light' | 'dark') => {
-    document.documentElement.classList.toggle('dark', next === 'dark');
-    document.documentElement.style.colorScheme = next;
+    const root = document.documentElement;
+    root.classList.add('theme-transition');
+    root.classList.toggle('dark', next === 'dark');
+    root.style.colorScheme = next;
+    window.setTimeout(() => root.classList.remove('theme-transition'), 280);
   }, []);
 
   useEffect(() => {

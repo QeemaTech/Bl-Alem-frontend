@@ -1,0 +1,127 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "ACTIVE": "فعّال",
+      "INACTIVE": "غير فعّال"
+    }
+  },
+  "actions": {
+    "edit": "تعديل",
+    "activate": "تفعيل",
+    "deactivate": "إيقاف",
+    "delete": "حذف",
+    "exportExcel": "تصدير Excel",
+    "review": "مراجعة"
+  },
+  "admin": {
+    "categories": {
+      "title": "التصنيفات",
+      "subtitle": "إدارة تصنيفات الدورات على المنصة",
+      "addCategory": "إضافة تصنيف",
+      "editCategory": "تعديل التصنيف",
+      "createCategory": "إنشاء التصنيف",
+      "saveChanges": "حفظ التعديلات",
+      "deleteTitle": "حذف التصنيف",
+      "deleteMessage": "هل أنت متأكد من حذف تصنيف \"{{name}}\"؟",
+      "backToCategories": "العودة للتصنيفات",
+      "notFound": {
+        "title": "التصنيف غير موجود",
+        "description": "لم نتمكن من العثور على هذا التصنيف."
+      },
+      "stats": {
+        "total": "إجمالي التصنيفات",
+        "active": "فعّالة",
+        "inactive": "غير فعّالة",
+        "totalCourses": "إجمالي الكورسات"
+      },
+      "charts": {
+        "statusDistribution": "توزيع حالات التصنيفات"
+      },
+      "filters": {
+        "allStatuses": "كل الحالات",
+        "status": "الحالة",
+        "searchPlaceholder": "بحث بالاسم أو الرابط..."
+      },
+      "table": {
+        "title": "قائمة التصنيفات",
+        "count": "{{count}} تصنيف",
+        "emptyTitle": "لا توجد تصنيفات",
+        "emptyDescription": "أضف تصنيفاً جديداً لتنظيم الدورات.",
+        "columns": {
+          "id": "رقم التصنيف",
+          "icon": "الأيقونة",
+          "nameAr": "الاسم العربي",
+          "nameEn": "الاسم الإنجليزي",
+          "slug": "الرابط",
+          "courses": "الكورسات",
+          "status": "الحالة",
+          "createdAt": "تاريخ الإنشاء",
+          "actions": "الإجراءات"
+        }
+      },
+      "coursesTable": {
+        "title": "الكورسات في هذا التصنيف",
+        "count": "{{count}} كورس",
+        "emptyTitle": "لا توجد كورسات",
+        "emptyDescription": "لم يتم ربط أي دورة بهذا التصنيف بعد.",
+        "columns": {
+          "id": "رقم الكورس",
+          "title": "العنوان",
+          "instructor": "المحاضر",
+          "students": "الطلاب",
+          "lessons": "الدروس",
+          "price": "السعر",
+          "status": "الحالة",
+          "updatedAt": "آخر تحديث",
+          "actions": "الإجراءات"
+        }
+      },
+      "detail": {
+        "metaAriaLabel": "تفاصيل التصنيف",
+        "metaTitle": "تفاصيل التصنيف",
+        "slug": "الرابط (slug)",
+        "courseCount": "عدد الكورسات",
+        "icon": "الأيقونة",
+        "image": "الصورة",
+        "createdAt": "تاريخ الإنشاء",
+        "updatedAt": "آخر تحديث"
+      },
+      "form": {
+        "nameAr": "الاسم العربي",
+        "nameEn": "الاسم الإنجليزي",
+        "slug": "الرابط (slug)",
+        "slugPlaceholder": "programming",
+        "icon": "الأيقونة",
+        "iconPlaceholder": "code",
+        "image": "رابط الصورة (اختياري)",
+        "imagePlaceholder": "https://...",
+        "status": "الحالة"
+      },
+      "export": {
+        "sheetName": "التصنيفات",
+        "columns": {
+          "id": "رقم التصنيف",
+          "nameAr": "الاسم العربي",
+          "nameEn": "الاسم الإنجليزي",
+          "slug": "الرابط",
+          "icon": "الأيقونة",
+          "courses": "عدد الكورسات",
+          "status": "الحالة",
+          "createdAt": "تاريخ الإنشاء"
+        }
+      },
+      "toast": {
+        "updated": "تم تحديث التصنيف.",
+        "created": "تم إنشاء التصنيف.",
+        "saveError": "تعذّر حفظ التصنيف.",
+        "activated": "تم تفعيل التصنيف.",
+        "deactivated": "تم إيقاف التصنيف.",
+        "deleted": "تم حذف التصنيف.",
+        "deleteError": "لا يمكن حذف تصنيف مرتبط بدورات.",
+        "loadError": "تعذّر تحميل التصنيف.",
+        "statusError": "تعذّر تحديث الحالة."
+      }
+    }
+  }
+}

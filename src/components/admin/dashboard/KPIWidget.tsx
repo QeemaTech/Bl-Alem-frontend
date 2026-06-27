@@ -18,7 +18,7 @@ export function KPIWidget({
   title,
   value,
   trend,
-  trendLabel = 'عن الشهر الماضي',
+  trendLabel,
   sparkline,
   icon: Icon,
   variant = 'primary',

@@ -1,0 +1,171 @@
+{
+  "title": "التقارير",
+  "subtitle": "إحصائيات وتحليلات أداء المنصة",
+  "tabs": {
+    "revenue": "الإيرادات",
+    "users": "المستخدمين",
+    "courses": "الكورسات",
+    "instructors": "المحاضرين",
+    "enrollments": "الاشتراكات"
+  },
+  "tabTitles": {
+    "revenue": "تقرير الإيرادات",
+    "users": "تقرير المستخدمين",
+    "courses": "تقرير الكورسات",
+    "instructors": "تقرير المحاضرين",
+    "enrollments": "تقرير الاشتراكات"
+  },
+  "summary": {
+    "revenue": {
+      "totalRevenue": "إجمالي الإيرادات (ج.م)",
+      "paymentsCount": "عدد المدفوعات",
+      "monthRevenue": "إيرادات الشهر الحالي",
+      "monthPayments": "مدفوعات الشهر الحالي",
+      "avgPayment": "متوسط قيمة الدفع",
+      "totalDiscount": "إجمالي الخصومات",
+      "refundedCount": "عمليات مستردة",
+      "refundedAmount": "مبلغ المستردات"
+    },
+    "users": {
+      "total": "إجمالي المستخدمين",
+      "students": "الطلاب",
+      "instructors": "المحاضرين",
+      "admins": "المشرفين",
+      "active": "حسابات نشطة",
+      "suspended": "حسابات موقوفة",
+      "newThisMonth": "جدد هذا الشهر"
+    },
+    "courses": {
+      "total": "إجمالي الكورسات",
+      "published": "منشورة",
+      "pending": "قيد المراجعة",
+      "draft": "مسودات",
+      "rejected": "مرفوضة",
+      "suspended": "موقوفة"
+    },
+    "instructors": {
+      "total": "إجمالي المحاضرين",
+      "pending": "قيد المراجعة",
+      "approved": "معتمدين",
+      "rejected": "مرفوضين",
+      "suspended": "موقوفين"
+    },
+    "enrollments": {
+      "total": "إجمالي الاشتراكات",
+      "active": "نشطة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة",
+      "avgProgress": "متوسط الإنجاز %",
+      "completionRate": "نسبة الإكمال %"
+    }
+  },
+  "table": {
+    "revenue": {
+      "title": "تفاصيل المدفوعات",
+      "columns": {
+        "id": "رقم العملية",
+        "student": "الطالب",
+        "email": "البريد",
+        "course": "الكورس",
+        "amount": "المبلغ (ج.م)",
+        "discount": "الخصم",
+        "gateway": "بوابة الدفع",
+        "date": "التاريخ"
+      }
+    },
+    "users": {
+      "title": "قائمة المستخدمين",
+      "columns": {
+        "fullName": "الاسم",
+        "email": "البريد",
+        "role": "الدور",
+        "status": "الحالة",
+        "createdAt": "تاريخ التسجيل"
+      }
+    },
+    "courses": {
+      "title": "أكثر الكورسات اشتراكاً",
+      "columns": {
+        "titleAr": "الكورس",
+        "instructor": "المحاضر",
+        "category": "التصنيف",
+        "status": "الحالة",
+        "price": "السعر (ج.م)",
+        "enrollments": "المشتركين"
+      }
+    },
+    "instructors": {
+      "title": "تفاصيل المحاضرين",
+      "columns": {
+        "fullName": "الاسم",
+        "email": "البريد",
+        "specialization": "التخصص",
+        "approvalStatus": "حالة الاعتماد",
+        "coursesCount": "عدد الكورسات",
+        "totalEarnings": "الأرباح (ج.م)",
+        "joinedAt": "تاريخ الانضمام"
+      }
+    },
+    "enrollments": {
+      "title": "تفاصيل الاشتراكات",
+      "columns": {
+        "student": "الطالب",
+        "course": "الكورس",
+        "status": "الحالة",
+        "progress": "نسبة الإنجاز %",
+        "enrolledAt": "تاريخ الاشتراك",
+        "completedAt": "تاريخ الإكمال"
+      }
+    }
+  },
+  "charts": {
+    "revenue": {
+      "monthly": "الإيرادات الشهرية",
+      "gateway": "الإيرادات حسب بوابة الدفع"
+    },
+    "users": {
+      "registrations": "التسجيلات الشهرية",
+      "roles": "توزيع الأدوار",
+      "status": "حالة الحسابات"
+    },
+    "courses": {
+      "status": "الكورسات حسب الحالة",
+      "category": "الكورسات حسب التصنيف"
+    },
+    "instructors": {
+      "approval": "حالة اعتماد المحاضرين",
+      "monthly": "انضمام المحاضرين شهرياً"
+    },
+    "enrollments": {
+      "monthly": "الاشتراكات الشهرية",
+      "status": "الاشتراكات حسب الحالة"
+    }
+  },
+  "dataLabels": {
+    "students": "طلاب",
+    "instructors": "محاضرين",
+    "admins": "مشرفين",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "others": "آخرون",
+    "published": "منشور",
+    "pendingReview": "قيد المراجعة",
+    "draft": "مسودة",
+    "rejected": "مرفوض",
+    "approved": "معتمد",
+    "completed": "مكتمل",
+    "cancelled": "ملغي",
+    "unspecified": "غير محدد"
+  },
+  "export": {
+    "button": "تصدير Excel",
+    "summarySheet": "ملخص",
+    "detailsSheet": "التفاصيل",
+    "summaryItem": "البند",
+    "summaryValue": "القيمة"
+  },
+  "empty": {
+    "title": "لا توجد بيانات",
+    "description": "لم يتم العثور على سجلات لهذا التقرير."
+  }
+}

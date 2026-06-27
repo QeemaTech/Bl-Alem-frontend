@@ -1,0 +1,139 @@
+{
+  "empty": "—",
+  "title": "Coupons",
+  "subtitle": "Manage discount codes — separate from referral codes",
+  "stats": {
+    "total": "Total coupons",
+    "active": "Active",
+    "inactive": "Inactive",
+    "expired": "Expired",
+    "totalUses": "Total uses"
+  },
+  "charts": {},
+  "filters": {
+    "searchPlaceholder": "Search by coupon code...",
+    "status": "Status",
+    "type": "Type",
+    "allStatuses": "All statuses",
+    "allTypes": "All types"
+  },
+  "table": {
+    "title": "Coupon list",
+    "recordCount": "{{count}} coupons",
+    "emptyTitle": "No coupons",
+    "emptyDescription": "Add a new discount coupon for the platform.",
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "maxUses": "Max uses",
+      "usedCount": "Uses",
+      "startAt": "Start date",
+      "expiresAt": "Expires",
+      "minOrderAmount": "Min order",
+      "courses": "Courses",
+      "status": "Status",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "user": "Student",
+      "amount": "Amount",
+      "payment": "Payment",
+      "date": "Date"
+    }
+  },
+  "labels": {
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "EXPIRED": "Expired"
+    },
+    "type": {
+      "PERCENTAGE": "Percentage",
+      "FIXED": "Fixed amount"
+    },
+    "courses": {
+      "all": "All courses",
+      "specific": "Selected courses"
+    },
+    "unlimited": "∞"
+  },
+  "form": {
+    "code": "Coupon code",
+    "codePlaceholder": "BI20",
+    "discountType": "Discount type",
+    "percentageOption": "Percentage (%)",
+    "fixedOption": "Fixed amount (EGP)",
+    "percentageValue": "Discount percentage (%)",
+    "fixedValue": "Discount amount (EGP)",
+    "startAt": "Start date (optional)",
+    "expiresAt": "End date (optional)",
+    "maxUses": "Max uses (optional)",
+    "maxUsesPlaceholder": "Leave empty for unlimited use",
+    "minOrderAmount": "Minimum order (EGP) — optional",
+    "minOrderAmountPlaceholder": "e.g. 100",
+    "appliesToAll": "Applies to all courses",
+    "appliedCourses": "Applied courses",
+    "noPublishedCourses": "No published courses.",
+    "status": "Status"
+  },
+  "modal": {
+    "create": "Add coupon",
+    "edit": "Edit coupon",
+    "detailTitle": "Coupon details: {{code}}",
+    "usageHistory": "Usage history",
+    "loadingUsage": "Loading usage history...",
+    "noUsage": "This coupon has not been used yet.",
+    "detail": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "usage": "Usage",
+      "start": "Start",
+      "end": "End",
+      "minOrder": "Min order"
+    }
+  },
+  "actions": {
+    "add": "Add coupon",
+    "view": "View",
+    "edit": "Edit",
+    "disable": "Disable",
+    "enable": "Enable",
+    "delete": "Delete",
+    "saveChanges": "Save changes",
+    "create": "Create coupon",
+    "exportExcel": "Export Excel"
+  },
+  "toast": {
+    "loadDetailFailed": "Could not load coupon details.",
+    "selectCourseOrAll": "Select at least one course or enable \"All courses\".",
+    "updated": "Coupon updated.",
+    "created": "Coupon created.",
+    "saveFailed": "Could not save coupon.",
+    "enabled": "Coupon enabled.",
+    "disabled": "Coupon disabled.",
+    "statusFailed": "Could not update coupon status.",
+    "deleted": "Coupon deleted.",
+    "deleteFailed": "Could not delete coupon."
+  },
+  "export": {
+    "sheetName": "Coupons",
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "maxUses": "Max uses",
+      "usedCount": "Uses",
+      "startAt": "Start date",
+      "expiresAt": "End date",
+      "minOrderAmount": "Min order",
+      "courses": "Courses",
+      "status": "Status",
+      "createdAt": "Created"
+    }
+  },
+  "confirm": {
+    "deleteTitle": "Delete coupon",
+    "deleteMessage": "Are you sure you want to delete coupon \"{{code}}\"? It will be deactivated while keeping past order records."
+  }
+}

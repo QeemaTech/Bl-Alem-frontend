@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -10,6 +11,7 @@ import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { useToast } from '../../components/ui/Toast';
 
 export default function AdminNotificationDetailPage() {
+  const { t } = useTranslation('notifications');
   const { notificationId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -28,14 +30,14 @@ export default function AdminNotificationDetailPage() {
           setNotification(data);
         }
       } catch {
-        showToast('تعذّر تحميل الإشعار.', 'error');
+        showToast(t('admin.toast.loadDetailFailed'), 'error');
         setNotification(null);
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [notificationId]);
+  }, [notificationId, showToast, t]);
 
   if (loading) return <DashboardSkeleton />;
 
@@ -43,11 +45,11 @@ export default function AdminNotificationDetailPage() {
     return (
       <div className="page-grid admin-notification-detail-page">
         <EmptyState
-          title="الإشعار غير موجود"
-          description="لم نتمكن من العثور على هذا الإشعار."
+          title={t('admin.detail.notFoundTitle')}
+          description={t('admin.detail.notFoundDescription')}
         />
         <Button variant="outline" onClick={() => navigate('/admin/notifications')}>
-          العودة للإشعارات
+          {t('admin.backToList')}
         </Button>
       </div>
     );
@@ -57,7 +59,7 @@ export default function AdminNotificationDetailPage() {
     <div className="page-grid admin-notification-detail-page">
       <Link to="/admin/notifications" className="support-ticket-back">
         <ArrowRight size={18} aria-hidden="true" />
-        العودة للإشعارات
+        {t('admin.backToList')}
       </Link>
 
       <Card className="support-ticket-page-card">

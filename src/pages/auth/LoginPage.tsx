@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, Phone } from '@/icons';
@@ -60,6 +61,10 @@ function Field({
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation('auth');
+  const { t: tv } = useTranslation('validation');
+  const { t: te } = useTranslation('errors');
+  const { t: tc } = useTranslation('common');
   const navigate = useNavigate();
   const { login, socialLogin } = useAuth();
   const { showToast } = useToast();
@@ -71,8 +76,10 @@ export default function LoginPage() {
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!identifier.trim()) next.identifier = mode === 'email' ? 'البريد الإلكتروني مطلوب' : 'رقم الهاتف مطلوب';
-    if (mode === 'email' && !password) next.password = 'كلمة المرور مطلوبة';
+    if (!identifier.trim()) {
+      next.identifier = mode === 'email' ? tv('required.email') : tv('required.phone');
+    }
+    if (mode === 'email' && !password) next.password = tv('required.password');
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -89,10 +96,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const user = await login({ identifier, password });
-      showToast('تم تسجيل الدخول بنجاح', 'success');
+      showToast(t('login.success'), 'success');
       navigate(getDashboardPath(user.role), { replace: true });
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'حدث خطأ، حاول مرة أخرى';
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || te('generic');
       showToast(message, 'error');
     } finally {
       setIsSubmitting(false);
@@ -103,11 +110,15 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const demoEmail = `demo.${provider}@bi-alem.com`;
-      const user = await socialLogin({ provider, email: demoEmail, fullName: `مستخدم ${provider}` });
-      showToast(`تم تسجيل الدخول عبر ${provider}`, 'success');
+      const user = await socialLogin({
+        provider,
+        email: demoEmail,
+        fullName: t('login.demoUser', { provider }),
+      });
+      showToast(t('login.socialSuccess', { provider }), 'success');
       navigate(getDashboardPath(user.role), { replace: true });
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'فشل تسجيل الدخول الاجتماعي';
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || t('login.socialFail');
       showToast(message, 'error');
     } finally {
       setIsSubmitting(false);
@@ -122,8 +133,8 @@ export default function LoginPage() {
         </motion.div>
 
         <motion.div variants={item} className="mb-7">
-          <h1 className="mb-1 text-2xl font-extrabold text-on-surface sm:text-3xl">مرحباً بعودتك</h1>
-          <p className="text-on-surface-variant">ادخل بياناتك للوصول إلى لوحة التحكم.</p>
+          <h1 className="mb-1 text-2xl font-extrabold text-on-surface sm:text-3xl">{t('login.title')}</h1>
+          <p className="text-on-surface-variant">{t('login.subtitle')}</p>
         </motion.div>
 
         <motion.div variants={item} className="mb-6 grid grid-cols-2 gap-1 rounded-2xl bg-surface-container-high p-1">
@@ -137,7 +148,7 @@ export default function LoginPage() {
                 mode === value ? 'bg-surface-container text-primary shadow-1' : 'text-on-surface-variant',
               )}
             >
-              {value === 'email' ? 'بالبريد' : 'بالهاتف'}
+              {value === 'email' ? t('login.emailTab') : t('login.phoneTab')}
             </button>
           ))}
         </motion.div>
@@ -147,7 +158,7 @@ export default function LoginPage() {
             <>
               <motion.div variants={item}>
                 <Field
-                  label="البريد الإلكتروني"
+                  label={t('login.emailLabel')}
                   icon={Mail}
                   type="email"
                   placeholder="example@email.com"
@@ -158,7 +169,7 @@ export default function LoginPage() {
               </motion.div>
               <motion.div variants={item}>
                 <Field
-                  label="كلمة المرور"
+                  label={t('login.passwordLabel')}
                   icon={Lock}
                   type="password"
                   placeholder="••••••••"
@@ -171,27 +182,27 @@ export default function LoginPage() {
           ) : (
             <motion.div variants={item}>
               <Field
-                label="رقم الهاتف"
+                label={t('login.phoneLabel')}
                 icon={Phone}
                 type="tel"
                 placeholder="+966500000002"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 error={errors.identifier}
-                helper="سيتم إرسال رمز تحقق OTP"
+                helper={t('login.phoneHelper')}
               />
             </motion.div>
           )}
           <motion.div variants={item}>
             <Button type="submit" size="lg" fullWidth loading={isSubmitting}>
-              {mode === 'phone' ? 'متابعة برمز OTP' : isSubmitting ? 'جاري الدخول...' : 'دخول'}
+              {mode === 'phone' ? t('login.submitOtp') : isSubmitting ? t('login.submitting') : t('login.submit')}
             </Button>
           </motion.div>
         </form>
 
         <motion.div variants={item} className="my-6 flex items-center gap-3 text-on-surface-variant">
           <span className="h-px flex-1 bg-outline" />
-          <span className="text-xs font-semibold">أو</span>
+          <span className="text-xs font-semibold">{tc('or')}</span>
           <span className="h-px flex-1 bg-outline" />
         </motion.div>
 
@@ -211,8 +222,8 @@ export default function LoginPage() {
         </motion.div>
 
         <motion.p variants={item} className="mt-6 text-center text-sm text-on-surface-variant">
-          ليس لديك حساب؟{' '}
-          <Link to="/register" className="font-bold text-primary hover:underline">إنشاء حساب جديد</Link>
+          {t('login.noAccount')}{' '}
+          <Link to="/register" className="font-bold text-primary hover:underline">{t('login.createAccount')}</Link>
         </motion.p>
       </div>
     </motion.div>

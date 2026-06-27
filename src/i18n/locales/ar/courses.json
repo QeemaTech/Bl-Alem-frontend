@@ -1,0 +1,221 @@
+{
+  "management": {
+    "title": "إدارة الكورسات",
+    "subtitle": "أنشئ وعدّل كورساتك وأرسلها للمراجعة",
+    "addCourse": "إضافة كورس"
+  },
+  "tabs": {
+    "all": "الكل",
+    "draft": "مسودة",
+    "pendingReview": "قيد المراجعة",
+    "published": "منشورة",
+    "rejected": "مرفوضة",
+    "suspended": "موقوفة"
+  },
+  "status": {
+    "DRAFT": "مسودة",
+    "PUBLISHED": "منشور",
+    "PENDING_REVIEW": "قيد المراجعة",
+    "REJECTED": "مرفوض",
+    "SUSPENDED": "موقوف"
+  },
+  "actions": {
+    "edit": "تعديل",
+    "content": "المحتوى",
+    "submitReview": "للمراجعة",
+    "delete": "حذف"
+  },
+  "toast": {
+    "submitted": "تم إرسال الكورس للمراجعة.",
+    "submitFailed": "تعذّر إرسال الكورس للمراجعة.",
+    "deleted": "تم حذف الكورس."
+  },
+  "deleteDialog": {
+    "title": "حذف الكورس",
+    "message": "هل أنت متأكد من حذف هذا الكورس؟"
+  },
+  "empty": {
+    "title": "لا توجد كورسات",
+    "allDesc": "ابدأ بإنشاء كورس جديد كمسودة.",
+    "filteredDesc": "لا توجد كورسات بحالة «{{status}}»."
+  },
+  "count": "{{count}} كورس",
+  "countFiltered": "{{count}} كورس — {{status}}",
+  "form": {
+    "steps": {
+      "basic": "البيانات الأساسية",
+      "details": "تفاصيل التعلم",
+      "pricing": "التسعير",
+      "review": "المراجعة"
+    },
+    "levels": {
+      "BEGINNER": "مبتدئ",
+      "INTERMEDIATE": "متوسط",
+      "ADVANCED": "متقدم"
+    },
+    "types": {
+      "RECORDED": "مسجل",
+      "LIVE": "مباشر",
+      "MIXED": "مختلط"
+    },
+    "languages": {
+      "ar": "العربية",
+      "en": "English",
+      "ar-en": "العربية والإنجليزية"
+    },
+    "cover": {
+      "label": "صورة الغلاف",
+      "previewAlt": "معاينة غلاف الكورس",
+      "empty": "لم تُرفع صورة بعد",
+      "hint": "PNG أو JPG — يُفضّل 1280×720",
+      "change": "تغيير الصورة",
+      "upload": "رفع صورة الغلاف",
+      "helper": "صورة جذابة تزيد من معدل التسجيل في الكورس."
+    },
+    "createTitle": "إنشاء كورس جديد",
+    "editTitle": "تعديل الكورس",
+    "subtitle": "أكمل الخطوات الأربع لحفظ الكورس كمسودة ثم أضف المحتوى",
+    "saveDraft": "حفظ كمسودة",
+    "saveAndBuilder": "حفظ والانتقال للمحتوى"
+  },
+  "admin": {
+    "empty": "—",
+    "free": "مجاني",
+    "durationMinutes": "{{count}} دقيقة",
+    "labels": {
+      "status": {
+        "DRAFT": "مسودة",
+        "PENDING_REVIEW": "قيد المراجعة",
+        "APPROVED": "معتمد",
+        "PUBLISHED": "منشور",
+        "REJECTED": "مرفوض",
+        "SUSPENDED": "موقوف"
+      }
+    },
+    "actions": {
+      "detail": "التفاصيل",
+      "approve": "اعتماد",
+      "publish": "نشر",
+      "reject": "رفض",
+      "suspend": "إيقاف",
+      "delete": "حذف",
+      "confirmReject": "تأكيد الرفض",
+      "confirmSuspend": "تأكيد الإيقاف",
+      "exportExcel": "تصدير Excel"
+    },
+    "courses": {
+      "title": "الكورسات",
+      "subtitle": "مراجعة وإدارة دورات المنصة التعليمية",
+      "backToCourses": "العودة للكورسات",
+      "notFound": {
+        "title": "الكورس غير موجود",
+        "description": "لم نتمكن من العثور على هذا الكورس."
+      },
+      "stats": {
+        "total": "إجمالي الكورسات",
+        "published": "منشورة",
+        "pending": "قيد المراجعة",
+        "draft": "مسودات",
+        "rejectedSuspended": "مرفوضة / موقوفة",
+        "totalStudents": "إجمالي الطلاب"
+      },
+      "charts": {
+        "statusDistribution": "توزيع حالات الكورسات"
+      },
+      "filters": {
+        "allStatuses": "كل الحالات",
+        "allCategories": "كل التصنيفات",
+        "status": "الحالة",
+        "category": "التصنيف",
+        "searchPlaceholder": "بحث بالعنوان، المحاضر، أو التصنيف..."
+      },
+      "table": {
+        "title": "قائمة الكورسات",
+        "count": "{{count}} كورس",
+        "emptyTitle": "لا توجد كورسات",
+        "emptyDescription": "ستظهر الدورات هنا عند إنشائها من قبل المحاضرين.",
+        "columns": {
+          "id": "رقم الكورس",
+          "title": "العنوان",
+          "instructor": "المحاضر",
+          "category": "التصنيف",
+          "level": "المستوى",
+          "price": "السعر",
+          "students": "الطلاب",
+          "lessons": "الدروس",
+          "status": "الحالة",
+          "updatedAt": "آخر تحديث",
+          "actions": "الإجراءات"
+        }
+      },
+      "detail": {
+        "instructor": "المحاضر",
+        "overviewAriaLabel": "نظرة عامة على الكورس",
+        "noCover": "بدون صورة",
+        "noShortDesc": "لا يوجد وصف مختصر.",
+        "sections": "{{count}} أقسام",
+        "lessons": "{{count}} درس",
+        "students": "{{count}} طالب",
+        "reviews": "{{count}} تقييم",
+        "metaAriaLabel": "تفاصيل الكورس",
+        "metaTitle": "تفاصيل الكورس",
+        "category": "التصنيف",
+        "level": "المستوى",
+        "price": "السعر",
+        "language": "اللغة",
+        "lessonCount": "عدد الدروس",
+        "studentCount": "عدد الطلاب",
+        "createdAt": "تاريخ الإنشاء",
+        "updatedAt": "آخر تحديث",
+        "rejectionReason": "سبب الرفض/الإيقاف",
+        "description": "وصف الكورس",
+        "introVideo": "فيديو المقدمة",
+        "whatYouWillLearn": "ماذا سيتعلم الطالب",
+        "quizzes": "الاختبارات ({{count}})",
+        "quizMeta": "{{questions}} أسئلة · {{minutes}} دقيقة",
+        "rejectTitle": "رفض الكورس",
+        "rejectPrompt": "رفض كورس:",
+        "rejectReason": "سبب الرفض",
+        "suspendTitle": "إيقاف الكورس",
+        "suspendMessage": "هل أنت متأكد من إيقاف كورس \"{{name}}\" مؤقتاً؟",
+        "deleteTitle": "حذف الكورس",
+        "deleteMessage": "هل أنت متأكد من حذف كورس \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "curriculum": {
+        "title": "المنهج الدراسي",
+        "empty": "لا توجد أقسام أو دروس بعد.",
+        "noLessonsInSection": "لا توجد دروس في هذا القسم.",
+        "preview": "معاينة",
+        "locked": "مقفل",
+        "resources": "{{count}} موارد",
+        "video": "فيديو"
+      },
+      "export": {
+        "sheetName": "الكورسات",
+        "columns": {
+          "id": "رقم الكورس",
+          "title": "العنوان",
+          "instructor": "المحاضر",
+          "category": "التصنيف",
+          "level": "المستوى",
+          "price": "السعر",
+          "students": "الطلاب",
+          "lessons": "الدروس",
+          "status": "الحالة",
+          "updatedAt": "آخر تحديث"
+        }
+      },
+      "toast": {
+        "approved": "تم اعتماد الكورس.",
+        "published": "تم نشر الكورس.",
+        "suspended": "تم إيقاف الكورس.",
+        "rejected": "تم رفض الكورس.",
+        "deleted": "تم حذف الكورس.",
+        "loadError": "تعذّر تحميل الكورس.",
+        "actionError": "تعذّر تنفيذ الإجراء.",
+        "rejectError": "تعذّر رفض الكورس.",
+        "deleteError": "تعذّر حذف الكورس."
+      }
+    }
+  }
+}

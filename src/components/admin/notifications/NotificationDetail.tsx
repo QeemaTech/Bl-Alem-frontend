@@ -1,11 +1,21 @@
+import { useTranslation } from 'react-i18next';
+import { useAdminNotificationLabels } from '../../../hooks/useAdminNotificationLabels';
 import { Badge } from '../../ui/Badge';
-import { fmtNotificationDate, roleLabels, typeLabels } from './notificationShared';
 
 interface NotificationDetailProps {
   notification: any;
 }
 
 export function NotificationDetail({ notification }: NotificationDetailProps) {
+  const {
+    getTypeLabel,
+    getRoleLabel,
+    getReadStatusLabel,
+    fmtNotificationDate,
+    empty,
+  } = useAdminNotificationLabels();
+  const { t } = useTranslation('notifications');
+
   return (
     <div className="support-ticket-detail admin-notification-detail">
       <div className="support-ticket-detail-header">
@@ -18,24 +28,24 @@ export function NotificationDetail({ notification }: NotificationDetailProps) {
           dot
           className="status-badge"
         >
-          {notification.isRead ? 'مقروء' : 'غير مقروء'}
+          {getReadStatusLabel(notification.isRead)}
         </Badge>
       </div>
 
       <div className="support-ticket-user-card">
-        <strong>{notification.user?.fullName || '—'}</strong>
-        <span>{notification.user?.email || '—'}</span>
-        <span>{roleLabels[notification.user?.role] || notification.user?.role || '—'}</span>
+        <strong>{notification.user?.fullName || empty}</strong>
+        <span>{notification.user?.email || empty}</span>
+        <span>{getRoleLabel(notification.user?.role) || empty}</span>
         {notification.user?.phone ? <span>{notification.user.phone}</span> : null}
       </div>
 
       <div className="admin-notification-meta">
         <div className="detail-row">
-          <span>النوع</span>
-          <strong>{typeLabels[notification.type] || notification.type || '—'}</strong>
+          <span>{t('admin.detail.type')}</span>
+          <strong>{getTypeLabel(notification.type) || empty}</strong>
         </div>
         <div className="detail-row">
-          <span>تاريخ الإرسال</span>
+          <span>{t('admin.detail.sentAt')}</span>
           <strong>{fmtNotificationDate(notification.createdAt)}</strong>
         </div>
       </div>

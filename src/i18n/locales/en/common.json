@@ -1,0 +1,130 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "remove": "Remove",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "retry": "Retry",
+    "viewAll": "View all",
+    "browse": "Browse",
+    "copy": "Copy",
+    "upload": "Upload",
+    "change": "Change",
+    "logout": "Log out",
+    "login": "Sign in",
+    "register": "Create account",
+    "continue": "Continue",
+    "start": "Start",
+    "send": "Send",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "loading": "Loading...",
+    "content": "Content",
+    "completeProfile": "Complete profile",
+    "editProfileResubmit": "Edit profile and resubmit"
+  },
+  "status": {
+    "all": "All",
+    "draft": "Draft",
+    "published": "Published",
+    "pending": "Pending review",
+    "pendingReview": "Pending review",
+    "rejected": "Rejected",
+    "suspended": "Suspended",
+    "live": "Live",
+    "upcoming": "Upcoming",
+    "online": "Online",
+    "new": "new"
+  },
+  "filter": {
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search...",
+    "ariaLabel": "Search filters",
+    "reset": "Reset"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  },
+  "table": {
+    "noData": "No data",
+    "actions": "Actions",
+    "recordCount": "{{count}} records",
+    "scrollHint": "Scroll horizontally to view all columns"
+  },
+  "chart": {
+    "total": "Total",
+    "value": "Value",
+    "noData": "Not enough data to display"
+  },
+  "dialog": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "logoutTitle": "Log out",
+    "logoutMessage": "Are you sure you want to log out?",
+    "logoutConfirm": "Log out"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "label": "Language",
+    "ar": "العربية",
+    "en": "English",
+    "switchTo": "Switch to {{lang}}",
+    "ariaLabel": "Switch language"
+  },
+  "sidebar": {
+    "ariaLabel": "Sidebar navigation",
+    "closeDrawer": "Close menu",
+    "openMenu": "Open menu",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "profile": "Profile",
+    "profileSettings": "Profile settings",
+    "profileOf": "Profile — {{name}}",
+    "user": "User",
+    "badgeNew": "{{count}} new",
+    "unknownInitial": "?"
+  },
+  "breadcrumb": {
+    "ariaLabel": "Breadcrumb"
+  },
+  "header": {
+    "greeting": "Welcome {{name}}, track your learning day from here.",
+    "greetingAdmin": "Welcome {{name}}, manage the platform from here.",
+    "greetingInstructor": "Welcome {{name}}, manage your courses from here.",
+    "greetingFallback": "there",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
+  "empty": {
+    "defaultTitle": "No data"
+  },
+  "or": "or",
+  "currency": {
+    "egp": "EGP"
+  },
+  "units": {
+    "course": "course",
+    "courses": "courses",
+    "student": "student",
+    "students": "students",
+    "sale": "sale"
+  }
+}

@@ -18,9 +18,7 @@ import StudentLivePage from './pages/student/StudentLivePage';
 import StudentCertificatesPage from './pages/student/StudentCertificatesPage';
 import StudentPaymentsPage from './pages/student/StudentPaymentsPage';
 import StudentRewardsPage from './pages/student/StudentRewardsPage';
-import StudentWalletPage from './pages/student/StudentWalletPage';
 import StudentCommunityPage from './pages/student/StudentCommunityPage';
-import StudentPricingPage from './pages/student/StudentPricingPage';
 import StudentLearningPathsPage from './pages/student/StudentLearningPathsPage';
 import StudentNotificationsPage from './pages/student/StudentNotificationsPage';
 import StudentSupportPage from './pages/student/StudentSupportPage';
@@ -42,6 +40,7 @@ import InstructorEarningsPage from './pages/instructor/InstructorEarningsPage';
 import InstructorProfilePage from './pages/instructor/InstructorProfilePage';
 import InstructorNotificationsPage from './pages/instructor/InstructorNotificationsPage';
 import InstructorSupportPage from './pages/instructor/InstructorSupportPage';
+import InstructorSupportTicketPage from './pages/instructor/InstructorSupportTicketPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminResourcePage from './pages/admin/AdminResourcePage';
 import AdminCourseDetailPage from './pages/admin/AdminCourseDetailPage';
@@ -59,6 +58,7 @@ import AdminCertificatesPage from './pages/admin/AdminCertificatesPage';
 import AdminRewardsPage from './pages/admin/AdminRewardsPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
+import AdminPaymentDetailPage from './pages/admin/AdminPaymentDetailPage';
 import AdminLiveSessionsPage from './pages/admin/AdminLiveSessionsPage';
 import AdminCoursesPage from './pages/admin/AdminCoursesPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
@@ -96,9 +96,7 @@ function App() {
           <Route path="/student/certificates" element={<StudentCertificatesPage />} />
           <Route path="/student/payments" element={<StudentPaymentsPage />} />
           <Route path="/student/rewards" element={<StudentRewardsPage />} />
-          <Route path="/student/wallet" element={<StudentWalletPage />} />
           <Route path="/student/community" element={<StudentCommunityPage />} />
-          <Route path="/student/pricing" element={<StudentPricingPage />} />
           <Route path="/student/learning-paths" element={<StudentLearningPathsPage />} />
           <Route path="/student/learning-paths/:id" element={<StudentLearningPathsPage />} />
           <Route path="/student/notifications" element={<StudentNotificationsPage />} />
@@ -129,6 +127,7 @@ function App() {
           <Route path="/instructor/earnings" element={<InstructorEarningsPage />} />
           <Route path="/instructor/profile" element={<InstructorProfilePage />} />
           <Route path="/instructor/notifications" element={<InstructorNotificationsPage />} />
+          <Route path="/instructor/support/:ticketId" element={<InstructorSupportTicketPage />} />
           <Route path="/instructor/support" element={<InstructorSupportPage />} />
           <Route path="/instructor" element={<Navigate to="/instructor/dashboard" replace />} />
         </Route>
@@ -148,6 +147,7 @@ function App() {
           <Route path="/admin/certificates" element={<AdminCertificatesPage />} />
           <Route path="/admin/rewards" element={<AdminRewardsPage />} />
           <Route path="/admin/coupons" element={<AdminCouponsPage />} />
+          <Route path="/admin/payments/:paymentId" element={<AdminPaymentDetailPage />} />
           <Route path="/admin/payments" element={<AdminPaymentsPage />} />
           <Route path="/admin/live" element={<AdminLiveSessionsPage />} />
           <Route path="/admin/courses/:courseId" element={<AdminCourseDetailPage />} />

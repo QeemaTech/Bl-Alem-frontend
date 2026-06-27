@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, Radio, Video, Calendar, Clock } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { ReportChart } from '../../components/reports/ReportChart';
@@ -15,32 +16,8 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminLiveSessionLabels } from '../../hooks/useAdminLiveSessionLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  SCHEDULED: 'مجدولة',
-  LIVE: 'مباشر الآن',
-  ENDED: 'منتهية',
-  CANCELLED: 'ملغاة',
-};
-
-const statusVariant = (status: string) => {
-  if (status === 'LIVE') return 'live' as const;
-  if (status === 'SCHEDULED') return 'info' as const;
-  if (status === 'ENDED') return 'completed' as const;
-  if (status === 'CANCELLED') return 'rejected' as const;
-  return 'default' as const;
-};
-
-const fmtDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-  : '—');
 
 const toLocalInput = (value?: string | null) => {
   if (!value) return '';
@@ -58,19 +35,18 @@ const emptyForm = {
   status: 'SCHEDULED',
 };
 
-const exportColumns = [
-  { key: 'id', header: 'رقم الجلسة' },
-  { key: 'title', header: 'العنوان' },
-  { key: 'course', header: 'الكورس' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'startAt', header: 'موعد البدء' },
-  { key: 'duration', header: 'المدة (دقيقة)' },
-  { key: 'meetingUrl', header: 'رابط الاجتماع' },
-  { key: 'status', header: 'الحالة' },
-];
-
 export default function AdminLiveSessionsPage() {
+  const { t } = useTranslation(['liveSessions', 'common']);
   const { showToast } = useToast();
+  const {
+    statusLabels,
+    fmtDate,
+    fmtDurationShort,
+    fmtDurationMinutes,
+    statusVariant,
+    empty,
+  } = useAdminLiveSessionLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -82,6 +58,20 @@ export default function AdminLiveSessionsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [cancelTarget, setCancelTarget] = useState<any>(null);
+
+  const exportColumns = useMemo(() => {
+    const cols = t('export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'title', header: cols.title },
+      { key: 'course', header: cols.course },
+      { key: 'instructor', header: cols.instructor },
+      { key: 'startAt', header: cols.startAt },
+      { key: 'duration', header: cols.duration },
+      { key: 'meetingUrl', header: cols.meetingUrl },
+      { key: 'status', header: cols.status },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -121,23 +111,44 @@ export default function AdminLiveSessionsPage() {
   const statusChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = statusLabels[i.status] || i.status;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.status;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: statusLabels[key] || key,
+      value,
+    }));
+  }, [items, statusLabels]);
 
   const tableRows = useMemo(() => filteredItems.map((row) => ({
     id: row.id,
     title: row.titleAr,
-    course: row.course?.titleAr || '—',
-    instructor: row.instructor?.fullName || '—',
+    course: row.course?.titleAr || empty,
+    instructor: row.instructor?.fullName || empty,
     startAt: fmtDate(row.startAt),
-    duration: `${row.durationMinutes} د`,
-    meetingUrl: row.meetingUrl || '—',
+    duration: fmtDurationShort(row.durationMinutes),
+    meetingUrl: row.meetingUrl || empty,
     status: statusLabels[row.status] || row.status,
     _raw: row,
-  })), [filteredItems]);
+  })), [filteredItems, statusLabels, fmtDate, fmtDurationShort, empty]);
+
+  const statusFilterOptions = useMemo(() => [
+    { label: t('filters.allStatuses'), value: '' },
+    { label: statusLabels.SCHEDULED, value: 'SCHEDULED' },
+    { label: statusLabels.LIVE, value: 'LIVE' },
+    { label: statusLabels.ENDED, value: 'ENDED' },
+    { label: statusLabels.CANCELLED, value: 'CANCELLED' },
+  ], [t, statusLabels]);
+
+  const formStatusOptions = useMemo(() => [
+    { label: statusLabels.SCHEDULED, value: 'SCHEDULED' },
+    { label: statusLabels.LIVE, value: 'LIVE' },
+    { label: statusLabels.ENDED, value: 'ENDED' },
+    { label: statusLabels.CANCELLED, value: 'CANCELLED' },
+  ], [statusLabels]);
+
+  const detailFields = t('detail.fields', { returnObjects: true }) as Record<string, string>;
+  const tableCols = t('table.columns', { returnObjects: true }) as Record<string, string>;
 
   const openDetail = (session: any) => {
     setSelected(session);
@@ -170,7 +181,7 @@ export default function AdminLiveSessionsPage() {
         meetingUrl: form.meetingUrl.trim() || null,
         status: form.status,
       });
-      showToast('تم تحديث الجلسة.', 'success');
+      showToast(t('toast.updated'), 'success');
       setEditOpen(false);
       setSelected(null);
       setForm(emptyForm);
@@ -189,7 +200,7 @@ export default function AdminLiveSessionsPage() {
   const handleCancel = async () => {
     if (!cancelTarget) return;
     await adminApi.cancelLiveSession(cancelTarget.id);
-    showToast('تم إلغاء الجلسة.', 'success');
+    showToast(t('toast.cancelled'), 'success');
     setCancelTarget(null);
     setDetailOpen(false);
     setSelected(null);
@@ -199,14 +210,14 @@ export default function AdminLiveSessionsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await adminApi.deleteLiveSession(deleteTarget.id);
-    showToast('تم حذف الجلسة.', 'success');
+    showToast(t('toast.deleted'), 'success');
     setDeleteTarget(null);
     await load();
   };
 
   const handleExport = () => {
     exportTableToExcel(
-      'الجلسات-المباشرة',
+      t('export.sheetName'),
       exportColumns,
       tableRows.map(({ _raw, ...row }) => row),
     );
@@ -215,61 +226,56 @@ export default function AdminLiveSessionsPage() {
   return (
     <div className="page-grid">
       <div className="reports-header">
-        <PageHeader title="الجلسات المباشرة" subtitle="إدارة ومراقبة جلسات البث المباشر على المنصة" />
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="chip-row">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الجلسات" value={String(stats.total)} icon={Video} />
-        <StatCard title="مجدولة" value={String(stats.scheduled)} icon={Calendar} />
-        <StatCard title="مباشر الآن" value={String(stats.live)} icon={Radio} />
-        <StatCard title="منتهية" value={String(stats.ended)} icon={Clock} />
-        <StatCard title="ملغاة" value={String(stats.cancelled)} icon={Video} />
+        <StatCard title={t('stats.total')} value={String(stats.total)} icon={Video} />
+        <StatCard title={t('stats.scheduled')} value={String(stats.scheduled)} icon={Calendar} />
+        <StatCard title={t('stats.live')} value={String(stats.live)} icon={Radio} />
+        <StatCard title={t('stats.ended')} value={String(stats.ended)} icon={Clock} />
+        <StatCard title={t('stats.cancelled')} value={String(stats.cancelled)} icon={Video} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع حالات الجلسات" type="pie" data={statusChart} />
+        <ReportChart title={t('charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان، الكورس، أو المحاضر..."
+        searchPlaceholder={t('filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مجدولة', value: 'SCHEDULED' },
-            { label: 'مباشر الآن', value: 'LIVE' },
-            { label: 'منتهية', value: 'ENDED' },
-            { label: 'ملغاة', value: 'CANCELLED' },
-          ]}
+          options={statusFilterOptions}
         />
       </FilterBar>
 
       <Card>
         <Table
+          className="admin-live-sessions-table"
           loading={loading}
           data={tableRows}
-          emptyTitle="لا توجد جلسات"
-          emptyDescription="ستظهر الجلسات المباشرة هنا عند جدولتها."
+          emptyTitle={t('table.emptyTitle')}
+          emptyDescription={t('table.emptyDescription')}
           columns={[
-            { key: 'title', header: 'العنوان' },
-            { key: 'course', header: 'الكورس' },
-            { key: 'instructor', header: 'المحاضر' },
-            { key: 'startAt', header: 'موعد البدء' },
-            { key: 'duration', header: 'المدة' },
+            { key: 'title', header: tableCols.title },
+            { key: 'course', header: tableCols.course },
+            { key: 'instructor', header: tableCols.instructor },
+            { key: 'startAt', header: tableCols.startAt },
+            { key: 'duration', header: tableCols.duration },
             {
               key: 'status',
-              header: 'الحالة',
+              header: tableCols.status,
               render: (row) => (
                 <Badge variant={statusVariant(String(row._raw?.status))}>
                   {statusLabels[String(row._raw?.status)] || row.status}
@@ -278,16 +284,25 @@ export default function AdminLiveSessionsPage() {
             },
             {
               key: 'actions',
-              header: 'الإجراءات',
+              header: tableCols.actions,
+              width: '22rem',
+              minWidth: '18rem',
+              align: 'end',
+              truncate: false,
               render: (row) => {
                 const session = row._raw;
                 return (
-                  <div className="card-actions">
-                    <Button variant="ghost" size="sm" onClick={() => openDetail(session)}>
-                      التفاصيل
+                  <div
+                    className="table-actions live-session-row-actions"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    role="presentation"
+                  >
+                    <Button variant="outline" size="sm" onClick={() => openDetail(session)}>
+                      {t('actions.detail')}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => openEdit(session)}>
-                      تعديل
+                      {t('actions.edit')}
                     </Button>
                     {session.meetingUrl ? (
                       <Button
@@ -295,26 +310,26 @@ export default function AdminLiveSessionsPage() {
                         size="sm"
                         onClick={() => window.open(session.meetingUrl, '_blank', 'noopener,noreferrer')}
                       >
-                        انضمام
+                        {t('actions.join')}
                       </Button>
                     ) : null}
                     {session.status === 'SCHEDULED' ? (
-                      <Button variant="secondary" size="sm" onClick={() => setStatus(session, 'LIVE', 'تم بدء الجلسة.')}>
-                        بدء
+                      <Button variant="secondary" size="sm" onClick={() => setStatus(session, 'LIVE', t('toast.started'))}>
+                        {t('actions.start')}
                       </Button>
                     ) : null}
                     {session.status === 'LIVE' ? (
-                      <Button variant="secondary" size="sm" onClick={() => setStatus(session, 'ENDED', 'تم إنهاء الجلسة.')}>
-                        إنهاء
+                      <Button variant="secondary" size="sm" onClick={() => setStatus(session, 'ENDED', t('toast.ended'))}>
+                        {t('actions.end')}
                       </Button>
                     ) : null}
                     {['SCHEDULED', 'LIVE'].includes(session.status) ? (
                       <Button variant="danger" size="sm" onClick={() => setCancelTarget(session)}>
-                        إلغاء
+                        {t('actions.cancel')}
                       </Button>
                     ) : null}
                     <Button variant="danger" size="sm" onClick={() => setDeleteTarget(session)}>
-                      حذف
+                      {t('actions.delete')}
                     </Button>
                   </div>
                 );
@@ -326,47 +341,47 @@ export default function AdminLiveSessionsPage() {
 
       <Modal
         isOpen={detailOpen}
-        title="تفاصيل الجلسة"
+        title={t('detail.title')}
         onClose={() => { setDetailOpen(false); setSelected(null); }}
       >
         {selected ? (
           <div className="stack-sm">
-            <div className="detail-row"><span>رقم الجلسة</span><strong>{selected.id}</strong></div>
-            <div className="detail-row"><span>العنوان</span><strong>{selected.titleAr}</strong></div>
-            <div className="detail-row"><span>الكورس</span><strong>{selected.course?.titleAr || '—'}</strong></div>
-            <div className="detail-row"><span>المحاضر</span><strong>{selected.instructor?.fullName || '—'}</strong></div>
-            <div className="detail-row"><span>البريد</span><strong>{selected.instructor?.email || '—'}</strong></div>
-            <div className="detail-row"><span>موعد البدء</span><strong>{fmtDate(selected.startAt)}</strong></div>
-            <div className="detail-row"><span>المدة</span><strong>{selected.durationMinutes} دقيقة</strong></div>
+            <div className="detail-row"><span>{detailFields.id}</span><strong>{selected.id}</strong></div>
+            <div className="detail-row"><span>{detailFields.title}</span><strong>{selected.titleAr}</strong></div>
+            <div className="detail-row"><span>{detailFields.course}</span><strong>{selected.course?.titleAr || empty}</strong></div>
+            <div className="detail-row"><span>{detailFields.instructor}</span><strong>{selected.instructor?.fullName || empty}</strong></div>
+            <div className="detail-row"><span>{detailFields.email}</span><strong>{selected.instructor?.email || empty}</strong></div>
+            <div className="detail-row"><span>{detailFields.startAt}</span><strong>{fmtDate(selected.startAt)}</strong></div>
+            <div className="detail-row"><span>{detailFields.duration}</span><strong>{fmtDurationMinutes(selected.durationMinutes)}</strong></div>
             <div className="detail-row">
-              <span>رابط الاجتماع</span>
+              <span>{detailFields.meetingUrl}</span>
               {selected.meetingUrl ? (
                 <a href={selected.meetingUrl} target="_blank" rel="noopener noreferrer" dir="ltr">
                   {selected.meetingUrl}
                 </a>
               ) : (
-                <strong>—</strong>
+                <strong>{empty}</strong>
               )}
             </div>
             <div className="detail-row">
-              <span>الحالة</span>
+              <span>{detailFields.status}</span>
               <Badge variant={statusVariant(selected.status)}>
                 {statusLabels[selected.status] || selected.status}
               </Badge>
             </div>
             {selected.descriptionAr ? (
-              <div className="detail-row"><span>الوصف</span><strong>{selected.descriptionAr}</strong></div>
+              <div className="detail-row"><span>{detailFields.description}</span><strong>{selected.descriptionAr}</strong></div>
             ) : null}
             <div className="chip-row">
               <Button variant="ghost" onClick={() => { setDetailOpen(false); openEdit(selected); }}>
-                تعديل
+                {t('actions.edit')}
               </Button>
               {selected.meetingUrl ? (
                 <Button
                   variant="secondary"
                   onClick={() => window.open(selected.meetingUrl, '_blank', 'noopener,noreferrer')}
                 >
-                  انضمام للجلسة
+                  {t('actions.joinSession')}
                 </Button>
               ) : null}
             </div>
@@ -376,25 +391,25 @@ export default function AdminLiveSessionsPage() {
 
       <Modal
         isOpen={editOpen}
-        title="تعديل الجلسة"
+        title={t('form.editTitle')}
         onClose={() => { setEditOpen(false); setSelected(null); setForm(emptyForm); }}
       >
         <form className="stack-sm" onSubmit={saveSession}>
           <Input
-            label="عنوان الجلسة"
+            label={t('form.titleLabel')}
             value={form.titleAr}
             onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
             required
           />
           <Input
-            label="موعد البدء"
+            label={t('form.startAtLabel')}
             type="datetime-local"
             value={form.startAt}
             onChange={(e) => setForm({ ...form, startAt: e.target.value })}
             required
           />
           <Input
-            label="المدة (دقيقة)"
+            label={t('form.durationLabel')}
             type="number"
             min="15"
             value={form.durationMinutes}
@@ -402,45 +417,40 @@ export default function AdminLiveSessionsPage() {
             required
           />
           <Input
-            label="رابط الاجتماع"
+            label={t('form.meetingUrlLabel')}
             value={form.meetingUrl}
             onChange={(e) => setForm({ ...form, meetingUrl: e.target.value })}
-            placeholder="https://meet.example.com/..."
+            placeholder={t('form.meetingUrlPlaceholder')}
           />
           <Select
-            label="الحالة"
+            label={t('form.statusLabel')}
             value={form.status}
             onChange={(e) => setForm({ ...form, status: e.target.value })}
-            options={[
-              { label: 'مجدولة', value: 'SCHEDULED' },
-              { label: 'مباشر الآن', value: 'LIVE' },
-              { label: 'منتهية', value: 'ENDED' },
-              { label: 'ملغاة', value: 'CANCELLED' },
-            ]}
+            options={formStatusOptions}
           />
           <Textarea
-            label="الوصف"
+            label={t('form.descriptionLabel')}
             value={form.descriptionAr}
             onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
           />
-          <Button loading={submitting}>حفظ التعديلات</Button>
+          <Button loading={submitting}>{t('actions.saveChanges')}</Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(cancelTarget)}
-        title="إلغاء الجلسة"
-        message={`هل أنت متأكد من إلغاء جلسة "${cancelTarget?.titleAr}"؟`}
-        confirmLabel="تأكيد الإلغاء"
+        title={t('cancel.title')}
+        message={t('cancel.message', { title: cancelTarget?.titleAr })}
+        confirmLabel={t('actions.confirmCancel')}
         onConfirm={handleCancel}
         onCancel={() => setCancelTarget(null)}
       />
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف الجلسة"
-        message={`هل أنت متأكد من حذف جلسة "${deleteTarget?.titleAr}"؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmLabel="حذف"
+        title={t('delete.title')}
+        message={t('delete.message', { title: deleteTarget?.titleAr })}
+        confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

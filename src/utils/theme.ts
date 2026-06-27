@@ -48,6 +48,8 @@ export function applyBrandingTheme(settings: BrandingSettings) {
   const secondary = normalizeHexColor(settings.secondaryColor, DEFAULT_BRANDING.secondaryColor);
   const root = document.documentElement;
 
+  root.style.setProperty('--color-primary', primary);
+  root.style.setProperty('--color-primary-hover', mixHex(primary, 'black', 0.18));
   root.style.setProperty('--primary', primary);
   root.style.setProperty('--primary-dark', mixHex(primary, 'black', 0.18));
   root.style.setProperty('--primary-light', mixHex(primary, 'white', 0.88));

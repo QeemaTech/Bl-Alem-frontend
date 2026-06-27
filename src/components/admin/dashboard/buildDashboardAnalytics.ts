@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import {
   BookOpen,
   CoPresent,
@@ -8,7 +9,7 @@ import {
   Ticket,
   UsersRound,
 } from '@/icons';
-import { AR_MONTHS, fmtMoney, fmtNum } from './dashboardFormat';
+import type { DashboardFormatters } from './dashboardFormat';
 import type {
   ActivityItem,
   AdminDashboardApiData,
@@ -45,16 +46,22 @@ function mockTrend(seed: number, min = -4, max = 18): number {
   return Number((min + rand() * (max - min)).toFixed(1));
 }
 
-function buildActivities(api: AdminDashboardApiData): ActivityItem[] {
+function buildActivities(
+  api: AdminDashboardApiData,
+  t: TFunction,
+  fmt: DashboardFormatters,
+): ActivityItem[] {
   const items: ActivityItem[] = [];
+  const instructorFallback = t('admin.dashboard.activity.instructorFallback');
+  const userFallback = t('admin.dashboard.activity.userFallback');
 
   (api.latestInstructorRequests || []).forEach((item) => {
     if (!item.createdAt) return;
     items.push({
       id: `inst-${item.id}`,
       type: 'instructor',
-      title: 'طلب محاضر جديد',
-      description: item.user?.fullName || 'محاضر',
+      title: t('admin.dashboard.activity.newInstructorRequest'),
+      description: item.user?.fullName || instructorFallback,
       timestamp: item.createdAt,
     });
   });
@@ -65,8 +72,11 @@ function buildActivities(api: AdminDashboardApiData): ActivityItem[] {
     items.push({
       id: `course-${item.id}`,
       type: 'course',
-      title: 'كورس بانتظار المراجعة',
-      description: `${item.titleAr} — ${item.instructor?.fullName || 'محاضر'}`,
+      title: t('admin.dashboard.activity.coursePendingReview'),
+      description: t('admin.dashboard.activity.courseDescription', {
+        title: item.titleAr,
+        instructor: item.instructor?.fullName || instructorFallback,
+      }),
       timestamp: ts,
     });
   });
@@ -76,8 +86,13 @@ function buildActivities(api: AdminDashboardApiData): ActivityItem[] {
     items.push({
       id: `pay-${item.id}`,
       type: 'payment',
-      title: item.status === 'FAILED' ? 'فشل دفع' : 'دفعة جديدة',
-      description: `${item.user?.fullName || 'مستخدم'} — ${fmtMoney(Number(item.finalAmount))}`,
+      title: item.status === 'FAILED'
+        ? t('admin.dashboard.activity.paymentFailed')
+        : t('admin.dashboard.activity.newPayment'),
+      description: t('admin.dashboard.activity.paymentDescription', {
+        name: item.user?.fullName || userFallback,
+        amount: fmt.fmtMoney(Number(item.finalAmount)),
+      }),
       timestamp: item.createdAt,
     });
   });
@@ -87,7 +102,7 @@ function buildActivities(api: AdminDashboardApiData): ActivityItem[] {
     items.push({
       id: `ticket-${item.id}`,
       type: 'support',
-      title: 'تذكرة دعم',
+      title: t('admin.dashboard.activity.supportTicket'),
       description: item.subject,
       timestamp: item.createdAt,
     });
@@ -98,12 +113,20 @@ function buildActivities(api: AdminDashboardApiData): ActivityItem[] {
     .slice(0, 12);
 }
 
-export function buildDashboardAnalytics(api: AdminDashboardApiData): DashboardAnalytics {
+export function buildDashboardAnalytics(
+  api: AdminDashboardApiData,
+  t: TFunction,
+  fmt: DashboardFormatters,
+): DashboardAnalytics {
+  const { fmtMoney, fmtNum, getMonthLabels } = fmt;
   const seed = api.totalUsers + api.totalCourses * 7 + Math.round(Number(api.totalRevenue) || 0);
   const rand = seeded(seed);
+  const monthLabels = getMonthLabels(12);
+  const trendMonth = t('admin.dashboard.trends.vsLastMonth');
+  const trendWeek = t('admin.dashboard.trends.vsLastWeek');
 
   const monthlyBase = Math.max(api.monthRevenue || 0, Number(api.totalRevenue) / 12 || 1000, 500);
-  const revenueTrend = AR_MONTHS.map((label, i) => ({
+  const revenueTrend = monthLabels.map((label, i) => ({
     label,
     value: Math.round(monthlyBase * (0.55 + i * 0.04 + rand() * 0.25)),
   }));
@@ -116,29 +139,29 @@ export function buildDashboardAnalytics(api: AdminDashboardApiData): DashboardAn
     revenueTrend[revenueTrend.length - 2]?.value ?? 0,
   );
 
-  const userGrowth = AR_MONTHS.map((label, i) => ({
+  const userGrowth = monthLabels.map((label, i) => ({
     label,
     students: Math.max(1, Math.round((api.totalStudents / 11) * (0.45 + i * 0.05 + rand() * 0.2))),
     instructors: Math.max(0, Math.round((api.totalInstructors / 11) * (0.35 + i * 0.06 + rand() * 0.15))),
   }));
 
   const courseActivity = [
-    { name: 'منشورة', value: api.publishedCourses },
-    { name: 'قيد المراجعة', value: api.pendingCourses },
-    { name: 'مرفوضة', value: api.rejectedCourses },
+    { name: t('admin.dashboard.courseStatus.published'), value: api.publishedCourses },
+    { name: t('admin.dashboard.courseStatus.pending'), value: api.pendingCourses },
+    { name: t('admin.dashboard.courseStatus.rejected'), value: api.rejectedCourses },
   ];
 
   const activeSubs = api.totalEnrollments;
   const expiredSubs = Math.round(activeSubs * (0.14 + rand() * 0.08));
   const cancelledSubs = Math.round(activeSubs * (0.04 + rand() * 0.04));
   const subscriptionDistribution = [
-    { name: 'نشطة', value: activeSubs },
-    { name: 'منتهية', value: expiredSubs },
-    { name: 'ملغاة', value: cancelledSubs },
+    { name: t('admin.dashboard.subscriptionStatus.active'), value: activeSubs },
+    { name: t('admin.dashboard.subscriptionStatus.expired'), value: expiredSubs },
+    { name: t('admin.dashboard.subscriptionStatus.cancelled'), value: cancelledSubs },
   ];
 
   const openSupportTickets =
-    (api.latestSupportTickets || []).filter((t) => t.status === 'OPEN').length ||
+    (api.latestSupportTickets || []).filter((ticket) => ticket.status === 'OPEN').length ||
     Math.max(0, Math.round(api.pendingCourses * 0.3));
 
   const failedPayments =
@@ -150,84 +173,84 @@ export function buildDashboardAnalytics(api: AdminDashboardApiData): DashboardAn
   const kpis: KpiItem[] = [
     {
       id: 'total-users',
-      title: 'إجمالي المستخدمين',
+      title: t('admin.dashboard.kpis.totalUsers'),
       value: api.totalUsers,
       displayValue: fmtNum(api.totalUsers),
       trend: mockTrend(seed + 1, 2, 14),
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: genSparkline(seed + 1, 12, api.totalUsers / 12, api.totalUsers / 24 || 5),
       icon: UsersRound,
     },
     {
       id: 'students',
-      title: 'الطلاب',
+      title: t('admin.dashboard.kpis.students'),
       value: api.totalStudents,
       displayValue: fmtNum(api.totalStudents),
       trend: mockTrend(seed + 2, 3, 16),
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: genSparkline(seed + 2, 12, api.totalStudents / 12, api.totalStudents / 20 || 4),
       icon: GraduationCap,
       variant: 'success',
     },
     {
       id: 'instructors',
-      title: 'المحاضرون',
+      title: t('admin.dashboard.kpis.instructors'),
       value: api.totalInstructors,
       displayValue: fmtNum(api.totalInstructors),
       trend: mockTrend(seed + 3, 1, 12),
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: genSparkline(seed + 3, 12, api.totalInstructors / 10 || 2, 3),
       icon: CoPresent,
     },
     {
       id: 'courses',
-      title: 'الكورسات',
+      title: t('admin.dashboard.kpis.courses'),
       value: api.totalCourses,
       displayValue: fmtNum(api.totalCourses),
       trend: mockTrend(seed + 4, 0, 10),
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: genSparkline(seed + 4, 12, api.totalCourses / 10 || 3, 2),
       icon: BookOpen,
     },
     {
       id: 'revenue',
-      title: 'الإيرادات',
+      title: t('admin.dashboard.kpis.revenue'),
       value: Number(api.totalRevenue),
       displayValue: fmtMoney(Number(api.totalRevenue)),
       trend: revenueGrowth,
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: revenueTrend.map((p) => p.value),
       icon: CreditCard,
       variant: 'success',
     },
     {
       id: 'subscriptions',
-      title: 'الاشتراكات النشطة',
+      title: t('admin.dashboard.kpis.activeSubscriptions'),
       value: activeSubs,
       displayValue: fmtNum(activeSubs),
       trend: mockTrend(seed + 5, 4, 18),
-      trendLabel: 'عن الشهر الماضي',
+      trendLabel: trendMonth,
       sparkline: genSparkline(seed + 5, 12, activeSubs / 12, activeSubs / 18 || 3),
       icon: Ticket,
     },
     {
       id: 'pending-reviews',
-      title: 'مراجعات معلّقة',
+      title: t('admin.dashboard.kpis.pendingReviews'),
       value: pendingReviews,
       displayValue: fmtNum(pendingReviews),
       trend: mockTrend(seed + 6, -8, 6),
-      trendLabel: 'عن الأسبوع الماضي',
+      trendLabel: trendWeek,
       sparkline: genSparkline(seed + 6, 12, pendingReviews || 2, 2),
       icon: Reviews,
       variant: pendingReviews > 5 ? 'warning' : 'primary',
     },
     {
       id: 'support-tickets',
-      title: 'تذاكر الدعم',
+      title: t('admin.dashboard.kpis.supportTickets'),
       value: openSupportTickets,
       displayValue: fmtNum(openSupportTickets),
       trend: mockTrend(seed + 7, -6, 8),
-      trendLabel: 'عن الأسبوع الماضي',
+      trendLabel: trendWeek,
       sparkline: genSparkline(seed + 7, 12, openSupportTickets || 1, 2),
       icon: Headphones,
       variant: openSupportTickets > 3 ? 'warning' : 'primary',
@@ -257,82 +280,82 @@ export function buildDashboardAnalytics(api: AdminDashboardApiData): DashboardAn
     insights: [
       {
         id: 'best-course',
-        title: 'الأكثر مبيعاً',
-        value: api.latestPayments?.[0]?.course?.titleAr || 'أساسيات البرمجة',
+        title: t('admin.dashboard.insights.bestSeller'),
+        value: api.latestPayments?.[0]?.course?.titleAr || t('admin.dashboard.insights.defaultCourse'),
         trend: mockTrend(seed + 20, 5, 22),
-        supporting: `${fmtNum(Math.round(120 + rand() * 80))} اشتراك`,
+        supporting: t('admin.dashboard.insights.enrollments', { count: fmtNum(Math.round(120 + rand() * 80)) }),
       },
       {
         id: 'top-instructor',
-        title: 'أنشط محاضر',
-        value: api.latestCourseRequests?.[0]?.instructor?.fullName || 'د. أحمد محمود',
+        title: t('admin.dashboard.insights.topInstructor'),
+        value: api.latestCourseRequests?.[0]?.instructor?.fullName || t('admin.dashboard.insights.defaultInstructor'),
         trend: mockTrend(seed + 21, 4, 18),
-        supporting: `${fmtNum(Math.round(3 + rand() * 5))} كورسات نشطة`,
+        supporting: t('admin.dashboard.insights.activeCourses', { count: fmtNum(Math.round(3 + rand() * 5)) }),
       },
       {
         id: 'top-category',
-        title: 'أعلى فئة إيراداً',
-        value: api.latestCourseRequests?.[0]?.category?.nameAr || 'التقنية والبرمجة',
+        title: t('admin.dashboard.insights.topCategory'),
+        value: api.latestCourseRequests?.[0]?.category?.nameAr || t('admin.dashboard.insights.defaultCategory'),
         trend: mockTrend(seed + 22, 6, 20),
         supporting: fmtMoney(monthlyBase * (0.25 + rand() * 0.15)),
       },
       {
         id: 'avg-rating',
-        title: 'متوسط تقييم الكورسات',
+        title: t('admin.dashboard.insights.avgRating'),
         value: `${(4.2 + rand() * 0.6).toFixed(1)} / 5`,
         trend: mockTrend(seed + 23, 0.5, 4),
-        supporting: `${fmtNum(Math.round(80 + rand() * 120))} تقييم`,
+        supporting: t('admin.dashboard.insights.reviewCount', { count: fmtNum(Math.round(80 + rand() * 120)) }),
       },
       {
         id: 'conversion',
-        title: 'معدل التحويل الشهري',
+        title: t('admin.dashboard.insights.conversion'),
         value: `${(2.8 + rand() * 2.2).toFixed(1)}%`,
         trend: mockTrend(seed + 24, 0.3, 3.5),
-        supporting: 'من الزيارات إلى الاشتراك',
+        supporting: t('admin.dashboard.insights.conversionSupporting'),
       },
       {
         id: 'retention',
-        title: 'احتفاظ الطلاب',
+        title: t('admin.dashboard.insights.retention'),
         value: `${(68 + rand() * 18).toFixed(0)}%`,
         trend: mockTrend(seed + 25, 1, 6),
-        supporting: 'خلال 90 يوماً',
+        supporting: t('admin.dashboard.insights.retentionSupporting'),
       },
     ],
     operations: [
       {
         id: 'instructor-requests',
-        title: 'طلبات المحاضرين',
+        title: t('admin.dashboard.operations.instructorRequests'),
         count: api.pendingInstructors,
         priority: api.pendingInstructors > 5 ? 'high' : api.pendingInstructors > 2 ? 'medium' : 'low',
         href: '/admin/instructors',
-        description: 'بانتظار الموافقة',
+        description: t('admin.dashboard.operations.awaitingApproval'),
       },
       {
         id: 'course-reviews',
-        title: 'مراجعات الكورسات',
+        title: t('admin.dashboard.operations.courseReviews'),
         count: api.pendingCourses,
         priority: api.pendingCourses > 8 ? 'high' : api.pendingCourses > 3 ? 'medium' : 'low',
         href: '/admin/courses',
-        description: 'قيد المراجعة',
+        description: t('admin.dashboard.operations.underReview'),
       },
       {
         id: 'support',
-        title: 'تذاكر الدعم المفتوحة',
+        title: t('admin.dashboard.operations.openSupport'),
         count: openSupportTickets,
         priority: openSupportTickets > 6 ? 'high' : openSupportTickets > 2 ? 'medium' : 'low',
         href: '/admin/support',
-        description: 'تحتاج متابعة',
+        description: t('admin.dashboard.operations.needsFollowUp'),
       },
       {
         id: 'failed-payments',
-        title: 'مدفوعات فاشلة',
+        title: t('admin.dashboard.operations.failedPayments'),
         count: failedPayments,
         priority: failedPayments > 4 ? 'high' : failedPayments > 1 ? 'medium' : 'low',
         href: '/admin/payments',
-        description: 'آخر 24 ساعة',
+        description: t('admin.dashboard.operations.last24Hours'),
       },
     ],
-    activities: buildActivities(api),
+    activities: buildActivities(api, t, fmt),
     revenue: {
       total: Number(api.totalRevenue),
       monthly: Number(api.monthRevenue),

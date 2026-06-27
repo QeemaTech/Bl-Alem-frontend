@@ -1,0 +1,64 @@
+{
+  "sections": {
+    "learning": "التعلم",
+    "account": "الحساب",
+    "support": "الدعم",
+    "training": "إدارة التدريب",
+    "platform": "إدارة المنصة"
+  },
+  "student": {
+    "dashboard": "الرئيسية",
+    "courses": "الكورسات المتاحة",
+    "learningPaths": "المسارات التعليمية",
+    "myCourses": "كورساتي",
+    "live": "البث المباشر",
+    "community": "المجتمع",
+    "certificates": "الشهادات",
+    "payments": "المدفوعات",
+    "rewards": "المكافآت",
+    "notifications": "الإشعارات",
+    "support": "الدعم"
+  },
+  "instructor": {
+    "dashboard": "الرئيسية",
+    "courses": "كورساتي",
+    "addCourse": "إضافة كورس",
+    "live": "البث المباشر",
+    "students": "الطلاب",
+    "reviews": "التقييمات",
+    "earnings": "الأرباح",
+    "notifications": "الإشعارات",
+    "support": "الدعم"
+  },
+  "admin": {
+    "dashboard": "الرئيسية",
+    "users": "المستخدمون",
+    "students": "الطلاب",
+    "instructors": "المحاضرون",
+    "categories": "التصنيفات",
+    "learningPaths": "المسارات التعليمية",
+    "courses": "الكورسات",
+    "live": "البث المباشر",
+    "payments": "المدفوعات",
+    "coupons": "الكوبونات",
+    "rewards": "المكافآت",
+    "certificates": "الشهادات",
+    "reviews": "التقييمات",
+    "notifications": "الإشعارات",
+    "support": "الدعم الفني",
+    "withdrawals": "السحوبات",
+    "reports": "التقارير",
+    "settings": "الإعدادات"
+  },
+  "sidebarTitles": {
+    "studentLearning": "مساحة التعلم",
+    "instructorTraining": "إدارة التدريب",
+    "platformAdmin": "إدارة المنصة"
+  },
+  "aria": {
+    "studentSidebar": "قائمة الطالب",
+    "instructorSidebar": "قائمة المحاضر",
+    "studentNav": "مساحة التعلم",
+    "instructorNav": "إدارة التدريب"
+  }
+}

@@ -1,0 +1,91 @@
+/* LTR typography and layout adjustments */
+html[dir="ltr"] {
+  font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+html[dir="ltr"] .dashboard-shell {
+  grid-template-columns: var(--sidebar-width) 1fr;
+}
+
+html[dir="ltr"] .sidebar {
+  border-inline-end: 1px solid var(--color-outline);
+  border-inline-start: none;
+}
+
+html[dir="ltr"] .dashboard-header-title {
+  text-align: start;
+}
+
+html[dir="ltr"] .sidebar-section-label,
+html[dir="ltr"] .page-header,
+html[dir="ltr"] .breadcrumb {
+  text-align: start;
+}
+
+html[dir="ltr"] .dropdown-menu {
+  inset-inline-end: 0;
+  inset-inline-start: auto;
+}
+
+/* Mirror physical text-align rules from legacy CSS for LTR */
+html[dir="ltr"] .course-review-body,
+html[dir="ltr"] .instructor-profile-completion,
+html[dir="ltr"] .student-wallet-body,
+html[dir="ltr"] .student-dashboard-hero-text,
+html[dir="ltr"] .student-community-detail,
+html[dir="ltr"] .student-live-detail,
+html[dir="ltr"] .review-item-body,
+html[dir="ltr"] .live-session-body {
+  text-align: start;
+}
+
+/* Language switcher */
+.language-switcher {
+  position: relative;
+  display: inline-flex;
+}
+
+.language-switcher-code {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-inline-start: 2px;
+}
+
+.language-switcher-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  inset-inline-end: 0;
+  min-width: 120px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--color-surface-container);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  z-index: 50;
+}
+
+.language-switcher.is-open .language-switcher-menu {
+  display: block;
+}
+
+.language-switcher-option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: start;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--color-on-surface);
+}
+
+.language-switcher-option:hover,
+.language-switcher-option.is-active {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}

@@ -1,0 +1,175 @@
+{
+  "title": "Settings",
+  "general": "General",
+  "platform": "Platform settings",
+  "saved": "Settings saved",
+  "admin": {
+    "title": "Settings",
+    "subtitle": "Full platform configuration — general, financial, contact, SEO, and technical",
+    "tabs": {
+      "general": "General",
+      "branding": "Branding",
+      "financial": "Financial",
+      "certificates": "Certificates",
+      "contact": "Contact",
+      "legal": "SEO",
+      "system": "Technical"
+    },
+    "sections": {
+      "general": {
+        "label": "General",
+        "title": "General settings",
+        "description": "Platform name, language, and registration/maintenance controls.",
+        "fields": {
+          "platformName": { "label": "Platform name", "placeholder": "BI-ALEM / بالعِلم" },
+          "platformTagline": { "label": "Tagline", "helper": "Shown on the homepage and in search results" },
+          "defaultLanguage": { "label": "Default language" },
+          "timezone": { "label": "Timezone" },
+          "maintenanceMode": { "label": "Maintenance mode", "helper": "When enabled, visitors see a maintenance message" },
+          "registrationEnabled": { "label": "Student registration" },
+          "instructorRegistrationEnabled": { "label": "Instructor registration" }
+        }
+      },
+      "branding": {
+        "label": "Branding",
+        "title": "Visual identity",
+        "description": "Logo, colors, and overall platform appearance.",
+        "fields": {
+          "logo": { "label": "Logo URL", "helper": "Upload an image or enter a direct URL" },
+          "favicon": { "label": "Browser icon (Favicon)", "helper": "Upload a square icon (PNG/WebP) — 32×32 or 64×64" },
+          "primaryColor": { "label": "Primary color" },
+          "secondaryColor": { "label": "Secondary color" }
+        }
+      },
+      "financial": {
+        "label": "Financial",
+        "title": "Financial settings",
+        "description": "Commissions, currency, withdrawals, and payment gateway.",
+        "fields": {
+          "platformCommissionPercentage": { "label": "Platform commission (%)" },
+          "currency": { "label": "Currency" },
+          "taxPercentage": { "label": "Tax rate (%)" },
+          "minWithdrawalAmount": { "label": "Minimum withdrawal {{suffix}}" },
+          "paymentGatewayPlaceholder": { "label": "Payment gateway", "helper": "SIMULATED for testing — replace with a real provider later" }
+        }
+      },
+      "certificates": {
+        "label": "Certificates",
+        "title": "Certificates & referrals",
+        "description": "Certificate prefix and referral program rewards.",
+        "fields": {
+          "certificatePrefix": { "label": "Certificate prefix", "placeholder": "BI", "helper": "Example: BI-2026-00001" },
+          "referralRewardPoints": { "label": "Referral reward points", "helper": "Awarded to referrer when a new student signs up with their code" },
+          "pointsPerEgp": { "label": "Point value (EGP)", "helper": "Example: 1 = each point equals 1 EGP discount" },
+          "referralEnabled": { "label": "Enable referral program" }
+        }
+      },
+      "contact": {
+        "label": "Contact",
+        "title": "Contact & support",
+        "description": "Communication channels for students and instructors.",
+        "fields": {
+          "supportEmail": { "label": "Support email" },
+          "supportPhone": { "label": "Support phone", "placeholder": "+966500000000" },
+          "whatsappNumber": { "label": "WhatsApp", "placeholder": "+966500000000" },
+          "facebookUrl": { "label": "Facebook", "placeholder": "https://facebook.com/..." },
+          "twitterUrl": { "label": "X (Twitter)" },
+          "instagramUrl": { "label": "Instagram" },
+          "linkedinUrl": { "label": "LinkedIn" },
+          "youtubeUrl": { "label": "YouTube" }
+        }
+      },
+      "legal": {
+        "label": "SEO",
+        "title": "SEO & legal pages",
+        "description": "Search engine optimization and terms/privacy links.",
+        "fields": {
+          "metaTitle": { "label": "SEO title" },
+          "metaDescription": { "label": "SEO description" },
+          "termsUrl": { "label": "Terms & conditions URL" },
+          "privacyUrl": { "label": "Privacy policy URL" },
+          "googleAnalyticsId": { "label": "Google Analytics ID", "placeholder": "G-XXXXXXXXXX", "helper": "Optional" }
+        }
+      },
+      "system": {
+        "label": "Technical",
+        "title": "Technical settings",
+        "description": "Upload limits, OTP, and session timeout.",
+        "fields": {
+          "maxUploadSizeMB": { "label": "Maximum upload size (MB)" },
+          "otpExpiryMinutes": { "label": "OTP expiry (minutes)" },
+          "sessionTimeoutMinutes": { "label": "Session timeout (minutes)" }
+        }
+      }
+    },
+    "options": {
+      "language": {
+        "ar": "Arabic",
+        "en": "English"
+      },
+      "timezone": {
+        "Africa/Cairo": "Cairo (GMT+2)",
+        "Asia/Riyadh": "Riyadh (GMT+3)",
+        "Asia/Dubai": "Dubai (GMT+4)",
+        "UTC": "UTC"
+      },
+      "currency": {
+        "EGP": "Egyptian pound (EGP)",
+        "SAR": "Saudi riyal (SAR)",
+        "USD": "US dollar ($)"
+      }
+    },
+    "stats": {
+      "savedSettings": "Saved settings",
+      "platformStatus": "Platform status",
+      "maintenance": "Maintenance",
+      "active": "Active",
+      "maintenanceHint": "Visitors see a maintenance message",
+      "activeHint": "Platform available to everyone",
+      "commission": "Platform commission",
+      "referralPoints": "Referral reward points",
+      "pointsUnit": "points"
+    },
+    "preview": {
+      "logoAlt": "Logo preview",
+      "logoPlaceholder": "Logo",
+      "platformNameFallback": "Platform name",
+      "taglineFallback": "Tagline",
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "sampleButton": "Sample button"
+    },
+    "logoUpload": {
+      "empty": "No logo",
+      "placeholder": "/uploads/logo.png or https://...",
+      "changeImage": "Change image",
+      "uploadLogo": "Upload logo",
+      "remove": "Remove"
+    },
+    "toggle": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enabledHint": "Takes effect immediately on the platform",
+      "disabledHint": "Currently disabled"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "saveAll": "Save all",
+      "revert": "Revert",
+      "saveSection": "Save {{section}}",
+      "unsavedChanges": "Unsaved changes"
+    },
+    "toast": {
+      "invalidEmail": "Support email is invalid.",
+      "invalidCommission": "Commission rate must be between 0 and 100.",
+      "invalidColor": "{{color}} color must be in #RRGGBB format.",
+      "primaryColor": "Primary",
+      "secondaryColor": "Secondary",
+      "saved": "Settings saved and applied to the platform.",
+      "saveFailed": "Could not save settings. Check your connection and try again.",
+      "logoUploaded": "Logo uploaded and applied to the platform.",
+      "faviconUploaded": "Favicon uploaded and applied to the platform.",
+      "uploadFailed": "Could not upload image. Ensure the backend is running and the file is a valid image."
+    }
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "title": "الإعدادات",
+  "general": "عام",
+  "platform": "إعدادات المنصة",
+  "saved": "تم حفظ الإعدادات",
+  "admin": {
+    "title": "الإعدادات",
+    "subtitle": "تهيئة شاملة لإعدادات المنصة — عام، مالي، تواصل، SEO، وتقني",
+    "tabs": {
+      "general": "عام",
+      "branding": "الهوية",
+      "financial": "مالي",
+      "certificates": "شهادات",
+      "contact": "تواصل",
+      "legal": "SEO",
+      "system": "تقني"
+    },
+    "sections": {
+      "general": {
+        "label": "عام",
+        "title": "الإعدادات العامة",
+        "description": "اسم المنصة، اللغة، وضوابط التسجيل والصيانة.",
+        "fields": {
+          "platformName": { "label": "اسم المنصة", "placeholder": "BI-ALEM / بالعِلم" },
+          "platformTagline": { "label": "الشعار النصي", "helper": "يظهر في الصفحة الرئيسية ونتائج البحث" },
+          "defaultLanguage": { "label": "اللغة الافتراضية" },
+          "timezone": { "label": "المنطقة الزمنية" },
+          "maintenanceMode": { "label": "وضع الصيانة", "helper": "عند التفعيل تُعرض رسالة صيانة للزوار" },
+          "registrationEnabled": { "label": "تسجيل الطلاب" },
+          "instructorRegistrationEnabled": { "label": "تسجيل المحاضرين" }
+        }
+      },
+      "branding": {
+        "label": "الهوية",
+        "title": "الهوية البصرية",
+        "description": "الشعار، الألوان، والمظهر العام للمنصة.",
+        "fields": {
+          "logo": { "label": "رابط الشعار", "helper": "ارفع صورة أو أدخل رابطاً مباشراً" },
+          "favicon": { "label": "أيقونة المتصفح (Favicon)", "helper": "ارفع أيقونة مربعة (PNG/WebP) — 32×32 أو 64×64" },
+          "primaryColor": { "label": "اللون الأساسي" },
+          "secondaryColor": { "label": "اللون الثانوي" }
+        }
+      },
+      "financial": {
+        "label": "مالي",
+        "title": "الإعدادات المالية",
+        "description": "العمولات، العملة، السحوبات، وبوابة الدفع.",
+        "fields": {
+          "platformCommissionPercentage": { "label": "نسبة عمولة المنصة (%)" },
+          "currency": { "label": "العملة" },
+          "taxPercentage": { "label": "نسبة الضريبة (%)" },
+          "minWithdrawalAmount": { "label": "الحد الأدنى للسحب {{suffix}}" },
+          "paymentGatewayPlaceholder": { "label": "بوابة الدفع", "helper": "SIMULATED للتجربة — استبدلها بمزود حقيقي لاحقاً" }
+        }
+      },
+      "certificates": {
+        "label": "شهادات",
+        "title": "الشهادات والإحالات",
+        "description": "بادئة الشهادات ومكافآت برنامج الإحالة.",
+        "fields": {
+          "certificatePrefix": { "label": "بادئة الشهادات", "placeholder": "BI", "helper": "مثال: BI-2026-00001" },
+          "referralRewardPoints": { "label": "نقاط مكافأة الإحالة", "helper": "تُمنح للمُحيل عند تسجيل طالب جديد بكوده" },
+          "pointsPerEgp": { "label": "قيمة النقطة (ج.م)", "helper": "مثال: 1 = كل نقطة تساوي 1 ج.م خصم" },
+          "referralEnabled": { "label": "تفعيل برنامج الإحالة" }
+        }
+      },
+      "contact": {
+        "label": "تواصل",
+        "title": "التواصل والدعم",
+        "description": "قنوات التواصل مع الطلاب والمحاضرين.",
+        "fields": {
+          "supportEmail": { "label": "بريد الدعم" },
+          "supportPhone": { "label": "هاتف الدعم", "placeholder": "+966500000000" },
+          "whatsappNumber": { "label": "واتساب", "placeholder": "+966500000000" },
+          "facebookUrl": { "label": "فيسبوك", "placeholder": "https://facebook.com/..." },
+          "twitterUrl": { "label": "X (تويتر)" },
+          "instagramUrl": { "label": "إنستغرام" },
+          "linkedinUrl": { "label": "لينكدإن" },
+          "youtubeUrl": { "label": "يوتيوب" }
+        }
+      },
+      "legal": {
+        "label": "SEO",
+        "title": "SEO والصفحات القانونية",
+        "description": "تحسين محركات البحث وروابط الشروط والخصوصية.",
+        "fields": {
+          "metaTitle": { "label": "عنوان SEO" },
+          "metaDescription": { "label": "وصف SEO" },
+          "termsUrl": { "label": "رابط الشروط والأحكام" },
+          "privacyUrl": { "label": "رابط سياسة الخصوصية" },
+          "googleAnalyticsId": { "label": "Google Analytics ID", "placeholder": "G-XXXXXXXXXX", "helper": "اختياري" }
+        }
+      },
+      "system": {
+        "label": "تقني",
+        "title": "الإعدادات التقنية",
+        "description": "حدود الرفع، OTP، ومهلة الجلسة.",
+        "fields": {
+          "maxUploadSizeMB": { "label": "الحد الأقصى لحجم الرفع (MB)" },
+          "otpExpiryMinutes": { "label": "مدة صلاحية OTP (دقيقة)" },
+          "sessionTimeoutMinutes": { "label": "مهلة الجلسة (دقيقة)" }
+        }
+      }
+    },
+    "options": {
+      "language": {
+        "ar": "العربية",
+        "en": "English"
+      },
+      "timezone": {
+        "Africa/Cairo": "القاهرة (GMT+2)",
+        "Asia/Riyadh": "الرياض (GMT+3)",
+        "Asia/Dubai": "دبي (GMT+4)",
+        "UTC": "UTC"
+      },
+      "currency": {
+        "EGP": "جنيه مصري (ج.م)",
+        "SAR": "ريال سعودي (ر.س)",
+        "USD": "دولار أمريكي ($)"
+      }
+    },
+    "stats": {
+      "savedSettings": "إعدادات محفوظة",
+      "platformStatus": "حالة المنصة",
+      "maintenance": "صيانة",
+      "active": "نشطة",
+      "maintenanceHint": "الزوار يرون رسالة صيانة",
+      "activeHint": "المنصة متاحة للجميع",
+      "commission": "عمولة المنصة",
+      "referralPoints": "نقاط مكافأة الإحالة",
+      "pointsUnit": "نقطة"
+    },
+    "preview": {
+      "logoAlt": "معاينة الشعار",
+      "logoPlaceholder": "شعار",
+      "platformNameFallback": "اسم المنصة",
+      "taglineFallback": "الشعار النصي",
+      "primary": "أساسي",
+      "secondary": "ثانوي",
+      "sampleButton": "زر تجريبي"
+    },
+    "logoUpload": {
+      "empty": "لا يوجد شعار",
+      "placeholder": "/uploads/logo.png أو https://...",
+      "changeImage": "تغيير الصورة",
+      "uploadLogo": "رفع شعار",
+      "remove": "إزالة"
+    },
+    "toggle": {
+      "enabled": "مفعّل",
+      "disabled": "معطّل",
+      "enabledHint": "ينعكس فوراً على المنصة",
+      "disabledHint": "غير مفعّل حالياً"
+    },
+    "actions": {
+      "refresh": "تحديث",
+      "saveAll": "حفظ الكل",
+      "revert": "تراجع",
+      "saveSection": "حفظ {{section}}",
+      "unsavedChanges": "تغييرات غير محفوظة"
+    },
+    "toast": {
+      "invalidEmail": "بريد الدعم غير صالح.",
+      "invalidCommission": "نسبة العمولة يجب أن تكون بين 0 و 100.",
+      "invalidColor": "اللون {{color}} يجب أن يكون بصيغة #RRGGBB.",
+      "primaryColor": "الأساسي",
+      "secondaryColor": "الثانوي",
+      "saved": "تم حفظ الإعدادات وتطبيقها على المنصة.",
+      "saveFailed": "تعذّر حفظ الإعدادات. تحقق من الاتصال وحاول مجدداً.",
+      "logoUploaded": "تم رفع الشعار وتطبيقه على المنصة.",
+      "faviconUploaded": "تم رفع الأيقونة وتطبيقها على المنصة.",
+      "uploadFailed": "تعذّر رفع الصورة. تأكد من أن Backend يعمل وأن الملف صورة صالحة."
+    }
+  }
+}

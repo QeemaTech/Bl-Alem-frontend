@@ -1,15 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   CheckCircle2, Download, Eye, Headphones, MessageSquare, MessageSquarePlus, Table2,
 } from '@/icons';
 import { adminApi } from '../../api/admin';
-import {
-  fmtSupportDate,
-  roleLabels,
-  statusLabels,
-  statusVariant,
-} from '../../components/admin/support/supportTicketShared';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -18,27 +13,45 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
+import { useAdminSupportLabels } from '../../hooks/useAdminSupportLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const exportColumns = [
-  { key: 'id', header: 'رقم التذكرة' },
-  { key: 'user', header: 'المستخدم' },
-  { key: 'email', header: 'البريد' },
-  { key: 'role', header: 'الدور' },
-  { key: 'subject', header: 'الموضوع' },
-  { key: 'message', header: 'الرسالة' },
-  { key: 'repliesCount', header: 'عدد الردود' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'تاريخ الإنشاء' },
-  { key: 'updatedAt', header: 'آخر تحديث' },
-];
+import { formatNumber } from '../../utils/localeFormat';
 
 export default function AdminSupportPage() {
+  const { t, i18n } = useTranslation(['support', 'common']);
   const navigate = useNavigate();
+  const {
+    getRoleLabel,
+    getStatusLabel,
+    fmtSupportDate,
+    statusLabels,
+    statusVariant,
+  } = useAdminSupportLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.export.columns', { returnObjects: true, ns: 'support' }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'user', header: cols.user },
+      { key: 'email', header: cols.email },
+      { key: 'role', header: cols.role },
+      { key: 'subject', header: cols.subject },
+      { key: 'message', header: cols.message },
+      { key: 'repliesCount', header: cols.repliesCount },
+      { key: 'status', header: cols.status },
+      { key: 'createdAt', header: cols.createdAt },
+      { key: 'updatedAt', header: cols.updatedAt },
+    ];
+  }, [t]);
+
+  const tableColumns = useMemo(() => (
+    t('admin.table.columns', { returnObjects: true, ns: 'support' }) as Record<string, string>
+  ), [t]);
 
   const load = async () => {
     setLoading(true);
@@ -72,19 +85,25 @@ export default function AdminSupportPage() {
     id: row.id,
     user: row.user?.fullName || '—',
     email: row.user?.email || '—',
-    role: roleLabels[row.user?.role] || row.user?.role || '—',
+    role: getRoleLabel(row.user?.role) || row.user?.role || '—',
     subject: row.subject,
     message: row.message?.length > 60 ? `${row.message.slice(0, 60)}...` : row.message,
     repliesCount: row._count?.replies ?? 0,
-    status: statusLabels[row.status] || row.status,
+    status: getStatusLabel(row.status),
     createdAt: fmtSupportDate(row.createdAt),
     updatedAt: fmtSupportDate(row.updatedAt),
     _raw: row,
-  })), [filteredItems]);
+  })), [filteredItems, getRoleLabel, getStatusLabel, fmtSupportDate]);
+
+  const ticketCountLabel = t('admin.table.ticketCount', {
+    count: filteredItems.length,
+    ns: 'support',
+    replace: { count: formatNumber(filteredItems.length, undefined, i18n.language) },
+  });
 
   const handleExport = () => {
     exportTableToExcel(
-      'تذاكر الدعم',
+      t('admin.export.sheetName', { ns: 'support' }),
       exportColumns,
       tableRows.map(({ _raw, message, ...row }) => ({
         ...row,
@@ -97,38 +116,38 @@ export default function AdminSupportPage() {
     <div className="page-grid admin-support-page">
       <div className="reports-header">
         <PageHeader
-          title="الدعم الفني"
-          subtitle="إدارة تذاكر الدعم والرد على المستخدمين"
+          title={t('admin.title', { ns: 'support' })}
+          subtitle={t('admin.subtitle', { ns: 'support' })}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('admin.exportExcel', { ns: 'support' })}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid admin-support-stats">
-        <StatCard title="إجمالي التذاكر" value={String(stats.total)} icon={Headphones} />
-        <StatCard title="مفتوحة" value={String(stats.open)} icon={MessageSquarePlus} />
-        <StatCard title="قيد المعالجة" value={String(stats.inProgress)} icon={MessageSquare} />
-        <StatCard title="مغلقة" value={String(stats.closed)} icon={CheckCircle2} />
+        <StatCard title={t('admin.stats.total', { ns: 'support' })} value={String(stats.total)} icon={Headphones} />
+        <StatCard title={t('admin.stats.open', { ns: 'support' })} value={String(stats.open)} icon={MessageSquarePlus} />
+        <StatCard title={t('admin.stats.inProgress', { ns: 'support' })} value={String(stats.inProgress)} icon={MessageSquare} />
+        <StatCard title={t('admin.stats.closed', { ns: 'support' })} value={String(stats.closed)} icon={CheckCircle2} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالموضوع، الرسالة، المستخدم، أو البريد..."
+        searchPlaceholder={t('admin.filters.searchPlaceholder', { ns: 'support' })}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('admin.filters.status', { ns: 'support' })}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مفتوحة', value: 'OPEN' },
-            { label: 'قيد المعالجة', value: 'IN_PROGRESS' },
-            { label: 'مغلقة', value: 'CLOSED' },
+            { label: t('admin.filters.allStatuses', { ns: 'support' }), value: '' },
+            { label: statusLabels.OPEN, value: 'OPEN' },
+            { label: statusLabels.IN_PROGRESS, value: 'IN_PROGRESS' },
+            { label: statusLabels.CLOSED, value: 'CLOSED' },
           ]}
         />
       </FilterBar>
@@ -139,37 +158,37 @@ export default function AdminSupportPage() {
             <span className="reports-table-title-icon" aria-hidden="true">
               <Table2 size={20} />
             </span>
-            تذاكر الدعم
+            {t('admin.table.title', { ns: 'support' })}
           </h2>
-          <span className="muted-count">{filteredItems.length.toLocaleString('ar-EG')} تذكرة</span>
+          <span className="muted-count">{ticketCountLabel}</span>
         </div>
         <Table
           loading={loading}
           fluid
           hideScrollNotice
           data={tableRows}
-          emptyTitle="لا توجد تذاكر"
-          emptyDescription="لم يتم إرسال أي تذاكر دعم بعد."
+          emptyTitle={t('admin.table.emptyTitle', { ns: 'support' })}
+          emptyDescription={t('admin.table.emptyDescription', { ns: 'support' })}
           columns={[
-            { key: 'id', header: 'رقم التذكرة', align: 'center' },
-            { key: 'user', header: 'المستخدم' },
-            { key: 'role', header: 'الدور' },
-            { key: 'subject', header: 'الموضوع' },
-            { key: 'repliesCount', header: 'الردود', align: 'center' },
+            { key: 'id', header: tableColumns.id, align: 'center' },
+            { key: 'user', header: tableColumns.user },
+            { key: 'role', header: tableColumns.role },
+            { key: 'subject', header: tableColumns.subject },
+            { key: 'repliesCount', header: tableColumns.repliesCount, align: 'center' },
             {
               key: 'status',
-              header: 'الحالة',
+              header: tableColumns.status,
               align: 'center',
               render: (row) => (
                 <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {statusLabels[String(row._raw?.status)] || row.status}
+                  {getStatusLabel(String(row._raw?.status))}
                 </Badge>
               ),
             },
-            { key: 'createdAt', header: 'التاريخ' },
+            { key: 'createdAt', header: tableColumns.createdAt },
             {
               key: 'actions',
-              header: 'الإجراءات',
+              header: tableColumns.actions,
               render: (row) => (
                 <Button
                   variant="outline"
@@ -177,7 +196,7 @@ export default function AdminSupportPage() {
                   icon={<Eye size={16} />}
                   onClick={() => navigate(`/admin/support/${row._raw.id}`)}
                 >
-                  عرض
+                  {t('admin.actions.view', { ns: 'support' })}
                 </Button>
               ),
             },

@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, FolderTree, Layers, Plus } from '@/icons';
 import { adminApi } from '../../api/admin';
-import { buildCategoryTableRows, CategoriesTable } from '../../components/admin/categories/CategoriesTable';
+import { CategoriesTable } from '../../components/admin/categories/CategoriesTable';
 import { CategoryFormModal } from '../../components/admin/categories/CategoryFormModal';
 import { emptyCategoryForm } from '../../components/admin/categories/categoryShared';
 import { ReportChart } from '../../components/reports/ReportChart';
@@ -13,23 +14,15 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminCategoryLabels } from '../../hooks/useAdminCategoryLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
-import { statusLabels } from '../../components/admin/categories/categoryShared';
-
-const exportColumns = [
-  { key: 'id', header: 'رقم التصنيف' },
-  { key: 'nameAr', header: 'الاسم العربي' },
-  { key: 'nameEn', header: 'الاسم الإنجليزي' },
-  { key: 'slug', header: 'الرابط' },
-  { key: 'icon', header: 'الأيقونة' },
-  { key: 'courses', header: 'عدد الكورسات' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'تاريخ الإنشاء' },
-];
 
 export default function AdminCategoriesPage() {
+  const { t } = useTranslation(['categories', 'common']);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { statusLabels, fmtDate, empty } = useAdminCategoryLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -39,6 +32,20 @@ export default function AdminCategoriesPage() {
   const [form, setForm] = useState(emptyCategoryForm);
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.categories.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'nameAr', header: cols.nameAr },
+      { key: 'nameEn', header: cols.nameEn },
+      { key: 'slug', header: cols.slug },
+      { key: 'icon', header: cols.icon },
+      { key: 'courses', header: cols.courses },
+      { key: 'status', header: cols.status },
+      { key: 'createdAt', header: cols.createdAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -75,9 +82,19 @@ export default function AdminCategoriesPage() {
       counts[label] = (counts[label] || 0) + 1;
     });
     return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+  }, [items, statusLabels]);
 
-  const tableRows = useMemo(() => buildCategoryTableRows(filteredItems), [filteredItems]);
+  const tableRows = useMemo(() => filteredItems.map((row) => ({
+    id: row.id,
+    nameAr: row.nameAr,
+    nameEn: row.nameEn || empty,
+    slug: row.slug,
+    icon: row.icon || empty,
+    courses: String(row._count?.courses ?? 0),
+    status: statusLabels[row.status] || row.status,
+    createdAt: fmtDate(row.createdAt),
+    _raw: row,
+  })), [filteredItems, statusLabels, fmtDate, empty]);
 
   const openCreate = () => {
     setEditing(null);
@@ -116,17 +133,17 @@ export default function AdminCategoriesPage() {
       };
       if (editing) {
         await adminApi.updateCategory(editing.id, payload);
-        showToast('تم تحديث التصنيف.', 'success');
+        showToast(t('admin.categories.toast.updated'), 'success');
       } else {
         await adminApi.createCategory(payload);
-        showToast('تم إنشاء التصنيف.', 'success');
+        showToast(t('admin.categories.toast.created'), 'success');
       }
       setFormOpen(false);
       setEditing(null);
       setForm(emptyCategoryForm);
       await load();
     } catch {
-      showToast('تعذّر حفظ التصنيف.', 'error');
+      showToast(t('admin.categories.toast.saveError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +152,10 @@ export default function AdminCategoriesPage() {
   const toggleStatus = async (category: any) => {
     const next = category.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     await adminApi.categoryStatus(category.id, next);
-    showToast(next === 'ACTIVE' ? 'تم تفعيل التصنيف.' : 'تم إيقاف التصنيف.', 'success');
+    showToast(
+      next === 'ACTIVE' ? t('admin.categories.toast.activated') : t('admin.categories.toast.deactivated'),
+      'success',
+    );
     await load();
   };
 
@@ -143,58 +163,62 @@ export default function AdminCategoriesPage() {
     if (!deleteTarget) return;
     try {
       await adminApi.deleteCategory(deleteTarget.id);
-      showToast('تم حذف التصنيف.', 'success');
+      showToast(t('admin.categories.toast.deleted'), 'success');
       setDeleteTarget(null);
       await load();
     } catch {
-      showToast('لا يمكن حذف تصنيف مرتبط بدورات.', 'error');
+      showToast(t('admin.categories.toast.deleteError'), 'error');
       setDeleteTarget(null);
     }
   };
 
   const handleExport = () => {
-    exportTableToExcel('التصنيفات', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('admin.categories.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   return (
     <div className="page-grid admin-categories-page">
       <div className="reports-header">
-        <PageHeader title="التصنيفات" subtitle="إدارة تصنيفات الدورات على المنصة" />
+        <PageHeader title={t('admin.categories.title')} subtitle={t('admin.categories.subtitle')} />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={openCreate}>
-            إضافة تصنيف
+            {t('admin.categories.addCategory')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid admin-categories-stats">
-        <StatCard title="إجمالي التصنيفات" value={String(stats.total)} icon={FolderTree} />
-        <StatCard title="فعّالة" value={String(stats.active)} icon={Layers} />
-        <StatCard title="غير فعّالة" value={String(stats.inactive)} icon={FolderTree} />
-        <StatCard title="إجمالي الكورسات" value={String(stats.courses)} icon={BookOpen} />
+        <StatCard title={t('admin.categories.stats.total')} value={String(stats.total)} icon={FolderTree} />
+        <StatCard title={t('admin.categories.stats.active')} value={String(stats.active)} icon={Layers} />
+        <StatCard title={t('admin.categories.stats.inactive')} value={String(stats.inactive)} icon={FolderTree} />
+        <StatCard title={t('admin.categories.stats.totalCourses')} value={String(stats.courses)} icon={BookOpen} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع حالات التصنيفات" type="pie" data={statusChart} />
+        <ReportChart title={t('admin.categories.charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالاسم أو الرابط..."
+        searchPlaceholder={t('admin.categories.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('admin.categories.filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'فعّال', value: 'ACTIVE' },
-            { label: 'غير فعّال', value: 'INACTIVE' },
+            { label: t('admin.categories.filters.allStatuses'), value: '' },
+            { label: statusLabels.ACTIVE, value: 'ACTIVE' },
+            { label: statusLabels.INACTIVE, value: 'INACTIVE' },
           ]}
         />
       </FilterBar>
@@ -220,9 +244,9 @@ export default function AdminCategoriesPage() {
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف التصنيف"
-        message={`هل أنت متأكد من حذف تصنيف "${deleteTarget?.nameAr}"؟`}
-        confirmLabel="حذف"
+        title={t('admin.categories.deleteTitle')}
+        message={t('admin.categories.deleteMessage', { name: deleteTarget?.nameAr })}
+        confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

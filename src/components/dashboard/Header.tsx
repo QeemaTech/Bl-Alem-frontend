@@ -1,27 +1,28 @@
 ﻿import { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, ChevronLeft, ChevronRight, DarkMode, LightMode, LogOut, Menu, UserRound } from '@/icons';
+import { useTranslation } from 'react-i18next';
+import { Bell, ChevronDown, DarkMode, LightMode, LogOut, Menu, UserRound } from '@/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { useAuth } from '../../store/AuthContext';
 import { useTheme } from '../../store/ThemeContext';
 
 interface HeaderProps {
   title: string;
+  greetingKey?: string;
   notificationsPath?: string;
   profilePath?: string;
   onMenuClick: () => void;
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 export function Header({
   title,
+  greetingKey = 'header.greeting',
   notificationsPath,
   profilePath,
   onMenuClick,
-  isCollapsed,
-  onToggleCollapse,
 }: HeaderProps) {
+  const { t } = useTranslation('common');
   const { user, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -46,7 +47,8 @@ export function Header({
     navigate('/login', { replace: true });
   };
 
-  const initials = user?.fullName?.split(' ').map((w) => w[0]).slice(0, 2).join('') || '؟';
+  const initials = user?.fullName?.split(' ').map((w) => w[0]).slice(0, 2).join('') || t('sidebar.unknownInitial');
+  const greetingName = user?.fullName || t('header.greetingFallback');
 
   return (
     <>
@@ -55,40 +57,30 @@ export function Header({
           type="button"
           className="icon-btn dashboard-menu-mobile"
           onClick={onMenuClick}
-          aria-label="فتح القائمة"
+          aria-label={t('sidebar.openMenu')}
         >
           <Menu size={20} />
         </button>
-        {onToggleCollapse ? (
-          <button
-            type="button"
-            className="icon-btn dashboard-sidebar-toggle"
-            onClick={onToggleCollapse}
-            aria-label={isCollapsed ? 'فتح القائمة الجانبية' : 'طيّ القائمة الجانبية'}
-            aria-expanded={!isCollapsed}
-          >
-            {isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-          </button>
-        ) : null}
         <div className="dashboard-header-title">
           <h1>{title}</h1>
-          <p>مرحباً {user?.fullName || 'بك'}، تابع يومك التعليمي من هنا.</p>
+          <p>{t(greetingKey, { name: greetingName })}</p>
         </div>
         <div className="header-actions">
+          <LanguageSwitcher />
           <button
             type="button"
             className="icon-btn"
             onClick={toggleTheme}
-            aria-label={resolvedTheme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+            aria-label={resolvedTheme === 'dark' ? t('theme.light') : t('theme.dark')}
           >
             {resolvedTheme === 'dark' ? <LightMode size={20} /> : <DarkMode size={20} />}
           </button>
           {notificationsPath ? (
-            <Link to={notificationsPath} className="icon-btn" aria-label="الإشعارات">
+            <Link to={notificationsPath} className="icon-btn" aria-label={t('header.notifications')}>
               <Bell size={20} />
             </Link>
           ) : (
-            <button type="button" className="icon-btn" aria-label="الإشعارات">
+            <button type="button" className="icon-btn" aria-label={t('header.notifications')}>
               <Bell size={20} />
             </button>
           )}
@@ -102,7 +94,7 @@ export function Header({
               <div className="dropdown-menu">
                 {profilePath ? (
                   <Link to={profilePath} className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <UserRound size={16} /> الملف الشخصي
+                    <UserRound size={16} /> {t('header.profile')}
                   </Link>
                 ) : null}
                 <button
@@ -110,7 +102,7 @@ export function Header({
                   className="dropdown-item danger"
                   onClick={() => { setDropdownOpen(false); setLogoutOpen(true); }}
                 >
-                  <LogOut size={16} /> تسجيل الخروج
+                  <LogOut size={16} /> {t('actions.logout')}
                 </button>
               </div>
             ) : null}
@@ -119,9 +111,9 @@ export function Header({
       </header>
       <ConfirmDialog
         isOpen={logoutOpen}
-        title="تسجيل الخروج"
-        message="هل أنت متأكد من تسجيل الخروج؟"
-        confirmLabel="خروج"
+        title={t('dialog.logoutTitle')}
+        message={t('dialog.logoutMessage')}
+        confirmLabel={t('dialog.logoutConfirm')}
         variant="primary"
         loading={loggingOut}
         onConfirm={handleLogout}

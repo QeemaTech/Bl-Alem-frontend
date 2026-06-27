@@ -1,0 +1,127 @@
+/* Student community — compact post cards */
+.student-community-page {
+  gap: clamp(12px, 1.5vw, 16px);
+}
+.student-community-page .student-community-hero {
+  gap: 14px;
+  padding: 14px 18px !important;
+}
+.student-community-page .student-community-hero-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+.student-community-page .student-community-hero-body strong {
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.student-community-page .student-community-hero-body p {
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.student-community-page .stats-grid {
+  gap: clamp(10px, 1.2vw, 14px);
+}
+
+.student-community-page .community-feed {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 1.1vw, 14px);
+}
+.student-community-page .community-post-card {
+  padding: 12px 14px !important;
+  border-radius: 12px;
+  gap: 0;
+}
+.student-community-page .community-post-head {
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.student-community-page .community-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.88rem;
+}
+.student-community-page .community-avatar.sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.78rem;
+}
+.student-community-page .community-post-meta strong {
+  font-size: 0.86rem;
+}
+.student-community-page .community-post-meta span,
+.student-community-page .community-comment small {
+  font-size: 0.74rem;
+}
+.student-community-page .community-post-meta-top {
+  gap: 4px;
+}
+.student-community-page .community-post-meta-top .badge {
+  font-size: 0.68rem;
+  padding: 2px 8px;
+}
+.student-community-page .community-post-title {
+  margin: 0 0 4px;
+  font-size: clamp(0.88rem, 1.3vw, 0.94rem);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.student-community-page .community-post-body {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.student-community-page .community-comments-list {
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.student-community-page .community-comments-list.compact {
+  max-height: 160px;
+}
+.student-community-page .community-comment {
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+.student-community-page .community-comment strong {
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+.student-community-page .community-comment p {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.student-community-page .community-reply-form {
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: auto;
+}
+.student-community-page .community-reply-form input {
+  padding: 8px 11px;
+  font-size: 0.82rem;
+  border-radius: 10px;
+}
+.student-community-page .community-reply-form .btn {
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: 0.78rem;
+}
+
+@media (min-width: 1440px) {
+  .student-community-page .community-feed {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .student-community-page .community-feed {
+    grid-template-columns: 1fr;
+  }
+}

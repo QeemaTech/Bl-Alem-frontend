@@ -21,14 +21,6 @@ export interface ReviewItem {
   };
 }
 
-export const fmtReviewDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
 export function ratingVariant(rating: number) {
   if (rating >= 4) return 'success' as const;
   if (rating === 3) return 'warning' as const;

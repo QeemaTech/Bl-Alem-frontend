@@ -1,0 +1,139 @@
+{
+  "empty": "—",
+  "title": "الكوبونات",
+  "subtitle": "إدارة أكواد الخصم — منفصلة عن أكواد الإحالة",
+  "stats": {
+    "total": "إجمالي الكوبونات",
+    "active": "فعّالة",
+    "inactive": "غير فعّالة",
+    "expired": "منتهية",
+    "totalUses": "إجمالي الاستخدامات"
+  },
+  "charts": {},
+  "filters": {
+    "searchPlaceholder": "بحث بكود الكوبون...",
+    "status": "الحالة",
+    "type": "النوع",
+    "allStatuses": "كل الحالات",
+    "allTypes": "كل الأنواع"
+  },
+  "table": {
+    "title": "قائمة الكوبونات",
+    "recordCount": "{{count}} كوبون",
+    "emptyTitle": "لا توجد كوبونات",
+    "emptyDescription": "أضف كوبون خصم جديد للمنصة.",
+    "columns": {
+      "code": "الكود",
+      "type": "النوع",
+      "value": "القيمة",
+      "maxUses": "الحد الأقصى",
+      "usedCount": "الاستخدام",
+      "startAt": "تاريخ البداية",
+      "expiresAt": "ينتهي في",
+      "minOrderAmount": "الحد الأدنى",
+      "courses": "الدورات",
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء",
+      "actions": "الإجراءات",
+      "user": "الطالب",
+      "amount": "المبلغ",
+      "payment": "الدفع",
+      "date": "التاريخ"
+    }
+  },
+  "labels": {
+    "status": {
+      "ACTIVE": "فعّال",
+      "INACTIVE": "غير فعّال",
+      "EXPIRED": "منتهي"
+    },
+    "type": {
+      "PERCENTAGE": "نسبة مئوية",
+      "FIXED": "مبلغ ثابت"
+    },
+    "courses": {
+      "all": "جميع الدورات",
+      "specific": "دورات محددة"
+    },
+    "unlimited": "∞"
+  },
+  "form": {
+    "code": "كود الكوبون",
+    "codePlaceholder": "BI20",
+    "discountType": "نوع الخصم",
+    "percentageOption": "نسبة مئوية (%)",
+    "fixedOption": "مبلغ ثابت (ج.م)",
+    "percentageValue": "نسبة الخصم (%)",
+    "fixedValue": "قيمة الخصم (ج.م)",
+    "startAt": "تاريخ البداية (اختياري)",
+    "expiresAt": "تاريخ الانتهاء (اختياري)",
+    "maxUses": "الحد الأقصى للاستخدام (اختياري)",
+    "maxUsesPlaceholder": "اتركه فارغاً لاستخدام غير محدود",
+    "minOrderAmount": "الحد الأدنى للطلب (ج.م) — اختياري",
+    "minOrderAmountPlaceholder": "مثال: 100",
+    "appliesToAll": "ينطبق على جميع الدورات",
+    "appliedCourses": "الدورات المطبّقة",
+    "noPublishedCourses": "لا توجد دورات منشورة.",
+    "status": "الحالة"
+  },
+  "modal": {
+    "create": "إضافة كوبون",
+    "edit": "تعديل الكوبون",
+    "detailTitle": "تفاصيل الكوبون: {{code}}",
+    "usageHistory": "سجل الاستخدام",
+    "loadingUsage": "جاري تحميل سجل الاستخدام...",
+    "noUsage": "لم يُستخدم هذا الكوبون بعد.",
+    "detail": {
+      "code": "الكود",
+      "type": "النوع",
+      "value": "القيمة",
+      "usage": "الاستخدام",
+      "start": "البداية",
+      "end": "الانتهاء",
+      "minOrder": "الحد الأدنى"
+    }
+  },
+  "actions": {
+    "add": "إضافة كوبون",
+    "view": "عرض",
+    "edit": "تعديل",
+    "disable": "إيقاف",
+    "enable": "تفعيل",
+    "delete": "حذف",
+    "saveChanges": "حفظ التعديلات",
+    "create": "إنشاء الكوبون",
+    "exportExcel": "تصدير Excel"
+  },
+  "toast": {
+    "loadDetailFailed": "تعذّر تحميل تفاصيل الكوبون.",
+    "selectCourseOrAll": "حدد دورة واحدة على الأقل أو فعّل «جميع الدورات».",
+    "updated": "تم تحديث الكوبون.",
+    "created": "تم إنشاء الكوبون.",
+    "saveFailed": "تعذّر حفظ الكوبون.",
+    "enabled": "تم تفعيل الكوبون.",
+    "disabled": "تم إيقاف الكوبون.",
+    "statusFailed": "تعذّر تحديث حالة الكوبون.",
+    "deleted": "تم حذف الكوبون.",
+    "deleteFailed": "تعذّر حذف الكوبون."
+  },
+  "export": {
+    "sheetName": "الكوبونات",
+    "columns": {
+      "code": "الكود",
+      "type": "النوع",
+      "value": "القيمة",
+      "maxUses": "الحد الأقصى للاستخدام",
+      "usedCount": "مرات الاستخدام",
+      "startAt": "تاريخ البداية",
+      "expiresAt": "تاريخ الانتهاء",
+      "minOrderAmount": "الحد الأدنى للطلب",
+      "courses": "الدورات",
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء"
+    }
+  },
+  "confirm": {
+    "deleteTitle": "حذف الكوبون",
+    "deleteMessage": "هل أنت متأكد من حذف كوبون \"{{code}}\"؟ سيتم إيقافه مع الإبقاء على سجل الطلبات السابقة."
+  }
+}

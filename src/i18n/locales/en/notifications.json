@@ -1,0 +1,121 @@
+{
+  "title": "Notifications",
+  "empty": "No notifications",
+  "markAllRead": "Mark all as read",
+  "unread": "Unread",
+  "admin": {
+    "title": "Notifications",
+    "subtitle": "Manage and send platform notifications to users",
+    "exportExcel": "Export Excel",
+    "sendNotification": "Send notification",
+    "backToList": "Back to notifications",
+    "empty": "—",
+    "stats": {
+      "total": "Total notifications",
+      "unread": "Unread",
+      "read": "Read",
+      "adminSent": "Admin notifications"
+    },
+    "filters": {
+      "ariaLabel": "Notification filters",
+      "searchPlaceholder": "Search by title, body, recipient, or email...",
+      "type": "Type",
+      "allTypes": "All types",
+      "readStatus": "Read status",
+      "recipientRole": "Recipient role",
+      "all": "All",
+      "students": "Students",
+      "instructors": "Instructors",
+      "admins": "Admins"
+    },
+    "table": {
+      "emptyTitle": "No notifications",
+      "emptyDescription": "No notifications have been sent yet.",
+      "columns": {
+        "id": "Notification ID",
+        "recipient": "Recipient",
+        "email": "Email",
+        "role": "Role",
+        "title": "Title",
+        "body": "Body",
+        "type": "Type",
+        "readStatus": "Read status",
+        "status": "Status",
+        "createdAt": "Date",
+        "actions": "Actions"
+      }
+    },
+    "export": {
+      "sheetName": "Notifications",
+      "columns": {
+        "id": "Notification ID",
+        "recipient": "Recipient",
+        "email": "Email",
+        "role": "Role",
+        "title": "Title",
+        "body": "Body",
+        "type": "Type",
+        "readStatus": "Read status",
+        "createdAt": "Date"
+      }
+    },
+    "actions": {
+      "detail": "Details"
+    },
+    "sendModal": {
+      "title": "Send notification",
+      "targetType": "Target audience",
+      "targetAll": "All users",
+      "targetStudents": "Students",
+      "targetInstructors": "Instructors",
+      "targetSpecificUser": "Specific user",
+      "userId": "User ID",
+      "notificationType": "Notification type",
+      "titleField": "Title",
+      "body": "Notification body",
+      "submit": "Send notification"
+    },
+    "detail": {
+      "notFoundTitle": "Notification not found",
+      "notFoundDescription": "We could not find this notification.",
+      "type": "Type",
+      "sentAt": "Sent at"
+    },
+    "toast": {
+      "loadFailed": "Failed to load notifications.",
+      "loadDetailFailed": "Failed to load notification.",
+      "titleBodyRequired": "Title and notification body are required.",
+      "userIdRequired": "User ID is required.",
+      "sentSuccess": "Notification sent to {{count}} user(s).",
+      "sendFailed": "Failed to send notification."
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "Welcome",
+        "LIVE_SESSION": "Live session",
+        "CERTIFICATE": "Certificate",
+        "REWARD": "Reward",
+        "PAYMENT": "Payment",
+        "COMMUNITY": "Community",
+        "SUBSCRIPTION": "Subscription",
+        "EARNING": "Earnings",
+        "REVIEW": "Review",
+        "WITHDRAWAL": "Withdrawal",
+        "COURSE": "Course",
+        "INSTRUCTOR_REQUEST": "Instructor request",
+        "COURSE_REVIEW": "Course review",
+        "SUPPORT": "Support",
+        "ADMIN": "Admin"
+      },
+      "role": {
+        "STUDENT": "Student",
+        "INSTRUCTOR": "Instructor",
+        "SUPER_ADMIN": "Admin"
+      },
+      "readStatus": {
+        "read": "Read",
+        "unread": "Unread"
+      }
+    }
+  }
+}

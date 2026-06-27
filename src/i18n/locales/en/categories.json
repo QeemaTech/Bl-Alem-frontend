@@ -1,0 +1,127 @@
+{
+  "empty": "—",
+  "labels": {
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    }
+  },
+  "actions": {
+    "edit": "Edit",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "exportExcel": "Export Excel",
+    "review": "Review"
+  },
+  "admin": {
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Manage course categories on the platform",
+      "addCategory": "Add category",
+      "editCategory": "Edit category",
+      "createCategory": "Create category",
+      "saveChanges": "Save changes",
+      "deleteTitle": "Delete category",
+      "deleteMessage": "Are you sure you want to delete category \"{{name}}\"?",
+      "backToCategories": "Back to categories",
+      "notFound": {
+        "title": "Category not found",
+        "description": "We could not find this category."
+      },
+      "stats": {
+        "total": "Total categories",
+        "active": "Active",
+        "inactive": "Inactive",
+        "totalCourses": "Total courses"
+      },
+      "charts": {
+        "statusDistribution": "Category status distribution"
+      },
+      "filters": {
+        "allStatuses": "All statuses",
+        "status": "Status",
+        "searchPlaceholder": "Search by name or slug..."
+      },
+      "table": {
+        "title": "Categories list",
+        "count": "{{count}} categories",
+        "emptyTitle": "No categories",
+        "emptyDescription": "Add a new category to organize courses.",
+        "columns": {
+          "id": "Category ID",
+          "icon": "Icon",
+          "nameAr": "Arabic name",
+          "nameEn": "English name",
+          "slug": "Slug",
+          "courses": "Courses",
+          "status": "Status",
+          "createdAt": "Created",
+          "actions": "Actions"
+        }
+      },
+      "coursesTable": {
+        "title": "Courses in this category",
+        "count": "{{count}} courses",
+        "emptyTitle": "No courses",
+        "emptyDescription": "No courses have been linked to this category yet.",
+        "columns": {
+          "id": "Course ID",
+          "title": "Title",
+          "instructor": "Instructor",
+          "students": "Students",
+          "lessons": "Lessons",
+          "price": "Price",
+          "status": "Status",
+          "updatedAt": "Last updated",
+          "actions": "Actions"
+        }
+      },
+      "detail": {
+        "metaAriaLabel": "Category details",
+        "metaTitle": "Category details",
+        "slug": "Slug",
+        "courseCount": "Course count",
+        "icon": "Icon",
+        "image": "Image",
+        "createdAt": "Created",
+        "updatedAt": "Last updated"
+      },
+      "form": {
+        "nameAr": "Arabic name",
+        "nameEn": "English name",
+        "slug": "Slug",
+        "slugPlaceholder": "programming",
+        "icon": "Icon",
+        "iconPlaceholder": "code",
+        "image": "Image URL (optional)",
+        "imagePlaceholder": "https://...",
+        "status": "Status"
+      },
+      "export": {
+        "sheetName": "Categories",
+        "columns": {
+          "id": "Category ID",
+          "nameAr": "Arabic name",
+          "nameEn": "English name",
+          "slug": "Slug",
+          "icon": "Icon",
+          "courses": "Course count",
+          "status": "Status",
+          "createdAt": "Created"
+        }
+      },
+      "toast": {
+        "updated": "Category updated.",
+        "created": "Category created.",
+        "saveError": "Could not save category.",
+        "activated": "Category activated.",
+        "deactivated": "Category deactivated.",
+        "deleted": "Category deleted.",
+        "deleteError": "Cannot delete a category linked to courses.",
+        "loadError": "Could not load category.",
+        "statusError": "Could not update status."
+      }
+    }
+  }
+}

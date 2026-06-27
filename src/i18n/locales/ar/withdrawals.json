@@ -1,0 +1,118 @@
+{
+  "empty": "—",
+  "admin": {
+    "title": "إدارة السحوبات",
+    "subtitle": "مراجعة واعتماد طلبات سحب أرباح المحاضرين بأمان ووضوح",
+    "exportExcel": "تصدير Excel",
+    "stats": {
+      "ariaLabel": "ملخص السحوبات",
+      "total": "إجمالي الطلبات",
+      "pending": "قيد المراجعة",
+      "approved": "معتمدة",
+      "approvedHint": "بانتظار التحويل",
+      "paid": "مدفوعة",
+      "rejected": "مرفوضة"
+    },
+    "filters": {
+      "ariaLabel": "فلاتر السحوبات",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "dateFrom": "من تاريخ",
+      "dateTo": "إلى تاريخ",
+      "reset": "مسح الفلاتر"
+    },
+    "table": {
+      "title": "طلبات السحب",
+      "emptyTitle": "لا توجد طلبات سحب",
+      "emptyDescription": "لم يتم إرسال أي طلبات سحب من المحاضرين بعد، أو لا توجد نتائج مطابقة للفلاتر.",
+      "columns": {
+        "id": "رقم الطلب",
+        "instructor": "المحاضر",
+        "email": "البريد",
+        "amount": "المبلغ",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "export": {
+      "sheetName": "السحوبات",
+      "columns": {
+        "id": "رقم الطلب",
+        "instructor": "المحاضر",
+        "email": "البريد",
+        "amount": "المبلغ (ج.م)",
+        "bankName": "البنك",
+        "accountName": "اسم الحساب",
+        "iban": "IBAN",
+        "status": "الحالة",
+        "createdAt": "تاريخ الطلب",
+        "notes": "ملاحظات"
+      }
+    },
+    "actions": {
+      "detail": "التفاصيل",
+      "approve": "اعتماد",
+      "reject": "رفض",
+      "confirmTransfer": "تأكيد التحويل"
+    },
+    "detail": {
+      "title": "تفاصيل طلب السحب",
+      "requestId": "رقم الطلب",
+      "instructor": "المحاضر",
+      "email": "البريد",
+      "phone": "الهاتف",
+      "amount": "المبلغ",
+      "bank": "البنك",
+      "accountName": "اسم الحساب",
+      "iban": "IBAN",
+      "status": "الحالة",
+      "requestDate": "تاريخ الطلب",
+      "notes": "ملاحظات",
+      "transferProof": "صورة التحويل",
+      "transferProofAlt": "صورة التحويل"
+    },
+    "rejectModal": {
+      "title": "تأكيد رفض طلب السحب",
+      "message": "هل أنت متأكد من رفض طلب سحب بمبلغ {{amount}} للمحاضر {{name}}؟",
+      "reasonLabel": "سبب الرفض (اختياري)",
+      "reasonPlaceholder": "اكتب سبب الرفض ليظهر للمحاضر...",
+      "confirm": "تأكيد الرفض"
+    },
+    "approveDialog": {
+      "title": "اعتماد طلب السحب",
+      "message": "هل تريد اعتماد طلب سحب بمبلغ {{amount}} للمحاضر {{name}}؟ سيتم خصم المبلغ من رصيده المتاح.",
+      "confirm": "اعتماد"
+    },
+    "transferModal": {
+      "title": "تأكيد التحويل",
+      "lead": "أكّد تحويل مبلغ {{amount}} إلى المحاضر {{name}}",
+      "bank": "البنك",
+      "accountName": "اسم الحساب",
+      "iban": "IBAN",
+      "previewAlt": "معاينة إيصال التحويل",
+      "replaceImage": "استبدال الصورة",
+      "remove": "إزالة",
+      "dropzoneTitle": "إرفاق صورة التحويل",
+      "dropzoneHint": "اسحب الصورة هنا أو اضغط للاختيار — PNG أو JPG (اختياري)",
+      "confirmPayment": "تأكيد الدفع"
+    },
+    "toast": {
+      "loadFailed": "تعذّر تحميل طلبات السحب.",
+      "approved": "تم اعتماد طلب السحب. يمكنك الآن تأكيد التحويل.",
+      "approveFailed": "تعذّر اعتماد الطلب.",
+      "paid": "تم تأكيد الدفع للمحاضر.",
+      "paidFailed": "تعذّر تأكيد الدفع.",
+      "rejected": "تم رفض طلب السحب.",
+      "rejectFailed": "تعذّر رفض الطلب."
+    },
+    "labels": {
+      "status": {
+        "PENDING": "قيد المراجعة",
+        "APPROVED": "معتمد",
+        "PAID": "مدفوع",
+        "REJECTED": "مرفوض"
+      }
+    }
+  }
+}

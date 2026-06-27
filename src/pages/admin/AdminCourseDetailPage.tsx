@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
@@ -15,6 +16,7 @@ import { useToast } from '../../components/ui/Toast';
 import { mediaUrl } from '../../utils/mediaUrl';
 
 export default function AdminCourseDetailPage() {
+  const { t } = useTranslation(['courses', 'common']);
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -32,7 +34,7 @@ export default function AdminCourseDetailPage() {
     try {
       setCourse(await adminApi.course(courseId));
     } catch {
-      showToast('تعذّر تحميل الكورس.', 'error');
+      showToast(t('admin.courses.toast.loadError'), 'error');
       setCourse(null);
     } finally {
       setLoading(false);
@@ -52,7 +54,7 @@ export default function AdminCourseDetailPage() {
       setSuspendOpen(false);
       await load();
     } catch {
-      showToast('تعذّر تنفيذ الإجراء.', 'error');
+      showToast(t('admin.courses.toast.actionError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -64,12 +66,12 @@ export default function AdminCourseDetailPage() {
     setSubmitting(true);
     try {
       await adminApi.rejectCourse(courseId, rejectReason);
-      showToast('تم رفض الكورس.', 'success');
+      showToast(t('admin.courses.toast.rejected'), 'success');
       setRejectOpen(false);
       setRejectReason('');
       await load();
     } catch {
-      showToast('تعذّر رفض الكورس.', 'error');
+      showToast(t('admin.courses.toast.rejectError'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -80,10 +82,10 @@ export default function AdminCourseDetailPage() {
     setSubmitting(true);
     try {
       await adminApi.deleteCourse(courseId);
-      showToast('تم حذف الكورس.', 'success');
+      showToast(t('admin.courses.toast.deleted'), 'success');
       navigate('/admin/courses');
     } catch {
-      showToast('تعذّر حذف الكورس.', 'error');
+      showToast(t('admin.courses.toast.deleteError'), 'error');
       setDeleteOpen(false);
     } finally {
       setSubmitting(false);
@@ -96,11 +98,11 @@ export default function AdminCourseDetailPage() {
     return (
       <div className="page-grid admin-course-detail-page">
         <EmptyState
-          title="الكورس غير موجود"
-          description="لم نتمكن من العثور على هذا الكورس."
+          title={t('admin.courses.notFound.title')}
+          description={t('admin.courses.notFound.description')}
         />
         <Button variant="outline" onClick={() => navigate('/admin/courses')}>
-          العودة للكورسات
+          {t('admin.courses.backToCourses')}
         </Button>
       </div>
     );
@@ -110,15 +112,15 @@ export default function AdminCourseDetailPage() {
     <div className="page-grid admin-course-detail-page">
       <Link to="/admin/courses" className="support-ticket-back">
         <ArrowRight size={18} aria-hidden="true" />
-        العودة للكورسات
+        {t('admin.courses.backToCourses')}
       </Link>
 
       <Card className="support-ticket-page-card">
         <CourseDetail
           course={course}
           submitting={submitting}
-          onApprove={() => runAction('approve', 'تم اعتماد الكورس.')}
-          onPublish={() => runAction('publish', 'تم نشر الكورس.')}
+          onApprove={() => runAction('approve', t('admin.courses.toast.approved'))}
+          onPublish={() => runAction('publish', t('admin.courses.toast.published'))}
           onReject={() => setRejectOpen(true)}
           onSuspend={() => setSuspendOpen(true)}
           onDelete={() => setDeleteOpen(true)}
@@ -127,21 +129,21 @@ export default function AdminCourseDetailPage() {
 
       {course.descriptionAr ? (
         <Card className="admin-course-description-card">
-          <h3>وصف الكورس</h3>
+          <h3>{t('admin.courses.detail.description')}</h3>
           <p className="course-review-description">{course.descriptionAr}</p>
         </Card>
       ) : null}
 
       {course.introVideo ? (
         <Card>
-          <h3>فيديو المقدمة</h3>
+          <h3>{t('admin.courses.detail.introVideo')}</h3>
           <video controls src={mediaUrl(course.introVideo)} className="course-review-video" />
         </Card>
       ) : null}
 
       {course.whatYouWillLearn?.length ? (
         <Card>
-          <h3>ماذا سيتعلم الطالب</h3>
+          <h3>{t('admin.courses.detail.whatYouWillLearn')}</h3>
           <ul className="list-style">
             {course.whatYouWillLearn.map((item: string, index: number) => (
               <li key={`${item}-${index}`}>{item}</li>
@@ -154,13 +156,16 @@ export default function AdminCourseDetailPage() {
 
       {course.quizzes?.length ? (
         <Card>
-          <h3>الاختبارات ({course.quizzes.length})</h3>
+          <h3>{t('admin.courses.detail.quizzes', { count: course.quizzes.length })}</h3>
           <div className="admin-course-quizzes">
             {course.quizzes.map((quiz: any) => (
               <div key={quiz.id} className="admin-course-quiz-item">
                 <strong>{quiz.titleAr}</strong>
                 <span className="muted-count">
-                  {quiz.questions?.length || 0} أسئلة · {quiz.durationMinutes} دقيقة
+                  {t('admin.courses.detail.quizMeta', {
+                    questions: quiz.questions?.length || 0,
+                    minutes: quiz.durationMinutes,
+                  })}
                 </span>
               </div>
             ))}
@@ -170,35 +175,35 @@ export default function AdminCourseDetailPage() {
 
       <Modal
         isOpen={rejectOpen}
-        title="رفض الكورس"
+        title={t('admin.courses.detail.rejectTitle')}
         onClose={() => { setRejectOpen(false); setRejectReason(''); }}
       >
         <form className="stack-sm" onSubmit={submitReject}>
-          <p>رفض كورس: <strong>{course.titleAr}</strong></p>
+          <p>{t('admin.courses.detail.rejectPrompt')} <strong>{course.titleAr}</strong></p>
           <Textarea
-            label="سبب الرفض"
+            label={t('admin.courses.detail.rejectReason')}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             required
           />
-          <Button variant="danger" disabled={submitting}>تأكيد الرفض</Button>
+          <Button variant="danger" disabled={submitting}>{t('admin.actions.confirmReject')}</Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={suspendOpen}
-        title="إيقاف الكورس"
-        message={`هل أنت متأكد من إيقاف كورس "${course.titleAr}" مؤقتاً؟`}
-        confirmLabel="تأكيد الإيقاف"
-        onConfirm={() => runAction('suspend', 'تم إيقاف الكورس.')}
+        title={t('admin.courses.detail.suspendTitle')}
+        message={t('admin.courses.detail.suspendMessage', { name: course.titleAr })}
+        confirmLabel={t('admin.actions.confirmSuspend')}
+        onConfirm={() => runAction('suspend', t('admin.courses.toast.suspended'))}
         onCancel={() => setSuspendOpen(false)}
       />
 
       <ConfirmDialog
         isOpen={deleteOpen}
-        title="حذف الكورس"
-        message={`هل أنت متأكد من حذف كورس "${course.titleAr}"؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmLabel="حذف"
+        title={t('admin.courses.detail.deleteTitle')}
+        message={t('admin.courses.detail.deleteMessage', { name: course.titleAr })}
+        confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}
       />

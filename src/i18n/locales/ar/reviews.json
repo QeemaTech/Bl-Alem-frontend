@@ -1,0 +1,84 @@
+{
+  "empty": "—",
+  "title": "التقييمات",
+  "subtitle": "مراجعة تقييمات الطلاب على الكورسات",
+  "stats": {
+    "total": "إجمالي التقييمات",
+    "average": "متوسط التقييم",
+    "fiveStar": "تقييم 5 نجوم",
+    "lowRating": "تقييمات منخفضة (1-2)"
+  },
+  "charts": {
+    "distribution": "توزيع التقييمات",
+    "stars": "{{count}} نجوم",
+    "oneStar": "1 نجمة"
+  },
+  "filters": {
+    "searchPlaceholder": "بحث بالطالب، الكورس، المحاضر، أو التعليق...",
+    "rating": "عدد النجوم",
+    "allRatings": "كل التقييمات"
+  },
+  "table": {
+    "title": "تقييمات الطلاب",
+    "emptyTitle": "لا توجد تقييمات",
+    "emptyDescription": "لم يتم إضافة أي تقييمات بعد، أو لا توجد نتائج مطابقة للفلاتر.",
+    "columns": {
+      "id": "رقم التقييم",
+      "student": "الطالب",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "rating": "التقييم",
+      "comment": "التعليق",
+      "date": "التاريخ",
+      "actions": "الإجراءات"
+    }
+  },
+  "labels": {
+    "studentFallback": "الطالب",
+    "starsAria": "{{rating}} من 5",
+    "ratingOf": "{{rating}}/5"
+  },
+  "form": {},
+  "modal": {},
+  "actions": {
+    "exportExcel": "تصدير Excel",
+    "details": "التفاصيل",
+    "delete": "حذف",
+    "deleteReview": "حذف التقييم",
+    "backToReviews": "العودة للتقييمات"
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل التقييمات.",
+    "deleted": "تم حذف التقييم.",
+    "deleteFailed": "تعذّر حذف التقييم.",
+    "loadDetailFailed": "تعذّر تحميل التقييم."
+  },
+  "export": {
+    "sheetName": "التقييمات",
+    "columns": {
+      "id": "رقم التقييم",
+      "student": "الطالب",
+      "email": "البريد",
+      "course": "الكورس",
+      "instructor": "المحاضر",
+      "rating": "التقييم",
+      "comment": "التعليق",
+      "createdAt": "التاريخ"
+    }
+  },
+  "detail": {
+    "title": "تقييم كورس {{course}}",
+    "student": "الطالب",
+    "course": "الكورس",
+    "courseId": "رقم الكورس: {{id}}",
+    "instructor": "المحاضر",
+    "comment": "التعليق",
+    "noComment": "لا يوجد تعليق مكتوب.",
+    "notFoundTitle": "التقييم غير موجود",
+    "notFoundDescription": "لم نتمكن من العثور على هذا التقييم."
+  },
+  "confirm": {
+    "deleteTitle": "حذف التقييم",
+    "deleteMessage": "هل أنت متأكد من حذف تقييم {{name}} على كورس \"{{course}}\"؟"
+  }
+}

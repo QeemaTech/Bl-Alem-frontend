@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Download, GraduationCap, Layers, Users } from '@/icons';
 import { adminApi } from '../../api/admin';
-import { buildCourseTableRows, CoursesTable } from '../../components/admin/courses/CoursesTable';
-import { statusLabels } from '../../components/admin/courses/courseShared';
+import { CoursesTable } from '../../components/admin/courses/CoursesTable';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -14,24 +14,15 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
+import { useAdminCourseLabels } from '../../hooks/useAdminCourseLabels';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
-const exportColumns = [
-  { key: 'id', header: 'رقم الكورس' },
-  { key: 'title', header: 'العنوان' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'category', header: 'التصنيف' },
-  { key: 'level', header: 'المستوى' },
-  { key: 'price', header: 'السعر' },
-  { key: 'students', header: 'الطلاب' },
-  { key: 'lessons', header: 'الدروس' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'updatedAt', header: 'آخر تحديث' },
-];
-
 export default function AdminCoursesPage() {
+  const { t } = useTranslation(['courses', 'common']);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { statusLabels, levelLabels, fmtDate, fmtMoney, empty } = useAdminCourseLabels();
+
   const [items, setItems] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +33,22 @@ export default function AdminCoursesPage() {
   const [suspendTarget, setSuspendTarget] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState('');
+
+  const exportColumns = useMemo(() => {
+    const cols = t('admin.courses.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'id', header: cols.id },
+      { key: 'title', header: cols.title },
+      { key: 'instructor', header: cols.instructor },
+      { key: 'category', header: cols.category },
+      { key: 'level', header: cols.level },
+      { key: 'price', header: cols.price },
+      { key: 'students', header: cols.students },
+      { key: 'lessons', header: cols.lessons },
+      { key: 'status', header: cols.status },
+      { key: 'updatedAt', header: cols.updatedAt },
+    ];
+  }, [t]);
 
   const load = async () => {
     setLoading(true);
@@ -88,13 +95,28 @@ export default function AdminCoursesPage() {
   const statusChart = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((i) => {
-      const label = statusLabels[i.status] || i.status;
-      counts[label] = (counts[label] || 0) + 1;
+      const key = i.status;
+      counts[key] = (counts[key] || 0) + 1;
     });
-    return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [items]);
+    return Object.entries(counts).map(([key, value]) => ({
+      label: statusLabels[key] || key,
+      value,
+    }));
+  }, [items, statusLabels]);
 
-  const tableRows = useMemo(() => buildCourseTableRows(filteredItems), [filteredItems]);
+  const tableRows = useMemo(() => filteredItems.map((row) => ({
+    id: row.id,
+    title: row.titleAr,
+    instructor: row.instructor?.fullName || empty,
+    category: row.category?.nameAr || empty,
+    level: levelLabels[row.level] || row.level,
+    price: fmtMoney(row),
+    students: String(row.totalStudents ?? row._count?.enrollments ?? 0),
+    lessons: String(row._count?.lessons ?? 0),
+    status: statusLabels[row.status] || row.status,
+    updatedAt: fmtDate(row.updatedAt),
+    _raw: row,
+  })), [filteredItems, statusLabels, levelLabels, fmtDate, fmtMoney, empty]);
 
   const openDetail = (course: any) => {
     navigate(`/admin/courses/${course.id}`);
@@ -113,7 +135,7 @@ export default function AdminCoursesPage() {
     e.preventDefault();
     if (!rejectTarget) return;
     await adminApi.rejectCourse(rejectTarget.id, rejectReason);
-    showToast('تم رفض الكورس.', 'success');
+    showToast(t('admin.courses.toast.rejected'), 'success');
     setRejectTarget(null);
     setRejectReason('');
     await load();
@@ -122,65 +144,69 @@ export default function AdminCoursesPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     await adminApi.deleteCourse(deleteTarget.id);
-    showToast('تم حذف الكورس.', 'success');
+    showToast(t('admin.courses.toast.deleted'), 'success');
     setDeleteTarget(null);
     await load();
   };
 
   const handleExport = () => {
-    exportTableToExcel('الكورسات', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('admin.courses.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   return (
     <div className="page-grid admin-courses-page">
       <div className="reports-header">
-        <PageHeader title="الكورسات" subtitle="مراجعة وإدارة دورات المنصة التعليمية" />
+        <PageHeader title={t('admin.courses.title')} subtitle={t('admin.courses.subtitle')} />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            تصدير Excel
+            {t('admin.actions.exportExcel')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الكورسات" value={String(stats.total)} icon={BookOpen} />
-        <StatCard title="منشورة" value={String(stats.published)} icon={GraduationCap} />
-        <StatCard title="قيد المراجعة" value={String(stats.pending)} icon={Layers} />
-        <StatCard title="مسودات" value={String(stats.draft)} icon={BookOpen} />
-        <StatCard title="مرفوضة / موقوفة" value={String(stats.rejected + stats.suspended)} icon={Layers} />
-        <StatCard title="إجمالي الطلاب" value={String(stats.students)} icon={Users} />
+        <StatCard title={t('admin.courses.stats.total')} value={String(stats.total)} icon={BookOpen} />
+        <StatCard title={t('admin.courses.stats.published')} value={String(stats.published)} icon={GraduationCap} />
+        <StatCard title={t('admin.courses.stats.pending')} value={String(stats.pending)} icon={Layers} />
+        <StatCard title={t('admin.courses.stats.draft')} value={String(stats.draft)} icon={BookOpen} />
+        <StatCard title={t('admin.courses.stats.rejectedSuspended')} value={String(stats.rejected + stats.suspended)} icon={Layers} />
+        <StatCard title={t('admin.courses.stats.totalStudents')} value={String(stats.students)} icon={Users} />
       </div>
 
       <div className="reports-charts-grid">
-        <ReportChart title="توزيع حالات الكورسات" type="pie" data={statusChart} />
+        <ReportChart title={t('admin.courses.charts.statusDistribution')} type="pie" data={statusChart} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان، المحاضر، أو التصنيف..."
+        searchPlaceholder={t('admin.courses.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); setCategoryFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('admin.courses.filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مسودة', value: 'DRAFT' },
-            { label: 'قيد المراجعة', value: 'PENDING_REVIEW' },
-            { label: 'معتمد', value: 'APPROVED' },
-            { label: 'منشور', value: 'PUBLISHED' },
-            { label: 'مرفوض', value: 'REJECTED' },
-            { label: 'موقوف', value: 'SUSPENDED' },
+            { label: t('admin.courses.filters.allStatuses'), value: '' },
+            { label: statusLabels.DRAFT, value: 'DRAFT' },
+            { label: statusLabels.PENDING_REVIEW, value: 'PENDING_REVIEW' },
+            { label: statusLabels.APPROVED, value: 'APPROVED' },
+            { label: statusLabels.PUBLISHED, value: 'PUBLISHED' },
+            { label: statusLabels.REJECTED, value: 'REJECTED' },
+            { label: statusLabels.SUSPENDED, value: 'SUSPENDED' },
           ]}
         />
         <Select
-          label="التصنيف"
+          label={t('admin.courses.filters.category')}
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           options={[
-            { label: 'كل التصنيفات', value: '' },
+            { label: t('admin.courses.filters.allCategories'), value: '' },
             ...categories.map((c) => ({ label: c.nameAr, value: String(c.id) })),
           ]}
         />
@@ -190,8 +216,8 @@ export default function AdminCoursesPage() {
         items={tableRows}
         loading={loading}
         onDetail={openDetail}
-        onApprove={(course) => runAction('approve', course, 'تم اعتماد الكورس.')}
-        onPublish={(course) => runAction('publish', course, 'تم نشر الكورس.')}
+        onApprove={(course) => runAction('approve', course, t('admin.courses.toast.approved'))}
+        onPublish={(course) => runAction('publish', course, t('admin.courses.toast.published'))}
         onReject={setRejectTarget}
         onSuspend={setSuspendTarget}
         onDelete={setDeleteTarget}
@@ -199,35 +225,35 @@ export default function AdminCoursesPage() {
 
       <Modal
         isOpen={Boolean(rejectTarget)}
-        title="رفض الكورس"
+        title={t('admin.courses.detail.rejectTitle')}
         onClose={() => { setRejectTarget(null); setRejectReason(''); }}
       >
         <form className="stack-sm" onSubmit={submitReject}>
-          <p>رفض كورس: <strong>{rejectTarget?.titleAr}</strong></p>
+          <p>{t('admin.courses.detail.rejectPrompt')} <strong>{rejectTarget?.titleAr}</strong></p>
           <Textarea
-            label="سبب الرفض"
+            label={t('admin.courses.detail.rejectReason')}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             required
           />
-          <Button variant="danger">تأكيد الرفض</Button>
+          <Button variant="danger">{t('admin.actions.confirmReject')}</Button>
         </form>
       </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(suspendTarget)}
-        title="إيقاف الكورس"
-        message={`هل أنت متأكد من إيقاف كورس "${suspendTarget?.titleAr}" مؤقتاً؟`}
-        confirmLabel="تأكيد الإيقاف"
-        onConfirm={() => suspendTarget && runAction('suspend', suspendTarget, 'تم إيقاف الكورس.')}
+        title={t('admin.courses.detail.suspendTitle')}
+        message={t('admin.courses.detail.suspendMessage', { name: suspendTarget?.titleAr })}
+        confirmLabel={t('admin.actions.confirmSuspend')}
+        onConfirm={() => suspendTarget && runAction('suspend', suspendTarget, t('admin.courses.toast.suspended'))}
         onCancel={() => setSuspendTarget(null)}
       />
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="حذف الكورس"
-        message={`هل أنت متأكد من حذف كورس "${deleteTarget?.titleAr}"؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmLabel="حذف"
+        title={t('admin.courses.detail.deleteTitle')}
+        message={t('admin.courses.detail.deleteMessage', { name: deleteTarget?.titleAr })}
+        confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

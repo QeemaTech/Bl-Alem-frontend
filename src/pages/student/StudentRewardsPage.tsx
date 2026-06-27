@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Copy, Download, Gift, Share2, Tag, TrendingUp, UserPlus, Users, Wallet,
+  Copy, Download, Gift, Share2, Star, Table2, TrendingUp, UserPlus, Users,
 } from '@/icons';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
@@ -17,7 +16,6 @@ import { Table } from '../../components/ui/Table';
 import { Tabs } from '../../components/ui/Tabs';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-import { formatMoney } from '../../utils/formatMoney';
 
 const rewardVariant = (status: string) => {
   if (status === 'APPROVED' || status === 'REWARDED') return 'success' as const;
@@ -27,10 +25,17 @@ const rewardVariant = (status: string) => {
 };
 
 const statusLabels: Record<string, string> = {
-  PENDING: 'قيد المراجعة',
+  PENDING: 'قيد الانتظار',
   APPROVED: 'معتمدة',
-  REWARDED: 'مكافأة مُصدَرة',
+  REWARDED: 'مُكافأ',
   REJECTED: 'مرفوضة',
+};
+
+const txTypeLabels: Record<string, string> = {
+  EARNED: 'مكتسبة',
+  SPENT: 'مُنفقة',
+  REDEEMED: 'مُستبدلة',
+  ADJUSTMENT: 'تعديل',
 };
 
 const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
@@ -43,52 +48,52 @@ const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
 
 const txExportColumns = [
   { key: 'type', header: 'النوع' },
-  { key: 'amount', header: 'المبلغ' },
+  { key: 'points', header: 'النقاط' },
   { key: 'reason', header: 'السبب' },
   { key: 'createdAt', header: 'التاريخ' },
 ];
+
+const referralInfoFallback = 'كود الإحالة يُستخدم عند التسجيل فقط — منفصل تماماً عن كوبونات الخصم.';
 
 export default function StudentRewardsPage() {
   const { showToast } = useToast();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('transactions');
+  const [tab, setTab] = useState('points');
   const [txSearch, setTxSearch] = useState('');
   const [txType, setTxType] = useState('');
   const [refSearch, setRefSearch] = useState('');
-  const [refStatus, setRefStatus] = useState('');
 
   useEffect(() => {
     studentApi.rewards().then(setData).finally(() => setLoading(false));
   }, []);
 
   const invited = data?.invitedUsers || [];
-  const transactions = data?.transactions || [];
-  const coupons = data?.coupons || [];
+  const pointTransactions = data?.pointTransactions || [];
+  const pointsSummary = data?.pointsSummary || { available: 0, earned: 0, spent: 0 };
 
   const stats = useMemo(() => ({
-    balance: Number(data?.walletBalance || 0),
+    available: Number(pointsSummary.available || 0),
+    earned: Number(pointsSummary.earned || 0),
+    spent: Number(pointsSummary.spent || 0),
     invited: invited.length,
-    approved: invited.filter((i: any) => ['APPROVED', 'REWARDED'].includes(i.rewardStatus)).length,
-    pending: invited.filter((i: any) => i.rewardStatus === 'PENDING').length,
-    credits: transactions.filter((t: any) => t.type === 'CREDIT').length,
-  }), [data, invited, transactions]);
+    rewarded: invited.filter((i: any) => ['APPROVED', 'REWARDED'].includes(i.rewardStatus)).length,
+  }), [data, invited, pointsSummary]);
 
   const filteredTx = useMemo(() => {
-    let rows = transactions;
+    let rows = pointTransactions;
     if (txType) rows = rows.filter((t: any) => t.type === txType);
     if (txSearch.trim()) {
       const q = txSearch.trim().toLowerCase();
       rows = rows.filter((t: any) =>
-        [t.reason, t.type, String(t.amount)].some((v) => String(v || '').toLowerCase().includes(q)),
+        [t.reason, t.type, String(t.points)].some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return rows;
-  }, [transactions, txType, txSearch]);
+  }, [pointTransactions, txType, txSearch]);
 
   const filteredReferrals = useMemo(() => {
     let rows = invited;
-    if (refStatus) rows = rows.filter((r: any) => r.rewardStatus === refStatus);
     if (refSearch.trim()) {
       const q = refSearch.trim().toLowerCase();
       rows = rows.filter((r: any) =>
@@ -97,14 +102,10 @@ export default function StudentRewardsPage() {
       );
     }
     return rows;
-  }, [invited, refStatus, refSearch]);
+  }, [invited, refSearch]);
 
-  const txRows = filteredTx.map((row: any) => ({
-    ...row,
-    type: row.type === 'CREDIT' ? 'إيداع' : 'خصم',
-    amount: formatMoney(row.amount),
-    createdAt: fmtDate(row.createdAt),
-  }));
+  const hasTxFilters = Boolean(txSearch.trim() || txType);
+  const hasRefFilters = Boolean(refSearch.trim());
 
   const copyCode = async () => {
     const code = data?.referralCode || '';
@@ -116,7 +117,7 @@ export default function StudentRewardsPage() {
   const shareCode = async () => {
     const code = data?.referralCode || '';
     if (!code) return;
-    const text = `انضم إلى منصة بيلعلم باستخدام كود الإحالة: ${code}`;
+    const text = `انضم إلى منصة بالعِلم باستخدام كود الإحالة: ${code}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: 'كود الإحالة', text });
@@ -130,108 +131,126 @@ export default function StudentRewardsPage() {
   };
 
   const exportTx = () => {
-    exportTableToExcel('سجل المحفظة', txExportColumns, txRows);
+    exportTableToExcel('سجل النقاط', txExportColumns, filteredTx.map((row: any) => ({
+      type: txTypeLabels[row.type] || row.type,
+      points: row.points > 0 ? `+${row.points}` : String(row.points),
+      reason: row.reason || '—',
+      createdAt: fmtDate(row.createdAt),
+    })));
   };
 
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="page-grid student-rewards-page">
-      <PageHeader
-        title="المكافآت والإحالات"
-        subtitle="ادعُ أصدقاءك واحصل على مكافآت عند اشتراكهم"
-      />
+    <div className="page-grid">
+      <div className="reports-header">
+        <PageHeader
+          title="المكافآت والإحالات"
+          subtitle="ادعُ أصدقاءك عند التسجيل واحصل على نقاط مكافآت"
+        />
+        <div className="reports-header-actions">
+          <Button
+            variant="outline"
+            icon={<Download size={18} />}
+            onClick={exportTx}
+            disabled={tab !== 'points' || !filteredTx.length}
+          >
+            تصدير Excel
+          </Button>
+        </div>
+      </div>
 
       <div className="stats-grid">
-        <StatCard title="رصيد المكافآت" value={formatMoney(stats.balance)} icon={Wallet} />
-        <StatCard title="المدعوون" value={String(stats.invited)} icon={Users} />
-        <StatCard title="إحالات معتمدة" value={String(stats.approved)} icon={UserPlus} hint={`${stats.pending} قيد المراجعة`} />
-        <StatCard title="عمليات إيداع" value={String(stats.credits)} icon={TrendingUp} />
+        <StatCard title="النقاط المتاحة" value={String(stats.available)} icon={Star} />
+        <StatCard title="نقاط مكتسبة" value={String(stats.earned)} icon={TrendingUp} />
+        <StatCard title="نقاط مُستبدلة" value={String(stats.spent)} icon={Gift} />
+        <StatCard title="المدعوون" value={String(stats.invited)} icon={Users} hint={`${stats.rewarded} إحالة ناجحة`} />
       </div>
 
-      <div className="student-rewards-hero">
-        <Card className="student-referral-card">
-          <div className="student-referral-icon"><Gift size={28} /></div>
-          <div className="student-referral-body">
-            <span className="student-referral-label">كود الإحالة الخاص بك</span>
-            <strong className="student-referral-code" dir="ltr">{data?.referralCode || '—'}</strong>
-            <p>شارك الكود مع أصدقائك — تحصل على مكافأة عند اعتماد اشتراكهم.</p>
-          </div>
-          <div className="student-referral-actions">
-            <Button icon={<Copy size={16} />} onClick={copyCode}>نسخ</Button>
-            <Button variant="secondary" icon={<Share2 size={16} />} onClick={shareCode}>مشاركة</Button>
-          </div>
-        </Card>
+      <Card className="student-referral-card">
+        <div className="student-referral-icon"><Gift size={28} /></div>
+        <div className="student-referral-body">
+          <span className="student-referral-label">كود الإحالة الخاص بك</span>
+          <strong className="student-referral-code" dir="ltr">{data?.referralCode || '—'}</strong>
+          <p>
+            شارك الكود مع أصدقائك عند التسجيل — تحصل على نقاط مكافآت فوراً.
+            {data?.referralCodeEnabled === false ? ' (الكود معطّل حالياً)' : ''}
+          </p>
+        </div>
+        <div className="student-referral-actions">
+          <Button icon={<Copy size={16} />} onClick={copyCode} disabled={!data?.referralCode}>نسخ</Button>
+          <Button variant="secondary" icon={<Share2 size={16} />} onClick={shareCode} disabled={!data?.referralCode}>مشاركة</Button>
+        </div>
+      </Card>
 
-        <Card className="student-wallet-card">
-          <div className="student-wallet-icon"><Wallet size={28} /></div>
-          <div className="student-wallet-body">
-            <span className="student-wallet-label">رصيد المحفظة</span>
-            <strong>{formatMoney(stats.balance)}</strong>
-            <p>استخدم الرصيد للاشتراك في الكورسات أو الخطط.</p>
-          </div>
-          <Link to="/student/wallet">
-            <Button variant="secondary">عرض المحفظة</Button>
-          </Link>
-        </Card>
-      </div>
+      <Card className="admin-reward-info">
+        <p>{data?.referralProgramNote || referralInfoFallback}</p>
+      </Card>
 
       <Tabs
         variant="pills"
         activeTab={tab}
         onChange={setTab}
         tabs={[
-          { id: 'transactions', label: `سجل المحفظة (${transactions.length})` },
+          { id: 'points', label: `سجل النقاط (${pointTransactions.length})` },
           { id: 'referrals', label: `المدعوون (${invited.length})` },
-          { id: 'coupons', label: `الكوبونات (${coupons.length})` },
         ]}
       />
 
-      {tab === 'transactions' ? (
+      {tab === 'points' ? (
         <>
-          <div className="reports-header">
-            <FilterBar
-              searchValue={txSearch}
-              searchPlaceholder="بحث بالسبب أو المبلغ..."
-              onSearchChange={setTxSearch}
-              onReset={() => { setTxSearch(''); setTxType(''); }}
-            >
-              <Select
-                label="النوع"
-                value={txType}
-                onChange={(e) => setTxType(e.target.value)}
-                options={[
-                  { label: 'الكل', value: '' },
-                  { label: 'إيداع', value: 'CREDIT' },
-                  { label: 'خصم', value: 'DEBIT' },
-                ]}
-              />
-            </FilterBar>
-            <Button variant="outline" icon={<Download size={16} />} onClick={exportTx} disabled={!filteredTx.length}>
-              تصدير
-            </Button>
-          </div>
-          <Card>
+          <FilterBar
+            searchValue={txSearch}
+            searchPlaceholder="بحث بالسبب أو النقاط..."
+            onSearchChange={setTxSearch}
+            onReset={() => { setTxSearch(''); setTxType(''); }}
+            resetDisabled={!hasTxFilters}
+          >
+            <Select
+              label="النوع"
+              value={txType}
+              onChange={(e) => setTxType(e.target.value)}
+              options={[
+                { label: 'الكل', value: '' },
+                { label: 'مكتسبة', value: 'EARNED' },
+                { label: 'مُستبدلة', value: 'REDEEMED' },
+                { label: 'مُنفقة', value: 'SPENT' },
+                { label: 'تعديل', value: 'ADJUSTMENT' },
+              ]}
+            />
+          </FilterBar>
+          <Card className="reports-table-card">
+            <div className="section-heading reports-table-head">
+              <h2>
+                <span className="reports-table-title-icon" aria-hidden="true">
+                  <Table2 size={20} />
+                </span>
+                سجل النقاط
+              </h2>
+              <span className="muted-count">{filteredTx.length.toLocaleString('ar-EG')} حركة</span>
+            </div>
             <Table
+              fluid
+              hideScrollNotice
               data={filteredTx}
-              emptyTitle="لا توجد معاملات"
-              emptyDescription="ستظهر عمليات الإيداع والخصم هنا."
+              emptyTitle="لا توجد حركات نقاط"
+              emptyDescription="ستظهر النقاط المكتسبة والمُستبدلة هنا."
               columns={[
                 {
                   key: 'type',
                   header: 'النوع',
-                  render: (row) => (
-                    <Badge variant={row.type === 'CREDIT' ? 'success' : 'warning'}>
-                      {row.type === 'CREDIT' ? 'إيداع' : 'خصم'}
+                  render: (row: any) => (
+                    <Badge variant={Number(row.points) > 0 ? 'success' : 'warning'}>
+                      {txTypeLabels[String(row.type)] || String(row.type)}
                     </Badge>
                   ),
                 },
                 {
-                  key: 'amount',
-                  header: 'المبلغ',
-                  render: (row) => (
-                    <span className={row.type === 'CREDIT' ? 'amount-credit' : 'amount-debit'}>
-                      {row.type === 'CREDIT' ? '+' : '−'}{formatMoney(Number(row.amount))}
+                  key: 'points',
+                  header: 'النقاط',
+                  render: (row: any) => (
+                    <span className={Number(row.points) > 0 ? 'amount-credit' : 'amount-debit'}>
+                      {Number(row.points) > 0 ? '+' : ''}{row.points}
                     </span>
                   ),
                 },
@@ -249,25 +268,25 @@ export default function StudentRewardsPage() {
             searchValue={refSearch}
             searchPlaceholder="بحث بالاسم أو البريد..."
             onSearchChange={setRefSearch}
-            onReset={() => { setRefSearch(''); setRefStatus(''); }}
-          >
-            <Select
-              label="حالة المكافأة"
-              value={refStatus}
-              onChange={(e) => setRefStatus(e.target.value)}
-              options={[
-                { label: 'الكل', value: '' },
-                { label: 'قيد المراجعة', value: 'PENDING' },
-                { label: 'معتمدة', value: 'APPROVED' },
-                { label: 'مرفوضة', value: 'REJECTED' },
-              ]}
-            />
-          </FilterBar>
-          <Card>
+            onReset={() => setRefSearch('')}
+            resetDisabled={!hasRefFilters}
+          />
+          <Card className="reports-table-card">
+            <div className="section-heading reports-table-head">
+              <h2>
+                <span className="reports-table-title-icon" aria-hidden="true">
+                  <Table2 size={20} />
+                </span>
+                المدعوون
+              </h2>
+              <span className="muted-count">{filteredReferrals.length.toLocaleString('ar-EG')} مدعو</span>
+            </div>
             <Table
+              fluid
+              hideScrollNotice
               data={filteredReferrals}
               emptyTitle="لا يوجد مدعوون"
-              emptyDescription="شارك كود الإحالة لدعوة أصدقائك."
+              emptyDescription="شارك كود الإحالة لدعوة أصدقائك عند التسجيل."
               columns={[
                 {
                   key: 'referredUser',
@@ -285,8 +304,13 @@ export default function StudentRewardsPage() {
                   ),
                 },
                 {
+                  key: 'rewardPoints',
+                  header: 'النقاط',
+                  render: (row: any) => <span>+{row.rewardPoints ?? 0}</span>,
+                },
+                {
                   key: 'rewardStatus',
-                  header: 'حالة المكافأة',
+                  header: 'الحالة',
                   render: (row) => (
                     <Badge variant={rewardVariant(String(row.rewardStatus))}>
                       {statusLabels[String(row.rewardStatus)] || String(row.rewardStatus)}
@@ -295,7 +319,7 @@ export default function StudentRewardsPage() {
                 },
                 {
                   key: 'createdAt',
-                  header: 'تاريخ الدعوة',
+                  header: 'تاريخ التسجيل',
                   render: (row) => fmtDate(String(row.createdAt)),
                 },
               ]}
@@ -304,38 +328,14 @@ export default function StudentRewardsPage() {
         </>
       ) : null}
 
-      {tab === 'coupons' ? (
-        coupons.length ? (
-          <div className="student-coupons-grid">
-            {coupons.map((coupon: any) => (
-              <Card key={coupon.id} className="student-coupon-card">
-                <div className="student-coupon-icon"><Tag size={22} /></div>
-                <div className="student-coupon-body">
-                  <strong dir="ltr">{coupon.code}</strong>
-                  <span>
-                    {coupon.type === 'PERCENTAGE'
-                      ? `${Number(coupon.value)}% خصم`
-                      : `${formatMoney(coupon.value)} خصم`}
-                  </span>
-                  {coupon.expiresAt ? (
-                    <small>ينتهي: {fmtDate(coupon.expiresAt)}</small>
-                  ) : (
-                    <small>بدون تاريخ انتهاء</small>
-                  )}
-                </div>
-                <Badge variant="info">فعّال</Badge>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <EmptyState
-              title="لا توجد كوبونات"
-              description="ستظهر الكوبونات المتاحة للاستخدام هنا."
-              icon={Tag}
-            />
-          </Card>
-        )
+      {!data?.referralCode ? (
+        <Card>
+          <EmptyState
+            title="كود الإحالة غير متاح"
+            description="تواصل مع الدعم إذا لم يظهر كود الإحالة الخاص بك."
+            icon={UserPlus}
+          />
+        </Card>
       ) : null}
     </div>
   );

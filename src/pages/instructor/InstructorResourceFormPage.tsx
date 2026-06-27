@@ -166,7 +166,7 @@ export default function InstructorResourceFormPage() {
             <Button type="button" variant="outline" onClick={() => navigate(builderPath)}>
               إلغاء
             </Button>
-            <Button loading={submitting}>إضافة المورد</Button>
+            <Button type="submit" loading={submitting}>إضافة المورد</Button>
           </div>
         </form>
       </Card>

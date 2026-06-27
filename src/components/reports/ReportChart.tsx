@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Area,
   AreaChart,
@@ -17,16 +18,18 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useChartTheme } from '../../hooks/useChartTheme';
+import { formatNumber } from '../../utils/localeFormat';
 
 export const CHART_COLORS = [
-  '#22A6BC',
-  '#16A34A',
-  '#F59E0B',
-  '#EF4444',
-  '#8B5CF6',
-  '#0EA5E9',
-  '#EC4899',
-  '#64748B',
+  '#006874',
+  '#146c2e',
+  '#8a5a00',
+  '#ba1a1a',
+  '#7c3aed',
+  '#0284c7',
+  '#db2777',
+  '#64748b',
 ];
 
 export interface ChartItem {
@@ -47,13 +50,15 @@ interface ReportChartProps {
   showBarValueLabels?: boolean;
 }
 
-const fmt = (value: number) => Number(value || 0).toLocaleString('ar-SA');
+const fmt = (value: number, language?: string) => formatNumber(Number(value || 0), undefined, language);
 
-const PRIMARY_BAR_DARK = '#0E7490';
-const PRIMARY_BAR_LIGHT = '#BAE6F0';
-
-const primaryGradientColor = (rank: number, total: number) => {
-  if (total <= 1) return PRIMARY_BAR_DARK;
+const primaryGradientColor = (
+  rank: number,
+  total: number,
+  darkEnd: string,
+  lightEnd: string,
+) => {
+  if (total <= 1) return darkEnd;
   const t = rank / (total - 1);
   const parse = (hex: string) => {
     const n = hex.replace('#', '');
@@ -63,8 +68,8 @@ const primaryGradientColor = (rank: number, total: number) => {
       b: parseInt(n.slice(4, 6), 16),
     };
   };
-  const start = parse(PRIMARY_BAR_DARK);
-  const end = parse(PRIMARY_BAR_LIGHT);
+  const start = parse(darkEnd);
+  const end = parse(lightEnd);
   const r = Math.round(start.r + (end.r - start.r) * t);
   const g = Math.round(start.g + (end.g - start.g) * t);
   const b = Math.round(start.b + (end.b - start.b) * t);
@@ -132,13 +137,15 @@ interface TooltipPayload {
 function ChartTooltip({
   active,
   payload,
-  valueLabel = 'القيمة',
+  valueLabel,
   showPercent,
+  language,
 }: {
   active?: boolean;
   payload?: TooltipPayload[];
   valueLabel?: string;
   showPercent?: boolean;
+  language?: string;
 }) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
@@ -150,25 +157,25 @@ function ChartTooltip({
     <div className="chart-tooltip">
       <span className="chart-tooltip-label">{name}</span>
       <span className="chart-tooltip-value">
-        {fmt(value)}{valueLabel ? ` ${valueLabel}` : ''}
+        {fmt(value, language)}{valueLabel ? ` ${valueLabel}` : ''}
         {showPercent && percent != null ? ` (${(percent * 100).toFixed(0)}%)` : ''}
       </span>
     </div>
   );
 }
 
-function DonutCenter({ viewBox, total }: { viewBox?: Record<string, number>; total: number }) {
+function DonutCenter({ viewBox, total, totalLabel, language }: { viewBox?: Record<string, number>; total: number; totalLabel: string; language?: string }) {
   const cx = viewBox?.cx ?? 0;
   const cy = viewBox?.cy ?? 0;
   return (
     <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
-      <tspan x={cx} dy="-0.35em" className="chart-donut-value">{fmt(total)}</tspan>
-      <tspan x={cx} dy="1.55em" className="chart-donut-label">الإجمالي</tspan>
+      <tspan x={cx} dy="-0.35em" className="chart-donut-value">{fmt(total, language)}</tspan>
+      <tspan x={cx} dy="1.55em" className="chart-donut-label">{totalLabel}</tspan>
     </text>
   );
 }
 
-function ChartLegend({ data }: { data: { name: string; value: number; color: string }[] }) {
+function ChartLegend({ data, language }: { data: { name: string; value: number; color: string }[]; language?: string }) {
   const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
   return (
     <ul className="chart-legend">
@@ -177,7 +184,7 @@ function ChartLegend({ data }: { data: { name: string; value: number; color: str
           <span className="chart-legend-dot" style={{ backgroundColor: item.color }} aria-hidden="true" />
           <span className="chart-legend-label" title={item.name}>{item.name}</span>
           <span className="chart-legend-meta">
-            <strong>{fmt(item.value)}</strong>
+            <strong>{fmt(item.value, language)}</strong>
             <small>({((item.value / total) * 100).toFixed(0)}%)</small>
           </span>
         </li>
@@ -197,14 +204,22 @@ export function ReportChart({
   barGradient = false,
   showBarValueLabels = false,
 }: ReportChartProps) {
+  const { t, i18n } = useTranslation('common');
+  const theme = useChartTheme();
+  const language = i18n.language;
+  const chartValueLabel = t('chart.value');
+  const chartTotalLabel = t('chart.total');
   const cardClass = `report-chart-card${embedded ? ' is-embedded' : ''}`;
+  const tickStyle = { fontSize: 11, fill: theme.text };
+  const tickStyleSm = { fontSize: 10, fill: theme.text };
+  const gradientId = `areaPrimary-${theme.primary.replace('#', '')}`;
 
   if (!data.length) {
     if (embedded) return null;
     return (
       <div className={cardClass}>
         <h3>{title}</h3>
-        <div className="report-chart-empty">لا توجد بيانات كافية للعرض</div>
+        <div className="report-chart-empty">{t('chart.noData')}</div>
       </div>
     );
   }
@@ -216,15 +231,15 @@ export function ReportChart({
     sortedByValue.map((item, index) => [
       item.name,
       barGradient
-        ? primaryGradientColor(index, sortedByValue.length)
-        : CHART_COLORS[index % CHART_COLORS.length],
+        ? primaryGradientColor(index, sortedByValue.length, theme.barGradientDark, theme.barGradientLight)
+        : theme.colors[index % theme.colors.length],
     ]),
   );
   const legendItems = chartData.map((item, index) => ({
     ...item,
     color: item.color || (barGradient
-      ? (barColorByName.get(item.name) || CHART_COLORS[0])
-      : CHART_COLORS[index % CHART_COLORS.length]),
+      ? (barColorByName.get(item.name) || theme.colors[0])
+      : theme.colors[index % theme.colors.length]),
   }));
 
   const barPerItem = 50;
@@ -248,7 +263,7 @@ export function ReportChart({
     <div className={cardClass}>
       <div className="report-chart-head">
         {title ? <h3>{title}</h3> : <span />}
-        {!hideTotal ? <span className="report-chart-total">{fmt(total)}</span> : null}
+        {!hideTotal ? <span className="report-chart-total">{fmt(total, language)}</span> : null}
       </div>
 
       {type === 'pie' ? (
@@ -265,25 +280,33 @@ export function ReportChart({
                   innerRadius="58%"
                   outerRadius="82%"
                   paddingAngle={2}
-                  stroke="#fff"
+                  stroke={theme.surfaceStroke}
                   strokeWidth={2}
                   isAnimationActive={false}
                 >
-                  {chartData.map((_, index) => (
-                    <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={index}
+                      fill={entry.color || theme.colors[index % theme.colors.length]}
+                    />
                   ))}
                   <Label
                     content={(props) => (
-                      <DonutCenter viewBox={props.viewBox as Record<string, number> | undefined} total={total} />
+                      <DonutCenter
+                        viewBox={props.viewBox as Record<string, number> | undefined}
+                        total={total}
+                        totalLabel={chartTotalLabel}
+                        language={language}
+                      />
                     )}
                     position="center"
                   />
                 </Pie>
-                <Tooltip content={<ChartTooltip showPercent valueLabel="" />} />
+                <Tooltip content={<ChartTooltip showPercent valueLabel="" language={language} />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <ChartLegend data={legendItems} />
+          <ChartLegend data={legendItems} language={language} />
         </div>
       ) : null}
 
@@ -304,14 +327,14 @@ export function ReportChart({
               }}
               barCategoryGap="16%"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#E8EEF2" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} horizontal={false} />
               <XAxis
                 type="number"
                 domain={barDomain || [0, 'auto']}
-                tick={{ fontSize: 10, fill: '#64748B' }}
+                tick={tickStyleSm}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => fmt(Number(v))}
+                tickFormatter={(v) => fmt(Number(v), language)}
               />
               <YAxis
                 type="category"
@@ -322,25 +345,25 @@ export function ReportChart({
                 tickLine={false}
               />
               <Tooltip
-                content={<ChartTooltip />}
-                cursor={{ fill: 'rgba(8, 145, 178, 0.08)' }}
+                content={<ChartTooltip valueLabel={chartValueLabel} language={language} />}
+                cursor={{ fill: theme.cursorFill }}
               />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={24}>
                 {barDisplayData.map((entry) => (
                   <Cell
                     key={entry.name}
-                    fill={entry.color || barColorByName.get(entry.name) || CHART_COLORS[0]}
+                    fill={entry.color || barColorByName.get(entry.name) || theme.colors[0]}
                   />
                 ))}
                 {showBarValueLabels ? (
                   <LabelList
                     dataKey="value"
                     position="right"
-                    fill="#64748B"
+                    fill={theme.text}
                     fontSize={11}
                     fontWeight={600}
                     offset={6}
-                    formatter={(value) => fmt(Number(value ?? 0))}
+                    formatter={(value) => fmt(Number(value ?? 0), language)}
                   />
                 ) : null}
               </Bar>
@@ -353,30 +376,30 @@ export function ReportChart({
         <div className="chart-line-wrap" style={{ height: height ?? 300 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E8EEF2" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 11, fill: '#64748B' }}
+                tick={tickStyle}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => truncate(String(v), 10)}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fontSize: 11, fill: '#64748B' }}
+                tick={tickStyle}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
-                tickFormatter={(v) => fmt(Number(v))}
+                tickFormatter={(v) => fmt(Number(v), language)}
                 width={48}
               />
-              <Tooltip content={<ChartTooltip valueLabel="" />} />
+              <Tooltip content={<ChartTooltip valueLabel="" language={language} />} />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#22A6BC"
+                stroke={theme.primary}
                 strokeWidth={3}
-                dot={{ r: 4, fill: '#22A6BC', strokeWidth: 2, stroke: '#fff' }}
+                dot={{ r: 4, fill: theme.primary, strokeWidth: 2, stroke: theme.surfaceStroke }}
                 activeDot={{ r: 6, strokeWidth: 0 }}
                 isAnimationActive={false}
               />
@@ -390,35 +413,35 @@ export function ReportChart({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 12, right: 16, left: 8, bottom: 8 }}>
               <defs>
-                <linearGradient id="areaPrimary" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22A6BC" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#22A6BC" stopOpacity={0.02} />
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={theme.primary} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={theme.primary} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E8EEF2" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 11, fill: '#64748B' }}
+                tick={tickStyle}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => truncate(String(v), 10)}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fontSize: 11, fill: '#64748B' }}
+                tick={tickStyle}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
-                tickFormatter={(v) => fmt(Number(v))}
+                tickFormatter={(v) => fmt(Number(v), language)}
                 width={48}
               />
-              <Tooltip content={<ChartTooltip valueLabel="" />} />
+              <Tooltip content={<ChartTooltip valueLabel="" language={language} />} />
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#22A6BC"
+                stroke={theme.primary}
                 strokeWidth={2.5}
-                fill="url(#areaPrimary)"
+                fill={`url(#${gradientId})`}
                 isAnimationActive={false}
               />
             </AreaChart>
