@@ -546,6 +546,33 @@
   min-width: 0;
 }
 .form-grid .textarea, .form-grid .field:has(textarea) { grid-column: 1 / -1; }
+.course-bilingual-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 18px;
+  align-items: start;
+}
+.course-bilingual-row .field,
+.course-bilingual-row .textarea {
+  grid-column: auto;
+}
+.course-bilingual-row--en-first > :first-child {
+  order: 2;
+}
+.course-bilingual-row--en-first > :last-child {
+  order: 1;
+}
+.course-form-bilingual-hint {
+  margin: -8px 0 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+.course-review-alt-title {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
 .wizard-steps {
   display: flex;
   gap: 8px;
@@ -1255,8 +1282,13 @@
   flex-wrap: wrap;
 }
 .growth-banner strong { font-size: 1.8rem; color: var(--success); }
-.session-card-info h4 { margin: 0 0 4px; font-weight: 800; }
-.session-card-info p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.session-card-info h4 { margin: 0 0 4px; font-weight: 800; text-align: start; }
+.session-card-info p { margin: 0; color: var(--muted); font-size: 0.88rem; text-align: start; }
+.session-card-info {
+  flex: 1 1 160px;
+  min-width: 0;
+  text-align: start;
+}
 .quiz-card { background: var(--surface); }
 
 /* Instructor course builder */
@@ -1335,7 +1367,12 @@
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  margin-top: 12px;
+  margin-top: 10px;
+}
+.instructor-builder-empty-actions .builder-add-lesson-btn {
+  padding: 9px 18px;
+  min-height: 40px;
+  font-size: 0.9375rem;
 }
 .builder-section-card {
   overflow: hidden;
@@ -1352,12 +1389,13 @@
 .builder-section-toggle {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  text-align: right;
+  text-align: start;
+  justify-content: flex-start;
   color: inherit;
   font: inherit;
   min-width: 0;
@@ -1377,24 +1415,41 @@
 }
 .builder-section-title-wrap {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
+  flex: 0 1 auto;
+  text-align: start;
 }
 .builder-section-title-wrap h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 800;
+  text-align: start;
 }
 .builder-section-meta {
   font-size: 0.8rem;
   color: var(--muted);
   font-weight: 700;
+  line-height: 1.25;
+  padding: 0;
+  margin: 0;
+  text-align: start;
 }
 .builder-section-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
+}
+.builder-section-actions .btn-ghost.btn-sm,
+.builder-section-actions .builder-icon-action-btn {
+  padding-inline: 6px;
+  min-width: 32px;
+}
+.builder-section-actions .btn-ghost.btn-sm svg,
+.builder-section-actions .builder-icon-action-btn svg {
+  width: 16px;
+  height: 16px;
 }
 .builder-section-body {
   display: grid;
@@ -1840,6 +1895,7 @@
   .auth-card { padding: 24px; }
   .form-grid { grid-template-columns: 1fr; }
   .form-grid .textarea, .form-grid .field:has(textarea) { grid-column: auto; }
+  .course-bilingual-row { grid-template-columns: 1fr; }
   .course-form-actions {
     flex-direction: column-reverse;
     align-items: stretch;
@@ -3921,7 +3977,7 @@ html.dark .instructor-dash-growth {
   }
 }
 .instructor-dashboard-page .stat-card {
-  min-height: 6.75rem;
+  min-height: 6rem;
 }
 
 .instructor-dash-section-head {
@@ -4197,6 +4253,93 @@ html.dark .instructor-dash-growth {
   margin-bottom: 0;
 }
 
+/* Instructor notifications — stacked card layout (icon + content column) */
+.instructor-notifications-feed .student-notification-item {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.instructor-notifications-feed .student-notification-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 6px;
+}
+
+.instructor-notifications-feed .student-notification-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--text);
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.instructor-notifications-feed .student-notification-text {
+  margin: 0 0 10px;
+  text-align: start;
+}
+
+.instructor-notifications-feed .student-notification-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.instructor-notifications-feed .student-notification-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 0;
+  margin-inline-start: auto;
+}
+
+.instructor-notifications-feed .student-notification-status-badge {
+  flex-shrink: 0;
+}
+
+html[dir="ltr"] .instructor-notifications-feed .student-notification-item {
+  direction: ltr;
+}
+
+html[dir="ltr"] .instructor-notifications-feed .student-notification-title,
+html[dir="ltr"] .instructor-notifications-feed .student-notification-text,
+html[dir="ltr"] .instructor-notifications-feed .student-notification-time {
+  text-align: start;
+}
+
+html[dir="ltr"] .instructor-notifications-feed .student-notification-top {
+  justify-content: flex-start;
+}
+
+html[dir="ltr"] .instructor-notifications-feed .student-notification-foot {
+  flex-direction: row;
+}
+
+html[dir="rtl"] .instructor-notifications-feed .student-notification-item {
+  direction: rtl;
+}
+
+@media (max-width: 768px) {
+  .instructor-notifications-feed .student-notification-foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .instructor-notifications-feed .student-notification-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-inline-start: 0;
+  }
+}
+
 /* ── Instructor support ── */
 .instructor-support-page {
   gap: clamp(14px, 2vw, 20px);
@@ -4343,7 +4486,7 @@ html.dark .instructor-dash-growth {
   display: grid;
   gap: 8px;
   min-width: 0;
-  text-align: right;
+  text-align: start;
 }
 .instructor-course-card-head {
   min-width: 0;
@@ -4366,6 +4509,7 @@ html.dark .instructor-dash-growth {
   color: var(--text);
   min-width: 0;
   flex: 1 1 10rem;
+  text-align: start;
 }
 .instructor-course-card-meta {
   display: flex;

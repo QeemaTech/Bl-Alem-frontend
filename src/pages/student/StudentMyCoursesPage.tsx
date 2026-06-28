@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Download, PlayCircle } from '@/icons';
 import { studentApi } from '../../api/student';
@@ -7,13 +8,11 @@ import {
   CourseFilters,
   CourseGrid,
   CourseStatusChart,
-  fmtDate,
   getDisplayStatus,
   LearningProgressCard,
   MyCoursesPageSkeleton,
   PAGE_SIZE,
   StatisticsCards,
-  STATUS_LABELS,
   STATUS_VARIANT,
   type MyCourseEnrollment,
 } from '../../components/student/myCourses';
@@ -23,20 +22,14 @@ import { Card } from '../../components/ui/Card';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Table } from '../../components/ui/Table';
+import { useStudentMyCourseLabels } from '../../hooks/useStudentMyCourseLabels';
+import { localizedCategoryName, localizedCourseTitle } from '../../utils/localizedContent';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
-const exportColumns = [
-  { key: 'title', header: 'الدورة' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'category', header: 'التصنيف' },
-  { key: 'progress', header: 'التقدم %' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'enrolledAt', header: 'تاريخ الاشتراك' },
-  { key: 'lessons', header: 'عدد الدروس' },
-  { key: 'quizzes', header: 'عدد الاختبارات' },
-];
-
 export default function StudentMyCoursesPage() {
+  const { t, i18n } = useTranslation('courses');
+  const lang = i18n.language;
+  const { getStatusLabel, fmtDate } = useStudentMyCourseLabels();
   const navigate = useNavigate();
   const [tab, setTab] = useState('all');
   const [viewMode, setViewMode] = useState('cards');
@@ -55,19 +48,21 @@ export default function StudentMyCoursesPage() {
   const stats = useMemo(() => computeStats(allItems), [allItems]);
 
   const categories = useMemo(() => {
-    const names = new Set<string>();
+    const names = new Map<string, string>();
     allItems.forEach((item) => {
-      const name = item.course?.category?.nameAr;
-      if (name) names.add(name);
+      const cat = item.course?.category;
+      if (!cat) return;
+      const label = localizedCategoryName(cat, lang);
+      if (label && label !== '—') names.set(label, label);
     });
     return [
-      { label: 'كل التصنيفات', value: '' },
-      ...Array.from(names).sort((a, b) => a.localeCompare(b, 'ar')).map((name) => ({
+      { label: t('student.myCourses.filters.allCategories'), value: '' },
+      ...Array.from(names.values()).sort((a, b) => a.localeCompare(b, lang)).map((name) => ({
         label: name,
         value: name,
       })),
     ];
-  }, [allItems]);
+  }, [allItems, lang, t]);
 
   const tabItems = useMemo(() => {
     if (tab === 'active') {
@@ -87,44 +82,62 @@ export default function StudentMyCoursesPage() {
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((item) =>
-        [item.course?.titleAr, item.course?.instructor?.fullName, item.course?.category?.nameAr]
-          .some((v) => String(v || '').toLowerCase().includes(q)),
+        [
+          localizedCourseTitle(item.course, lang),
+          item.course?.instructor?.fullName,
+          localizedCategoryName(item.course?.category, lang),
+        ].some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     if (category) {
-      result = result.filter((item) => item.course?.category?.nameAr === category);
+      result = result.filter((item) => localizedCategoryName(item.course?.category, lang) === category);
     }
     result.sort((a, b) => {
       if (sort === 'progress') {
         return Number(b.progressPercentage || 0) - Number(a.progressPercentage || 0);
       }
       if (sort === 'name') {
-        return String(a.course?.titleAr || '').localeCompare(String(b.course?.titleAr || ''), 'ar');
+        return localizedCourseTitle(a.course, lang).localeCompare(localizedCourseTitle(b.course, lang), lang);
       }
       return new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime();
     });
     return result;
-  }, [tabItems, search, sort, category]);
+  }, [tabItems, search, sort, category, lang]);
 
   useEffect(() => {
     setPage(1);
   }, [tab, search, sort, category, viewMode]);
 
+  const exportColumns = useMemo(() => [
+    { key: 'title', header: t('student.myCourses.export.columns.title') },
+    { key: 'instructor', header: t('student.myCourses.export.columns.instructor') },
+    { key: 'category', header: t('student.myCourses.export.columns.category') },
+    { key: 'progress', header: t('student.myCourses.export.columns.progress') },
+    { key: 'status', header: t('student.myCourses.export.columns.status') },
+    { key: 'enrolledAt', header: t('student.myCourses.export.columns.enrolledAt') },
+    { key: 'lessons', header: t('student.myCourses.export.columns.lessons') },
+    { key: 'quizzes', header: t('student.myCourses.export.columns.quizzes') },
+  ], [t, lang]);
+
   const tableRows = useMemo(() => filtered.map((item) => ({
     id: item.courseId,
-    title: item.course?.titleAr || '—',
+    title: localizedCourseTitle(item.course, lang),
     instructor: item.course?.instructor?.fullName || '—',
-    category: item.course?.category?.nameAr || '—',
+    category: localizedCategoryName(item.course?.category, lang),
     progress: Number(item.progressPercentage || 0),
-    status: STATUS_LABELS[getDisplayStatus(item)],
+    status: getStatusLabel(getDisplayStatus(item)),
     enrolledAt: fmtDate(item.enrolledAt),
     lessons: item.course?._count?.lessons || 0,
     quizzes: item.course?.quizzes?.length || 0,
     _raw: item,
-  })), [filtered]);
+  })), [filtered, getStatusLabel, fmtDate, lang]);
 
   const handleExport = () => {
-    exportTableToExcel('كورساتي', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('student.myCourses.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
 
   const handleReset = () => {
@@ -134,10 +147,57 @@ export default function StudentMyCoursesPage() {
     setCategory('');
   };
 
-  const emptyTitle = allItems.length ? 'لا توجد نتائج مطابقة' : 'لا توجد دورات';
+  const emptyTitle = allItems.length
+    ? t('student.myCourses.empty.noResults')
+    : t('student.myCourses.empty.noCourses');
   const emptyDescription = allItems.length
-    ? 'جرّبي تغيير البحث أو الفلتر للعثور على دوراتك.'
-    : 'اشترك في دورة من صفحة الكورسات المتاحة لتظهر هنا.';
+    ? t('student.myCourses.empty.noResultsDesc')
+    : t('student.myCourses.empty.noCoursesDesc');
+
+  const tableColumns = useMemo(() => [
+    { key: 'title', header: t('student.myCourses.table.columns.title') },
+    { key: 'instructor', header: t('student.myCourses.table.columns.instructor') },
+    { key: 'category', header: t('student.myCourses.table.columns.category') },
+    {
+      key: 'progress',
+      header: t('student.myCourses.table.columns.progress'),
+      render: (row: typeof tableRows[number]) => (
+        <div className="table-progress-cell">
+          <ProgressBar value={Number(row.progress)} size="sm" />
+          <span>{row.progress}%</span>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: t('student.myCourses.table.columns.status'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={STATUS_VARIANT(getDisplayStatus(row._raw))}>{row.status}</Badge>
+      ),
+    },
+    { key: 'quizzes', header: t('student.myCourses.table.columns.quizzes') },
+    { key: 'enrolledAt', header: t('student.myCourses.table.columns.enrolled') },
+    {
+      key: 'actions',
+      header: t('student.myCourses.table.columns.actions'),
+      render: (row: typeof tableRows[number]) => {
+        const done = getDisplayStatus(row._raw) === 'COMPLETED';
+        return (
+          <Button
+            size="sm"
+            icon={done ? <CheckCircle2 size={14} /> : <PlayCircle size={14} />}
+            onClick={() => (done
+              ? navigate('/student/certificates')
+              : navigate(`/student/player/${row.id}`))}
+          >
+            {done
+              ? t('student.myCourses.actions.viewCertificate')
+              : t('student.myCourses.actions.continueLearning')}
+          </Button>
+        );
+      },
+    },
+  ], [t, lang, navigate]);
 
   if (loading) return <MyCoursesPageSkeleton />;
 
@@ -145,15 +205,15 @@ export default function StudentMyCoursesPage() {
     <div className="page-grid student-my-courses-page">
       <div className="reports-header student-my-courses-header">
         <PageHeader
-          title="كورساتي"
-          subtitle="تابع الدورات التي اشتركت بها واستكمل التعلم"
+          title={t('student.myCourses.title')}
+          subtitle={t('student.myCourses.subtitle')}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!filtered.length}>
-            تصدير Excel
+            {t('student.myCourses.exportExcel')}
           </Button>
           <Button icon={<PlayCircle size={18} />} onClick={() => navigate('/student/courses')}>
-            تصفح دورات جديدة
+            {t('student.myCourses.browseNew')}
           </Button>
         </div>
       </div>
@@ -198,48 +258,7 @@ export default function StudentMyCoursesPage() {
               data={tableRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)}
               emptyTitle={emptyTitle}
               emptyDescription={emptyDescription}
-              columns={[
-                { key: 'title', header: 'الدورة' },
-                { key: 'instructor', header: 'المحاضر' },
-                { key: 'category', header: 'التصنيف' },
-                {
-                  key: 'progress',
-                  header: 'التقدم',
-                  render: (row) => (
-                    <div className="table-progress-cell">
-                      <ProgressBar value={Number(row.progress)} size="sm" />
-                      <span>{row.progress}%</span>
-                    </div>
-                  ),
-                },
-                {
-                  key: 'status',
-                  header: 'الحالة',
-                  render: (row) => (
-                    <Badge variant={STATUS_VARIANT(getDisplayStatus(row._raw))}>{row.status}</Badge>
-                  ),
-                },
-                { key: 'quizzes', header: 'الاختبارات' },
-                { key: 'enrolledAt', header: 'الاشتراك' },
-                {
-                  key: 'actions',
-                  header: 'الإجراءات',
-                  render: (row) => {
-                    const done = getDisplayStatus(row._raw) === 'COMPLETED';
-                    return (
-                      <Button
-                        size="sm"
-                        icon={done ? <CheckCircle2 size={14} /> : <PlayCircle size={14} />}
-                        onClick={() => (done
-                          ? navigate('/student/certificates')
-                          : navigate(`/student/player/${row.id}`))}
-                      >
-                        {done ? 'عرض الشهادة' : 'متابعة التعلم'}
-                      </Button>
-                    );
-                  },
-                },
-              ]}
+              columns={tableColumns}
             />
           </Card>
         )}

@@ -1,0 +1,115 @@
+{
+  "student": {
+    "title": "المجتمع",
+    "subtitle": "شارك أسئلتك وتجاربك مع المتعلمين الآخرين",
+    "exportExcel": "تصدير Excel",
+    "newPost": "منشور جديد",
+    "hero": {
+      "title": "مجتمع المتعلمين",
+      "body": "اطرح أسئلتك، شارك تجاربك، وتفاعل مع زملائك في التعلم."
+    },
+    "stats": {
+      "posts": "المنشورات",
+      "comments": "التعليقات",
+      "mine": "منشوراتي",
+      "answered": "تم الرد",
+      "unansweredHint": "{{count}} بانتظار رد",
+      "unansweredHint_one": "{{count}} بانتظار رد",
+      "unansweredHint_two": "{{count}} بانتظار رد",
+      "unansweredHint_few": "{{count}} بانتظار رد",
+      "unansweredHint_many": "{{count}} بانتظار رد",
+      "unansweredHint_other": "{{count}} بانتظار رد"
+    },
+    "charts": {
+      "distribution": "توزيع المنشورات",
+      "answered": "تم الرد",
+      "unanswered": "بانتظار رد"
+    },
+    "filters": {
+      "searchPlaceholder": "بحث بالعنوان، المحتوى، أو الكاتب...",
+      "comments": "التعليقات",
+      "author": "الكاتب",
+      "all": "الكل",
+      "answered": "تم الرد",
+      "unanswered": "بانتظار رد",
+      "mine": "منشوراتي"
+    },
+    "tabs": {
+      "feed": "البطاقات ({{count}})",
+      "table": "الجدول ({{count}})"
+    },
+    "status": {
+      "answered": "تم الرد",
+      "unanswered": "بانتظار رد"
+    },
+    "badges": {
+      "yourPost": "منشورك",
+      "comments": "{{count}} تعليق",
+      "comments_one": "{{count}} تعليق",
+      "comments_two": "{{count}} تعليقان",
+      "comments_few": "{{count}} تعليقات",
+      "comments_many": "{{count}} تعليقاً",
+      "comments_other": "{{count}} تعليق",
+      "platformTeam": "فريق المنصة"
+    },
+    "empty": {
+      "title": "لا توجد منشورات",
+      "filteredDescription": "جرّب تغيير الفلاتر أو البحث.",
+      "noPostsDescription": "كن أول من يشارك سؤالاً أو تجربة مع المجتمع."
+    },
+    "table": {
+      "title": "جدول المنشورات",
+      "count": "{{count}} منشور",
+      "count_one": "{{count}} منشور",
+      "count_two": "{{count}} منشوران",
+      "count_few": "{{count}} منشورات",
+      "count_many": "{{count}} منشوراً",
+      "count_other": "{{count}} منشور",
+      "emptyDescription": "لم يُعثر على منشورات مطابقة.",
+      "columns": {
+        "id": "الرقم",
+        "author": "الكاتب",
+        "title": "العنوان",
+        "comments": "التعليقات",
+        "status": "الحالة",
+        "createdAt": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "export": {
+      "sheetName": "منشورات-المجتمع",
+      "columns": {
+        "id": "رقم المنشور",
+        "author": "الكاتب",
+        "title": "العنوان",
+        "body": "المحتوى",
+        "commentsCount": "عدد التعليقات",
+        "status": "الحالة",
+        "createdAt": "التاريخ"
+      }
+    },
+    "actions": {
+      "view": "عرض",
+      "reply": "رد",
+      "publish": "نشر"
+    },
+    "form": {
+      "titleLabel": "العنوان",
+      "titlePlaceholder": "مثال: كيف أستخدم المحفظة عند الشراء؟",
+      "bodyLabel": "المحتوى",
+      "bodyPlaceholder": "اكتب سؤالك أو تجربتك بالتفصيل...",
+      "commentPlaceholder": "أضف تعليقاً...",
+      "commentAriaLabel": "أضف تعليقاً"
+    },
+    "detail": {
+      "title": "تفاصيل المنشور"
+    },
+    "userFallback": "مستخدم",
+    "toast": {
+      "postPublished": "تم نشر المنشور",
+      "postFailed": "فشل نشر المنشور",
+      "commentAdded": "تم إضافة التعليق",
+      "commentFailed": "فشل إضافة التعليق"
+    }
+  }
+}

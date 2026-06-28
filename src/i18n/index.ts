@@ -29,6 +29,8 @@ import arCoupons from './locales/ar/coupons.json';
 import arRewards from './locales/ar/rewards.json';
 import arCertificates from './locales/ar/certificates.json';
 import arReviews from './locales/ar/reviews.json';
+import arCommunity from './locales/ar/community.json';
+import arProfile from './locales/ar/profile.json';
 
 import enCommon from './locales/en/common.json';
 import enNav from './locales/en/nav.json';
@@ -51,6 +53,8 @@ import enCoupons from './locales/en/coupons.json';
 import enRewards from './locales/en/rewards.json';
 import enCertificates from './locales/en/certificates.json';
 import enReviews from './locales/en/reviews.json';
+import enCommunity from './locales/en/community.json';
+import enProfile from './locales/en/profile.json';
 
 export { applyDocumentDirection, supportedLanguages, STORAGE_KEY } from './config';
 export type { SupportedLanguage } from './config';
@@ -83,6 +87,8 @@ void i18n
         rewards: arRewards,
         certificates: arCertificates,
         reviews: arReviews,
+        community: arCommunity,
+        profile: arProfile,
       },
       en: {
         common: enCommon,
@@ -106,6 +112,8 @@ void i18n
         rewards: enRewards,
         certificates: enCertificates,
         reviews: enReviews,
+        community: enCommunity,
+        profile: enProfile,
       },
     },
     lng: initialLanguage,
@@ -133,6 +141,8 @@ void i18n
       'rewards',
       'certificates',
       'reviews',
+      'community',
+      'profile',
     ],
     interpolation: { escapeValue: false },
     react: {

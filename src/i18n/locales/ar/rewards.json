@@ -121,5 +121,91 @@
     "resetTitle": "إعادة تعيين النقاط",
     "resetMessage": "هل تريد تصفير نقاط المكافآت للطالب {{name}}؟ هذا الإجراء لا يمكن التراجع عنه.",
     "resetConfirm": "إعادة التعيين"
+  },
+  "student": {
+    "title": "المكافآت والإحالات",
+    "subtitle": "ادعُ أصدقاءك عند التسجيل واحصل على نقاط مكافآت",
+    "stats": {
+      "available": "النقاط المتاحة",
+      "earned": "نقاط مكتسبة",
+      "spent": "نقاط مُستبدلة",
+      "invited": "المدعوون",
+      "successfulHint": "{{count}} إحالة ناجحة"
+    },
+    "referral": {
+      "label": "كود الإحالة الخاص بك",
+      "description": "شارك الكود مع أصدقائك عند التسجيل — تحصل على نقاط مكافآت فوراً.",
+      "disabledSuffix": " (الكود معطّل حالياً)",
+      "infoFallback": "كود الإحالة يُستخدم عند التسجيل فقط — منفصل تماماً عن كوبونات الخصم."
+    },
+    "actions": {
+      "exportExcel": "تصدير Excel",
+      "copy": "نسخ",
+      "share": "مشاركة"
+    },
+    "share": {
+      "title": "كود الإحالة",
+      "message": "انضم إلى منصة بالعِلم باستخدام كود الإحالة: {{code}}"
+    },
+    "tabs": {
+      "points": "سجل النقاط ({{count}})",
+      "referrals": "المدعوون ({{count}})"
+    },
+    "filters": {
+      "txSearchPlaceholder": "بحث بالسبب أو النقاط...",
+      "refSearchPlaceholder": "بحث بالاسم أو البريد...",
+      "type": "النوع",
+      "all": "الكل"
+    },
+    "labels": {
+      "referralStatus": {
+        "PENDING": "قيد الانتظار",
+        "APPROVED": "معتمدة",
+        "REWARDED": "مُكافأ",
+        "REJECTED": "مرفوضة"
+      },
+      "txType": {
+        "EARNED": "مكتسبة",
+        "SPENT": "مُنفقة",
+        "REDEEMED": "مُستبدلة",
+        "ADJUSTMENT": "تعديل"
+      }
+    },
+    "table": {
+      "pointsTitle": "سجل النقاط",
+      "pointsCount": "{{count}} حركة",
+      "pointsEmptyTitle": "لا توجد حركات نقاط",
+      "pointsEmptyDescription": "ستظهر النقاط المكتسبة والمُستبدلة هنا.",
+      "referralsTitle": "المدعوون",
+      "referralsCount": "{{count}} مدعو",
+      "referralsEmptyTitle": "لا يوجد مدعوون",
+      "referralsEmptyDescription": "شارك كود الإحالة لدعوة أصدقائك عند التسجيل.",
+      "columns": {
+        "type": "النوع",
+        "points": "النقاط",
+        "reason": "السبب",
+        "createdAt": "التاريخ",
+        "user": "المستخدم",
+        "rewardStatus": "الحالة",
+        "registeredAt": "تاريخ التسجيل"
+      }
+    },
+    "empty": {
+      "noCodeTitle": "كود الإحالة غير متاح",
+      "noCodeDescription": "تواصل مع الدعم إذا لم يظهر كود الإحالة الخاص بك."
+    },
+    "toast": {
+      "codeCopied": "تم نسخ كود الإحالة.",
+      "shareCopied": "تم نسخ رسالة المشاركة."
+    },
+    "export": {
+      "sheetName": "سجل النقاط",
+      "columns": {
+        "type": "النوع",
+        "points": "النقاط",
+        "reason": "السبب",
+        "createdAt": "التاريخ"
+      }
+    }
   }
 }

@@ -11,6 +11,7 @@
       "branding": "الهوية",
       "financial": "مالي",
       "certificates": "شهادات",
+      "rewards": "مكافآت",
       "contact": "تواصل",
       "legal": "SEO",
       "system": "تقني"
@@ -55,10 +56,17 @@
       },
       "certificates": {
         "label": "شهادات",
-        "title": "الشهادات والإحالات",
-        "description": "بادئة الشهادات ومكافآت برنامج الإحالة.",
+        "title": "الشهادات",
+        "description": "إعدادات ترقيم وإصدار الشهادات.",
         "fields": {
-          "certificatePrefix": { "label": "بادئة الشهادات", "placeholder": "BI", "helper": "مثال: BI-2026-00001" },
+          "certificatePrefix": { "label": "بادئة الشهادات", "placeholder": "BI", "helper": "مثال: BI-2026-00001" }
+        }
+      },
+      "rewards": {
+        "label": "مكافآت",
+        "title": "المكافآت والإحالة",
+        "description": "نقاط الإحالة وقيمة النقطة عند استخدامها في شراء الدورات.",
+        "fields": {
           "referralRewardPoints": { "label": "نقاط مكافأة الإحالة", "helper": "تُمنح للمُحيل عند تسجيل طالب جديد بكوده" },
           "pointsPerEgp": { "label": "قيمة النقطة (ج.م)", "helper": "مثال: 1 = كل نقطة تساوي 1 ج.م خصم" },
           "referralEnabled": { "label": "تفعيل برنامج الإحالة" }

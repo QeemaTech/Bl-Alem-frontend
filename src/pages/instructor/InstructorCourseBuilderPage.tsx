@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronDown, ChevronUp, ClipboardList, Edit, FilePlus, GripVertical, Layers,
@@ -14,6 +15,13 @@ import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { SuccessModal } from '../../components/ui/SuccessModal';
 import { useToast } from '../../components/ui/Toast';
+import {
+  localizedCourseTitle,
+  localizedLessonTitle,
+  localizedQuizTitle,
+  localizedResourceTitle,
+  localizedSectionTitle,
+} from '../../utils/localizedContent';
 
 const courseVariant = (status: string) => {
   if (status === 'PUBLISHED') return 'published' as const;
@@ -22,14 +30,9 @@ const courseVariant = (status: string) => {
   return 'default' as const;
 };
 
-const statusLabels: Record<string, string> = {
-  DRAFT: 'مسودة',
-  PUBLISHED: 'منشور',
-  PENDING_REVIEW: 'قيد المراجعة',
-  REJECTED: 'مرفوض',
-};
-
 export default function InstructorCourseBuilderPage() {
+  const { t, i18n } = useTranslation('courses');
+  const lang = i18n.language;
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -65,7 +68,7 @@ export default function InstructorCourseBuilderPage() {
   const handleAddLesson = () => {
     const sections = course?.sections || [];
     if (!sections.length) {
-      showToast('أضف سيشناً أولاً قبل إضافة دروس.', 'warning');
+      showToast(t('builder.needSessionFirst'), 'warning');
       goSectionNew();
       return;
     }
@@ -77,10 +80,16 @@ export default function InstructorCourseBuilderPage() {
   };
 
   const submitReview = async () => {
-    await instructorApi.submitCourseReview(id!);
-    setConfirmSubmit(false);
-    setSuccessOpen(true);
-    load();
+    try {
+      await instructorApi.submitCourseReview(id!);
+      setConfirmSubmit(false);
+      setSuccessOpen(true);
+      load();
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        || t('toast.submitFailed');
+      showToast(message, 'error');
+    }
   };
 
   const moveSection = async (sectionId: number, direction: 'up' | 'down') => {
@@ -170,16 +179,27 @@ export default function InstructorCourseBuilderPage() {
   if (!course) {
     return (
       <div className="page-grid instructor-course-builder-page">
-        <PageHeader title="منشئ الكورس" breadcrumb={[{ label: 'كورساتي', to: '/instructor/courses' }, { label: 'غير موجود' }]} />
-        <Card><EmptyState title="الكورس غير موجود" description="لم نتمكن من تحميل بيانات الكورس." /></Card>
+        <PageHeader
+          title={t('builder.title')}
+          breadcrumb={[
+            { label: t('management.title'), to: '/instructor/courses' },
+            { label: t('builder.missing') },
+          ]}
+        />
+        <Card>
+          <EmptyState title={t('builder.notFound')} description={t('builder.notFoundDesc')} />
+        </Card>
       </div>
     );
   }
 
   const lessons = course.sections?.flatMap((s: any) => s.lessons || []) || [];
+  const courseTitle = localizedCourseTitle(course, lang);
+
   const lessonTitleById = (lessonId?: number | null) => {
-    if (!lessonId) return 'اختبار للدورة بالكامل';
-    return lessons.find((l: any) => l.id === lessonId)?.titleAr || 'درس مرتبط';
+    if (!lessonId) return t('builder.fullCourseQuiz');
+    const lesson = lessons.find((l: any) => l.id === lessonId);
+    return lesson ? localizedLessonTitle(lesson, lang) : t('builder.linkedLesson');
   };
 
   const quizReadyCount = (quiz: any) => (
@@ -192,48 +212,53 @@ export default function InstructorCourseBuilderPage() {
     }).length
   );
 
+  const statusLabel = (status: string) => t(`builder.status.${status}`, { defaultValue: status });
+
   return (
     <div className="page-grid instructor-course-builder-page">
       <PageHeader
-        title={course.titleAr}
-        subtitle="اسحب أيقونة ⋮⋮ لترتيب الدروس داخل السيشن"
-        breadcrumb={[{ label: 'كورساتي', to: '/instructor/courses' }, { label: course.titleAr }]}
+        title={courseTitle}
+        subtitle={t('builder.subtitle')}
+        breadcrumb={[
+          { label: t('management.title'), to: '/instructor/courses' },
+          { label: courseTitle },
+        ]}
         status={(
           <Badge variant={courseVariant(course.status)}>
-            {statusLabels[course.status] || course.status}
+            {statusLabel(course.status)}
           </Badge>
         )}
       />
 
       <Card className="instructor-builder-toolbar">
         <div className="instructor-builder-toolbar-main">
-          <span className="instructor-builder-toolbar-label">إضافة محتوى</span>
+          <span className="instructor-builder-toolbar-label">{t('builder.addContent')}</span>
           <div className="instructor-builder-toolbar-actions">
             <Button type="button" onClick={goSectionNew} icon={<Layers size={18} />}>
-              إضافة سيشن
+              {t('builder.addSession')}
             </Button>
             <Button type="button" variant="outline" onClick={handleAddLesson} icon={<PlayCircle size={18} />}>
-              إضافة درس
+              {t('builder.addLesson')}
             </Button>
             <Button type="button" variant="outline" onClick={goQuizNew} icon={<ClipboardList size={18} />}>
-              إضافة اختبار
+              {t('builder.addQuiz')}
             </Button>
             <Button type="button" variant="outline" onClick={() => goResourceNew()} icon={<FilePlus size={18} />}>
-              مورد
+              {t('builder.resource')}
             </Button>
           </div>
         </div>
         <Button type="button" onClick={() => setConfirmSubmit(true)} icon={<Send size={18} />}>
-          إرسال للمراجعة
+          {t('builder.submitReview')}
         </Button>
       </Card>
 
       <div className="instructor-builder-sections-block">
         <div className="instructor-builder-sections-head">
-          <h2>سيشنات الكورس</h2>
+          <h2>{t('builder.sessionsTitle')}</h2>
           {course.sections?.length ? (
             <Button type="button" size="sm" variant="outline" onClick={goSectionNew} icon={<Plus size={16} />}>
-              سيشن جديد
+              {t('builder.newSession')}
             </Button>
           ) : null}
         </div>
@@ -253,17 +278,19 @@ export default function InstructorCourseBuilderPage() {
                   >
                     <ChevronDown size={20} className={`builder-section-chevron ${sectionOpen ? 'open' : ''}`} />
                     <div className="builder-section-title-wrap">
-                      <h3>{section.titleAr}</h3>
-                      <span className="builder-section-meta">{lessonCount} {lessonCount === 1 ? 'درس' : 'دروس'}</span>
+                      <h3>{localizedSectionTitle(section, lang)}</h3>
+                      <span className="builder-section-meta">
+                        {t('builder.lessonCount', { count: lessonCount })}
+                      </span>
                     </div>
                   </button>
                   <div className="builder-section-actions">
-                    <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'up')} disabled={sectionIndex === 0} icon={<ChevronUp size={16} />} aria-label="تحريك لأعلى" />
-                    <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'down')} disabled={sectionIndex === course.sections.length - 1} icon={<ChevronDown size={16} />} aria-label="تحريك لأسفل" />
-                    <Button variant="outline" size="sm" onClick={() => goSectionEdit(section.id)} icon={<Edit size={16} />}>تعديل</Button>
-                    <Button variant="outline" size="sm" onClick={() => goLessonNew(section.id)} icon={<PlayCircle size={16} />}>درس</Button>
+                    <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'up')} disabled={sectionIndex === 0} icon={<ChevronUp size={16} />} aria-label={t('builder.moveUp')} />
+                    <Button variant="ghost" size="sm" onClick={() => moveSection(section.id, 'down')} disabled={sectionIndex === course.sections.length - 1} icon={<ChevronDown size={16} />} aria-label={t('builder.moveDown')} />
+                    <Button variant="outline" size="sm" onClick={() => goSectionEdit(section.id)} icon={<Edit size={16} />}>{t('builder.edit')}</Button>
+                    <Button variant="outline" size="sm" onClick={() => goLessonNew(section.id)} icon={<PlayCircle size={16} />}>{t('builder.lesson')}</Button>
                     <Button variant="danger" size="sm" onClick={async () => { await instructorApi.deleteSection(section.id); load(); }} icon={<Trash2 size={16} />}>
-                      حذف
+                      {t('builder.delete')}
                     </Button>
                   </div>
                 </div>
@@ -288,7 +315,7 @@ export default function InstructorCourseBuilderPage() {
                             <span
                               className="lesson-drag-handle"
                               draggable
-                              title="اسحب لإعادة الترتيب"
+                              title={t('builder.dragToReorder')}
                               onDragStart={(e) => {
                                 startLessonDrag(lesson.id);
                                 e.dataTransfer.effectAllowed = 'move';
@@ -298,13 +325,13 @@ export default function InstructorCourseBuilderPage() {
                               <GripVertical size={18} />
                             </span>
                             <div className="session-card-info">
-                              <h4>{lesson.titleAr}</h4>
-                              <p>فيديو ({Math.round((lesson.duration || 0) / 60)} دقيقة)</p>
+                              <h4>{localizedLessonTitle(lesson, lang)}</h4>
+                              <p>{t('builder.videoDuration', { minutes: Math.round((lesson.duration || 0) / 60) })}</p>
                               {lesson.resources?.length ? (
                                 <div className="lesson-resources">
                                   {lesson.resources.map((resource: any) => (
                                     <div key={resource.id} className="lesson-resource-item">
-                                      <a href={resource.fileUrl} target="_blank" rel="noreferrer">{resource.title}</a>
+                                      <a href={resource.fileUrl} target="_blank" rel="noreferrer">{localizedResourceTitle(resource, lang)}</a>
                                       <Button
                                         size="sm"
                                         variant="ghost"
@@ -317,13 +344,13 @@ export default function InstructorCourseBuilderPage() {
                               ) : null}
                             </div>
                             <Badge variant={lesson.isPreview ? 'info' : lesson.isLocked ? 'warning' : 'success'}>
-                              {lesson.isPreview ? 'معاينة' : lesson.isLocked ? 'مغلق' : 'مفتوح'}
+                              {lesson.isPreview ? t('builder.preview') : lesson.isLocked ? t('builder.locked') : t('builder.open')}
                             </Badge>
                             <div className="builder-section-actions">
-                              <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'up')} disabled={lessonIndex === 0} icon={<ChevronUp size={14} />} aria-label="تحريك لأعلى" />
-                              <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'down')} disabled={lessonIndex === sortedLessons(section).length - 1} icon={<ChevronDown size={14} />} aria-label="تحريك لأسفل" />
-                              <Button variant="outline" size="sm" onClick={() => goLessonEdit(lesson.id)} icon={<Edit size={14} />}>تعديل</Button>
-                              <Button variant="ghost" size="sm" onClick={() => goResourceNew(lesson.id)} icon={<FilePlus size={14} />} aria-label="إضافة مورد" />
+                              <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'up')} disabled={lessonIndex === 0} icon={<ChevronUp size={14} />} aria-label={t('builder.moveUp')} />
+                              <Button variant="ghost" size="sm" onClick={() => moveLesson(lesson, 'down')} disabled={lessonIndex === sortedLessons(section).length - 1} icon={<ChevronDown size={14} />} aria-label={t('builder.moveDown')} />
+                              <Button variant="outline" size="sm" onClick={() => goLessonEdit(lesson.id)} icon={<Edit size={14} />}>{t('builder.edit')}</Button>
+                              <Button variant="ghost" size="sm" className="builder-icon-action-btn" onClick={() => goResourceNew(lesson.id)} icon={<FilePlus size={16} />} aria-label={t('builder.addResource')} />
                               <Button variant="danger" size="sm" onClick={async () => { await instructorApi.deleteLesson(lesson.id); load(); }} icon={<Trash2 size={14} />} />
                             </div>
                           </div>
@@ -355,10 +382,10 @@ export default function InstructorCourseBuilderPage() {
                           handleLessonDrop(null, section.id);
                         }}
                       >
-                        <EmptyState title="لا توجد دروس" description="أضف دروساً لهذا السيشن أو اسحب درساً هنا." />
+                        <EmptyState title={t('builder.noLessonsTitle')} description={t('builder.noLessonsDesc')} />
                         <div className="instructor-builder-empty-actions">
-                          <Button size="sm" onClick={() => goLessonNew(section.id)} icon={<PlayCircle size={16} />}>
-                            إضافة درس
+                          <Button size="sm" className="builder-add-lesson-btn" onClick={() => goLessonNew(section.id)} icon={<PlayCircle size={18} />}>
+                            {t('builder.addLesson')}
                           </Button>
                         </div>
                       </div>
@@ -370,9 +397,9 @@ export default function InstructorCourseBuilderPage() {
           })
         ) : (
           <Card>
-            <EmptyState title="لا توجد سيشنات" description="ابدأ بإضافة سيشن ثم أضف الدروس والاختبارات." />
+            <EmptyState title={t('builder.noSessionsTitle')} description={t('builder.noSessionsDesc')} />
             <div className="instructor-builder-empty-actions">
-              <Button onClick={goSectionNew} icon={<Layers size={18} />}>إضافة سيشن</Button>
+              <Button onClick={goSectionNew} icon={<Layers size={18} />}>{t('builder.addSession')}</Button>
             </div>
           </Card>
         )}
@@ -380,26 +407,63 @@ export default function InstructorCourseBuilderPage() {
 
       <Card className="instructor-builder-quizzes-card">
         <div className="section-heading">
-          <h2>الاختبارات</h2>
+          <h2>{t('builder.courseResourcesTitle')}</h2>
+          <Button type="button" size="sm" variant="outline" onClick={() => goResourceNew()} icon={<FilePlus size={16} />}>
+            {t('builder.addCourseResource')}
+          </Button>
+        </div>
+        {course.courseResources?.length ? (
+          course.courseResources.map((resource: any) => (
+            <div key={resource.id} className="session-card">
+              <FilePlus size={22} className="text-primary shrink-0" />
+              <div className="session-card-info">
+                <h4>{localizedResourceTitle(resource, lang)}</h4>
+                <p>{resource.type || 'file'}</p>
+              </div>
+              <a href={resource.fileUrl} target="_blank" rel="noreferrer" className="builder-resource-link">
+                {t('builder.openResource')}
+              </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => { await instructorApi.deleteCourseResource(resource.id); load(); }}
+                icon={<Trash2 size={16} />}
+                aria-label={t('builder.delete')}
+              />
+            </div>
+          ))
+        ) : (
+          <EmptyState title={t('builder.noCourseResourcesTitle')} description={t('builder.noCourseResourcesDesc')} />
+        )}
+      </Card>
+
+      <Card className="instructor-builder-quizzes-card">
+        <div className="section-heading">
+          <h2>{t('builder.quizzesTitle')}</h2>
           <Button type="button" size="sm" variant="outline" onClick={goQuizNew} icon={<Plus size={16} />}>
-            إضافة اختبار
+            {t('builder.addQuiz')}
           </Button>
         </div>
         {course.quizzes?.length ? (
           course.quizzes.map((q: any) => {
             const readyCount = quizReadyCount(q);
+            const quizTitle = localizedQuizTitle(q, lang);
             return (
               <div key={q.id} className="session-card quiz-card">
                 <ClipboardList size={22} className="text-primary shrink-0" />
                 <div className="session-card-info">
-                  <h4>{q.titleAr}</h4>
+                  <h4>{quizTitle}</h4>
                   <p>
-                    {readyCount} سؤال جاهز · {q.durationMinutes || 10} دقيقة · نجاح {q.passingScore || 60}%
-                    · {lessonTitleById(q.lessonId)}
+                    {t('builder.quizMeta', {
+                      questions: readyCount,
+                      minutes: q.durationMinutes || 10,
+                      score: q.passingScore || 60,
+                      lesson: lessonTitleById(q.lessonId),
+                    })}
                   </p>
                 </div>
                 <Badge variant={readyCount > 0 ? 'success' : 'warning'}>
-                  {readyCount > 0 ? 'جاهز للطلاب' : 'غير جاهز'}
+                  {readyCount > 0 ? t('builder.quizReady') : t('builder.quizNotReady')}
                 </Badge>
                 <div className="builder-section-actions">
                   <Button
@@ -408,20 +472,20 @@ export default function InstructorCourseBuilderPage() {
                     onClick={() => navigate(`/instructor/quizzes/${q.id}`)}
                     icon={<ClipboardList size={16} />}
                   >
-                    إدارة الأسئلة
+                    {t('builder.manageQuestions')}
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
                     onClick={async () => {
-                      if (!window.confirm(`حذف الاختبار "${q.titleAr}"؟`)) return;
+                      if (!window.confirm(t('builder.deleteQuizConfirm', { title: quizTitle }))) return;
                       await instructorApi.deleteQuiz(q.id);
-                      showToast('تم حذف الاختبار.', 'success');
+                      showToast(t('builder.quizDeleted'), 'success');
                       load();
                     }}
                     icon={<Trash2 size={14} />}
-                    aria-label="حذف الاختبار"
+                    aria-label={t('builder.deleteQuiz')}
                   />
                 </div>
               </div>
@@ -429,10 +493,10 @@ export default function InstructorCourseBuilderPage() {
           })
         ) : (
           <>
-            <EmptyState title="لا توجد اختبارات" description="أنشئ اختباراً مرتبطاً بالدورة أو بدرس محدد." />
+            <EmptyState title={t('builder.noQuizzesTitle')} description={t('builder.noQuizzesDesc')} />
             <div className="instructor-builder-empty-actions">
               <Button variant="outline" onClick={goQuizNew} icon={<ClipboardList size={18} />}>
-                إضافة اختبار
+                {t('builder.addQuiz')}
               </Button>
             </div>
           </>
@@ -441,8 +505,8 @@ export default function InstructorCourseBuilderPage() {
 
       <ConfirmDialog
         isOpen={confirmSubmit}
-        title="إرسال للمراجعة"
-        message="سيصبح الكورس قيد مراجعة الإدارة ولن يتم نشره مباشرة."
+        title={t('builder.submitConfirmTitle')}
+        message={t('builder.submitConfirmMessage')}
         variant="primary"
         onConfirm={submitReview}
         onCancel={() => setConfirmSubmit(false)}
@@ -450,9 +514,9 @@ export default function InstructorCourseBuilderPage() {
 
       <SuccessModal
         isOpen={successOpen}
-        title="تم إرسال للمراجعة بنجاح"
-        message="وسوف يتم التواصل معك في أقرب وقت بعد مراجعة المحتوى."
-        actionLabel="العودة للرئيسية"
+        title={t('builder.submitSuccessTitle')}
+        message={t('builder.submitSuccessMessage')}
+        actionLabel={t('builder.backToDashboard')}
         onAction={() => { setSuccessOpen(false); navigate('/instructor/dashboard'); }}
       />
     </div>

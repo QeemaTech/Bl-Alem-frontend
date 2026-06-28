@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { RotateCcw, Search } from '@/icons';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -23,45 +24,47 @@ export function NotificationFilters({
   onChange,
   onReset,
 }: NotificationFiltersProps) {
+  const { t } = useTranslation('notifications');
+
   return (
-    <section className="ntf-filters-toolbar" aria-label="فلاتر الإشعارات">
+    <section className="ntf-filters-toolbar" aria-label={t('instructor.filters.ariaLabel')}>
       <Input
-        label="بحث"
-        placeholder="بحث في العنوان أو النص..."
+        label={t('instructor.filters.search')}
+        placeholder={t('instructor.filters.searchPlaceholder')}
         value={filters.search}
         onChange={(e) => onChange({ search: e.target.value })}
         icon={<Search size={16} aria-hidden="true" />}
       />
       <Select
-        label="الحالة"
+        label={t('instructor.filters.readStatus')}
         value={filters.readFilter}
         onChange={(e) => onChange({ readFilter: e.target.value })}
         options={[
-          { label: 'الكل', value: '' },
-          { label: 'غير مقروء', value: 'unread' },
-          { label: 'مقروء', value: 'read' },
+          { label: t('instructor.filters.all'), value: '' },
+          { label: t('instructor.filters.unread'), value: 'unread' },
+          { label: t('instructor.filters.read'), value: 'read' },
         ]}
       />
       <Select
-        label="النوع"
+        label={t('instructor.filters.type')}
         value={filters.typeFilter}
         onChange={(e) => onChange({ typeFilter: e.target.value })}
         options={typeOptions}
       />
       <Select
-        label="التاريخ"
+        label={t('instructor.filters.date')}
         value={filters.dateFilter}
         onChange={(e) => onChange({ dateFilter: e.target.value })}
         options={[
-          { label: 'كل الفترات', value: '' },
-          { label: 'اليوم', value: 'today' },
-          { label: 'آخر 7 أيام', value: 'week' },
-          { label: 'آخر 30 يوماً', value: 'month' },
+          { label: t('instructor.filters.allPeriods'), value: '' },
+          { label: t('instructor.filters.today'), value: 'today' },
+          { label: t('instructor.filters.last7Days'), value: 'week' },
+          { label: t('instructor.filters.last30Days'), value: 'month' },
         ]}
       />
       <div className="ntf-filters-reset">
         <Button variant="outline" size="sm" onClick={onReset} icon={<RotateCcw size={14} />}>
-          إعادة تعيين
+          {t('instructor.filters.reset')}
         </Button>
       </div>
     </section>

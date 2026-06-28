@@ -105,5 +105,86 @@
   },
   "toast": {
     "loadError": "تعذّر تحميل عملية الدفع."
+  },
+  "student": {
+    "title": "المدفوعات",
+    "subtitle": "سجل عمليات الدفع والاشتراك في الدورات",
+    "stats": {
+      "total": "إجمالي العمليات",
+      "paid": "مدفوعة",
+      "totalSpent": "إجمالي المدفوع",
+      "discountsSaved": "خصومات مُوفَّرة",
+      "refundedHint": "{{count}} مستردة"
+    },
+    "charts": {
+      "statusDistribution": "توزيع حالات الدفع",
+      "gateways": "بوابات الدفع"
+    },
+    "filters": {
+      "ariaLabel": "فلاتر المدفوعات",
+      "searchPlaceholder": "بحث بالدورة أو المرجع...",
+      "status": "الحالة",
+      "gateway": "البوابة",
+      "all": "الكل"
+    },
+    "labels": {
+      "status": {
+        "PAID": "مدفوع",
+        "PENDING": "قيد الانتظار",
+        "FAILED": "فاشل",
+        "REFUNDED": "مسترد",
+        "COMPLETED": "مكتمل"
+      },
+      "gateway": {
+        "SIMULATED": "محاكاة",
+        "WALLET": "المحفظة",
+        "STRIPE": "Stripe",
+        "PAYPAL": "PayPal"
+      }
+    },
+    "table": {
+      "title": "سجل المدفوعات",
+      "count": "{{count}} عملية",
+      "emptyTitle": "لا توجد مدفوعات",
+      "emptyDescription": "ستظهر عمليات الاشتراك بعد إتمام الدفع.",
+      "columns": {
+        "course": "الدورة",
+        "finalAmount": "المبلغ",
+        "gateway": "البوابة",
+        "status": "الحالة",
+        "createdAt": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "actions": {
+      "exportExcel": "تصدير Excel",
+      "details": "التفاصيل"
+    },
+    "modal": {
+      "detailTitle": "تفاصيل الدفع",
+      "fields": {
+        "course": "الدورة",
+        "amount": "المبلغ الأصلي",
+        "discount": "الخصم",
+        "finalAmount": "المبلغ النهائي",
+        "gateway": "البوابة",
+        "status": "الحالة",
+        "transactionRef": "مرجع العملية",
+        "createdAt": "التاريخ"
+      }
+    },
+    "toast": {
+      "exported": "تم تصدير السجل."
+    },
+    "export": {
+      "sheetName": "المدفوعات",
+      "columns": {
+        "course": "الدورة",
+        "finalAmount": "المبلغ",
+        "gateway": "البوابة",
+        "status": "الحالة",
+        "createdAt": "التاريخ"
+      }
+    }
   }
 }

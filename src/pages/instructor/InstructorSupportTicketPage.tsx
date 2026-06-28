@@ -1,7 +1,9 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Send } from '@/icons';
 import { instructorApi } from '../../api/instructor';
+import { statusVariant } from '../../components/admin/support/supportTicketShared';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -9,17 +11,43 @@ import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
-import { useAdminSupportLabels } from '../../hooks/useAdminSupportLabels';
+import { formatDateTime } from '../../utils/localeFormat';
 
 export default function InstructorSupportTicketPage() {
+  const { t, i18n } = useTranslation('support');
+  const lang = i18n.language;
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { getStatusLabel, getRoleLabel, fmtSupportDate, statusVariant } = useAdminSupportLabels();
   const [ticket, setTicket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [reply, setReply] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const statusLabel = useCallback(
+    (status: string) => t(`instructor.labels.status.${status}`, { defaultValue: status }),
+    [t, lang],
+  );
+
+  const roleLabel = useCallback(
+    (role: string) => t(`instructor.labels.role.${role}`, { defaultValue: role }),
+    [t, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value?: string | null) => (
+      value
+        ? formatDateTime(value, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }, lang)
+        : ''
+    ),
+    [lang],
+  );
 
   const load = async () => {
     if (!ticketId) return;
@@ -27,7 +55,7 @@ export default function InstructorSupportTicketPage() {
     try {
       setTicket(await instructorApi.supportTicket(ticketId));
     } catch {
-      showToast('تعذّر تحميل التذكرة.', 'error');
+      showToast(t('instructor.toast.loadFailed'), 'error');
       setTicket(null);
     } finally {
       setLoading(false);
@@ -43,10 +71,10 @@ export default function InstructorSupportTicketPage() {
     try {
       await instructorApi.replySupportTicket(ticket.id, reply.trim());
       setReply('');
-      showToast('تم إرسال الرد.', 'success');
+      showToast(t('instructor.toast.replySent'), 'success');
       await load();
     } catch {
-      showToast('تعذّر إرسال الرد.', 'error');
+      showToast(t('instructor.toast.replyFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -58,11 +86,11 @@ export default function InstructorSupportTicketPage() {
     return (
       <div className="page-grid admin-support-ticket-page instructor-support-ticket-page">
         <EmptyState
-          title="التذكرة غير موجودة"
-          description="لم نتمكن من العثور على هذه التذكرة."
+          title={t('instructor.detail.notFoundTitle')}
+          description={t('instructor.detail.notFoundDescription')}
         />
         <Button variant="outline" onClick={() => navigate('/instructor/support')}>
-          العودة للدعم الفني
+          {t('instructor.backToSupport')}
         </Button>
       </div>
     );
@@ -72,7 +100,7 @@ export default function InstructorSupportTicketPage() {
     <div className="page-grid admin-support-ticket-page instructor-support-ticket-page">
       <Link to="/instructor/support" className="support-ticket-back">
         <ArrowRight size={18} aria-hidden="true" />
-        العودة لتذاكر الدعم
+        {t('instructor.backToTickets')}
       </Link>
 
       <Card className="support-ticket-page-card">
@@ -83,7 +111,7 @@ export default function InstructorSupportTicketPage() {
               <h2>{ticket.subject}</h2>
             </div>
             <Badge variant={statusVariant(ticket.status)}>
-              {getStatusLabel(ticket.status)}
+              {statusLabel(ticket.status)}
             </Badge>
           </div>
 
@@ -92,26 +120,26 @@ export default function InstructorSupportTicketPage() {
               <span className="admin-entity-meta-head-icon" aria-hidden="true">
                 <Send size={18} />
               </span>
-              <h3>معلومات التذكرة</h3>
+              <h3>{t('instructor.detail.ticketInfo')}</h3>
             </div>
             <div className="admin-entity-meta-grid">
               <div className="detail-row">
-                <span className="detail-row-label">تاريخ الإنشاء</span>
-                <span className="detail-row-value">{fmtSupportDate(ticket.createdAt)}</span>
+                <span className="detail-row-label">{t('instructor.detail.createdAt')}</span>
+                <span className="detail-row-value">{fmtDate(ticket.createdAt)}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-row-label">آخر تحديث</span>
-                <span className="detail-row-value">{fmtSupportDate(ticket.updatedAt)}</span>
+                <span className="detail-row-label">{t('instructor.detail.lastUpdated')}</span>
+                <span className="detail-row-value">{fmtDate(ticket.updatedAt)}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-row-label">عدد الردود</span>
+                <span className="detail-row-label">{t('instructor.detail.repliesCount')}</span>
                 <span className="detail-row-value">{ticket.replies?.length ?? 0}</span>
               </div>
             </div>
           </div>
 
           <div className="support-reply is-user">
-            <small>أنت · {fmtSupportDate(ticket.createdAt)}</small>
+            <small>{t('instructor.detail.you')} · {fmtDate(ticket.createdAt)}</small>
             <p>{ticket.message}</p>
           </div>
 
@@ -125,39 +153,39 @@ export default function InstructorSupportTicketPage() {
                     className={`support-reply ${isAdmin ? 'is-admin' : 'is-user'}`}
                   >
                     <small>
-                      {isAdmin ? 'فريق الدعم' : (item.user?.fullName || 'أنت')}
-                      {item.user?.role ? ` (${getRoleLabel(item.user.role)})` : ''}
+                      {isAdmin ? t('instructor.detail.supportTeam') : (item.user?.fullName || t('instructor.detail.you'))}
+                      {item.user?.role ? ` (${roleLabel(item.user.role)})` : ''}
                       {' · '}
-                      {fmtSupportDate(item.createdAt)}
+                      {fmtDate(item.createdAt)}
                     </small>
                     <p>{item.message}</p>
                   </div>
                 );
               })
             ) : (
-              <p className="support-ticket-no-replies">لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.</p>
+              <p className="support-ticket-no-replies">{t('instructor.detail.noReplies')}</p>
             )}
           </div>
 
           {ticket.status !== 'CLOSED' ? (
             <form className="support-ticket-reply-form" onSubmit={sendReply}>
               <Textarea
-                label="رد جديد"
+                label={t('instructor.detail.replyLabel')}
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
-                placeholder="اكتب ردك أو أضف تفاصيل..."
+                placeholder={t('instructor.detail.replyPlaceholder')}
                 required
               />
               <div className="support-ticket-actions">
                 <Button type="submit" loading={submitting} disabled={!reply.trim()} icon={<Send size={16} />}>
-                  إرسال الرد
+                  {t('instructor.detail.sendReply')}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="support-ticket-closed-notice">
               <CheckCircle2 size={18} />
-              <span>تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية.</span>
+              <span>{t('instructor.detail.closedNotice')}</span>
             </div>
           )}
         </div>

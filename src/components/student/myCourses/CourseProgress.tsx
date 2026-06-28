@@ -1,16 +1,19 @@
+import { useTranslation } from 'react-i18next';
+
 interface CourseProgressProps {
   value: number;
   showLabel?: boolean;
 }
 
 export function CourseProgress({ value, showLabel = true }: CourseProgressProps) {
+  const { t } = useTranslation('courses');
   const clamped = Math.min(100, Math.max(0, value));
 
   return (
     <div className="student-my-course-progress">
       {showLabel ? (
         <div className="student-my-course-progress-head">
-          <span>التقدم</span>
+          <span>{t('student.myCourses.progress')}</span>
           <strong>{clamped}%</strong>
         </div>
       ) : null}

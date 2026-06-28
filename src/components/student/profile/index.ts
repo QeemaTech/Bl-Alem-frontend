@@ -8,8 +8,8 @@ export { PasswordCard } from './PasswordCard';
 export { ProfilePageSkeleton } from './ProfilePageSkeleton';
 export {
   calcProfileCompletion,
-  educationOptions,
-  languageOptions,
-  fmtProfileDate,
+  EDUCATION_LEVEL_VALUES,
+  getPasswordStrength,
   type ProfileFormState,
+  type PasswordStrength,
 } from './profileUtils';

@@ -80,5 +80,47 @@
   "confirm": {
     "deleteTitle": "Delete review",
     "deleteMessage": "Are you sure you want to delete {{name}}'s review on course \"{{course}}\"?"
+  },
+  "instructor": {
+    "subtitle": "See what students think about your courses and monitor content quality",
+    "stats": {
+      "withComment": "With comment",
+      "avgHint": "out of 5 stars",
+      "percentOfReviews": "{{percent}}% of reviews"
+    },
+    "filters": {
+      "course": "Course",
+      "allCourses": "All courses",
+      "searchPlaceholder": "Search by student, course, or comment..."
+    },
+    "ratingLabels": {
+      "5": "Excellent",
+      "4": "Very good",
+      "3": "Good",
+      "2": "Poor",
+      "1": "Bad"
+    },
+    "reply": {
+      "yourReply": "Your reply:",
+      "editReply": "Edit reply",
+      "placeholder": "Write your reply here...",
+      "submitting": "Sending...",
+      "submit": "Send reply",
+      "reply": "Reply",
+      "yourReplyShort": "Your reply"
+    },
+    "noComment": "No written comment",
+    "empty": {
+      "noResults": "No results",
+      "noResultsDesc": "Try changing filters or search.",
+      "noReviewsDesc": "Student reviews will appear here after they complete courses."
+    },
+    "detail": {
+      "title": "Review details",
+      "date": "Date"
+    },
+    "export": {
+      "sheetName": "Instructor-reviews"
+    }
   }
 }

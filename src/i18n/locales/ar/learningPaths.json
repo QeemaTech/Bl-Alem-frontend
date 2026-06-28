@@ -99,5 +99,133 @@
         "coursesSaved": "تم حفظ دورات المسار."
       }
     }
+  },
+  "student": {
+    "labels": {
+      "defaultDesc": "مسار تعليمي منظم",
+      "coursesCount": "{{count}} دورات",
+      "coursesCount_one": "{{count}} دورة",
+      "coursesCount_two": "{{count}} دورتان",
+      "coursesCount_few": "{{count}} دورات",
+      "coursesCount_many": "{{count}} دورة",
+      "coursesCount_other": "{{count}} دورة",
+      "stepAria": "الخطوة {{number}}",
+      "pathProgress": "تقدم المسار",
+      "completionRate": "نسبة الإكمال",
+      "enrolledShort": "{{count}} مسجّلة",
+      "completedShort": "{{count}} مكتملة",
+      "totalShort": "{{count}} إجمالاً",
+      "stepsCount": "{{count}} خطوة",
+      "stepsCount_one": "{{count}} خطوة",
+      "stepsCount_two": "{{count}} خطوتان",
+      "stepsCount_few": "{{count}} خطوات",
+      "stepsCount_many": "{{count}} خطوة",
+      "stepsCount_other": "{{count}} خطوة",
+      "coursesInPath": "{{count}} دورة",
+      "coursesInPath_one": "{{count}} دورة",
+      "coursesInPath_two": "{{count}} دورتان",
+      "coursesInPath_few": "{{count}} دورات",
+      "coursesInPath_many": "{{count}} دورة",
+      "coursesInPath_other": "{{count}} دورة",
+      "status": {
+        "completed": "مكتمل",
+        "inProgress": "قيد التعلم",
+        "notStarted": "لم يبدأ",
+        "notEnrolled": "غير مسجّل"
+      },
+      "actions": {
+        "explore": "استكشف المسار",
+        "reviewPath": "مراجعة المسار",
+        "view": "عرض",
+        "backToPaths": "العودة للمسارات",
+        "enrollNow": "اشترك الآن"
+      }
+    },
+    "list": {
+      "title": "المسارات التعليمية",
+      "subtitle": "تعلّم بشكل منظم عبر مسارات متسلسلة",
+      "exportExcel": "تصدير Excel",
+      "heroTitle": "خطط تعلم منظّمة",
+      "heroSummary": "{{paths}} مسارات متاحة — {{courses}} دورة ضمن المسارات",
+      "heroEmpty": "ستُضاف مسارات تعليمية قريباً.",
+      "stats": {
+        "paths": "المسارات",
+        "inProgress": "قيد التعلم",
+        "completed": "مكتملة",
+        "totalCourses": "إجمالي الدورات"
+      },
+      "charts": {
+        "statusDistribution": "حالة المسارات",
+        "completed": "مكتملة",
+        "inProgress": "قيد التعلم",
+        "notStarted": "لم تبدأ"
+      },
+      "filters": {
+        "searchPlaceholder": "بحث باسم المسار أو الوصف...",
+        "status": "الحالة"
+      },
+      "tabs": {
+        "cards": "البطاقات ({{count}})",
+        "table": "الجدول ({{count}})"
+      },
+      "empty": {
+        "title": "لا توجد مسارات",
+        "filteredDesc": "لا توجد مسارات مطابقة للفلاتر.",
+        "defaultDesc": "ستُضاف مسارات تعليمية قريباً."
+      },
+      "table": {
+        "emptyTitle": "لا توجد مسارات",
+        "emptyDescription": "لا توجد مسارات مطابقة.",
+        "columns": {
+          "title": "المسار",
+          "courses": "الدورات",
+          "enrolled": "مسجّلة",
+          "completed": "مكتملة",
+          "progress": "التقدم",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        }
+      },
+      "export": {
+        "sheetName": "المسارات-التعليمية",
+        "columns": {
+          "title": "المسار",
+          "courses": "عدد الدورات",
+          "enrolled": "مسجّلة",
+          "completed": "مكتملة",
+          "progress": "التقدم %",
+          "status": "الحالة"
+        }
+      }
+    },
+    "detail": {
+      "breadcrumb": "المسارات التعليمية",
+      "stats": {
+        "pathCourses": "دورات المسار",
+        "enrolled": "مسجّلة",
+        "completed": "مكتملة",
+        "progress": "تقدم المسار"
+      },
+      "journey": {
+        "title": "التقدم الكلي للمسار",
+        "allComplete": "أحسنت! أكملت جميع دورات هذا المسار.",
+        "partial": "{{completed}} من {{total}} دورات مكتملة — استمر في التعلّم.",
+        "notStarted": "اشترك في دورات المسار لبدء رحلتك التعليمية."
+      },
+      "enroll": {
+        "title": "اشترك في جميع دورات المسار",
+        "desc": "سيتم تسجيلك في كل دورات المسار المتاحة دفعة واحدة."
+      },
+      "timeline": {
+        "title": "مسار الدورات"
+      },
+      "coursesSection": {
+        "title": "دورات المسار"
+      },
+      "toast": {
+        "enrollSuccess": "تم الاشتراك في دورات المسار بنجاح.",
+        "enrollError": "تعذّر الاشتراك في المسار."
+      }
+    }
   }
 }

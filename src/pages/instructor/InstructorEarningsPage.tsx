@@ -1,9 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowDownToLine, Banknote, Clock, Download, TrendingUp, Wallet,
 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { ReportChart } from '../../components/reports/ReportChart';
+import { withdrawalStatusVariant } from '../../components/admin/withdrawals/types';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -19,44 +21,11 @@ import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { formatMoney, roundMoney } from '../../utils/formatMoney';
 import { exportTableToExcel } from '../../utils/exportExcel';
+import { formatDateTime } from '../../utils/localeFormat';
+import { localizedCourseTitle } from '../../utils/localizedContent';
 import { mediaUrl } from '../../utils/mediaUrl';
 
-const withdrawalVariant = (status: string) => {
-  if (status === 'APPROVED' || status === 'PAID') return 'success' as const;
-  if (status === 'PENDING') return 'pending' as const;
-  if (status === 'REJECTED') return 'rejected' as const;
-  return 'default' as const;
-};
-
-const withdrawalLabels: Record<string, string> = {
-  PENDING: 'قيد المراجعة',
-  APPROVED: 'معتمد',
-  PAID: 'مدفوع',
-  REJECTED: 'مرفوض',
-};
-
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const normalizeSearchText = (value: unknown) => String(value ?? '').toLowerCase().trim();
-
-const withdrawalSearchText = (item: any) => normalizeSearchText([
-  item.id,
-  item.bankName,
-  item.accountName,
-  item.iban,
-  item.notes,
-  item.adminNotes,
-  item.amount,
-  fmtDate(String(item.createdAt || '')),
-  withdrawalLabels[item.status],
-  item.status,
-].join(' '));
+const WITHDRAWAL_STATUSES = ['PENDING', 'APPROVED', 'PAID', 'REJECTED'] as const;
 
 const emptyWithdrawForm = {
   amount: '',
@@ -66,17 +35,12 @@ const emptyWithdrawForm = {
   notes: '',
 };
 
-const exportColumns = [
-  { key: 'amount', header: 'المبلغ (ج.م)' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'bankName', header: 'البنك' },
-  { key: 'accountName', header: 'اسم الحساب' },
-  { key: 'iban', header: 'IBAN' },
-  { key: 'createdAt', header: 'التاريخ' },
-  { key: 'notes', header: 'ملاحظات' },
-];
-
 export default function InstructorEarningsPage() {
+  const { t, i18n } = useTranslation('dashboard');
+  const { t: tw } = useTranslation('withdrawals');
+  const { t: tc } = useTranslation('common');
+  const { t: tl } = useTranslation('liveSessions');
+  const lang = i18n.language;
   const { showToast } = useToast();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +50,42 @@ export default function InstructorEarningsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selected, setSelected] = useState<any>(null);
+
+  const dash = tl('empty');
+
+  const getStatusLabel = useCallback(
+    (status: string) => tw(`admin.labels.status.${status}`, { defaultValue: status }),
+    [tw, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value: string) => formatDateTime(value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }, lang),
+    [lang],
+  );
+
+  const fmtMoney = useCallback(
+    (value: number | string | null | undefined) => formatMoney(value, undefined, lang),
+    [lang],
+  );
+
+  const exportColumns = useMemo(() => {
+    const cols = t('instructor.earnings.export.columns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'amount', header: cols.amount },
+      { key: 'status', header: cols.status },
+      { key: 'bankName', header: cols.bankName },
+      { key: 'accountName', header: cols.accountName },
+      { key: 'iban', header: cols.iban },
+      { key: 'createdAt', header: cols.createdAt },
+      { key: 'notes', header: cols.notes },
+    ];
+  }, [t, lang]);
 
   const load = async () => {
     setLoading(true);
@@ -101,7 +101,7 @@ export default function InstructorEarningsPage() {
     if (!data?.salesByCourse) return [];
     return data.salesByCourse
       .map((course: any) => ({
-        label: course.titleAr,
+        label: localizedCourseTitle(course, lang),
         value: roundMoney(
           (course.payments || []).reduce((sum: number, p: any) => sum + Number(p.finalAmount || 0), 0)
             * (1 - commission),
@@ -110,11 +110,26 @@ export default function InstructorEarningsPage() {
       .filter((item: { value: number }) => item.value > 0)
       .sort((a: { value: number }, b: { value: number }) => b.value - a.value)
       .slice(0, 6);
-  }, [data, commission]);
+  }, [data, commission, lang]);
 
   const withdrawals = data?.withdrawals || [];
 
   const hasActiveFilters = Boolean(search.trim() || statusFilter);
+
+  const normalizeSearchText = (value: unknown) => String(value ?? '').toLowerCase().trim();
+
+  const withdrawalSearchText = useCallback((item: any) => normalizeSearchText([
+    item.id,
+    item.bankName,
+    item.accountName,
+    item.iban,
+    item.notes,
+    item.adminNotes,
+    item.amount,
+    fmtDate(String(item.createdAt || '')),
+    getStatusLabel(item.status),
+    item.status,
+  ].join(' ')), [fmtDate, getStatusLabel, lang]);
 
   const filteredWithdrawals = useMemo(() => {
     let result = withdrawals as any[];
@@ -126,7 +141,7 @@ export default function InstructorEarningsPage() {
       result = result.filter((item) => withdrawalSearchText(item).includes(q));
     }
     return result;
-  }, [withdrawals, statusFilter, search]);
+  }, [withdrawals, statusFilter, search, withdrawalSearchText]);
 
   const stats = useMemo(() => {
     const pending = withdrawals.filter((i: any) => i.status === 'PENDING');
@@ -137,6 +152,14 @@ export default function InstructorEarningsPage() {
       salesCount: data?.recentTransactions?.length || 0,
     };
   }, [withdrawals, data]);
+
+  const statusOptions = useMemo(() => [
+    { label: tc('status.all'), value: '' },
+    ...WITHDRAWAL_STATUSES.map((status) => ({
+      label: getStatusLabel(status),
+      value: status,
+    })),
+  ], [tc, getStatusLabel, lang]);
 
   const openWithdrawModal = () => {
     const withdrawable = roundMoney(data?.withdrawableBalance ?? data?.availableBalance ?? 0);
@@ -153,15 +176,15 @@ export default function InstructorEarningsPage() {
     const available = roundMoney(data?.withdrawableBalance ?? data?.availableBalance ?? 0);
     const minAmount = roundMoney(data?.minWithdrawalAmount || 0);
     if (amount <= 0) {
-      showToast('أدخل مبلغاً صالحاً.', 'error');
+      showToast(t('instructor.earnings.toast.invalidAmount'), 'error');
       return;
     }
     if (amount > available) {
-      showToast('المبلغ أكبر من الرصيد المتاح.', 'error');
+      showToast(t('instructor.earnings.toast.amountExceedsBalance'), 'error');
       return;
     }
     if (minAmount > 0 && amount < minAmount) {
-      showToast(`الحد الأدنى للسحب ${formatMoney(minAmount)}.`, 'error');
+      showToast(t('instructor.earnings.toast.minAmount', { amount: fmtMoney(minAmount) }), 'error');
       return;
     }
     setSubmitting(true);
@@ -169,11 +192,11 @@ export default function InstructorEarningsPage() {
       await instructorApi.requestWithdrawal(form);
       setOpen(false);
       setForm(emptyWithdrawForm);
-      showToast('تم إرسال طلب السحب بنجاح.', 'success');
+      showToast(t('instructor.earnings.toast.submitted'), 'success');
       await load();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر إرسال طلب السحب.';
+        || t('instructor.earnings.toast.submitFailed');
       showToast(message, 'error');
     } finally {
       setSubmitting(false);
@@ -181,14 +204,14 @@ export default function InstructorEarningsPage() {
   };
 
   const handleExport = () => {
-    exportTableToExcel('سحوبات-المحاضر', exportColumns, filteredWithdrawals.map((row: any) => ({
-      amount: formatMoney(row.amount),
-      status: withdrawalLabels[row.status] || row.status,
-      bankName: row.bankName || '—',
-      accountName: row.accountName || '—',
-      iban: row.iban || '—',
+    exportTableToExcel(t('instructor.earnings.export.sheetName'), exportColumns, filteredWithdrawals.map((row: any) => ({
+      amount: fmtMoney(row.amount),
+      status: getStatusLabel(row.status),
+      bankName: row.bankName || dash,
+      accountName: row.accountName || dash,
+      iban: row.iban || dash,
       createdAt: fmtDate(row.createdAt),
-      notes: row.notes || '—',
+      notes: row.notes || dash,
     })));
   };
 
@@ -206,8 +229,8 @@ export default function InstructorEarningsPage() {
     <div className="page-grid">
       <div className="reports-header">
         <PageHeader
-          title="الأرباح"
-          subtitle="تابع إيراداتك، مبيعاتك، وطلبات سحب الرصيد"
+          title={t('instructor.earnings.title')}
+          subtitle={t('instructor.earnings.subtitle')}
         />
         <div className="reports-actions">
           <Button
@@ -215,7 +238,7 @@ export default function InstructorEarningsPage() {
             onClick={openWithdrawModal}
             disabled={!canOpenWithdrawModal}
           >
-            طلب سحب
+            {t('instructor.earnings.requestWithdrawal')}
           </Button>
         </div>
       </div>
@@ -224,10 +247,9 @@ export default function InstructorEarningsPage() {
         <Card className="withdraw-blocked-notice">
           <Clock size={20} />
           <div>
-            <strong>لديك طلب سحب قيد المراجعة</strong>
+            <strong>{t('instructor.earnings.pendingNotice.title')}</strong>
             <p>
-              طلب بمبلغ {formatMoney(pendingRequest?.amount)} بانتظار موافقة الإدارة.
-              {' '}المبلغ لم يُخصم من رصيدك بعد — سيُخصم عند الاعتماد.
+              {t('instructor.earnings.pendingNotice.body', { amount: fmtMoney(pendingRequest?.amount) })}
             </p>
           </div>
         </Card>
@@ -237,9 +259,12 @@ export default function InstructorEarningsPage() {
         <Card className="withdraw-blocked-notice is-warning">
           <Wallet size={20} />
           <div>
-            <strong>الرصيد أقل من الحد الأدنى للسحب</strong>
+            <strong>{t('instructor.earnings.minBalanceNotice.title')}</strong>
             <p>
-              الحد الأدنى {formatMoney(minWithdrawalAmount)} — رصيدك المتاح حالياً {formatMoney(available)}.
+              {t('instructor.earnings.minBalanceNotice.body', {
+                min: fmtMoney(minWithdrawalAmount),
+                available: fmtMoney(available),
+              })}
             </p>
           </div>
         </Card>
@@ -247,33 +272,35 @@ export default function InstructorEarningsPage() {
 
       <div className="stats-grid">
         <StatCard
-          title="إجمالي الأرباح"
-          value={formatMoney(data?.totalEarnings)}
+          title={t('instructor.earnings.stats.totalEarnings')}
+          value={fmtMoney(data?.totalEarnings)}
           icon={TrendingUp}
-          hint="بعد خصم عمولة المنصة"
+          hint={t('instructor.earnings.stats.totalEarningsHint')}
         />
         <StatCard
-          title="الرصيد المتاح"
-          value={formatMoney(data?.availableBalance)}
+          title={t('instructor.earnings.stats.availableBalance')}
+          value={fmtMoney(data?.availableBalance)}
           icon={Wallet}
           hint={
             hasPending
-              ? `${formatMoney(withdrawable)} قابل للسحب الآن`
+              ? t('instructor.earnings.stats.withdrawableNow', { amount: fmtMoney(withdrawable) })
               : available >= minWithdrawalAmount
-                ? 'جاهز للسحب'
+                ? t('instructor.earnings.stats.readyToWithdraw')
                 : available > 0
-                  ? `الحد الأدنى ${formatMoney(minWithdrawalAmount)}`
-                  : 'لا يوجد رصيد'
+                  ? t('instructor.earnings.stats.minWithdrawal', { amount: fmtMoney(minWithdrawalAmount) })
+                  : t('instructor.earnings.stats.noBalance')
           }
         />
         <StatCard
-          title="الرصيد المعلق"
-          value={formatMoney(data?.pendingBalance)}
+          title={t('instructor.earnings.stats.pendingBalance')}
+          value={fmtMoney(data?.pendingBalance)}
           icon={Clock}
-          hint={stats.pendingCount ? `${stats.pendingCount} طلب قيد المراجعة` : 'لا طلبات معلقة'}
+          hint={stats.pendingCount
+            ? t('instructor.earnings.stats.pendingRequests', { count: stats.pendingCount })
+            : t('instructor.earnings.stats.noPendingRequests')}
         />
         <StatCard
-          title="عمولة المنصة"
+          title={t('instructor.earnings.stats.platformCommission')}
           value={`${roundMoney(commission * 100)}%`}
           icon={Banknote}
         />
@@ -281,13 +308,13 @@ export default function InstructorEarningsPage() {
 
       {salesChart.length ? (
         <div className="reports-charts-grid">
-          <ReportChart title="أرباح الكورسات (صافي)" type="bar" data={salesChart} />
+          <ReportChart title={t('instructor.earnings.charts.courseEarnings')} type="bar" data={salesChart} />
         </div>
       ) : null}
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالبنك، الحساب، IBAN، المبلغ، أو الحالة..."
+        searchPlaceholder={t('instructor.earnings.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
         resetDisabled={!hasActiveFilters}
@@ -299,69 +326,68 @@ export default function InstructorEarningsPage() {
             onClick={handleExport}
             disabled={!filteredWithdrawals.length}
           >
-            تصدير Excel
+            {tw('admin.exportExcel')}
           </Button>
         )}
       >
         <Select
-          label="حالة السحب"
+          label={t('instructor.earnings.filters.withdrawalStatus')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          options={[
-            { label: 'الكل', value: '' },
-            { label: 'قيد المراجعة', value: 'PENDING' },
-            { label: 'معتمد', value: 'APPROVED' },
-            { label: 'مدفوع', value: 'PAID' },
-            { label: 'مرفوض', value: 'REJECTED' },
-          ]}
+          options={statusOptions}
         />
       </FilterBar>
 
       <Card>
         <div className="section-heading">
-          <h2>السحوبات</h2>
+          <h2>{t('instructor.earnings.withdrawals.title')}</h2>
           <span className="muted-count">
             {hasActiveFilters
-              ? `${filteredWithdrawals.length} من ${withdrawals.length} طلب`
-              : `${filteredWithdrawals.length} طلب`}
+              ? t('instructor.earnings.withdrawals.countFiltered', {
+                filtered: filteredWithdrawals.length,
+                total: withdrawals.length,
+              })
+              : t('instructor.earnings.withdrawals.count', { count: filteredWithdrawals.length })}
           </span>
         </div>
         <Table
           data={filteredWithdrawals}
           showHeadersWhenEmpty={hasActiveFilters}
-          emptyTitle={hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد سحوبات'}
+          emptyTitle={hasActiveFilters
+            ? t('instructor.earnings.withdrawals.emptyFilteredTitle')
+            : t('instructor.earnings.withdrawals.emptyTitle')}
           emptyDescription={
             hasActiveFilters
-              ? 'جرّب تغيير كلمة البحث أو حالة السحب.'
-              : 'اطلب سحب الرصيد المتاح عند الحاجة.'
+              ? t('instructor.earnings.withdrawals.emptyFilteredDesc')
+              : t('instructor.earnings.withdrawals.emptyDesc')
           }
           columns={[
             {
               key: 'amount',
-              header: 'المبلغ',
-              render: (row) => <strong>{formatMoney(Number(row.amount))}</strong>,
+              header: tw('admin.detail.amount'),
+              render: (row) => <strong>{fmtMoney(Number(row.amount))}</strong>,
             },
             {
               key: 'status',
-              header: 'الحالة',
+              header: tw('admin.detail.status'),
               render: (row) => (
-                <Badge variant={withdrawalVariant(String(row.status))}>
-                  {withdrawalLabels[String(row.status)] || String(row.status)}
+                <Badge variant={withdrawalStatusVariant[String(row.status) as keyof typeof withdrawalStatusVariant] || 'default'}>
+                  {getStatusLabel(String(row.status))}
                 </Badge>
               ),
             },
-            { key: 'bankName', header: 'البنك', render: (row) => String(row.bankName || '—') },
+            { key: 'bankName', header: tw('admin.detail.bank'), render: (row) => String(row.bankName || dash) },
             {
               key: 'createdAt',
-              header: 'التاريخ',
+              header: tw('admin.detail.requestDate'),
               render: (row) => fmtDate(String(row.createdAt)),
             },
             {
               key: 'actions',
-              header: 'الإجراءات',
+              header: tw('admin.table.columns.actions'),
               render: (row) => (
                 <Button variant="ghost" size="sm" onClick={() => setSelected(row)}>
-                  التفاصيل
+                  {tw('admin.actions.detail')}
                 </Button>
               ),
             },
@@ -371,85 +397,100 @@ export default function InstructorEarningsPage() {
 
       <Card>
         <div className="section-heading">
-          <h2>آخر المبيعات</h2>
-          <span className="muted-count">{stats.salesCount} عملية</span>
+          <h2>{t('instructor.earnings.sales.title')}</h2>
+          <span className="muted-count">{t('instructor.earnings.sales.count', { count: stats.salesCount })}</span>
         </div>
         <Table
           data={data?.recentTransactions || []}
-          emptyTitle="لا توجد عمليات"
-          emptyDescription="ستظهر المبيعات هنا عند اشتراك الطلاب."
+          emptyTitle={t('instructor.earnings.sales.emptyTitle')}
+          emptyDescription={t('instructor.earnings.sales.emptyDesc')}
           columns={[
-            { key: 'course', header: 'الكورس', render: (row) => String((row.course as any)?.titleAr || '—') },
-            { key: 'user', header: 'الطالب', render: (row) => String((row.user as any)?.fullName || '—') },
+            {
+              key: 'course',
+              header: t('instructor.earnings.sales.columns.course'),
+              render: (row) => localizedCourseTitle((row.course as any), lang) || dash,
+            },
+            {
+              key: 'user',
+              header: t('instructor.earnings.sales.columns.student'),
+              render: (row) => String((row.user as any)?.fullName || dash),
+            },
             {
               key: 'finalAmount',
-              header: 'المبلغ',
-              render: (row) => formatMoney(Number(row.finalAmount)),
+              header: t('instructor.earnings.sales.columns.amount'),
+              render: (row) => fmtMoney(Number(row.finalAmount)),
             },
             {
               key: 'net',
-              header: 'صافي ربحك',
-              render: (row) => formatMoney(roundMoney(Number(row.finalAmount) * (1 - commission))),
+              header: t('instructor.earnings.sales.columns.net'),
+              render: (row) => fmtMoney(roundMoney(Number(row.finalAmount) * (1 - commission))),
             },
             {
               key: 'createdAt',
-              header: 'التاريخ',
+              header: t('instructor.earnings.sales.columns.date'),
               render: (row) => fmtDate(String(row.createdAt)),
             },
           ]}
         />
       </Card>
 
-      <Modal isOpen={open} title="طلب سحب" onClose={() => !submitting && setOpen(false)}>
+      <Modal isOpen={open} title={t('instructor.earnings.withdrawModal.title')} onClose={() => !submitting && setOpen(false)}>
         <div className="withdraw-modal-summary">
           <div>
-            <span>الرصيد المتاح</span>
-            <strong>{formatMoney(available)}</strong>
+            <span>{t('instructor.earnings.withdrawModal.availableBalance')}</span>
+            <strong>{fmtMoney(available)}</strong>
           </div>
           {hasPending ? (
             <p className="field-helper">
-              يمكنك سحب حتى {formatMoney(withdrawable)} — الطلب المعلق ({formatMoney(pendingRequest?.amount)}) لم يُخصم بعد.
+              {t('instructor.earnings.withdrawModal.withdrawableHelper', {
+                withdrawable: fmtMoney(withdrawable),
+                pending: fmtMoney(pendingRequest?.amount),
+              })}
             </p>
           ) : null}
           {hasPending ? (
             <div className="withdraw-pending-alert">
-              <strong>لا يمكن إرسال طلب جديد الآن</strong>
+              <strong>{t('instructor.earnings.withdrawModal.cannotSubmitTitle')}</strong>
               <p>
-                لديك طلب سحب بمبلغ {formatMoney(pendingRequest?.amount)} قيد المراجعة.
-                انتظر حتى تعالج الإدارة الطلب الحالي ثم أعد المحاولة.
+                {t('instructor.earnings.withdrawModal.cannotSubmitBody', {
+                  amount: fmtMoney(pendingRequest?.amount),
+                })}
               </p>
             </div>
           ) : null}
           {minWithdrawalAmount > 0 && !hasPending ? (
-            <p className="field-helper">الحد الأدنى للسحب: {formatMoney(minWithdrawalAmount)}</p>
+            <p className="field-helper">{t('instructor.earnings.withdrawModal.minAmount', { amount: fmtMoney(minWithdrawalAmount) })}</p>
           ) : null}
           {available > 0 && available < minWithdrawalAmount && !hasPending ? (
-            <p className="field-helper">الرصيد الحالي أقل من الحد الأدنى للسحب.</p>
+            <p className="field-helper">{t('instructor.earnings.withdrawModal.belowMin')}</p>
           ) : null}
         </div>
         <form className="stack-sm withdraw-modal-form" onSubmit={withdraw}>
           <Input
-            label="المبلغ (ج.م)"
+            label={t('instructor.earnings.withdrawModal.amountLabel')}
             type="number"
             min={minWithdrawalAmount || 1}
             max={withdrawable}
             step="0.01"
             value={form.amount}
-            helper={`الحد الأدنى: ${formatMoney(minWithdrawalAmount)} • الحد الأقصى: ${formatMoney(withdrawable)}`}
+            helper={t('instructor.earnings.withdrawModal.amountHelper', {
+              min: fmtMoney(minWithdrawalAmount),
+              max: fmtMoney(withdrawable),
+            })}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             disabled={!canSubmitWithdrawal}
             required
           />
           <Input
-            label="البنك"
+            label={t('instructor.earnings.withdrawModal.bankLabel')}
             value={form.bankName}
-            placeholder="مثال: الراجحي"
+            placeholder={t('instructor.earnings.withdrawModal.bankPlaceholder')}
             onChange={(e) => setForm({ ...form, bankName: e.target.value })}
             disabled={!canSubmitWithdrawal}
             required
           />
           <Input
-            label="اسم الحساب"
+            label={t('instructor.earnings.withdrawModal.accountNameLabel')}
             value={form.accountName}
             onChange={(e) => setForm({ ...form, accountName: e.target.value })}
             disabled={!canSubmitWithdrawal}
@@ -465,7 +506,7 @@ export default function InstructorEarningsPage() {
             required
           />
           <Textarea
-            label="ملاحظات (اختياري)"
+            label={t('instructor.earnings.withdrawModal.notesLabel')}
             rows={2}
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -473,35 +514,42 @@ export default function InstructorEarningsPage() {
           />
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={() => setOpen(false)} disabled={submitting}>
-              إلغاء
+              {tc('actions.cancel')}
             </Button>
             <Button type="submit" loading={submitting} disabled={!canSubmitWithdrawal}>
-              إرسال الطلب
+              {t('instructor.earnings.withdrawModal.submit')}
             </Button>
           </div>
         </form>
       </Modal>
 
-      <Modal isOpen={Boolean(selected)} title="تفاصيل طلب السحب" onClose={() => setSelected(null)}>
+      <Modal isOpen={Boolean(selected)} title={t('instructor.earnings.detail.title')} onClose={() => setSelected(null)}>
         {selected ? (
           <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>المبلغ</span><strong>{formatMoney(selected.amount)}</strong></div>
+            <div className="detail-row"><span>{tw('admin.detail.amount')}</span><strong>{fmtMoney(selected.amount)}</strong></div>
             <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={withdrawalVariant(selected.status)}>{withdrawalLabels[selected.status]}</Badge>
+              <span>{tw('admin.detail.status')}</span>
+              <Badge variant={withdrawalStatusVariant[selected.status as keyof typeof withdrawalStatusVariant] || 'default'}>{getStatusLabel(selected.status)}</Badge>
             </div>
-            <div className="detail-row"><span>البنك</span><strong>{selected.bankName || '—'}</strong></div>
-            <div className="detail-row"><span>اسم الحساب</span><strong>{selected.accountName || '—'}</strong></div>
-            <div className="detail-row"><span>IBAN</span><strong dir="ltr">{selected.iban || '—'}</strong></div>
-            <div className="detail-row"><span>التاريخ</span><strong>{fmtDate(selected.createdAt)}</strong></div>
+            <div className="detail-row"><span>{tw('admin.detail.bank')}</span><strong>{selected.bankName || dash}</strong></div>
+            <div className="detail-row"><span>{tw('admin.detail.accountName')}</span><strong>{selected.accountName || dash}</strong></div>
+            <div className="detail-row"><span>IBAN</span><strong dir="ltr">{selected.iban || dash}</strong></div>
+            <div className="detail-row"><span>{tw('admin.detail.requestDate')}</span><strong>{fmtDate(selected.createdAt)}</strong></div>
             {selected.notes ? (
-              <div className="detail-row"><span>ملاحظات</span><strong>{selected.notes}</strong></div>
+              <div className="detail-row"><span>{tw('admin.detail.notes')}</span><strong>{selected.notes}</strong></div>
+            ) : null}
+            {selected.adminNotes ? (
+              <div className="detail-row"><span>{tw('admin.rejectModal.reasonLabel')}</span><strong>{selected.adminNotes}</strong></div>
             ) : null}
             {selected.transferProofImage ? (
               <div className="withdrawal-proof-block">
-                <strong>صورة التحويل</strong>
+                <strong>{t('instructor.earnings.detail.transferProof')}</strong>
                 <a href={mediaUrl(selected.transferProofImage)} target="_blank" rel="noreferrer">
-                  <img src={mediaUrl(selected.transferProofImage)} alt="صورة التحويل" className="withdrawal-proof-image" />
+                  <img
+                    src={mediaUrl(selected.transferProofImage)}
+                    alt={t('instructor.earnings.detail.transferProofAlt')}
+                    className="withdrawal-proof-image"
+                  />
                 </a>
               </div>
             ) : null}

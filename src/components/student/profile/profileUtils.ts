@@ -1,17 +1,4 @@
-export const educationOptions = [
-  { label: 'اختر المستوى', value: '' },
-  { label: 'ثانوي', value: 'ثانوي' },
-  { label: 'جامعي', value: 'جامعي' },
-  { label: 'دراسات عليا', value: 'دراسات عليا' },
-  { label: 'مهني / تقني', value: 'مهني' },
-  { label: 'تعلم ذاتي', value: 'تعلم ذاتي' },
-  { label: 'أخرى', value: 'أخرى' },
-];
-
-export const languageOptions = [
-  { label: 'العربية', value: 'ar' },
-  { label: 'English', value: 'en' },
-];
+export const EDUCATION_LEVEL_VALUES = ['', 'ثانوي', 'جامعي', 'دراسات عليا', 'مهني', 'تعلم ذاتي', 'أخرى'];
 
 export interface ProfileFormState {
   fullName?: string;
@@ -58,19 +45,3 @@ export function getPasswordStrength(password: string): PasswordStrength {
   if (variety >= 2) return 'good';
   return 'fair';
 }
-
-export const passwordStrengthLabels: Record<Exclude<PasswordStrength, 'empty'>, string> = {
-  weak: 'ضعيفة — 8 أحرف على الأقل',
-  fair: 'مقبولة — أضف أرقاماً أو رموزاً',
-  good: 'جيدة',
-  strong: 'قوية جداً',
-};
-
-export const fmtProfileDate = (value?: string) => {
-  if (!value) return '—';
-  return new Date(value).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};

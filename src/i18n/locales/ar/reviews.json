@@ -80,5 +80,47 @@
   "confirm": {
     "deleteTitle": "حذف التقييم",
     "deleteMessage": "هل أنت متأكد من حذف تقييم {{name}} على كورس \"{{course}}\"؟"
+  },
+  "instructor": {
+    "subtitle": "اطّلع على آراء الطلاب في كورساتك وتابع جودة المحتوى",
+    "stats": {
+      "withComment": "مع تعليق",
+      "avgHint": "من 5 نجوم",
+      "percentOfReviews": "{{percent}}% من التقييمات"
+    },
+    "filters": {
+      "course": "الكورس",
+      "allCourses": "كل الكورسات",
+      "searchPlaceholder": "بحث بالطالب، الكورس، أو التعليق..."
+    },
+    "ratingLabels": {
+      "5": "ممتاز",
+      "4": "جيد جداً",
+      "3": "جيد",
+      "2": "ضعيف",
+      "1": "سيء"
+    },
+    "reply": {
+      "yourReply": "ردك:",
+      "editReply": "تعديل الرد",
+      "placeholder": "اكتب ردك هنا...",
+      "submitting": "جارٍ الإرسال...",
+      "submit": "إرسال الرد",
+      "reply": "رد",
+      "yourReplyShort": "ردك"
+    },
+    "noComment": "بدون تعليق نصي",
+    "empty": {
+      "noResults": "لا نتائج",
+      "noResultsDesc": "جرّب تغيير الفلاتر أو البحث.",
+      "noReviewsDesc": "ستظهر تقييمات الطلاب هنا بعد إكمالهم للدورات."
+    },
+    "detail": {
+      "title": "تفاصيل التقييم",
+      "date": "التاريخ"
+    },
+    "export": {
+      "sheetName": "تقييمات-المحاضر"
+    }
   }
 }

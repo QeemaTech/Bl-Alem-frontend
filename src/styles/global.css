@@ -3268,12 +3268,13 @@ table:not(.data-table) tr:hover td { background: var(--primary-50); }
 .builder-section-toggle {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  text-align: right;
+  text-align: start;
+  justify-content: flex-start;
   color: inherit;
   font: inherit;
   min-width: 0;
@@ -3293,18 +3294,25 @@ table:not(.data-table) tr:hover td { background: var(--primary-50); }
 }
 .builder-section-title-wrap {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
+  flex: 0 1 auto;
+  text-align: start;
 }
 .builder-section-title-wrap h3 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 800;
+  text-align: start;
 }
 .builder-section-meta {
   font-size: 0.85rem;
   color: var(--muted);
   font-weight: 700;
+  line-height: 1.25;
+  padding: 0;
+  margin: 0;
+  text-align: start;
 }
 .builder-section-body {
   display: grid;

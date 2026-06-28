@@ -1,13 +1,11 @@
 import { FormEvent, useId, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, KeyRound } from '@/icons';
 import { cn } from '@/lib/cn';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
-import {
-  getPasswordStrength,
-  passwordStrengthLabels,
-  type PasswordStrength,
-} from './profileUtils';
+import { useStudentProfileLabels } from '../../../hooks/useStudentProfileLabels';
+import { getPasswordStrength, type PasswordStrength } from './profileUtils';
 
 interface PasswordFieldProps {
   id: string;
@@ -16,6 +14,7 @@ interface PasswordFieldProps {
   onChange: (value: string) => void;
   autoComplete?: string;
   error?: string;
+  toggleLabels: { show: string; hide: string };
 }
 
 function PasswordField({
@@ -25,6 +24,7 @@ function PasswordField({
   onChange,
   autoComplete,
   error,
+  toggleLabels,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
 
@@ -46,7 +46,7 @@ function PasswordField({
           type="button"
           className="student-password-toggle"
           onClick={() => setVisible((current) => !current)}
-          aria-label={visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+          aria-label={visible ? toggleLabels.hide : toggleLabels.show}
           aria-pressed={visible}
         >
           {visible ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
@@ -65,6 +65,7 @@ const strengthClass: Record<Exclude<PasswordStrength, 'empty'>, string> = {
 };
 
 function PasswordStrengthMeter({ password }: { password: string }) {
+  const { passwordStrengthLabel } = useStudentProfileLabels();
   const strength = getPasswordStrength(password);
   const segments = 4;
   const filled =
@@ -90,7 +91,7 @@ function PasswordStrengthMeter({ password }: { password: string }) {
       </div>
       {strength !== 'empty' ? (
         <p className={cn('student-password-strength-label', strengthClass[strength])}>
-          {passwordStrengthLabels[strength]}
+          {passwordStrengthLabel(strength)}
         </p>
       ) : null}
     </div>
@@ -103,6 +104,7 @@ interface PasswordCardProps {
 }
 
 export function PasswordCard({ saving, onSubmit }: PasswordCardProps) {
+  const { t } = useTranslation('profile');
   const baseId = useId();
   const [passwords, setPasswords] = useState({
     currentPassword: '',
@@ -111,6 +113,11 @@ export function PasswordCard({ saving, onSubmit }: PasswordCardProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const toggleLabels = useMemo(() => ({
+    show: t('student.password.show'),
+    hide: t('student.password.hide'),
+  }), [t]);
+
   const canSubmit = useMemo(
     () => passwords.currentPassword && passwords.newPassword && passwords.confirmPassword,
     [passwords],
@@ -118,12 +125,12 @@ export function PasswordCard({ saving, onSubmit }: PasswordCardProps) {
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!passwords.currentPassword) next.currentPassword = 'أدخل كلمة المرور الحالية.';
-    if (!passwords.newPassword) next.newPassword = 'أدخل كلمة المرور الجديدة.';
-    else if (passwords.newPassword.length < 8) next.newPassword = '8 أحرف على الأقل.';
-    if (!passwords.confirmPassword) next.confirmPassword = 'أكّد كلمة المرور الجديدة.';
+    if (!passwords.currentPassword) next.currentPassword = t('student.validation.currentPassword');
+    if (!passwords.newPassword) next.newPassword = t('student.validation.newPassword');
+    else if (passwords.newPassword.length < 8) next.newPassword = t('student.validation.newPasswordMin');
+    if (!passwords.confirmPassword) next.confirmPassword = t('student.validation.confirmPassword');
     else if (passwords.confirmPassword !== passwords.newPassword) {
-      next.confirmPassword = 'كلمتا المرور غير متطابقتين.';
+      next.confirmPassword = t('student.validation.passwordMismatch');
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -162,44 +169,45 @@ export function PasswordCard({ saving, onSubmit }: PasswordCardProps) {
           <KeyRound size={22} />
         </span>
         <div>
-          <h2 className="student-profile-section-title">تغيير كلمة المرور</h2>
-          <p className="student-profile-section-desc">
-            استخدم كلمة مرور قوية لا تقل عن 8 أحرف مع أرقام ورموز.
-          </p>
+          <h2 className="student-profile-section-title">{t('student.password.title')}</h2>
+          <p className="student-profile-section-desc">{t('student.password.desc')}</p>
         </div>
       </header>
 
       <form className="form-grid student-profile-password-form" onSubmit={handleSubmit} noValidate>
         <PasswordField
           id={`${baseId}-current`}
-          label="كلمة المرور الحالية"
+          label={t('student.password.current')}
           value={passwords.currentPassword}
           onChange={(value) => update('currentPassword', value)}
           autoComplete="current-password"
           error={errors.currentPassword}
+          toggleLabels={toggleLabels}
         />
         <PasswordField
           id={`${baseId}-new`}
-          label="كلمة المرور الجديدة"
+          label={t('student.password.new')}
           value={passwords.newPassword}
           onChange={(value) => update('newPassword', value)}
           autoComplete="new-password"
           error={errors.newPassword}
+          toggleLabels={toggleLabels}
         />
         <div className="student-profile-password-strength-wrap">
           <PasswordStrengthMeter password={passwords.newPassword} />
         </div>
         <PasswordField
           id={`${baseId}-confirm`}
-          label="تأكيد كلمة المرور"
+          label={t('student.password.confirm')}
           value={passwords.confirmPassword}
           onChange={(value) => update('confirmPassword', value)}
           autoComplete="new-password"
           error={errors.confirmPassword}
+          toggleLabels={toggleLabels}
         />
         <div className="student-profile-form-actions">
           <Button type="submit" variant="secondary" loading={saving} disabled={!canSubmit}>
-            تحديث كلمة المرور
+            {t('student.password.submit')}
           </Button>
         </div>
       </form>

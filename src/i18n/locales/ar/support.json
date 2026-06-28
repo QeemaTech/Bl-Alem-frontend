@@ -94,5 +94,170 @@
         "SUPER_ADMIN": "مشرف"
       }
     }
+  },
+  "student": {
+    "title": "الدعم الفني",
+    "subtitle": "أنشئ تذكرة أو تابع ردود فريق الدعم",
+    "exportExcel": "تصدير Excel",
+    "newTicket": "تذكرة جديدة",
+    "heroTitle": "نحن هنا لمساعدتك",
+    "heroDesc": "أرسل استفسارك أو مشكلتك وسيرد عليك فريق الدعم في أقرب وقت.",
+    "stats": {
+      "total": "إجمالي التذاكر",
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "closed": "مغلقة"
+    },
+    "filters": {
+      "searchPlaceholder": "بحث بالموضوع أو الرسالة...",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات"
+    },
+    "table": {
+      "title": "تذاكر الدعم",
+      "ticketCount": "{{count}} تذكرة",
+      "ticketCount_other": "{{count}} تذكرة",
+      "emptyTitle": "لا توجد تذاكر",
+      "emptyDescription": "أنشئ تذكرة عند احتياجك للمساعدة.",
+      "columns": {
+        "id": "رقم التذكرة",
+        "subject": "الموضوع",
+        "replies": "الردود",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "export": {
+      "sheetName": "تذاكر الدعم",
+      "columns": {
+        "id": "رقم التذكرة",
+        "subject": "الموضوع",
+        "message": "الرسالة",
+        "repliesCount": "عدد الردود",
+        "status": "الحالة",
+        "createdAt": "تاريخ الإنشاء",
+        "updatedAt": "آخر تحديث"
+      }
+    },
+    "actions": {
+      "view": "عرض",
+      "closeDetail": "إغلاق التفاصيل"
+    },
+    "detail": {
+      "loadingTitle": "جاري التحميل...",
+      "loadingDesc": "يتم جلب تفاصيل التذكرة.",
+      "you": "أنت",
+      "supportTeam": "فريق الدعم",
+      "noReplies": "لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.",
+      "replyLabel": "رد جديد",
+      "replyPlaceholder": "اكتب ردك أو أضف تفاصيل...",
+      "sendReply": "إرسال الرد",
+      "closedNotice": "تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية."
+    },
+    "modal": {
+      "title": "تذكرة دعم جديدة",
+      "subject": "الموضوع",
+      "subjectPlaceholder": "مثال: مشكلة في الدفع أو الوصول للدورة",
+      "message": "الرسالة",
+      "messagePlaceholder": "اشرح مشكلتك أو استفسارك بالتفصيل...",
+      "cancel": "إلغاء",
+      "submit": "إرسال التذكرة"
+    },
+    "toast": {
+      "created": "تم إنشاء التذكرة بنجاح.",
+      "createFailed": "تعذّر إنشاء التذكرة.",
+      "replySent": "تم إرسال الرد.",
+      "replyFailed": "تعذّر إرسال الرد."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "مفتوحة",
+        "IN_PROGRESS": "قيد المعالجة",
+        "CLOSED": "مغلقة"
+      }
+    }
+  },
+  "instructor": {
+    "title": "الدعم الفني",
+    "subtitle": "تواصل مع إدارة المنصة للحصول على المساعدة",
+    "newTicket": "تذكرة جديدة",
+    "heroTitle": "فريق الدعم جاهز لمساعدتك",
+    "heroDesc": "أرسل استفسارك حول مراجعة الدورات، المدفوعات، أو أي مشكلة تقنية وسنرد عليك في أقرب وقت.",
+    "backToSupport": "العودة للدعم الفني",
+    "backToTickets": "العودة لتذاكر الدعم",
+    "stats": {
+      "total": "إجمالي التذاكر",
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "closed": "مغلقة"
+    },
+    "filters": {
+      "searchPlaceholder": "بحث بالموضوع أو الرسالة...",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات"
+    },
+    "table": {
+      "title": "تذاكر الدعم",
+      "ticketCount": "{{count}} تذكرة",
+      "ticketCount_other": "{{count}} تذكرة",
+      "emptyTitle": "لا توجد تذاكر",
+      "emptyDescription": "أنشئ تذكرة للحصول على دعم من الإدارة.",
+      "columns": {
+        "id": "رقم التذكرة",
+        "subject": "الموضوع",
+        "message": "الرسالة",
+        "replies": "الردود",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "actions": {
+      "details": "التفاصيل"
+    },
+    "detail": {
+      "notFoundTitle": "التذكرة غير موجودة",
+      "notFoundDescription": "لم نتمكن من العثور على هذه التذكرة.",
+      "ticketInfo": "معلومات التذكرة",
+      "createdAt": "تاريخ الإنشاء",
+      "lastUpdated": "آخر تحديث",
+      "repliesCount": "عدد الردود",
+      "you": "أنت",
+      "supportTeam": "فريق الدعم",
+      "noReplies": "لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.",
+      "replyLabel": "رد جديد",
+      "replyPlaceholder": "اكتب ردك أو أضف تفاصيل...",
+      "sendReply": "إرسال الرد",
+      "closedNotice": "تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية."
+    },
+    "modal": {
+      "title": "تذكرة دعم جديدة",
+      "subject": "الموضوع",
+      "subjectPlaceholder": "مثال: تأخير في مراجعة الكورس",
+      "message": "الرسالة",
+      "messagePlaceholder": "اشرح مشكلتك أو استفسارك بالتفصيل...",
+      "cancel": "إلغاء",
+      "submit": "إرسال التذكرة"
+    },
+    "toast": {
+      "created": "تم إنشاء التذكرة.",
+      "createFailed": "تعذّر إنشاء التذكرة.",
+      "loadFailed": "تعذّر تحميل التذكرة.",
+      "replySent": "تم إرسال الرد.",
+      "replyFailed": "تعذّر إرسال الرد."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "مفتوحة",
+        "IN_PROGRESS": "قيد المعالجة",
+        "CLOSED": "مغلقة"
+      },
+      "role": {
+        "STUDENT": "طالب",
+        "INSTRUCTOR": "محاضر",
+        "SUPER_ADMIN": "إدارة"
+      }
+    }
   }
 }

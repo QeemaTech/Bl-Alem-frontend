@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RotateCcw, Search } from '@/icons';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
@@ -38,38 +40,55 @@ export function CourseFilters({
   onReset,
   resetDisabled,
 }: CourseFiltersProps) {
+  const { t, i18n } = useTranslation('courses');
+  const lang = i18n.language;
+
+  const sortOptions = useMemo(() => [
+    { label: t('student.myCourses.filters.sortRecent'), value: 'recent' },
+    { label: t('student.myCourses.filters.sortProgress'), value: 'progress' },
+    { label: t('student.myCourses.filters.sortName'), value: 'name' },
+  ], [t, lang]);
+
+  const statusTabs = useMemo(() => [
+    { id: 'all', label: t('student.myCourses.filters.tabs.all', { count: stats.total }) },
+    { id: 'active', label: t('student.myCourses.filters.tabs.active', { count: stats.active }) },
+    { id: 'completed', label: t('student.myCourses.filters.tabs.completed', { count: stats.completed }) },
+    { id: 'not_started', label: t('student.myCourses.filters.tabs.notStarted', { count: stats.notStarted }) },
+  ], [t, lang, stats]);
+
+  const viewTabs = useMemo(() => [
+    { id: 'cards', label: t('student.myCourses.filters.view.cards', { count: resultCount }) },
+    { id: 'table', label: t('student.myCourses.filters.view.table', { count: resultCount }) },
+  ], [t, lang, resultCount]);
+
   return (
     <section
       className={`student-my-courses-toolbar${categories.length <= 1 ? ' student-my-courses-toolbar--no-category' : ''}`}
-      aria-label="فلاتر الدورات"
+      aria-label={t('student.myCourses.filters.ariaLabel')}
     >
       <div className="student-my-courses-toolbar-search">
         <Input
-          label="بحث"
+          label={t('student.myCourses.filters.search')}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="بحث باسم الدورة أو المحاضر..."
+          placeholder={t('student.myCourses.filters.searchPlaceholder')}
           icon={<Search size={18} aria-hidden />}
         />
       </div>
 
       <div className="student-my-courses-toolbar-sort">
         <Select
-          label="الترتيب"
+          label={t('student.myCourses.filters.sort')}
           value={sort}
           onChange={(e) => onSortChange(e.target.value)}
-          options={[
-            { label: 'الأحدث اشتراكاً', value: 'recent' },
-            { label: 'الأعلى تقدماً', value: 'progress' },
-            { label: 'الاسم', value: 'name' },
-          ]}
+          options={sortOptions}
         />
       </div>
 
       {categories.length > 1 ? (
         <div className="student-my-courses-toolbar-category">
           <Select
-            label="التصنيف"
+            label={t('student.myCourses.filters.category')}
             value={category}
             onChange={(e) => onCategoryChange(e.target.value)}
             options={categories}
@@ -84,7 +103,7 @@ export function CourseFilters({
         disabled={resetDisabled}
       >
         <RotateCcw size={16} aria-hidden />
-        إعادة تعيين
+        {t('student.myCourses.filters.reset')}
       </button>
 
       <div className="student-my-courses-toolbar-tabs">
@@ -92,12 +111,7 @@ export function CourseFilters({
           variant="pills"
           activeTab={tab}
           onChange={onTabChange}
-          tabs={[
-            { id: 'all', label: `الكل (${stats.total})` },
-            { id: 'active', label: `قيد التعلم (${stats.active})` },
-            { id: 'completed', label: `مكتمل (${stats.completed})` },
-            { id: 'not_started', label: `لم يبدأ (${stats.notStarted})` },
-          ]}
+          tabs={statusTabs}
         />
       </div>
 
@@ -106,10 +120,7 @@ export function CourseFilters({
           variant="pills"
           activeTab={viewMode}
           onChange={onViewModeChange}
-          tabs={[
-            { id: 'cards', label: `البطاقات (${resultCount})` },
-            { id: 'table', label: `الجدول (${resultCount})` },
-          ]}
+          tabs={viewTabs}
         />
       </div>
     </section>

@@ -105,5 +105,86 @@
   },
   "toast": {
     "loadError": "Could not load payment."
+  },
+  "student": {
+    "title": "Payments",
+    "subtitle": "Payment and course enrollment history",
+    "stats": {
+      "total": "Total transactions",
+      "paid": "Paid",
+      "totalSpent": "Total paid",
+      "discountsSaved": "Discounts saved",
+      "refundedHint": "{{count}} refunded"
+    },
+    "charts": {
+      "statusDistribution": "Payment status distribution",
+      "gateways": "Payment gateways"
+    },
+    "filters": {
+      "ariaLabel": "Payment filters",
+      "searchPlaceholder": "Search by course or reference...",
+      "status": "Status",
+      "gateway": "Gateway",
+      "all": "All"
+    },
+    "labels": {
+      "status": {
+        "PAID": "Paid",
+        "PENDING": "Pending",
+        "FAILED": "Failed",
+        "REFUNDED": "Refunded",
+        "COMPLETED": "Completed"
+      },
+      "gateway": {
+        "SIMULATED": "Simulated",
+        "WALLET": "Wallet",
+        "STRIPE": "Stripe",
+        "PAYPAL": "PayPal"
+      }
+    },
+    "table": {
+      "title": "Payment history",
+      "count": "{{count}} transactions",
+      "emptyTitle": "No payments",
+      "emptyDescription": "Enrollment transactions will appear after payment is completed.",
+      "columns": {
+        "course": "Course",
+        "finalAmount": "Amount",
+        "gateway": "Gateway",
+        "status": "Status",
+        "createdAt": "Date",
+        "actions": "Actions"
+      }
+    },
+    "actions": {
+      "exportExcel": "Export Excel",
+      "details": "Details"
+    },
+    "modal": {
+      "detailTitle": "Payment details",
+      "fields": {
+        "course": "Course",
+        "amount": "Original amount",
+        "discount": "Discount",
+        "finalAmount": "Final amount",
+        "gateway": "Gateway",
+        "status": "Status",
+        "transactionRef": "Transaction ref",
+        "createdAt": "Date"
+      }
+    },
+    "toast": {
+      "exported": "Payment history exported."
+    },
+    "export": {
+      "sheetName": "Payments",
+      "columns": {
+        "course": "Course",
+        "finalAmount": "Amount",
+        "gateway": "Gateway",
+        "status": "Status",
+        "createdAt": "Date"
+      }
+    }
   }
 }

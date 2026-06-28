@@ -1,0 +1,106 @@
+{
+  "student": {
+    "title": "Community",
+    "subtitle": "Share your questions and experiences with other learners",
+    "exportExcel": "Export Excel",
+    "newPost": "New post",
+    "hero": {
+      "title": "Learner community",
+      "body": "Ask questions, share experiences, and connect with fellow learners."
+    },
+    "stats": {
+      "posts": "Posts",
+      "comments": "Comments",
+      "mine": "My posts",
+      "answered": "Answered",
+      "unansweredHint": "{{count}} awaiting reply",
+      "unansweredHint_one": "{{count}} awaiting reply",
+      "unansweredHint_other": "{{count}} awaiting reply"
+    },
+    "charts": {
+      "distribution": "Post distribution",
+      "answered": "Answered",
+      "unanswered": "Awaiting reply"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by title, content, or author...",
+      "comments": "Comments",
+      "author": "Author",
+      "all": "All",
+      "answered": "Answered",
+      "unanswered": "Awaiting reply",
+      "mine": "My posts"
+    },
+    "tabs": {
+      "feed": "Cards ({{count}})",
+      "table": "Table ({{count}})"
+    },
+    "status": {
+      "answered": "Answered",
+      "unanswered": "Awaiting reply"
+    },
+    "badges": {
+      "yourPost": "Your post",
+      "comments": "{{count}} comments",
+      "comments_one": "{{count}} comment",
+      "comments_other": "{{count}} comments",
+      "platformTeam": "Platform team"
+    },
+    "empty": {
+      "title": "No posts",
+      "filteredDescription": "Try changing filters or search.",
+      "noPostsDescription": "Be the first to share a question or experience with the community."
+    },
+    "table": {
+      "title": "Posts table",
+      "count": "{{count}} posts",
+      "count_one": "{{count}} post",
+      "count_other": "{{count}} posts",
+      "emptyDescription": "No matching posts found.",
+      "columns": {
+        "id": "ID",
+        "author": "Author",
+        "title": "Title",
+        "comments": "Comments",
+        "status": "Status",
+        "createdAt": "Date",
+        "actions": "Actions"
+      }
+    },
+    "export": {
+      "sheetName": "Community-posts",
+      "columns": {
+        "id": "Post ID",
+        "author": "Author",
+        "title": "Title",
+        "body": "Content",
+        "commentsCount": "Comments",
+        "status": "Status",
+        "createdAt": "Date"
+      }
+    },
+    "actions": {
+      "view": "View",
+      "reply": "Reply",
+      "publish": "Publish"
+    },
+    "form": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "Example: How do I use my wallet when purchasing?",
+      "bodyLabel": "Content",
+      "bodyPlaceholder": "Write your question or experience in detail...",
+      "commentPlaceholder": "Add a comment...",
+      "commentAriaLabel": "Add a comment"
+    },
+    "detail": {
+      "title": "Post details"
+    },
+    "userFallback": "User",
+    "toast": {
+      "postPublished": "Post published.",
+      "postFailed": "Could not publish post.",
+      "commentAdded": "Comment added.",
+      "commentFailed": "Could not add comment."
+    }
+  }
+}

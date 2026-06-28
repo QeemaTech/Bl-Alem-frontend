@@ -86,5 +86,81 @@
     "title": "No eligible students",
     "description": "All students who completed their courses already have certificates."
   },
-  "confirm": {}
+  "confirm": {},
+  "student": {
+    "title": "Certificates",
+    "subtitle": "Certificates appear automatically after completing a course 100%",
+    "stats": {
+      "total": "Total certificates",
+      "thisMonth": "This month",
+      "coursesCompleted": "Completed courses"
+    },
+    "actions": {
+      "export": "Export",
+      "myCourses": "My courses",
+      "downloadPdf": "Download PDF",
+      "verify": "Verify",
+      "copy": "Copy",
+      "share": "Share",
+      "details": "Details",
+      "verifyPage": "Verification page",
+      "copyLink": "Copy link"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by course name or certificate number..."
+    },
+    "tabs": {
+      "grid": "Cards",
+      "list": "Table"
+    },
+    "badge": {
+      "completion": "Completion certificate"
+    },
+    "issuedAt": "Issue date: {{date}}",
+    "pdf": {
+      "available": "Available",
+      "generatedOnDownload": "Generated on download"
+    },
+    "table": {
+      "emptyTitle": "No certificates",
+      "noResultsTitle": "No results",
+      "noResultsDescription": "Try changing your search.",
+      "emptyDescription": "Complete a course 100% to receive your certificate automatically.",
+      "emptyAction": "Go to my courses",
+      "columns": {
+        "course": "Course",
+        "certificateNumber": "Certificate number",
+        "issuedAt": "Issue date",
+        "pdf": "PDF",
+        "actions": "Actions"
+      }
+    },
+    "modal": {
+      "detailTitle": "Certificate details",
+      "fields": {
+        "course": "Course",
+        "certificateNumber": "Certificate number",
+        "issuedAt": "Issue date",
+        "pdf": "PDF file"
+      }
+    },
+    "share": {
+      "title": "Completion certificate",
+      "message": "My certificate for \"{{course}}\" — verify it: {{url}}"
+    },
+    "toast": {
+      "linkCopied": "Verification link copied.",
+      "shareCopied": "Share message copied.",
+      "exported": "Certificates exported."
+    },
+    "export": {
+      "sheetName": "My certificates",
+      "columns": {
+        "course": "Course",
+        "certificateNumber": "Certificate number",
+        "issuedAt": "Issue date",
+        "verifyUrl": "Verification link"
+      }
+    }
+  }
 }

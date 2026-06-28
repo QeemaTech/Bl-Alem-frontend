@@ -25,5 +25,5 @@ export const getCourseStats = (course: any) => {
 
 export const canApproveCourse = (status: string) => status === 'PENDING_REVIEW';
 export const canPublishCourse = (status: string) => ['APPROVED', 'SUSPENDED'].includes(status);
-export const canRejectCourse = (status: string) => ['PENDING_REVIEW', 'APPROVED'].includes(status);
+export const canRejectCourse = (status: string) => status === 'PENDING_REVIEW';
 export const canSuspendCourse = (status: string) => ['PUBLISHED', 'APPROVED'].includes(status);

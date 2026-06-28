@@ -9,10 +9,6 @@ export { StatisticsCards } from './StatisticsCards';
 export type { DisplayStatus, EnrollmentStatus, MyCourseEnrollment, MyCoursesStats } from './types';
 export {
   computeStats,
-  fmtDate,
-  formatDuration,
   getDisplayStatus,
-  getJourneyMessage,
-  STATUS_LABELS,
   STATUS_VARIANT,
 } from './utils';

@@ -104,6 +104,117 @@
     "started": "تم بدء الجلسة.",
     "ended": "تم إنهاء الجلسة.",
     "cancelled": "تم إلغاء الجلسة.",
-    "deleted": "تم حذف الجلسة."
+    "deleted": "تم حذف الجلسة.",
+    "linkOpened": "تم فتح رابط الجلسة.",
+    "noMeetingUrl": "لا يوجد رابط اجتماع متاح.",
+    "joinFailed": "تعذّر الانضمام للجلسة.",
+    "linkCopied": "تم نسخ رابط الاجتماع."
+  },
+  "student": {
+    "title": "الجلسات المباشرة",
+    "subtitle": "انضم للجلسات القادمة أو شاهد السجل السابق",
+    "hero": {
+      "title": "جلسات دوراتك المسجّلة",
+      "body": "تظهر هنا الجلسات المباشرة للكورسات التي اشتركت بها.",
+      "liveNow": " يوجد جلسة مباشرة الآن — انضم فوراً!"
+    },
+    "stats": {
+      "total": "إجمالي الجلسات",
+      "upcoming": "قادمة",
+      "live": "مباشر الآن",
+      "ended": "سابقة",
+      "liveHintActive": "جلسة نشطة",
+      "liveHintNone": "لا جلسة حية"
+    },
+    "charts": {
+      "distribution": "توزيع الجلسات",
+      "upcoming": "قادمة",
+      "live": "مباشر",
+      "ended": "سابقة"
+    },
+    "tabs": {
+      "upcoming": "القادمة ({{count}})",
+      "liveNow": "مباشر الآن ({{count}})",
+      "ended": "السابقة ({{count}})"
+    },
+    "view": {
+      "feed": "البطاقات",
+      "table": "الجدول"
+    },
+    "searchPlaceholder": "بحث بالعنوان، الكورس، أو المحاضر...",
+    "empty": {
+      "title": "لا توجد جلسات",
+      "filteredInTab": "لا توجد جلسات مطابقة في هذا التصنيف.",
+      "noSessions": "لا توجد جلسات مباشرة لدوراتك حالياً. اشترك في دورة تحتوي على جلسات مباشرة.",
+      "tableDescription": "لا توجد جلسات مطابقة للبحث أو التصنيف الحالي."
+    },
+    "myCoursesAction": "كورساتي",
+    "export": {
+      "sheetName": "جلسات-الطالب"
+    },
+    "detail": {
+      "openMeetingLink": "فتح رابط الاجتماع",
+      "viewCourse": "عرض الدورة"
+    }
+  },
+  "instructor": {
+    "title": "الجلسات المباشرة",
+    "subtitle": "جدولة وإدارة جلسات البث المباشر لطلابك",
+    "export": "تصدير",
+    "createSession": "إنشاء جلسة",
+    "stats": {
+      "liveHintActive": "جلسة نشطة",
+      "liveHintNone": "لا جلسة حية"
+    },
+    "tabs": {
+      "scheduled": "القادمة ({{count}})",
+      "live": "مباشر ({{count}})",
+      "ended": "السابقة ({{count}})",
+      "cancelled": "الملغية ({{count}})"
+    },
+    "searchPlaceholder": "بحث بالعنوان أو الكورس...",
+    "openMeetingLink": "فتح رابط الاجتماع",
+    "empty": {
+      "createNew": "أنشئ جلسة مباشرة جديدة للبدء.",
+      "noInTab": "لا توجد جلسات في هذا التبويب."
+    },
+    "form": {
+      "createTitle": "جلسة مباشرة جديدة",
+      "courseLabel": "الكورس",
+      "titleLabel": "عنوان الجلسة",
+      "titlePlaceholder": "مثال: مراجعة الوحدة الأولى",
+      "startAtLabel": "التاريخ والوقت",
+      "startAtHelper": "اختر موعد بدء الجلسة",
+      "durationLabel": "المدة (دقيقة)",
+      "meetingUrlHelper": "Zoom أو Google Meet أو أي منصة",
+      "descriptionLabel": "الوصف (اختياري)",
+      "create": "إنشاء الجلسة"
+    },
+    "confirm": {
+      "endTitle": "إنهاء الجلسة؟",
+      "cancelTitle": "إلغاء الجلسة؟",
+      "endMessage": "سيتم إنهاء البث وتحويل الجلسة إلى منتهية.",
+      "cancelMessage": "سيتم إلغاء الجلسة ولن يتمكن الطلاب من حضورها.",
+      "cancelConfirm": "إلغاء الجلسة"
+    },
+    "toast": {
+      "validation": "يرجى إكمال الكورس والعنوان وموعد البدء.",
+      "created": "تم إنشاء الجلسة.",
+      "saveFailed": "تعذّر حفظ الجلسة.",
+      "actionFailed": "تعذّر تنفيذ الإجراء."
+    },
+    "exportSheet": "جلسات-المحاضر",
+    "exportColumns": {
+      "title": "العنوان",
+      "course": "الكورس",
+      "startAt": "موعد البدء",
+      "duration": "المدة (دقيقة)",
+      "status": "الحالة",
+      "meetingUrl": "رابط الاجتماع"
+    },
+    "detailFields": {
+      "startAt": "الموعد",
+      "url": "الرابط"
+    }
   }
 }

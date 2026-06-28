@@ -17,12 +17,6 @@
       "certificates": "Certificates",
       "support": "Support"
     },
-    "stats": {
-      "inProgress": "In progress",
-      "completed": "Completed",
-      "enrolled": "Enrolled",
-      "completionRate": "Completion rate"
-    },
     "time": {
       "now": "Now",
       "minutesAgo": "{{count}}m ago",
@@ -34,16 +28,22 @@
       "copyAria": "Copy referral code"
     },
     "stats": {
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "enrolled": "Enrolled",
+      "completionRate": "Completion rate",
       "myCourses": "My courses",
       "activeHint": "{{count}} active",
-      "completed": "Completed",
       "completionHint": "{{rate}}% completion",
       "certificates": "My certificates",
       "walletBalance": "Wallet balance"
     },
     "search": {
       "placeholder": "Search for a course or skill...",
-      "chartTitle": "Learning status"
+      "chartTitle": "Learning status",
+      "emptyTitle": "No courses",
+      "emptyDesc": "No courses match this category yet.",
+      "viewAll": "View all courses"
     },
     "continue": {
       "title": "Continue learning",
@@ -66,7 +66,42 @@
       "title": "Upcoming sessions",
       "liveNow": "Live now",
       "scheduled": "Scheduled",
-      "join": "Join"
+      "join": "Join",
+      "emptyTitle": "No sessions",
+      "emptyDesc": "No upcoming live sessions at the moment.",
+      "viewAll": "View all sessions"
+    },
+    "notifications": {
+      "title": "Latest notifications",
+      "newBadge": "{{count}} new",
+      "emptyTitle": "No notifications",
+      "emptyDesc": "Your learning updates will appear here."
+    },
+    "pathsSection": {
+      "title": "Learning paths",
+      "viewAll": "View all",
+      "coursesCount": "{{count}} courses",
+      "defaultDesc": "Structured learning path",
+      "explore": "Explore path",
+      "emptyTitle": "No paths",
+      "emptyDesc": "Learning paths will be added soon."
+    },
+    "popular": {
+      "title": "Most popular",
+      "viewAll": "View all",
+      "emptyTitle": "No popular courses",
+      "emptyDesc": "Most enrolled courses will appear here."
+    },
+    "recommended": {
+      "title": "Recommended for you",
+      "viewAll": "View all",
+      "emptyTitle": "No recommendations yet",
+      "emptyDesc": "Recommended courses will appear here when available."
+    },
+    "community": {
+      "title": "Join the community",
+      "desc": "Share questions and experiences with other learners.",
+      "cta": "Visit community"
     }
   },
   "instructor": {
@@ -123,6 +158,184 @@
     },
     "reviews": {
       "starsAria": "{{rating}} out of 5"
+    },
+    "students": {
+      "title": "My students",
+      "subtitle": "Track progress of students enrolled in your courses",
+      "stats": {
+        "totalEnrollments": "Total enrollments",
+        "uniqueStudents": "Unique students",
+        "active": "Active",
+        "completed": "Completed",
+        "avgProgressHint": "Average progress {{percent}}%"
+      },
+      "tooltips": {
+        "uniqueStudents": "Distinct students — each student is counted once even if enrolled in multiple courses.",
+        "totalEnrollments": "Total enrollments — each course enrollment counts as a separate record, so this may exceed unique students."
+      },
+      "chart": {
+        "title": "Enrollments by course"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by student, email, or course...",
+        "course": "Course",
+        "allCourses": "All courses",
+        "enrollmentStatus": "Enrollment status"
+      },
+      "enrollmentStatus": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled",
+        "PENDING": "Pending"
+      },
+      "table": {
+        "title": "Students list",
+        "countAria": "Count: {{value}}",
+        "columns": {
+          "student": "Student",
+          "course": "Course",
+          "enrolledAt": "Enrolled",
+          "progress": "Progress",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "details": "Details",
+        "noResultsTitle": "No matching results",
+        "noResultsDesc": "Try changing search, enrollment status, or course.",
+        "emptyTitle": "No students",
+        "emptyDesc": "Students will appear after enrolling in your courses."
+      },
+      "export": {
+        "sheetName": "Instructor-students",
+        "columns": {
+          "student": "Student",
+          "email": "Email",
+          "course": "Course",
+          "enrolledAt": "Enrolled",
+          "progress": "Progress %",
+          "status": "Status"
+        }
+      },
+      "detail": {
+        "backToList": "Back to students list",
+        "badgeStudent": "Student",
+        "enrollmentsCount": "{{count}} enrollments in your courses",
+        "enrollmentsCount_one": "{{count}} enrollment in your courses",
+        "enrollmentsCount_other": "{{count}} enrollments in your courses",
+        "stats": {
+          "totalEnrollments": "Total enrollments",
+          "active": "Active",
+          "completed": "Completed",
+          "avgProgress": "Average progress"
+        },
+        "chart": {
+          "title": "Progress by course"
+        },
+        "table": {
+          "title": "Student courses",
+          "emptyTitle": "No enrollments"
+        },
+        "countAria": "Count: {{value}}",
+        "toast": {
+          "notFound": "Student not found.",
+          "loadFailed": "Could not load student data."
+        }
+      }
+    },
+    "earnings": {
+      "title": "Earnings",
+      "subtitle": "Track your revenue, sales, and withdrawal requests",
+      "requestWithdrawal": "Request withdrawal",
+      "pendingNotice": {
+        "title": "You have a withdrawal request under review",
+        "body": "A request for {{amount}} is awaiting admin approval. The amount has not been deducted from your balance yet — it will be deducted upon approval."
+      },
+      "minBalanceNotice": {
+        "title": "Balance below minimum withdrawal",
+        "body": "Minimum is {{min}} — your available balance is currently {{available}}."
+      },
+      "stats": {
+        "totalEarnings": "Total earnings",
+        "totalEarningsHint": "After platform commission",
+        "availableBalance": "Available balance",
+        "withdrawableNow": "{{amount}} withdrawable now",
+        "readyToWithdraw": "Ready to withdraw",
+        "minWithdrawal": "Minimum {{amount}}",
+        "noBalance": "No balance",
+        "pendingBalance": "Pending balance",
+        "pendingRequests": "{{count}} request(s) under review",
+        "noPendingRequests": "No pending requests",
+        "platformCommission": "Platform commission"
+      },
+      "charts": {
+        "courseEarnings": "Course earnings (net)"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by bank, account, IBAN, amount, or status...",
+        "withdrawalStatus": "Withdrawal status"
+      },
+      "withdrawals": {
+        "title": "Withdrawals",
+        "countFiltered": "{{filtered}} of {{total}} requests",
+        "count": "{{count}} requests",
+        "emptyFilteredTitle": "No matching results",
+        "emptyFilteredDesc": "Try changing your search or withdrawal status.",
+        "emptyTitle": "No withdrawals",
+        "emptyDesc": "Request a withdrawal when you need to access your available balance."
+      },
+      "sales": {
+        "title": "Recent sales",
+        "count": "{{count}} transactions",
+        "emptyTitle": "No transactions",
+        "emptyDesc": "Sales will appear here when students enroll.",
+        "columns": {
+          "course": "Course",
+          "student": "Student",
+          "amount": "Amount",
+          "net": "Your net earnings",
+          "date": "Date"
+        }
+      },
+      "withdrawModal": {
+        "title": "Withdrawal request",
+        "availableBalance": "Available balance",
+        "withdrawableHelper": "You can withdraw up to {{withdrawable}} — the pending request ({{pending}}) has not been deducted yet.",
+        "cannotSubmitTitle": "Cannot submit a new request now",
+        "cannotSubmitBody": "You have a withdrawal request for {{amount}} under review. Wait until admin processes the current request, then try again.",
+        "minAmount": "Minimum withdrawal: {{amount}}",
+        "belowMin": "Current balance is below the minimum withdrawal amount.",
+        "amountLabel": "Amount (EGP)",
+        "amountHelper": "Minimum: {{min}} • Maximum: {{max}}",
+        "bankLabel": "Bank",
+        "bankPlaceholder": "e.g. Al Rajhi",
+        "accountNameLabel": "Account name",
+        "notesLabel": "Notes (optional)",
+        "submit": "Submit request"
+      },
+      "detail": {
+        "title": "Withdrawal request details",
+        "transferProof": "Transfer proof",
+        "transferProofAlt": "Transfer proof image"
+      },
+      "toast": {
+        "invalidAmount": "Enter a valid amount.",
+        "amountExceedsBalance": "Amount exceeds available balance.",
+        "minAmount": "Minimum withdrawal is {{amount}}.",
+        "submitted": "Withdrawal request submitted successfully.",
+        "submitFailed": "Could not submit withdrawal request."
+      },
+      "export": {
+        "sheetName": "Instructor-withdrawals",
+        "columns": {
+          "amount": "Amount (EGP)",
+          "status": "Status",
+          "bankName": "Bank",
+          "accountName": "Account name",
+          "iban": "IBAN",
+          "createdAt": "Date",
+          "notes": "Notes"
+        }
+      }
     },
     "approval": {
       "pendingTitle": "Your account is under review",

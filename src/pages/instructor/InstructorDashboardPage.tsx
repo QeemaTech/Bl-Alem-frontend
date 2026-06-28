@@ -28,6 +28,7 @@ import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../store/AuthContext';
 import { formatDate, formatTime } from '../../utils/localeFormat';
 import { formatMoney } from '../../utils/formatMoney';
+import { localizedCourseTitle, localizedSessionTitle } from '../../utils/localizedContent';
 import { mediaUrl } from '../../utils/mediaUrl';
 
 function ReviewStars({ rating, ariaLabel }: { rating: number; ariaLabel: string }) {
@@ -51,8 +52,9 @@ function ReviewStars({ rating, ariaLabel }: { rating: number; ariaLabel: string 
 }
 
 export default function InstructorDashboardPage() {
-  const { t } = useTranslation('dashboard');
+  const { t, i18n } = useTranslation('dashboard');
   const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { user } = useAuth();
   const { showToast } = useToast();
   const [data, setData] = useState<any>(null);
@@ -168,7 +170,7 @@ export default function InstructorDashboardPage() {
       </Card>
 
       <div className="stats-grid instructor-dashboard-stats">
-        <StatCard title={t('instructor.stats.monthEarnings')} value={formatMoney(data?.monthEarnings)} icon={Wallet} />
+        <StatCard title={t('instructor.stats.monthEarnings')} value={formatMoney(data?.monthEarnings, undefined, lang)} icon={Wallet} />
         <StatCard title={t('instructor.stats.students')} value={String(data?.totalStudents || 0)} icon={UsersRound} />
         <StatCard title={t('instructor.stats.published')} value={String(data?.publishedCourses || 0)} icon={BookOpen} />
         <StatCard
@@ -222,11 +224,11 @@ export default function InstructorDashboardPage() {
                     <LiveTv size={20} />
                   </div>
                   <div className="instructor-dash-row-info">
-                    <h4>{s.titleAr}</h4>
+                    <h4>{localizedSessionTitle(s, lang)}</h4>
                     <p>
-                      {s.course?.titleAr}
+                      {localizedCourseTitle(s.course, lang)}
                       {' — '}
-                      {formatTime(s.startAt, { hour: '2-digit', minute: '2-digit' })}
+                      {formatTime(s.startAt, { hour: '2-digit', minute: '2-digit' }, lang)}
                     </p>
                   </div>
                   <Badge variant={s.status === 'LIVE' ? 'live' : 'pending'}>
@@ -267,7 +269,7 @@ export default function InstructorDashboardPage() {
                     <BookOpen size={20} />
                   </div>
                   <div className="instructor-dash-row-info">
-                    <h4>{c.titleAr}</h4>
+                    <h4>{localizedCourseTitle(c, lang)}</h4>
                     <p>
                       {t('instructor.sales.salesAndStudents', {
                         sales: c.salesCount,
@@ -275,7 +277,7 @@ export default function InstructorDashboardPage() {
                       })}
                     </p>
                   </div>
-                  <strong className="instructor-dash-revenue">{formatMoney(c.revenue)}</strong>
+                  <strong className="instructor-dash-revenue">{formatMoney(c.revenue, undefined, lang)}</strong>
                 </div>
               ))}
             </div>
@@ -323,16 +325,16 @@ export default function InstructorDashboardPage() {
                     </div>
                     <span className="latest-review-score">{r.rating}/5</span>
                   </div>
-                  {r.course?.titleAr ? (
+                  {r.course ? (
                     <Link to={`/instructor/courses/${r.course.id}/edit`} className="latest-review-course">
-                      {r.course.titleAr}
+                      {localizedCourseTitle(r.course, lang)}
                     </Link>
                   ) : null}
                   {r.comment ? (
                     <p className="latest-review-comment">{r.comment}</p>
                   ) : null}
                   <span className="latest-review-date">
-                    {formatDate(r.createdAt, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {formatDate(r.createdAt, { year: 'numeric', month: 'short', day: 'numeric' }, lang)}
                   </span>
                 </div>
               </div>

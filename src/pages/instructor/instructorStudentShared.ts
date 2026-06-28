@@ -1,9 +1,5 @@
-export const enrollmentLabels: Record<string, string> = {
-  ACTIVE: 'نشط',
-  COMPLETED: 'مكتمل',
-  CANCELLED: 'ملغي',
-  PENDING: 'معلق',
-};
+import i18n from '@/i18n';
+import { formatDate } from '../../utils/localeFormat';
 
 export const enrollmentVariant = (status: string) => {
   if (status === 'COMPLETED') return 'success' as const;
@@ -12,6 +8,15 @@ export const enrollmentVariant = (status: string) => {
   return 'default' as const;
 };
 
-export const fmtEnrollmentDate = (value?: string | null) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-  : '—');
+export function getEnrollmentLabel(status: string): string {
+  return i18n.t(`instructor.students.enrollmentStatus.${status}`, {
+    ns: 'dashboard',
+    defaultValue: status,
+  });
+}
+
+export const fmtEnrollmentDate = (value?: string | null, lang?: string) => (
+  value
+    ? formatDate(value, { year: 'numeric', month: 'short', day: 'numeric' }, lang ?? i18n.language)
+    : i18n.t('empty', { ns: 'liveSessions' })
+);

@@ -63,7 +63,7 @@ export function CoursesTable({
         </span>
       </div>
       <Table<CourseTableRow>
-        className="admin-users-table admin-courses-table"
+        className="admin-courses-table"
         loading={loading}
         stickyHeader
         compact

@@ -1,9 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   CheckCircle2, ChevronLeft, Headphones, MessageSquare, MessageSquarePlus, Plus, Table2,
 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
+import { statusVariant } from '../../components/admin/support/supportTicketShared';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -17,12 +19,13 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
-import { useAdminSupportLabels } from '../../hooks/useAdminSupportLabels';
+import { formatDateTime } from '../../utils/localeFormat';
 
 export default function InstructorSupportPage() {
+  const { t, i18n } = useTranslation('support');
+  const lang = i18n.language;
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { getStatusLabel, fmtSupportDate, statusLabels, statusVariant } = useAdminSupportLabels();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -31,6 +34,20 @@ export default function InstructorSupportPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+
+  const statusLabel = useCallback(
+    (status: string) => t(`instructor.labels.status.${status}`, { defaultValue: status }),
+    [t, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value: string) => formatDateTime(
+      value,
+      { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
+      lang,
+    ),
+    [lang],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -45,11 +62,11 @@ export default function InstructorSupportPage() {
 
   const filteredTickets = useMemo(() => {
     let result = tickets;
-    if (statusFilter) result = result.filter((t) => t.status === statusFilter);
+    if (statusFilter) result = result.filter((item) => item.status === statusFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((t) =>
-        [t.subject, t.message, String(t.id)]
+      result = result.filter((item) =>
+        [item.subject, item.message, String(item.id)]
           .some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
@@ -58,21 +75,28 @@ export default function InstructorSupportPage() {
 
   const stats = useMemo(() => ({
     total: tickets.length,
-    open: tickets.filter((t) => t.status === 'OPEN').length,
-    inProgress: tickets.filter((t) => t.status === 'IN_PROGRESS').length,
-    closed: tickets.filter((t) => t.status === 'CLOSED').length,
+    open: tickets.filter((item) => item.status === 'OPEN').length,
+    inProgress: tickets.filter((item) => item.status === 'IN_PROGRESS').length,
+    closed: tickets.filter((item) => item.status === 'CLOSED').length,
   }), [tickets]);
+
+  const statusFilterOptions = useMemo(() => [
+    { label: t('instructor.filters.allStatuses'), value: '' },
+    { label: statusLabel('OPEN'), value: 'OPEN' },
+    { label: statusLabel('IN_PROGRESS'), value: 'IN_PROGRESS' },
+    { label: statusLabel('CLOSED'), value: 'CLOSED' },
+  ], [t, statusLabel, lang]);
 
   const tableRows = useMemo(() => filteredTickets.map((row) => ({
     id: row.id,
     subject: row.subject,
     message: row.message?.length > 60 ? `${row.message.slice(0, 60)}…` : row.message,
     repliesCount: row._count?.replies ?? row.replies?.length ?? 0,
-    status: getStatusLabel(row.status),
-    createdAt: fmtSupportDate(row.createdAt),
-    updatedAt: fmtSupportDate(row.updatedAt),
+    status: statusLabel(row.status),
+    createdAt: fmtDate(row.createdAt),
+    updatedAt: fmtDate(row.updatedAt),
     _raw: row,
-  })), [filteredTickets, getStatusLabel, fmtSupportDate]);
+  })), [filteredTickets, statusLabel, fmtDate]);
 
   const create = async (e: FormEvent) => {
     e.preventDefault();
@@ -83,10 +107,10 @@ export default function InstructorSupportPage() {
       setOpen(false);
       setSubject('');
       setMessage('');
-      showToast('تم إنشاء التذكرة.', 'success');
+      showToast(t('instructor.toast.created'), 'success');
       await load();
     } catch {
-      showToast('تعذّر إنشاء التذكرة.', 'error');
+      showToast(t('instructor.toast.createFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -98,12 +122,12 @@ export default function InstructorSupportPage() {
     <div className="page-grid instructor-support-page">
       <div className="reports-header instructor-support-header">
         <PageHeader
-          title="الدعم الفني"
-          subtitle="تواصل مع إدارة المنصة للحصول على المساعدة"
+          title={t('instructor.title')}
+          subtitle={t('instructor.subtitle')}
         />
         <div className="reports-header-actions">
           <Button icon={<Plus size={18} />} onClick={() => setOpen(true)}>
-            تذكرة جديدة
+            {t('instructor.newTicket')}
           </Button>
         </div>
       </div>
@@ -113,34 +137,29 @@ export default function InstructorSupportPage() {
           <Headphones size={32} />
         </div>
         <div className="student-support-hero-body">
-          <strong>فريق الدعم جاهز لمساعدتك</strong>
-          <p>أرسل استفسارك حول مراجعة الدورات، المدفوعات، أو أي مشكلة تقنية وسنرد عليك في أقرب وقت.</p>
+          <strong>{t('instructor.heroTitle')}</strong>
+          <p>{t('instructor.heroDesc')}</p>
         </div>
       </Card>
 
       <div className="stats-grid instructor-support-stats">
-        <StatCard title="إجمالي التذاكر" value={String(stats.total)} icon={Headphones} />
-        <StatCard title="مفتوحة" value={String(stats.open)} icon={MessageSquarePlus} />
-        <StatCard title="قيد المعالجة" value={String(stats.inProgress)} icon={MessageSquare} />
-        <StatCard title="مغلقة" value={String(stats.closed)} icon={CheckCircle2} />
+        <StatCard title={t('instructor.stats.total')} value={String(stats.total)} icon={Headphones} />
+        <StatCard title={t('instructor.stats.open')} value={String(stats.open)} icon={MessageSquarePlus} />
+        <StatCard title={t('instructor.stats.inProgress')} value={String(stats.inProgress)} icon={MessageSquare} />
+        <StatCard title={t('instructor.stats.closed')} value={String(stats.closed)} icon={CheckCircle2} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالموضوع أو الرسالة..."
+        searchPlaceholder={t('instructor.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('instructor.filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مفتوحة', value: 'OPEN' },
-            { label: 'قيد المعالجة', value: 'IN_PROGRESS' },
-            { label: 'مغلقة', value: 'CLOSED' },
-          ]}
+          options={statusFilterOptions}
         />
       </FilterBar>
 
@@ -150,37 +169,39 @@ export default function InstructorSupportPage() {
             <span className="reports-table-title-icon" aria-hidden="true">
               <Table2 size={20} />
             </span>
-            تذاكر الدعم
+            {t('instructor.table.title')}
           </h2>
-          <span className="muted-count">{filteredTickets.length.toLocaleString('ar-EG')} تذكرة</span>
+          <span className="muted-count">
+            {t('instructor.table.ticketCount', { count: filteredTickets.length })}
+          </span>
         </div>
         <Table
           loading={loading}
           fluid
           hideScrollNotice
           data={tableRows}
-          emptyTitle="لا توجد تذاكر"
-          emptyDescription="أنشئ تذكرة للحصول على دعم من الإدارة."
+          emptyTitle={t('instructor.table.emptyTitle')}
+          emptyDescription={t('instructor.table.emptyDescription')}
           onRowClick={(row) => navigate(`/instructor/support/${row._raw.id}`)}
           columns={[
-            { key: 'id', header: 'رقم التذكرة', align: 'center' },
-            { key: 'subject', header: 'الموضوع' },
-            { key: 'message', header: 'الرسالة' },
-            { key: 'repliesCount', header: 'الردود', align: 'center' },
+            { key: 'id', header: t('instructor.table.columns.id'), align: 'center' },
+            { key: 'subject', header: t('instructor.table.columns.subject') },
+            { key: 'message', header: t('instructor.table.columns.message') },
+            { key: 'repliesCount', header: t('instructor.table.columns.replies'), align: 'center' },
             {
               key: 'status',
-              header: 'الحالة',
+              header: t('instructor.table.columns.status'),
               align: 'center',
               render: (row) => (
                 <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {getStatusLabel(String(row._raw?.status))}
+                  {statusLabel(String(row._raw?.status))}
                 </Badge>
               ),
             },
-            { key: 'createdAt', header: 'التاريخ' },
+            { key: 'createdAt', header: t('instructor.table.columns.date') },
             {
               key: 'actions',
-              header: 'الإجراءات',
+              header: t('instructor.table.columns.actions'),
               render: (row) => (
                 <Button
                   variant="outline"
@@ -191,7 +212,7 @@ export default function InstructorSupportPage() {
                     navigate(`/instructor/support/${row._raw.id}`);
                   }}
                 >
-                  التفاصيل
+                  {t('instructor.actions.details')}
                 </Button>
               ),
             },
@@ -199,26 +220,26 @@ export default function InstructorSupportPage() {
         />
       </Card>
 
-      <Modal isOpen={open} title="تذكرة دعم جديدة" onClose={() => setOpen(false)}>
+      <Modal isOpen={open} title={t('instructor.modal.title')} onClose={() => setOpen(false)}>
         <form className="stack-sm" onSubmit={create}>
           <Input
-            label="الموضوع"
+            label={t('instructor.modal.subject')}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="مثال: تأخير في مراجعة الكورس"
+            placeholder={t('instructor.modal.subjectPlaceholder')}
             required
           />
           <Textarea
-            label="الرسالة"
+            label={t('instructor.modal.message')}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="اشرح مشكلتك أو استفسارك بالتفصيل..."
+            placeholder={t('instructor.modal.messagePlaceholder')}
             required
           />
           <div className="card-actions">
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>إلغاء</Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>{t('instructor.modal.cancel')}</Button>
             <Button type="submit" loading={submitting} icon={<MessageSquarePlus size={16} />}>
-              إرسال التذكرة
+              {t('instructor.modal.submit')}
             </Button>
           </div>
         </form>

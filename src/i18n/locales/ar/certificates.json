@@ -86,5 +86,81 @@
     "title": "لا يوجد طلاب مؤهلون",
     "description": "جميع الطلاب الذين أكملوا دوراتهم لديهم شهادات بالفعل."
   },
-  "confirm": {}
+  "confirm": {},
+  "student": {
+    "title": "الشهادات",
+    "subtitle": "تظهر الشهادات تلقائياً بعد إكمال الدورة بنسبة 100%",
+    "stats": {
+      "total": "إجمالي الشهادات",
+      "thisMonth": "هذا الشهر",
+      "coursesCompleted": "دورات مُكتملة"
+    },
+    "actions": {
+      "export": "تصدير",
+      "myCourses": "كورساتي",
+      "downloadPdf": "تحميل PDF",
+      "verify": "التحقق",
+      "copy": "نسخ",
+      "share": "مشاركة",
+      "details": "التفاصيل",
+      "verifyPage": "صفحة التحقق",
+      "copyLink": "نسخ الرابط"
+    },
+    "filters": {
+      "searchPlaceholder": "بحث باسم الدورة أو رقم الشهادة..."
+    },
+    "tabs": {
+      "grid": "بطاقات",
+      "list": "جدول"
+    },
+    "badge": {
+      "completion": "شهادة إتمام"
+    },
+    "issuedAt": "تاريخ الإصدار: {{date}}",
+    "pdf": {
+      "available": "متاح",
+      "generatedOnDownload": "يُولَّد عند التحميل"
+    },
+    "table": {
+      "emptyTitle": "لا توجد شهادات",
+      "noResultsTitle": "لا نتائج",
+      "noResultsDescription": "جرّب تغيير البحث.",
+      "emptyDescription": "أكمل دورة بنسبة 100% لتحصل على شهادتك تلقائياً.",
+      "emptyAction": "انتقل إلى كورساتي",
+      "columns": {
+        "course": "الدورة",
+        "certificateNumber": "رقم الشهادة",
+        "issuedAt": "تاريخ الإصدار",
+        "pdf": "PDF",
+        "actions": "الإجراءات"
+      }
+    },
+    "modal": {
+      "detailTitle": "تفاصيل الشهادة",
+      "fields": {
+        "course": "الدورة",
+        "certificateNumber": "رقم الشهادة",
+        "issuedAt": "تاريخ الإصدار",
+        "pdf": "ملف PDF"
+      }
+    },
+    "share": {
+      "title": "شهادة إتمام",
+      "message": "شهادتي في \"{{course}}\" — تحقق منها: {{url}}"
+    },
+    "toast": {
+      "linkCopied": "تم نسخ رابط التحقق.",
+      "shareCopied": "تم نسخ رسالة المشاركة.",
+      "exported": "تم تصدير الشهادات."
+    },
+    "export": {
+      "sheetName": "شهاداتي",
+      "columns": {
+        "course": "الدورة",
+        "certificateNumber": "رقم الشهادة",
+        "issuedAt": "تاريخ الإصدار",
+        "verifyUrl": "رابط التحقق"
+      }
+    }
+  }
 }

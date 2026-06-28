@@ -1,21 +1,19 @@
 import { memo, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Award, BookOpen, Calendar, Clock, Layers, PlayCircle, UserRound,
 } from '@/icons';
+import { useStudentCourseLabels } from '../../../hooks/useStudentCourseLabels';
+import { useStudentMyCourseLabels } from '../../../hooks/useStudentMyCourseLabels';
+import { localizedCategoryName, localizedCourseTitle } from '../../../utils/localizedContent';
+import { mediaUrl } from '../../../utils/mediaUrl';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
-import { mediaUrl } from '../../../utils/mediaUrl';
 import { CourseProgress } from './CourseProgress';
 import type { MyCourseEnrollment } from './types';
-import {
-  fmtDate,
-  formatDuration,
-  getDisplayStatus,
-  STATUS_LABELS,
-  STATUS_VARIANT,
-} from './utils';
+import { getDisplayStatus, STATUS_VARIANT } from './utils';
 
 interface CourseCardProps {
   item: MyCourseEnrollment;
@@ -23,12 +21,16 @@ interface CourseCardProps {
 }
 
 function CourseCardComponent({ item, style }: CourseCardProps) {
+  const { t } = useTranslation('courses');
+  const { lang, fmtLessons, courseFallback } = useStudentCourseLabels();
+  const { getStatusLabel, fmtDate, formatDuration } = useStudentMyCourseLabels();
   const navigate = useNavigate();
   const progress = Number(item.progressPercentage || 0);
   const displayStatus = getDisplayStatus(item);
   const isCompleted = displayStatus === 'COMPLETED';
   const coverSrc = mediaUrl(item.course?.coverImage);
-  const categoryName = item.course?.category?.nameAr || 'دورة';
+  const categoryName = localizedCategoryName(item.course?.category, lang) || courseFallback;
+  const courseTitle = localizedCourseTitle(item.course, lang);
   const lessonCount = item.course?._count?.lessons || 0;
   const durationLabel = formatDuration(item.course?.duration);
   const lastActivity = item.completedAt || item.enrolledAt;
@@ -56,7 +58,7 @@ function CourseCardComponent({ item, style }: CourseCardProps) {
         )}
         <span className="student-my-course-cover-overlay" aria-hidden />
         <Badge variant={STATUS_VARIANT(displayStatus)} className="student-my-course-status-badge">
-          {STATUS_LABELS[displayStatus]}
+          {getStatusLabel(displayStatus)}
         </Badge>
         <span className="student-my-course-category-icon" title={categoryName}>
           <Layers size={16} />
@@ -66,7 +68,7 @@ function CourseCardComponent({ item, style }: CourseCardProps) {
       <div className="student-my-course-body">
         <div className="student-my-course-content">
           <span className="student-my-course-category">{categoryName}</span>
-          <h3 className="student-my-course-title">{item.course?.titleAr}</h3>
+          <h3 className="student-my-course-title">{courseTitle}</h3>
           <p className="student-my-course-instructor">
             <UserRound size={14} aria-hidden />
             <span>{item.course?.instructor?.fullName || '—'}</span>
@@ -75,7 +77,7 @@ function CourseCardComponent({ item, style }: CourseCardProps) {
             {durationLabel ? (
               <span><Clock size={13} aria-hidden /> {durationLabel}</span>
             ) : lessonCount ? (
-              <span><BookOpen size={13} aria-hidden /> {lessonCount} درس</span>
+              <span><BookOpen size={13} aria-hidden /> {fmtLessons(lessonCount)}</span>
             ) : null}
             <span><Calendar size={13} aria-hidden /> {fmtDate(lastActivity)}</span>
           </div>
@@ -91,7 +93,9 @@ function CourseCardComponent({ item, style }: CourseCardProps) {
             icon={isCompleted ? <Award size={16} /> : <PlayCircle size={16} />}
             onClick={handlePrimaryAction}
           >
-            {isCompleted ? 'عرض الشهادة' : 'متابعة التعلم'}
+            {isCompleted
+              ? t('student.myCourses.actions.viewCertificate')
+              : t('student.myCourses.actions.continueLearning')}
           </Button>
           <Button
             fullWidth
@@ -99,7 +103,7 @@ function CourseCardComponent({ item, style }: CourseCardProps) {
             className="student-my-course-details-btn"
             onClick={() => navigate(`/student/courses/${item.courseId}`)}
           >
-            تفاصيل الدورة
+            {t('student.myCourses.actions.courseDetails')}
           </Button>
         </div>
       </div>

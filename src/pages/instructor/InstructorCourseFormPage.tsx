@@ -2,7 +2,8 @@ import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from '
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, DollarSign, Image, Layers, Save, Upload,
+  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, DollarSign, Image, Layers, NavChevronBack,
+  NavChevronForward, Save, Upload,
 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
 import { Badge } from '../../components/ui/Badge';
@@ -17,25 +18,35 @@ import { Select } from '../../components/ui/Select';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { formatMoney } from '../../utils/formatMoney';
+import { localizedCategoryName, localizedCourseList, localizedCourseShortDescription, localizedCourseTitle } from '../../utils/localizedContent';
 import { mediaUrl } from '../../utils/mediaUrl';
 
 const initial = {
   titleAr: '',
+  titleEn: '',
   categoryId: '',
   level: 'BEGINNER',
   type: 'RECORDED',
   language: 'ar',
   shortDescriptionAr: '',
+  shortDescriptionEn: '',
   descriptionAr: '',
+  descriptionEn: '',
   coverImage: '',
   introVideo: '',
   whatYouWillLearn: '',
+  whatYouWillLearnEn: '',
   requirements: '',
+  requirementsEn: '',
   targetAudience: '',
+  targetAudienceEn: '',
   price: '0',
   discountPrice: '',
   isFree: false,
 } as Record<string, any>;
+
+const requiresArabic = (language: string) => language === 'ar' || language === 'ar-en';
+const requiresEnglish = (language: string) => language === 'en' || language === 'ar-en';
 
 function CoverUploadField({
   value,
@@ -106,8 +117,9 @@ function CoverUploadField({
 const linesToList = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean);
 
 export default function InstructorCourseFormPage() {
-  const { t } = useTranslation('courses');
+  const { t, i18n } = useTranslation('courses');
   const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
@@ -131,6 +143,12 @@ export default function InstructorCourseFormPage() {
     { id: '4', label: t('form.steps.review'), icon: CheckCircle2 },
   ], [t]);
 
+  const isLtr = lang.startsWith('en');
+  const bilingualRowClass = `course-bilingual-row${isLtr ? ' course-bilingual-row--en-first' : ''}`;
+  const navIconPosition = isLtr ? 'end' as const : 'start' as const;
+  const prevIcon = isLtr ? <NavChevronBack size={18} /> : <ArrowLeft size={18} />;
+  const nextIcon = isLtr ? <NavChevronForward size={18} /> : <ArrowRight size={18} />;
+
   const languageOptions = useMemo(() => [
     { label: t('form.languages.ar'), value: 'ar' },
     { label: t('form.languages.en'), value: 'en' },
@@ -147,13 +165,19 @@ export default function InstructorCourseFormPage() {
         setForm({
           ...initial,
           ...course,
+          titleEn: course.titleEn || '',
+          shortDescriptionEn: course.shortDescriptionEn || '',
+          descriptionEn: course.descriptionEn || '',
           categoryId: String(course.categoryId),
           price: String(course.price || 0),
           discountPrice: course.discountPrice ? String(course.discountPrice) : '',
           isFree: Number(course.price || 0) === 0,
           whatYouWillLearn: (course.whatYouWillLearn || []).join('\n'),
+          whatYouWillLearnEn: (course.whatYouWillLearnEn || []).join('\n'),
           requirements: (course.requirements || []).join('\n'),
+          requirementsEn: (course.requirementsEn || []).join('\n'),
           targetAudience: (course.targetAudience || []).join('\n'),
+          targetAudienceEn: (course.targetAudienceEn || []).join('\n'),
         });
       }).finally(() => setLoading(false));
     }
@@ -169,42 +193,82 @@ export default function InstructorCourseFormPage() {
     });
   };
 
-  const categoryName = useMemo(
-    () => categories.find((c) => String(c.id) === form.categoryId)?.nameAr || '—',
-    [categories, form.categoryId],
+  const levelOptions = useMemo(
+    () => ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((value) => ({
+      label: t(`form.levels.${value}`),
+      value,
+    })),
+    [t, lang],
   );
 
+  const typeOptions = useMemo(
+    () => ['RECORDED', 'LIVE', 'MIXED'].map((value) => ({
+      label: t(`form.types.${value}`),
+      value,
+    })),
+    [t, lang],
+  );
+
+  const categoryOptions = useMemo(
+    () => [
+      { label: t('form.fields.categoryPlaceholder'), value: '' },
+      ...categories.map((c) => ({
+        label: localizedCategoryName(c, lang),
+        value: String(c.id),
+      })),
+    ],
+    [categories, t, lang],
+  );
+
+  const categoryName = useMemo(() => {
+    const cat = categories.find((c) => String(c.id) === form.categoryId);
+    return cat ? localizedCategoryName(cat, lang) : '—';
+  }, [categories, form.categoryId, lang]);
+
   const progress = useMemo(() => {
-    let filled = 0;
-    if (form.titleAr?.trim()) filled += 1;
-    if (form.categoryId) filled += 1;
-    if (form.shortDescriptionAr?.trim()) filled += 1;
-    if (form.coverImage) filled += 1;
-    if (linesToList(form.whatYouWillLearn).length) filled += 1;
-    if (form.isFree || Number(form.price) > 0) filled += 1;
-    return Math.round((filled / 6) * 100);
+    const needsAr = requiresArabic(form.language);
+    const needsEn = requiresEnglish(form.language);
+    const checks: boolean[] = [];
+    if (needsAr) checks.push(Boolean(form.titleAr?.trim()));
+    if (needsEn) checks.push(Boolean(form.titleEn?.trim()));
+    checks.push(Boolean(form.categoryId));
+    if (needsAr) checks.push(Boolean(form.shortDescriptionAr?.trim()));
+    if (needsEn) checks.push(Boolean(form.shortDescriptionEn?.trim()));
+    checks.push(Boolean(form.coverImage));
+    if (needsAr) checks.push(linesToList(form.whatYouWillLearn).length > 0);
+    if (needsEn) checks.push(linesToList(form.whatYouWillLearnEn).length > 0);
+    checks.push(form.isFree || Number(form.price) > 0);
+    const filled = checks.filter(Boolean).length;
+    return checks.length ? Math.round((filled / checks.length) * 100) : 0;
   }, [form]);
 
   const validateStep = (current: string) => {
     const next: Record<string, string> = {};
+    const needsAr = requiresArabic(form.language);
+    const needsEn = requiresEnglish(form.language);
     if (current === '1') {
-      if (!form.titleAr?.trim()) next.titleAr = 'أدخل عنوان الكورس.';
-      if (!form.categoryId) next.categoryId = 'اختر التصنيف.';
-      if (!form.shortDescriptionAr?.trim()) next.shortDescriptionAr = 'أضف وصفاً مختصراً.';
+      if (needsAr && !form.titleAr?.trim()) next.titleAr = t('form.validation.titleAr');
+      if (needsEn && !form.titleEn?.trim()) next.titleEn = t('form.validation.titleEn');
+      if (!form.categoryId) next.categoryId = t('form.validation.category');
+      if (needsAr && !form.shortDescriptionAr?.trim()) next.shortDescriptionAr = t('form.validation.shortDescAr');
+      if (needsEn && !form.shortDescriptionEn?.trim()) next.shortDescriptionEn = t('form.validation.shortDescEn');
     }
     if (current === '2') {
-      if (!linesToList(form.whatYouWillLearn).length) {
-        next.whatYouWillLearn = 'أضف نقطة واحدة على الأقل.';
+      if (needsAr && !linesToList(form.whatYouWillLearn).length) {
+        next.whatYouWillLearn = t('form.validation.whatYouLearn');
+      }
+      if (needsEn && !linesToList(form.whatYouWillLearnEn).length) {
+        next.whatYouWillLearnEn = t('form.validation.whatYouLearnEn');
       }
     }
     if (current === '3') {
       if (!form.isFree) {
         const price = Number(form.price);
-        if (Number.isNaN(price) || price < 0) next.price = 'أدخل سعراً صالحاً.';
+        if (Number.isNaN(price) || price < 0) next.price = t('form.validation.price');
         if (form.discountPrice) {
           const discount = Number(form.discountPrice);
-          if (Number.isNaN(discount) || discount < 0) next.discountPrice = 'سعر الخصم غير صالح.';
-          else if (discount >= price) next.discountPrice = 'يجب أن يكون سعر الخصم أقل من السعر.';
+          if (Number.isNaN(discount) || discount < 0) next.discountPrice = t('form.validation.discountInvalid');
+          else if (discount >= price) next.discountPrice = t('form.validation.discountTooHigh');
         }
       }
     }
@@ -224,9 +288,9 @@ export default function InstructorCourseFormPage() {
     try {
       const uploaded = await instructorApi.upload('image', file);
       update('coverImage', uploaded.url);
-      showToast('تم رفع صورة الغلاف.', 'success');
+      showToast(t('form.toast.coverUploaded'), 'success');
     } catch {
-      showToast('تعذّر رفع الصورة. حاول مرة أخرى.', 'error');
+      showToast(t('form.toast.coverFailed'), 'error');
     } finally {
       setUploadingCover(false);
     }
@@ -237,27 +301,33 @@ export default function InstructorCourseFormPage() {
     try {
       const uploaded = await instructorApi.upload('video', file);
       update('introVideo', uploaded.url);
-      showToast('تم رفع فيديو المقدمة.', 'success');
+      showToast(t('form.toast.videoUploaded'), 'success');
     } catch {
-      showToast('تعذّر رفع الفيديو. حاول مرة أخرى.', 'error');
+      showToast(t('form.toast.videoFailed'), 'error');
     } finally {
       setUploadingIntro(false);
     }
   };
 
   const buildPayload = () => ({
-    titleAr: form.titleAr?.trim(),
+    titleAr: form.titleAr?.trim() || form.titleEn?.trim(),
+    titleEn: form.titleEn?.trim() || null,
     categoryId: Number(form.categoryId),
     level: form.level,
     type: form.type,
     language: form.language,
     shortDescriptionAr: form.shortDescriptionAr || null,
+    shortDescriptionEn: form.shortDescriptionEn || null,
     descriptionAr: form.descriptionAr || null,
+    descriptionEn: form.descriptionEn || null,
     coverImage: form.coverImage || null,
     introVideo: form.introVideo || null,
     whatYouWillLearn: form.whatYouWillLearn,
+    whatYouWillLearnEn: form.whatYouWillLearnEn || null,
     requirements: form.requirements || null,
+    requirementsEn: form.requirementsEn || null,
     targetAudience: form.targetAudience || null,
+    targetAudienceEn: form.targetAudienceEn || null,
     isFree: Boolean(form.isFree),
     price: form.isFree ? 0 : Number(form.price || 0),
     discountPrice: form.isFree || !form.discountPrice ? null : Number(form.discountPrice),
@@ -276,7 +346,7 @@ export default function InstructorCourseFormPage() {
   const requestSave = (mode: 'stay' | 'builder') => {
     if (step !== '4') return;
     if (!validateAllSteps()) {
-      showToast('راجع الحقول المطلوبة قبل الحفظ.', 'error');
+      showToast(t('form.validation.reviewFields'), 'error');
       return;
     }
     setSaveMode(mode);
@@ -291,14 +361,14 @@ export default function InstructorCourseFormPage() {
       const course = isEdit && id
         ? await instructorApi.updateCourse(id, payload)
         : await instructorApi.createCourse(payload);
-      showToast('تم حفظ الكورس كمسودة.', 'success');
+      showToast(t('form.toast.saved'), 'success');
       if (saveMode === 'builder') {
         navigate(`/instructor/courses/${course.id}/builder`);
       } else if (!isEdit) {
         navigate(`/instructor/courses/${course.id}/edit`);
       }
     } catch {
-      showToast('تعذّر حفظ الكورس.', 'error');
+      showToast(t('form.toast.saveFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -315,10 +385,23 @@ export default function InstructorCourseFormPage() {
   };
 
   const displayPrice = form.isFree
-    ? 'مجاني'
+    ? t('form.free')
     : form.discountPrice
-      ? formatMoney(form.discountPrice)
-      : formatMoney(form.price);
+      ? formatMoney(form.discountPrice, undefined, lang)
+      : formatMoney(form.price, undefined, lang);
+
+  const reviewTitle = localizedCourseTitle({ titleAr: form.titleAr, titleEn: form.titleEn }, lang);
+  const reviewShortDesc = localizedCourseShortDescription(
+    { shortDescriptionAr: form.shortDescriptionAr, shortDescriptionEn: form.shortDescriptionEn },
+    lang,
+    '—',
+  );
+  const reviewLearnItems = localizedCourseList(
+    linesToList(form.whatYouWillLearn),
+    linesToList(form.whatYouWillLearnEn),
+    lang,
+  );
+  const showBothTitles = form.language === 'ar-en' && form.titleAr?.trim() && form.titleEn?.trim();
 
   if (loading) {
     return (
@@ -343,10 +426,10 @@ export default function InstructorCourseFormPage() {
         <div className="course-form-progress-bar">
           <div className="course-form-progress-fill" style={{ width: `${progress}%` }} />
         </div>
-        <span className="course-form-progress-label">اكتمال البيانات: {progress}%</span>
+        <span className="course-form-progress-label">{t('form.progress', { progress })}</span>
       </div>
 
-      <nav className="wizard-steps course-wizard-steps" aria-label="خطوات إنشاء الكورس">
+      <nav className="wizard-steps course-wizard-steps" aria-label={t('form.wizardAria')}>
         {steps.map((s) => {
           const Icon = s.icon;
           const num = Number(s.id);
@@ -377,49 +460,49 @@ export default function InstructorCourseFormPage() {
         <Card className="course-form-card">
           {step === '1' ? (
             <>
-              <h2 className="course-form-section-title">البيانات الأساسية</h2>
-              <p className="course-form-section-desc">المعلومات التي يراها الطالب في صفحة الكورس.</p>
+              <h2 className="course-form-section-title">{t('form.sections.basic.title')}</h2>
+              <p className="course-form-section-desc">{t('form.sections.basic.desc')}</p>
+              <p className="course-form-bilingual-hint">{t('form.fields.bilingualHint')}</p>
               <div className="form-grid">
-                <Input
-                  label="عنوان الكورس"
-                  value={form.titleAr}
-                  onChange={(e) => update('titleAr', e.target.value)}
-                  placeholder="مثال: أساسيات JavaScript للمبتدئين"
-                  error={errors.titleAr}
-                  required
-                />
+                <div className={bilingualRowClass}>
+                  <Input
+                    label={t('form.fields.titleAr')}
+                    value={form.titleAr}
+                    onChange={(e) => update('titleAr', e.target.value)}
+                    placeholder={t('form.fields.titleArPlaceholder')}
+                    error={errors.titleAr}
+                    dir="rtl"
+                  />
+                  <Input
+                    label={t('form.fields.titleEn')}
+                    value={form.titleEn}
+                    onChange={(e) => update('titleEn', e.target.value)}
+                    placeholder={t('form.fields.titleEnPlaceholder')}
+                    error={errors.titleEn}
+                    dir="ltr"
+                  />
+                </div>
                 <Select
-                  label="التصنيف"
+                  label={t('form.fields.category')}
                   value={form.categoryId}
                   onChange={(e) => update('categoryId', e.target.value)}
                   error={errors.categoryId}
-                  options={[
-                    { label: 'اختر التصنيف', value: '' },
-                    ...categories.map((c) => ({ label: c.nameAr, value: String(c.id) })),
-                  ]}
+                  options={categoryOptions}
                 />
                 <Select
-                  label="المستوى"
+                  label={t('form.fields.level')}
                   value={form.level}
                   onChange={(e) => update('level', e.target.value)}
-                  options={[
-                    { label: 'مبتدئ', value: 'BEGINNER' },
-                    { label: 'متوسط', value: 'INTERMEDIATE' },
-                    { label: 'متقدم', value: 'ADVANCED' },
-                  ]}
+                  options={levelOptions}
                 />
                 <Select
-                  label="النوع"
+                  label={t('form.fields.type')}
                   value={form.type}
                   onChange={(e) => update('type', e.target.value)}
-                  options={[
-                    { label: 'مسجل', value: 'RECORDED' },
-                    { label: 'مباشر', value: 'LIVE' },
-                    { label: 'مختلط', value: 'MIXED' },
-                  ]}
+                  options={typeOptions}
                 />
                 <Select
-                  label="اللغة"
+                  label={t('form.fields.language')}
                   value={form.language}
                   onChange={(e) => update('language', e.target.value)}
                   options={languageOptions}
@@ -432,14 +515,14 @@ export default function InstructorCourseFormPage() {
                 />
                 <Card className="stack-sm">
                   <Input
-                    label="فيديو المقدمة (رابط)"
+                    label={t('form.fields.introVideoUrl')}
                     value={form.introVideo}
                     onChange={(e) => update('introVideo', e.target.value)}
                     placeholder="https://"
-                    helper="سيظهر في صفحة تفاصيل الكورس كفيديو تعريفي."
+                    helper={t('form.fields.introVideoHelper')}
                   />
                   <label className="field">
-                    <span>رفع فيديو المقدمة</span>
+                    <span>{t('form.fields.introVideoUpload')}</span>
                     <input
                       ref={introVideoInputRef}
                       type="file"
@@ -451,66 +534,123 @@ export default function InstructorCourseFormPage() {
                         e.target.value = '';
                       }}
                     />
-                    <small className="field-helper">MP4 أو MOV بحجم مناسب للعرض التعريفي.</small>
+                    <small className="field-helper">{t('form.fields.introVideoUploadHelper')}</small>
                     <Button type="button" variant="secondary" loading={uploadingIntro} icon={<Upload size={16} />} onClick={() => introVideoInputRef.current?.click()}>
-                      رفع الفيديو
+                      {t('form.fields.introVideoUploadBtn')}
                     </Button>
                   </label>
                 </Card>
-                <Textarea
-                  label="وصف مختصر"
-                  value={form.shortDescriptionAr}
-                  onChange={(e) => update('shortDescriptionAr', e.target.value)}
-                  placeholder="جملة أو جملتان تلخصان محتوى الكورس..."
-                  error={errors.shortDescriptionAr}
-                  rows={3}
-                />
-                <Textarea
-                  label="الوصف التفصيلي"
-                  value={form.descriptionAr}
-                  onChange={(e) => update('descriptionAr', e.target.value)}
-                  placeholder="اشرح محتوى الكورس، منهجه، وما يميزه..."
-                  rows={5}
-                />
+                <div className={bilingualRowClass}>
+                  <Textarea
+                    label={t('form.fields.shortDescAr')}
+                    value={form.shortDescriptionAr}
+                    onChange={(e) => update('shortDescriptionAr', e.target.value)}
+                    placeholder={t('form.fields.shortDescArPlaceholder')}
+                    error={errors.shortDescriptionAr}
+                    rows={3}
+                    dir="rtl"
+                  />
+                  <Textarea
+                    label={t('form.fields.shortDescEn')}
+                    value={form.shortDescriptionEn}
+                    onChange={(e) => update('shortDescriptionEn', e.target.value)}
+                    placeholder={t('form.fields.shortDescEnPlaceholder')}
+                    error={errors.shortDescriptionEn}
+                    rows={3}
+                    dir="ltr"
+                  />
+                </div>
+                <div className={bilingualRowClass}>
+                  <Textarea
+                    label={t('form.fields.fullDescAr')}
+                    value={form.descriptionAr}
+                    onChange={(e) => update('descriptionAr', e.target.value)}
+                    placeholder={t('form.fields.fullDescArPlaceholder')}
+                    rows={5}
+                    dir="rtl"
+                  />
+                  <Textarea
+                    label={t('form.fields.fullDescEn')}
+                    value={form.descriptionEn}
+                    onChange={(e) => update('descriptionEn', e.target.value)}
+                    placeholder={t('form.fields.fullDescEnPlaceholder')}
+                    rows={5}
+                    dir="ltr"
+                  />
+                </div>
               </div>
             </>
           ) : null}
 
           {step === '2' ? (
             <>
-              <h2 className="course-form-section-title">تفاصيل التعلم</h2>
-              <p className="course-form-section-desc">سطر واحد لكل نقطة — تظهر في صفحة الكورس للطالب.</p>
+              <h2 className="course-form-section-title">{t('form.sections.details.title')}</h2>
+              <p className="course-form-section-desc">{t('form.sections.details.desc')}</p>
               <div className="form-grid form-grid-single">
-                <Textarea
-                  label="ماذا سيتعلم الطالب؟"
-                  value={form.whatYouWillLearn}
-                  onChange={(e) => update('whatYouWillLearn', e.target.value)}
-                  placeholder={'فهم أساسيات JavaScript\nبناء تطبيقات تفاعلية\nالتعامل مع DOM'}
-                  error={errors.whatYouWillLearn}
-                  rows={6}
-                />
-                <Textarea
-                  label="المتطلبات"
-                  value={form.requirements}
-                  onChange={(e) => update('requirements', e.target.value)}
-                  placeholder={'معرفة أساسية بالحاسوب\nلا يلزم خبرة برمجية سابقة'}
-                  rows={4}
-                />
-                <Textarea
-                  label="الفئة المستهدفة"
-                  value={form.targetAudience}
-                  onChange={(e) => update('targetAudience', e.target.value)}
-                  placeholder={'المبتدئون في البرمجة\nطلاب علوم الحاسب'}
-                  rows={4}
-                />
+                <div className={bilingualRowClass}>
+                  <Textarea
+                    label={t('form.fields.whatYouLearnAr')}
+                    value={form.whatYouWillLearn}
+                    onChange={(e) => update('whatYouWillLearn', e.target.value)}
+                    placeholder={t('form.fields.whatYouLearnArPlaceholder')}
+                    error={errors.whatYouWillLearn}
+                    rows={6}
+                    dir="rtl"
+                  />
+                  <Textarea
+                    label={t('form.fields.whatYouLearnEn')}
+                    value={form.whatYouWillLearnEn}
+                    onChange={(e) => update('whatYouWillLearnEn', e.target.value)}
+                    placeholder={t('form.fields.whatYouLearnEnPlaceholder')}
+                    error={errors.whatYouWillLearnEn}
+                    rows={6}
+                    dir="ltr"
+                  />
+                </div>
+                <div className={bilingualRowClass}>
+                  <Textarea
+                    label={t('form.fields.requirementsAr')}
+                    value={form.requirements}
+                    onChange={(e) => update('requirements', e.target.value)}
+                    placeholder={t('form.fields.requirementsArPlaceholder')}
+                    rows={4}
+                    dir="rtl"
+                  />
+                  <Textarea
+                    label={t('form.fields.requirementsEn')}
+                    value={form.requirementsEn}
+                    onChange={(e) => update('requirementsEn', e.target.value)}
+                    placeholder={t('form.fields.requirementsEnPlaceholder')}
+                    rows={4}
+                    dir="ltr"
+                  />
+                </div>
+                <div className={bilingualRowClass}>
+                  <Textarea
+                    label={t('form.fields.targetAudienceAr')}
+                    value={form.targetAudience}
+                    onChange={(e) => update('targetAudience', e.target.value)}
+                    placeholder={t('form.fields.targetAudienceArPlaceholder')}
+                    rows={4}
+                    dir="rtl"
+                  />
+                  <Textarea
+                    label={t('form.fields.targetAudienceEn')}
+                    value={form.targetAudienceEn}
+                    onChange={(e) => update('targetAudienceEn', e.target.value)}
+                    placeholder={t('form.fields.targetAudienceEnPlaceholder')}
+                    rows={4}
+                    dir="ltr"
+                  />
+                </div>
               </div>
             </>
           ) : null}
 
           {step === '3' ? (
             <>
-              <h2 className="course-form-section-title">التسعير</h2>
-              <p className="course-form-section-desc">حدّد ما إذا كان الكورس مجانياً أو مدفوعاً.</p>
+              <h2 className="course-form-section-title">{t('form.sections.pricing.title')}</h2>
+              <p className="course-form-section-desc">{t('form.sections.pricing.desc')}</p>
               <div className="form-grid course-pricing-grid">
                 <CoursePricingTypeToggle
                   isFree={Boolean(form.isFree)}
@@ -525,7 +665,7 @@ export default function InstructorCourseFormPage() {
                 {!form.isFree ? (
                   <>
                     <Input
-                      label="السعر (ج.م)"
+                      label={t('form.fields.price', { currency: tc('currency.egp') })}
                       type="number"
                       min={0}
                       step="0.01"
@@ -534,28 +674,28 @@ export default function InstructorCourseFormPage() {
                       error={errors.price}
                     />
                     <Input
-                      label="سعر الخصم (اختياري)"
+                      label={t('form.fields.discountPrice')}
                       type="number"
                       min={0}
                       step="0.01"
                       value={form.discountPrice}
                       onChange={(e) => update('discountPrice', e.target.value)}
                       error={errors.discountPrice}
-                      helper="يظهر كسعر مخفّض في صفحة الكورس."
+                      helper={t('form.fields.discountHelper')}
                     />
                   </>
                 ) : null}
               </div>
               {!form.isFree && form.price ? (
                 <div className="course-price-preview">
-                  <span>معاينة السعر:</span>
+                  <span>{t('form.pricePreview')}</span>
                   {form.discountPrice ? (
                     <>
-                      <strong>{formatMoney(form.discountPrice)}</strong>
-                      <del>{formatMoney(form.price)}</del>
+                      <strong>{formatMoney(form.discountPrice, undefined, lang)}</strong>
+                      <del>{formatMoney(form.price, undefined, lang)}</del>
                     </>
                   ) : (
-                    <strong>{formatMoney(form.price)}</strong>
+                    <strong>{formatMoney(form.price, undefined, lang)}</strong>
                   )}
                 </div>
               ) : null}
@@ -564,8 +704,8 @@ export default function InstructorCourseFormPage() {
 
           {step === '4' ? (
             <>
-              <h2 className="course-form-section-title">مراجعة قبل الحفظ</h2>
-              <p className="course-form-section-desc">تأكد من صحة البيانات — يُحفظ الكورس كمسودة.</p>
+              <h2 className="course-form-section-title">{t('form.sections.review.title')}</h2>
+              <p className="course-form-section-desc">{t('form.sections.review.desc')}</p>
               <div className="course-review-layout">
                 <div className="course-review-cover-wrap">
                   {form.coverImage ? (
@@ -573,18 +713,23 @@ export default function InstructorCourseFormPage() {
                   ) : (
                     <div className="course-review-cover-empty">
                       <Image size={40} />
-                      <span>بدون صورة غلاف</span>
+                      <span>{t('form.review.noCover')}</span>
                     </div>
                   )}
                 </div>
                 <div className="course-review-body">
                   <div className="course-review-head">
                     <div className="course-review-title-row">
-                      <Badge variant="default">مسودة</Badge>
-                      <h3>{form.titleAr || 'عنوان الكورس'}</h3>
+                      <Badge variant="default">{t('form.review.draftBadge')}</Badge>
+                      <h3>{reviewTitle || t('form.review.titleFallback')}</h3>
                     </div>
+                    {showBothTitles ? (
+                      <p className="course-review-alt-title">
+                        {lang.startsWith('en') ? form.titleAr : form.titleEn}
+                      </p>
+                    ) : null}
                   </div>
-                  <p className="course-review-desc">{form.shortDescriptionAr || '—'}</p>
+                  <p className="course-review-desc">{reviewShortDesc}</p>
                   <div className="course-review-meta">
                     <span>{categoryName}</span>
                     <span>{levelLabel(form.level)}</span>
@@ -595,20 +740,20 @@ export default function InstructorCourseFormPage() {
                     <video controls src={mediaUrl(form.introVideo)} className="course-review-video" />
                   ) : null}
                   <p className="course-review-price">
-                    السعر: <strong>{displayPrice}</strong>
+                    {t('form.review.priceLabel')} <strong>{displayPrice}</strong>
                   </p>
-                  {linesToList(form.whatYouWillLearn).length ? (
+                  {reviewLearnItems.length ? (
                     <div className="course-review-list">
-                      <h4>ماذا سيتعلم الطالب</h4>
+                      <h4>{t('form.review.whatYouLearnTitle')}</h4>
                       <ul>
-                        {linesToList(form.whatYouWillLearn).map((item) => (
+                        {reviewLearnItems.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
                     </div>
                   ) : null}
                   <p className="course-review-hint">
-                    راجع جميع البيانات بعناية. لن يتم الحفظ إلا عند الضغط على أحد أزرار الحفظ أدناه.
+                    {t('form.review.hint')}
                   </p>
                 </div>
               </div>
@@ -623,15 +768,22 @@ export default function InstructorCourseFormPage() {
             size="lg"
             className="course-form-prev-btn"
             disabled={step === '1'}
-            icon={<ArrowLeft size={18} />}
+            icon={prevIcon}
+            iconPosition={navIconPosition}
             onClick={goPrev}
           >
-            السابق
+            {t('form.navigation.prev')}
           </Button>
           <div className="course-form-actions-group">
             {step !== '4' ? (
-              <Button type="button" size="lg" icon={<ArrowRight size={18} />} onClick={goNext}>
-                التالي
+              <Button
+                type="button"
+                size="lg"
+                icon={nextIcon}
+                iconPosition={navIconPosition}
+                onClick={goNext}
+              >
+                {t('form.navigation.next')}
               </Button>
             ) : (
               <>
@@ -643,10 +795,10 @@ export default function InstructorCourseFormPage() {
                   icon={<Save size={18} />}
                   onClick={() => requestSave('stay')}
                 >
-                  {isEdit ? 'حفظ التعديلات' : 'حفظ كمسودة'}
+                  {isEdit ? t('form.navigation.saveEdits') : t('form.navigation.saveDraft')}
                 </Button>
                 <Button type="submit" size="lg" loading={submitting} icon={<Save size={18} />}>
-                  حفظ والمتابعة للبناء
+                  {t('form.navigation.saveAndBuilder')}
                 </Button>
               </>
             )}
@@ -656,13 +808,13 @@ export default function InstructorCourseFormPage() {
 
       <ConfirmDialog
         isOpen={confirmSave}
-        title="تأكيد حفظ الكورس"
+        title={t('form.confirm.title')}
         message={
           saveMode === 'builder'
-            ? 'سيتم حفظ الكورس كمسودة ثم الانتقال لمنشئ المحتوى لإضافة الأقسام والدروس.'
-            : 'سيتم حفظ الكورس كمسودة والبقاء في هذه الصفحة.'
+            ? t('form.confirm.messageBuilder')
+            : t('form.confirm.messageStay')
         }
-        confirmLabel="تأكيد الحفظ"
+        confirmLabel={t('form.confirm.confirmLabel')}
         variant="primary"
         onConfirm={save}
         onCancel={() => setConfirmSave(false)}

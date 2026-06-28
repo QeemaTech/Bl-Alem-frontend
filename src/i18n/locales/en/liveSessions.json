@@ -104,6 +104,117 @@
     "started": "Session started.",
     "ended": "Session ended.",
     "cancelled": "Session cancelled.",
-    "deleted": "Session deleted."
+    "deleted": "Session deleted.",
+    "linkOpened": "Session link opened.",
+    "noMeetingUrl": "No meeting link available.",
+    "joinFailed": "Could not join the session.",
+    "linkCopied": "Meeting link copied."
+  },
+  "student": {
+    "title": "Live sessions",
+    "subtitle": "Join upcoming sessions or review past ones",
+    "hero": {
+      "title": "Sessions for your enrolled courses",
+      "body": "Live sessions for courses you enrolled in appear here.",
+      "liveNow": " A live session is running now — join right away!"
+    },
+    "stats": {
+      "total": "Total sessions",
+      "upcoming": "Upcoming",
+      "live": "Live now",
+      "ended": "Past",
+      "liveHintActive": "Active session",
+      "liveHintNone": "No live session"
+    },
+    "charts": {
+      "distribution": "Session distribution",
+      "upcoming": "Upcoming",
+      "live": "Live",
+      "ended": "Past"
+    },
+    "tabs": {
+      "upcoming": "Upcoming ({{count}})",
+      "liveNow": "Live now ({{count}})",
+      "ended": "Past ({{count}})"
+    },
+    "view": {
+      "feed": "Cards",
+      "table": "Table"
+    },
+    "searchPlaceholder": "Search by title, course, or instructor...",
+    "empty": {
+      "title": "No sessions",
+      "filteredInTab": "No sessions match this category.",
+      "noSessions": "No live sessions for your courses yet. Enroll in a course that includes live sessions.",
+      "tableDescription": "No sessions match your search or current category."
+    },
+    "myCoursesAction": "My courses",
+    "export": {
+      "sheetName": "Student-sessions"
+    },
+    "detail": {
+      "openMeetingLink": "Open meeting link",
+      "viewCourse": "View course"
+    }
+  },
+  "instructor": {
+    "title": "Live sessions",
+    "subtitle": "Schedule and manage live streams for your students",
+    "export": "Export",
+    "createSession": "Create session",
+    "stats": {
+      "liveHintActive": "Active session",
+      "liveHintNone": "No live session"
+    },
+    "tabs": {
+      "scheduled": "Upcoming ({{count}})",
+      "live": "Live ({{count}})",
+      "ended": "Past ({{count}})",
+      "cancelled": "Cancelled ({{count}})"
+    },
+    "searchPlaceholder": "Search by title or course...",
+    "openMeetingLink": "Open meeting link",
+    "empty": {
+      "createNew": "Create a new live session to get started.",
+      "noInTab": "No sessions in this tab."
+    },
+    "form": {
+      "createTitle": "New live session",
+      "courseLabel": "Course",
+      "titleLabel": "Session title",
+      "titlePlaceholder": "e.g. Unit 1 review",
+      "startAtLabel": "Date and time",
+      "startAtHelper": "Choose when the session starts",
+      "durationLabel": "Duration (minutes)",
+      "meetingUrlHelper": "Zoom, Google Meet, or any platform",
+      "descriptionLabel": "Description (optional)",
+      "create": "Create session"
+    },
+    "confirm": {
+      "endTitle": "End session?",
+      "cancelTitle": "Cancel session?",
+      "endMessage": "The stream will end and the session will be marked as ended.",
+      "cancelMessage": "The session will be cancelled and students won't be able to attend.",
+      "cancelConfirm": "Cancel session"
+    },
+    "toast": {
+      "validation": "Please complete course, title, and start time.",
+      "created": "Session created.",
+      "saveFailed": "Could not save session.",
+      "actionFailed": "Could not complete action."
+    },
+    "exportSheet": "Instructor-sessions",
+    "exportColumns": {
+      "title": "Title",
+      "course": "Course",
+      "startAt": "Start time",
+      "duration": "Duration (min)",
+      "status": "Status",
+      "meetingUrl": "Meeting link"
+    },
+    "detailFields": {
+      "startAt": "Schedule",
+      "url": "Link"
+    }
   }
 }

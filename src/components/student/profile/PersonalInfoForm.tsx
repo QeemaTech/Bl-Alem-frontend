@@ -1,11 +1,13 @@
 import { FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Save, UserRound } from '@/icons';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { Textarea } from '../../ui/Textarea';
-import { educationOptions, languageOptions, type ProfileFormState } from './profileUtils';
+import { useStudentProfileLabels } from '../../../hooks/useStudentProfileLabels';
+import type { ProfileFormState } from './profileUtils';
 import { InterestChips } from './InterestChips';
 
 interface PersonalInfoFormProps {
@@ -23,6 +25,9 @@ export function PersonalInfoForm({
   onChange,
   onSubmit,
 }: PersonalInfoFormProps) {
+  const { t } = useTranslation('profile');
+  const { educationOptions, languageOptions } = useStudentProfileLabels();
+
   return (
     <Card className="student-profile-form-card support-ticket-page-card">
       <header className="student-profile-section-head">
@@ -30,16 +35,14 @@ export function PersonalInfoForm({
           <UserRound size={22} />
         </span>
         <div>
-          <h2 className="student-profile-section-title">البيانات الشخصية</h2>
-          <p className="student-profile-section-desc">
-            تُستخدم لتخصيص تجربتك التعليمية وتوصيات الكورسات.
-          </p>
+          <h2 className="student-profile-section-title">{t('student.personal.title')}</h2>
+          <p className="student-profile-section-desc">{t('student.personal.desc')}</p>
         </div>
       </header>
 
       <form className="form-grid student-profile-form" onSubmit={onSubmit} noValidate>
         <Input
-          label="الاسم الكامل"
+          label={t('student.personal.fullName')}
           value={profile.fullName || ''}
           onChange={(e) => onChange('fullName', e.target.value)}
           error={errors.fullName}
@@ -47,7 +50,7 @@ export function PersonalInfoForm({
           autoComplete="name"
         />
         <Input
-          label="الجوال"
+          label={t('student.personal.phone')}
           value={profile.phone || ''}
           onChange={(e) => onChange('phone', e.target.value)}
           placeholder="+9665XXXXXXXX"
@@ -57,22 +60,22 @@ export function PersonalInfoForm({
           inputMode="tel"
         />
         <Select
-          label="المستوى التعليمي"
+          label={t('student.personal.educationLevel')}
           value={profile.educationLevel || ''}
           onChange={(e) => onChange('educationLevel', e.target.value)}
           options={educationOptions}
         />
         <Select
-          label="لغة الواجهة المفضلة"
+          label={t('student.personal.preferredLanguage')}
           value={profile.preferredLanguage || 'ar'}
           onChange={(e) => onChange('preferredLanguage', e.target.value)}
           options={languageOptions}
         />
         <Textarea
-          label="نبذة عنك"
+          label={t('student.personal.bio')}
           value={profile.bio || ''}
           onChange={(e) => onChange('bio', e.target.value)}
-          placeholder="عرّف بنفسك واهتماماتك التعليمية..."
+          placeholder={t('student.personal.bioPlaceholder')}
           rows={4}
           className="student-profile-bio-field"
         />
@@ -84,7 +87,7 @@ export function PersonalInfoForm({
         </div>
         <div className="student-profile-form-actions">
           <Button type="submit" loading={saving} icon={<Save size={16} aria-hidden />}>
-            حفظ التعديلات
+            {t('student.personal.save')}
           </Button>
         </div>
       </form>

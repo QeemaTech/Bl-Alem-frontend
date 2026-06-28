@@ -192,6 +192,9 @@ export const CircleCheck = createIcon('check_circle');
 export const CircleX = createIcon('highlight_off');
 export const ChevronLeft = createIcon('chevron_right');
 export const ChevronRight = createIcon('chevron_left');
+/** Physical direction icons for LTR navigation (not mirrored for RTL layouts). */
+export const NavChevronBack = createIcon('chevron_left');
+export const NavChevronForward = createIcon('chevron_right');
 export const Wrench = createIcon('build');
 export const Briefcase = createIcon('work');
 export const KeyRound = createIcon('key');

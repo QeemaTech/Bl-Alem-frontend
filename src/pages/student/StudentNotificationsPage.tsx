@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Award, Bell, BellOff, BookOpen, CalendarDays, Check, CheckCheck, CreditCard, Gift,
   MessageCircle, Radio, Sparkles,
@@ -15,21 +16,8 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
-
-const typeLabels: Record<string, string> = {
-  WELCOME: 'ترحيب',
-  LIVE_SESSION: 'جلسة مباشرة',
-  CERTIFICATE: 'شهادة',
-  REWARD: 'مكافأة',
-  PAYMENT: 'دفع',
-  COMMUNITY: 'مجتمع',
-  SUBSCRIPTION: 'اشتراك',
-  COURSE: 'كورس',
-  SUPPORT: 'دعم فني',
-  REFERRAL: 'إحالة',
-  QUIZ: 'اختبار',
-  ADMIN: 'إداري',
-};
+import { localizedText } from '../../utils/localizedContent';
+import { formatDateTime, formatNumber } from '../../utils/localeFormat';
 
 const typeIcons: Record<string, MaterialIcon> = {
   WELCOME: Sparkles,
@@ -44,26 +32,9 @@ const typeIcons: Record<string, MaterialIcon> = {
   REFERRAL: Gift,
 };
 
-const fmtRelative = (value: string) => {
-  const date = new Date(value);
-  const diffMs = Date.now() - date.getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'الآن';
-  if (mins < 60) return `منذ ${mins} دقيقة`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `منذ ${hours} ساعة`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `منذ ${days} يوم`;
-  return date.toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 export default function StudentNotificationsPage() {
+  const { t, i18n } = useTranslation('notifications');
+  const lang = i18n.language;
   const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +43,40 @@ export default function StudentNotificationsPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
+
+  const typeLabel = useCallback(
+    (type: string) => t(`student.labels.type.${type}`, { defaultValue: type || t('student.labels.fallbackType') }),
+    [t, lang],
+  );
+
+  const notificationTitle = useCallback(
+    (item: any) => localizedText({ ar: item.titleAr, en: item.titleEn }, lang),
+    [lang],
+  );
+
+  const notificationBody = useCallback(
+    (item: any) => localizedText({ ar: item.bodyAr, en: item.bodyEn }, lang),
+    [lang],
+  );
+
+  const fmtRelative = useCallback((value: string) => {
+    const date = new Date(value);
+    const diffMs = Date.now() - date.getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return t('student.time.now');
+    if (mins < 60) return t('student.time.minutesAgo', { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('student.time.hoursAgo', { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 7) return t('student.time.daysAgo', { count: days });
+    return formatDateTime(value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }, lang);
+  }, [t, lang]);
 
   const load = async () => {
     setItems(await studentApi.notifications());
@@ -90,12 +95,12 @@ export default function StudentNotificationsPage() {
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((i) =>
-        [i.titleAr, i.bodyAr, typeLabels[i.type], String(i.id)]
+        [notificationTitle(i), notificationBody(i), typeLabel(i.type), String(i.id)]
           .some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result;
-  }, [items, readFilter, typeFilter, search]);
+  }, [items, readFilter, typeFilter, search, lang, notificationTitle, notificationBody, typeLabel]);
 
   const stats = useMemo(() => {
     const todayStart = new Date();
@@ -110,10 +115,10 @@ export default function StudentNotificationsPage() {
   const typeOptions = useMemo(() => {
     const types = [...new Set(items.map((i) => i.type).filter(Boolean))].sort();
     return [
-      { label: 'كل الأنواع', value: '' },
-      ...types.map((type) => ({ label: typeLabels[type] || type, value: type })),
+      { label: t('student.filters.allTypes'), value: '' },
+      ...types.map((type) => ({ label: typeLabel(type), value: type })),
     ];
-  }, [items]);
+  }, [items, lang, t, typeLabel]);
 
   const hasActiveFilters = Boolean(search.trim() || readFilter || typeFilter);
 
@@ -124,9 +129,9 @@ export default function StudentNotificationsPage() {
       setItems((current) => current.map((item) => (
         item.id === id ? { ...item, isRead: true } : item
       )));
-      showToast('تم تعليم الإشعار كمقروء.', 'success');
+      showToast(t('student.toast.markedRead'), 'success');
     } catch {
-      showToast('تعذّر تحديث الإشعار.', 'error');
+      showToast(t('student.toast.markReadFailed'), 'error');
     } finally {
       setBusyId(null);
     }
@@ -139,9 +144,9 @@ export default function StudentNotificationsPage() {
     try {
       await Promise.all(unread.map((i) => studentApi.markNotificationRead(i.id)));
       setItems((current) => current.map((item) => ({ ...item, isRead: true })));
-      showToast(`تم تعليم ${unread.length} إشعار كمقروء.`, 'success');
+      showToast(t('student.toast.markedAllRead', { count: unread.length }), 'success');
     } catch {
-      showToast('تعذّر تعليم الكل كمقروء.', 'error');
+      showToast(t('student.toast.markAllReadFailed'), 'error');
     } finally {
       setMarkingAll(false);
     }
@@ -151,8 +156,8 @@ export default function StudentNotificationsPage() {
     <div className="page-grid student-notifications-page">
       <div className="reports-header">
         <PageHeader
-          title="الإشعارات"
-          subtitle="تابع تحديثات الدورات والدعم والمكافآت والمجتمع"
+          title={t('student.title')}
+          subtitle={t('student.subtitle')}
         />
         <div className="reports-header-actions">
           <Button
@@ -162,42 +167,42 @@ export default function StudentNotificationsPage() {
             loading={markingAll}
             disabled={!stats.unread || loading}
           >
-            تعليم الكل كمقروء
+            {t('student.actions.markAllRead')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الإشعارات" value={String(stats.total)} icon={Bell} />
+        <StatCard title={t('student.stats.total')} value={String(stats.total)} icon={Bell} />
         <StatCard
-          title="غير مقروء"
+          title={t('student.stats.unread')}
           value={String(stats.unread)}
           icon={BellOff}
-          hint={stats.unread ? 'تحتاج متابعة' : 'لا جديد'}
+          hint={stats.unread ? t('student.stats.unreadHintActive') : t('student.stats.unreadHintClear')}
         />
-        <StatCard title="اليوم" value={String(stats.today)} icon={CalendarDays} />
+        <StatCard title={t('student.stats.today')} value={String(stats.today)} icon={CalendarDays} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان أو النص..."
+        searchPlaceholder={t('student.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setReadFilter(''); setTypeFilter(''); }}
         resetDisabled={!hasActiveFilters}
-        ariaLabel="فلاتر الإشعارات"
+        ariaLabel={t('student.filters.ariaLabel')}
       >
         <Select
-          label="حالة القراءة"
+          label={t('student.filters.readStatus')}
           value={readFilter}
           onChange={(e) => setReadFilter(e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'غير مقروء', value: 'unread' },
-            { label: 'مقروء', value: 'read' },
+            { label: t('student.filters.all'), value: '' },
+            { label: t('student.filters.unread'), value: 'unread' },
+            { label: t('student.filters.read'), value: 'read' },
           ]}
         />
         <Select
-          label="النوع"
+          label={t('student.filters.type')}
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
           options={typeOptions}
@@ -210,10 +215,10 @@ export default function StudentNotificationsPage() {
             <span className="reports-table-title-icon" aria-hidden="true">
               <Bell size={20} />
             </span>
-            قائمة الإشعارات
+            {t('student.table.title')}
           </h2>
           <span className="muted-count">
-            {filteredItems.length.toLocaleString('ar-EG')} إشعار
+            {t('student.table.count', { count: formatNumber(filteredItems.length, undefined, lang) })}
           </span>
         </div>
 
@@ -225,7 +230,7 @@ export default function StudentNotificationsPage() {
           <div className="student-notifications-list">
             {filteredItems.map((item) => {
               const Icon = typeIcons[item.type] || Bell;
-              const typeLabel = typeLabels[item.type] || 'إشعار';
+              const label = typeLabel(item.type);
               return (
                 <article
                   key={item.id}
@@ -241,18 +246,18 @@ export default function StudentNotificationsPage() {
                   <div className="student-notification-body">
                     <div className="student-notification-top">
                       <div className="student-notification-title-wrap">
-                        <h3>{item.titleAr}</h3>
+                        <h3>{notificationTitle(item)}</h3>
                         <Badge
                           variant={item.isRead ? 'default' : 'info'}
                           dot
                           className="status-badge"
                         >
-                          {item.isRead ? 'مقروء' : 'غير مقروء'}
+                          {item.isRead ? t('student.labels.readStatus.read') : t('student.labels.readStatus.unread')}
                         </Badge>
                       </div>
-                      <span className="student-notification-type">{typeLabel}</span>
+                      <span className="student-notification-type">{label}</span>
                     </div>
-                    <p className="student-notification-text">{item.bodyAr}</p>
+                    <p className="student-notification-text">{notificationBody(item)}</p>
                     <time className="student-notification-time" dateTime={item.createdAt}>
                       {fmtRelative(item.createdAt)}
                     </time>
@@ -266,12 +271,12 @@ export default function StudentNotificationsPage() {
                         loading={busyId === item.id}
                         onClick={() => markRead(item.id)}
                       >
-                        تعليم كمقروء
+                        {t('student.actions.markRead')}
                       </Button>
                     ) : (
                       <span className="student-notification-done">
                         <Check size={14} aria-hidden="true" />
-                        مقروء
+                        {t('student.actions.read')}
                       </span>
                     )}
                   </div>
@@ -281,14 +286,14 @@ export default function StudentNotificationsPage() {
           </div>
         ) : items.length ? (
           <EmptyState
-            title="لا نتائج"
-            description="جرّب تغيير الفلاتر أو البحث."
+            title={t('student.table.noResultsTitle')}
+            description={t('student.table.noResultsDescription')}
             icon={Bell}
           />
         ) : (
           <EmptyState
-            title="لا توجد إشعارات"
-            description="ستظهر إشعارات الدورات والدعم والمكافآت هنا."
+            title={t('student.table.emptyTitle')}
+            description={t('student.table.emptyDescription')}
             icon={Bell}
           />
         )}

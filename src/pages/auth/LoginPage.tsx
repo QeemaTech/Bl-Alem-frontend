@@ -99,7 +99,12 @@ export default function LoginPage() {
       showToast(t('login.success'), 'success');
       navigate(getDashboardPath(user.role), { replace: true });
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || te('generic');
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const message = axiosError.response?.status === 429
+        ? te('rateLimited')
+        : !axiosError.response
+          ? te('network')
+          : axiosError.response?.data?.message || te('generic');
       showToast(message, 'error');
     } finally {
       setIsSubmitting(false);

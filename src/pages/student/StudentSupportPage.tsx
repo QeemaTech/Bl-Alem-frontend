@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2, Download, Eye, Headphones, MessageSquare, MessageSquarePlus, Plus, Send, Table2, X,
 } from '@/icons';
@@ -17,12 +18,7 @@ import { Table } from '../../components/ui/Table';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  OPEN: 'مفتوحة',
-  IN_PROGRESS: 'قيد المعالجة',
-  CLOSED: 'مغلقة',
-};
+import { formatDateTime } from '../../utils/localeFormat';
 
 const statusVariant = (status: string) => {
   if (status === 'CLOSED') return 'success' as const;
@@ -31,25 +27,9 @@ const statusVariant = (status: string) => {
   return 'default' as const;
 };
 
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const exportColumns = [
-  { key: 'id', header: 'رقم التذكرة' },
-  { key: 'subject', header: 'الموضوع' },
-  { key: 'message', header: 'الرسالة' },
-  { key: 'repliesCount', header: 'عدد الردود' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'تاريخ الإنشاء' },
-  { key: 'updatedAt', header: 'آخر تحديث' },
-];
-
 export default function StudentSupportPage() {
+  const { t, i18n } = useTranslation('support');
+  const lang = i18n.language;
   const { showToast } = useToast();
   const [tickets, setTickets] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
@@ -62,6 +42,20 @@ export default function StudentSupportPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [reply, setReply] = useState('');
+
+  const statusLabel = useCallback(
+    (status: string) => t(`student.labels.status.${status}`, { defaultValue: status }),
+    [t, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value: string) => formatDateTime(
+      value,
+      { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
+      lang,
+    ),
+    [lang],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -76,11 +70,11 @@ export default function StudentSupportPage() {
 
   const filteredTickets = useMemo(() => {
     let result = tickets;
-    if (statusFilter) result = result.filter((t) => t.status === statusFilter);
+    if (statusFilter) result = result.filter((item) => item.status === statusFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      result = result.filter((t) =>
-        [t.subject, t.message, String(t.id)]
+      result = result.filter((item) =>
+        [item.subject, item.message, String(item.id)]
           .some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
@@ -89,21 +83,38 @@ export default function StudentSupportPage() {
 
   const stats = useMemo(() => ({
     total: tickets.length,
-    open: tickets.filter((t) => t.status === 'OPEN').length,
-    inProgress: tickets.filter((t) => t.status === 'IN_PROGRESS').length,
-    closed: tickets.filter((t) => t.status === 'CLOSED').length,
+    open: tickets.filter((item) => item.status === 'OPEN').length,
+    inProgress: tickets.filter((item) => item.status === 'IN_PROGRESS').length,
+    closed: tickets.filter((item) => item.status === 'CLOSED').length,
   }), [tickets]);
+
+  const exportColumns = useMemo(() => [
+    { key: 'id', header: t('student.export.columns.id') },
+    { key: 'subject', header: t('student.export.columns.subject') },
+    { key: 'message', header: t('student.export.columns.message') },
+    { key: 'repliesCount', header: t('student.export.columns.repliesCount') },
+    { key: 'status', header: t('student.export.columns.status') },
+    { key: 'createdAt', header: t('student.export.columns.createdAt') },
+    { key: 'updatedAt', header: t('student.export.columns.updatedAt') },
+  ], [t, lang]);
 
   const tableRows = useMemo(() => filteredTickets.map((row) => ({
     id: row.id,
     subject: row.subject,
     message: row.message?.length > 50 ? `${row.message.slice(0, 50)}...` : row.message,
     repliesCount: row._count?.replies ?? row.replies?.length ?? 0,
-    status: statusLabels[row.status] || row.status,
+    status: statusLabel(row.status),
     createdAt: fmtDate(row.createdAt),
     updatedAt: fmtDate(row.updatedAt),
     _raw: row,
-  })), [filteredTickets]);
+  })), [filteredTickets, statusLabel, fmtDate]);
+
+  const statusFilterOptions = useMemo(() => [
+    { label: t('student.filters.allStatuses'), value: '' },
+    { label: statusLabel('OPEN'), value: 'OPEN' },
+    { label: statusLabel('IN_PROGRESS'), value: 'IN_PROGRESS' },
+    { label: statusLabel('CLOSED'), value: 'CLOSED' },
+  ], [t, statusLabel, lang]);
 
   const openTicket = async (id: number) => {
     if (selected?.id === id) return;
@@ -130,10 +141,10 @@ export default function StudentSupportPage() {
       setIsOpen(false);
       setSubject('');
       setMessage('');
-      showToast('تم إنشاء التذكرة بنجاح.', 'success');
+      showToast(t('student.toast.created'), 'success');
       await load();
     } catch {
-      showToast('تعذّر إنشاء التذكرة.', 'error');
+      showToast(t('student.toast.createFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -146,11 +157,11 @@ export default function StudentSupportPage() {
     try {
       await studentApi.replySupportTicket(selected.id, reply.trim());
       setReply('');
-      showToast('تم إرسال الرد.', 'success');
+      showToast(t('student.toast.replySent'), 'success');
       await load();
       setSelected(await studentApi.supportTicket(selected.id));
     } catch {
-      showToast('تعذّر إرسال الرد.', 'error');
+      showToast(t('student.toast.replyFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -158,7 +169,7 @@ export default function StudentSupportPage() {
 
   const handleExport = () => {
     exportTableToExcel(
-      'تذاكر الدعم',
+      t('student.export.sheetName'),
       exportColumns,
       tableRows.map(({ _raw, message: preview, ...row }) => ({
         ...row,
@@ -171,15 +182,15 @@ export default function StudentSupportPage() {
     <div className="page-grid student-support-page">
       <div className="reports-header">
         <PageHeader
-          title="الدعم الفني"
-          subtitle="أنشئ تذكرة أو تابع ردود فريق الدعم"
+          title={t('student.title')}
+          subtitle={t('student.subtitle')}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!tickets.length}>
-            تصدير Excel
+            {t('student.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={() => setIsOpen(true)}>
-            تذكرة جديدة
+            {t('student.newTicket')}
           </Button>
         </div>
       </div>
@@ -189,34 +200,29 @@ export default function StudentSupportPage() {
           <Headphones size={32} />
         </div>
         <div className="student-support-hero-body">
-          <strong>نحن هنا لمساعدتك</strong>
-          <p>أرسل استفسارك أو مشكلتك وسيرد عليك فريق الدعم في أقرب وقت.</p>
+          <strong>{t('student.heroTitle')}</strong>
+          <p>{t('student.heroDesc')}</p>
         </div>
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي التذاكر" value={String(stats.total)} icon={Headphones} />
-        <StatCard title="مفتوحة" value={String(stats.open)} icon={MessageSquarePlus} />
-        <StatCard title="قيد المعالجة" value={String(stats.inProgress)} icon={MessageSquare} />
-        <StatCard title="مغلقة" value={String(stats.closed)} icon={CheckCircle2} />
+        <StatCard title={t('student.stats.total')} value={String(stats.total)} icon={Headphones} />
+        <StatCard title={t('student.stats.open')} value={String(stats.open)} icon={MessageSquarePlus} />
+        <StatCard title={t('student.stats.inProgress')} value={String(stats.inProgress)} icon={MessageSquare} />
+        <StatCard title={t('student.stats.closed')} value={String(stats.closed)} icon={CheckCircle2} />
       </div>
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالموضوع أو الرسالة..."
+        searchPlaceholder={t('student.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('student.filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          options={[
-            { label: 'كل الحالات', value: '' },
-            { label: 'مفتوحة', value: 'OPEN' },
-            { label: 'قيد المعالجة', value: 'IN_PROGRESS' },
-            { label: 'مغلقة', value: 'CLOSED' },
-          ]}
+          options={statusFilterOptions}
         />
       </FilterBar>
 
@@ -226,35 +232,37 @@ export default function StudentSupportPage() {
             <span className="reports-table-title-icon" aria-hidden="true">
               <Table2 size={20} />
             </span>
-            تذاكر الدعم
+            {t('student.table.title')}
           </h2>
-          <span className="muted-count">{filteredTickets.length.toLocaleString('ar-EG')} تذكرة</span>
+          <span className="muted-count">
+            {t('student.table.ticketCount', { count: filteredTickets.length })}
+          </span>
         </div>
         <Table
           loading={loading}
           fluid
           hideScrollNotice
           data={tableRows}
-          emptyTitle="لا توجد تذاكر"
-          emptyDescription="أنشئ تذكرة عند احتياجك للمساعدة."
+          emptyTitle={t('student.table.emptyTitle')}
+          emptyDescription={t('student.table.emptyDescription')}
           columns={[
-            { key: 'id', header: 'رقم التذكرة', align: 'center' },
-            { key: 'subject', header: 'الموضوع' },
-            { key: 'repliesCount', header: 'الردود', align: 'center' },
+            { key: 'id', header: t('student.table.columns.id'), align: 'center' },
+            { key: 'subject', header: t('student.table.columns.subject') },
+            { key: 'repliesCount', header: t('student.table.columns.replies'), align: 'center' },
             {
               key: 'status',
-              header: 'الحالة',
+              header: t('student.table.columns.status'),
               align: 'center',
               render: (row) => (
                 <Badge variant={statusVariant(String(row._raw?.status))}>
-                  {statusLabels[String(row._raw?.status)] || row.status}
+                  {statusLabel(String(row._raw?.status))}
                 </Badge>
               ),
             },
-            { key: 'createdAt', header: 'التاريخ' },
+            { key: 'createdAt', header: t('student.table.columns.date') },
             {
               key: 'actions',
-              header: 'الإجراءات',
+              header: t('student.table.columns.actions'),
               render: (row) => (
                 <Button
                   variant={selected?.id === row._raw?.id ? 'primary' : 'outline'}
@@ -262,7 +270,7 @@ export default function StudentSupportPage() {
                   icon={<Eye size={16} />}
                   onClick={() => openTicket(row._raw.id)}
                 >
-                  عرض
+                  {t('student.actions.view')}
                 </Button>
               ),
             },
@@ -273,7 +281,7 @@ export default function StudentSupportPage() {
       {(detailLoading || selected) ? (
         <Card className="student-support-detail-panel">
           {detailLoading ? (
-            <EmptyState title="جاري التحميل..." description="يتم جلب تفاصيل التذكرة." />
+            <EmptyState title={t('student.detail.loadingTitle')} description={t('student.detail.loadingDesc')} />
           ) : selected ? (
             <>
               <div className="student-support-detail-header">
@@ -283,20 +291,20 @@ export default function StudentSupportPage() {
                 </div>
                 <div className="student-support-detail-actions">
                   <Badge variant={statusVariant(selected.status)}>
-                    {statusLabels[selected.status] || selected.status}
+                    {statusLabel(selected.status)}
                   </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
                     icon={<X size={18} />}
                     onClick={closeDetail}
-                    aria-label="إغلاق التفاصيل"
+                    aria-label={t('student.actions.closeDetail')}
                   />
                 </div>
               </div>
 
               <div className="support-reply user">
-                <small>أنت · {fmtDate(selected.createdAt)}</small>
+                <small>{t('student.detail.you')} · {fmtDate(selected.createdAt)}</small>
                 <p>{selected.message}</p>
               </div>
 
@@ -310,7 +318,7 @@ export default function StudentSupportPage() {
                         className={`support-reply ${isAdmin ? 'admin' : 'user'}`}
                       >
                         <small>
-                          {isAdmin ? 'فريق الدعم' : item.user?.fullName || 'أنت'}
+                          {isAdmin ? t('student.detail.supportTeam') : item.user?.fullName || t('student.detail.you')}
                           {' · '}
                           {fmtDate(item.createdAt)}
                         </small>
@@ -319,27 +327,27 @@ export default function StudentSupportPage() {
                     );
                   })
                 ) : (
-                  <p className="admin-support-no-replies">لا توجد ردود بعد — سيتواصل معك فريق الدعم قريباً.</p>
+                  <p className="admin-support-no-replies">{t('student.detail.noReplies')}</p>
                 )}
               </div>
 
               {selected.status !== 'CLOSED' ? (
                 <form className="stack-sm" onSubmit={sendReply}>
                   <Textarea
-                    label="رد جديد"
+                    label={t('student.detail.replyLabel')}
                     value={reply}
                     onChange={(event) => setReply(event.target.value)}
-                    placeholder="اكتب ردك أو أضف تفاصيل..."
+                    placeholder={t('student.detail.replyPlaceholder')}
                     required
                   />
                   <Button type="submit" loading={submitting} disabled={!reply.trim()} icon={<Send size={16} />}>
-                    إرسال الرد
+                    {t('student.detail.sendReply')}
                   </Button>
                 </form>
               ) : (
                 <div className="admin-support-closed-notice">
                   <CheckCircle2 size={18} />
-                  <span>تم إغلاق هذه التذكرة. يمكنك فتح تذكرة جديدة إن احتجت مساعدة إضافية.</span>
+                  <span>{t('student.detail.closedNotice')}</span>
                 </div>
               )}
             </>
@@ -347,25 +355,25 @@ export default function StudentSupportPage() {
         </Card>
       ) : null}
 
-      <Modal isOpen={isOpen} title="تذكرة دعم جديدة" onClose={() => setIsOpen(false)}>
+      <Modal isOpen={isOpen} title={t('student.modal.title')} onClose={() => setIsOpen(false)}>
         <form className="stack-sm" onSubmit={createTicket}>
           <Input
-            label="الموضوع"
+            label={t('student.modal.subject')}
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
-            placeholder="مثال: مشكلة في الدفع أو الوصول للدورة"
+            placeholder={t('student.modal.subjectPlaceholder')}
             required
           />
           <Textarea
-            label="الرسالة"
+            label={t('student.modal.message')}
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="اشرح مشكلتك أو استفسارك بالتفصيل..."
+            placeholder={t('student.modal.messagePlaceholder')}
             required
           />
           <div className="card-actions">
-            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>إلغاء</Button>
-            <Button type="submit" loading={submitting} icon={<MessageSquarePlus size={16} />}>إرسال التذكرة</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>{t('student.modal.cancel')}</Button>
+            <Button type="submit" loading={submitting} icon={<MessageSquarePlus size={16} />}>{t('student.modal.submit')}</Button>
           </div>
         </form>
       </Modal>

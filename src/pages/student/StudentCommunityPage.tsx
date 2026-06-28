@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Download, LayoutGrid, MessageCircle, MessageSquare, MessagesSquare, Plus, Send,
   Table2, UserRound, Users,
@@ -21,29 +22,15 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../store/AuthContext';
+import { formatDateTime } from '../../utils/localeFormat';
 import { exportTableToExcel } from '../../utils/exportExcel';
 
-const getInitial = (name?: string) => (name?.trim()?.[0] || '؟').toUpperCase();
-
-const fmtDate = (value: string) => new Date(value).toLocaleDateString('ar-SA', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const exportColumns = [
-  { key: 'id', header: 'رقم المنشور' },
-  { key: 'author', header: 'الكاتب' },
-  { key: 'title', header: 'العنوان' },
-  { key: 'body', header: 'المحتوى' },
-  { key: 'commentsCount', header: 'عدد التعليقات' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'createdAt', header: 'التاريخ' },
-];
+type PostStatusKey = 'answered' | 'unanswered';
 
 export default function StudentCommunityPage() {
+  const { t, i18n } = useTranslation('community');
+  const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { user } = useAuth();
   const { showToast } = useToast();
   const [posts, setPosts] = useState<any[]>([]);
@@ -60,6 +47,31 @@ export default function StudentCommunityPage() {
   const [search, setSearch] = useState('');
   const [replyFilter, setReplyFilter] = useState('');
   const [authorFilter, setAuthorFilter] = useState('');
+
+  const getInitial = useCallback(
+    (name?: string) => (name?.trim()?.[0] || tc('labels.unknownInitial')).toUpperCase(),
+    [tc],
+  );
+
+  const fmtDate = useCallback(
+    (value: string) => formatDateTime(value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }, lang),
+    [lang],
+  );
+
+  const getPostStatusKey = useCallback((commentCount: number): PostStatusKey => (
+    commentCount > 0 ? 'answered' : 'unanswered'
+  ), []);
+
+  const getPostStatusLabel = useCallback(
+    (statusKey: PostStatusKey) => t(`student.status.${statusKey}`),
+    [t, lang],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -86,9 +98,9 @@ export default function StudentCommunityPage() {
   }, [posts, user?.id]);
 
   const chartData = useMemo(() => [
-    { label: 'تم الرد', value: stats.answered },
-    { label: 'بانتظار رد', value: stats.unanswered },
-  ].filter((d) => d.value > 0), [stats.answered, stats.unanswered]);
+    { label: t('student.charts.answered'), value: stats.answered },
+    { label: t('student.charts.unanswered'), value: stats.unanswered },
+  ].filter((d) => d.value > 0), [t, lang, stats.answered, stats.unanswered]);
 
   const filteredPosts = useMemo(() => {
     let result = posts;
@@ -110,19 +122,31 @@ export default function StudentCommunityPage() {
     return result;
   }, [posts, search, replyFilter, authorFilter, user?.id]);
 
+  const exportColumns = useMemo(() => [
+    { key: 'id', header: t('student.export.columns.id') },
+    { key: 'author', header: t('student.export.columns.author') },
+    { key: 'title', header: t('student.export.columns.title') },
+    { key: 'body', header: t('student.export.columns.body') },
+    { key: 'commentsCount', header: t('student.export.columns.commentsCount') },
+    { key: 'status', header: t('student.export.columns.status') },
+    { key: 'createdAt', header: t('student.export.columns.createdAt') },
+  ], [t, lang]);
+
   const tableRows = useMemo(() => filteredPosts.map((post) => {
     const count = post.comments?.length || 0;
+    const statusKey = getPostStatusKey(count);
     return {
       id: post.id,
       author: post.user?.fullName || '—',
       title: post.titleAr,
       body: post.bodyAr?.length > 60 ? `${post.bodyAr.slice(0, 60)}...` : post.bodyAr,
       commentsCount: count,
-      status: count > 0 ? 'تم الرد' : 'بانتظار رد',
+      statusKey,
+      status: getPostStatusLabel(statusKey),
       createdAt: fmtDate(post.createdAt),
       _raw: post,
     };
-  }), [filteredPosts]);
+  }), [filteredPosts, fmtDate, getPostStatusKey, getPostStatusLabel]);
 
   const createPost = async (event: FormEvent) => {
     event.preventDefault();
@@ -130,13 +154,13 @@ export default function StudentCommunityPage() {
     setSubmitting(true);
     try {
       await studentApi.createCommunityPost({ titleAr: titleAr.trim(), bodyAr: bodyAr.trim() });
-      showToast('تم نشر المنشور', 'success');
+      showToast(t('student.toast.postPublished'), 'success');
       setCreateOpen(false);
       setTitleAr('');
       setBodyAr('');
       await load();
     } catch {
-      showToast('فشل نشر المنشور', 'error');
+      showToast(t('student.toast.postFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -148,11 +172,11 @@ export default function StudentCommunityPage() {
     setReplyingId(postId);
     try {
       await studentApi.createCommunityComment(postId, text);
-      showToast('تم إضافة التعليق', 'success');
+      showToast(t('student.toast.commentAdded'), 'success');
       await load();
       onSuccess?.();
     } catch {
-      showToast('فشل إضافة التعليق', 'error');
+      showToast(t('student.toast.commentFailed'), 'error');
     } finally {
       setReplyingId(null);
     }
@@ -160,7 +184,7 @@ export default function StudentCommunityPage() {
 
   const handleExport = () => {
     exportTableToExcel(
-      'منشورات المجتمع',
+      t('student.export.sheetName'),
       exportColumns,
       tableRows.map(({ _raw, body, ...row }) => ({
         ...row,
@@ -181,8 +205,8 @@ export default function StudentCommunityPage() {
               <span className="community-avatar sm" aria-hidden>{getInitial(comment.user?.fullName)}</span>
               <div>
                 <div className="community-comment-head">
-                  <strong>{comment.user?.fullName || 'مستخدم'}</strong>
-                  {isAdmin ? <Badge variant="info">فريق المنصة</Badge> : null}
+                  <strong>{comment.user?.fullName || t('student.userFallback')}</strong>
+                  {isAdmin ? <Badge variant="info">{t('student.badges.platformTeam')}</Badge> : null}
                 </div>
                 <p>{comment.bodyAr}</p>
                 <small>{fmtDate(comment.createdAt)}</small>
@@ -205,10 +229,10 @@ export default function StudentCommunityPage() {
     >
       <input
         type="text"
-        placeholder="أضف تعليقاً..."
+        placeholder={t('student.form.commentPlaceholder')}
         value={draft}
         onChange={(e) => onChange(e.target.value)}
-        aria-label="أضف تعليقاً"
+        aria-label={t('student.form.commentAriaLabel')}
       />
       <Button
         type="submit"
@@ -216,7 +240,7 @@ export default function StudentCommunityPage() {
         loading={replyingId === postId}
         icon={<Send size={14} />}
       >
-        رد
+        {t('student.actions.reply')}
       </Button>
     </form>
   );
@@ -230,12 +254,12 @@ export default function StudentCommunityPage() {
           <span className="community-avatar" aria-hidden>{getInitial(post.user?.fullName)}</span>
           <div className="community-post-meta">
             <div className="community-post-meta-top">
-              <strong>{post.user?.fullName || 'مستخدم'}</strong>
-              {isMine ? <Badge variant="info">منشورك</Badge> : null}
+              <strong>{post.user?.fullName || t('student.userFallback')}</strong>
+              {isMine ? <Badge variant="info">{t('student.badges.yourPost')}</Badge> : null}
               {commentCount > 0 ? (
-                <Badge variant="success">{commentCount} تعليق</Badge>
+                <Badge variant="success">{t('student.badges.comments', { count: commentCount })}</Badge>
               ) : (
-                <Badge variant="warning">بانتظار رد</Badge>
+                <Badge variant="warning">{t('student.status.unanswered')}</Badge>
               )}
             </div>
             <span>{fmtDate(post.createdAt)}</span>
@@ -256,21 +280,57 @@ export default function StudentCommunityPage() {
     );
   };
 
+  const tableColumns = useMemo(() => [
+    { key: 'id', header: t('student.table.columns.id') },
+    { key: 'author', header: t('student.table.columns.author') },
+    { key: 'title', header: t('student.table.columns.title') },
+    {
+      key: 'commentsCount',
+      header: t('student.table.columns.comments'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={Number(row.commentsCount) > 0 ? 'success' : 'warning'}>
+          {row.commentsCount}
+        </Badge>
+      ),
+    },
+    {
+      key: 'status',
+      header: t('student.table.columns.status'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={row.statusKey === 'answered' ? 'success' : 'warning'}>
+          {row.status}
+        </Badge>
+      ),
+    },
+    { key: 'createdAt', header: t('student.table.columns.createdAt') },
+    {
+      key: 'actions',
+      header: t('student.table.columns.actions'),
+      render: (row: typeof tableRows[number]) => (
+        <div className="table-actions">
+          <Button size="sm" variant="secondary" icon={<LayoutGrid size={14} />} onClick={() => setDetailPost(row._raw)}>
+            {t('student.actions.view')}
+          </Button>
+        </div>
+      ),
+    },
+  ], [t, lang]);
+
   if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="page-grid student-community-page">
       <div className="reports-header">
         <PageHeader
-          title="المجتمع"
-          subtitle="شارك أسئلتك وتجاربك مع المتعلمين الآخرين"
+          title={t('student.title')}
+          subtitle={t('student.subtitle')}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!posts.length}>
-            تصدير Excel
+            {t('student.exportExcel')}
           </Button>
           <Button icon={<Plus size={18} />} onClick={() => setCreateOpen(true)}>
-            منشور جديد
+            {t('student.newPost')}
           </Button>
         </div>
       </div>
@@ -280,47 +340,52 @@ export default function StudentCommunityPage() {
           <Users size={32} />
         </div>
         <div className="student-community-hero-body">
-          <strong>مجتمع المتعلمين</strong>
-          <p>اطرح أسئلتك، شارك تجاربك، وتفاعل مع زملائك في التعلم.</p>
+          <strong>{t('student.hero.title')}</strong>
+          <p>{t('student.hero.body')}</p>
         </div>
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="المنشورات" value={String(stats.total)} icon={MessageCircle} />
-        <StatCard title="التعليقات" value={String(stats.comments)} icon={MessagesSquare} />
-        <StatCard title="منشوراتي" value={String(stats.mine)} icon={UserRound} />
-        <StatCard title="تم الرد" value={String(stats.answered)} icon={MessageSquare} hint={`${stats.unanswered} بانتظار رد`} />
+        <StatCard title={t('student.stats.posts')} value={String(stats.total)} icon={MessageCircle} />
+        <StatCard title={t('student.stats.comments')} value={String(stats.comments)} icon={MessagesSquare} />
+        <StatCard title={t('student.stats.mine')} value={String(stats.mine)} icon={UserRound} />
+        <StatCard
+          title={t('student.stats.answered')}
+          value={String(stats.answered)}
+          icon={MessageSquare}
+          hint={t('student.stats.unansweredHint', { count: stats.unanswered })}
+        />
       </div>
 
       {chartData.length ? (
         <div className="reports-charts-grid student-community-charts">
-          <ReportChart title="توزيع المنشورات" type="pie" data={chartData} />
+          <ReportChart title={t('student.charts.distribution')} type="pie" data={chartData} />
         </div>
       ) : null}
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان، المحتوى، أو الكاتب..."
+        searchPlaceholder={t('student.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setReplyFilter(''); setAuthorFilter(''); }}
       >
         <Select
-          label="التعليقات"
+          label={t('student.filters.comments')}
           value={replyFilter}
           onChange={(e) => setReplyFilter(e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'تم الرد', value: 'answered' },
-            { label: 'بانتظار رد', value: 'unanswered' },
+            { label: t('student.filters.all'), value: '' },
+            { label: t('student.filters.answered'), value: 'answered' },
+            { label: t('student.filters.unanswered'), value: 'unanswered' },
           ]}
         />
         <Select
-          label="الكاتب"
+          label={t('student.filters.author')}
           value={authorFilter}
           onChange={(e) => setAuthorFilter(e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'منشوراتي', value: 'mine' },
+            { label: t('student.filters.all'), value: '' },
+            { label: t('student.filters.mine'), value: 'mine' },
           ]}
         />
       </FilterBar>
@@ -330,8 +395,8 @@ export default function StudentCommunityPage() {
         onChange={setViewMode}
         variant="pills"
         tabs={[
-          { id: 'feed', label: `البطاقات (${filteredPosts.length})` },
-          { id: 'table', label: `الجدول (${filteredPosts.length})` },
+          { id: 'feed', label: t('student.tabs.feed', { count: filteredPosts.length }) },
+          { id: 'table', label: t('student.tabs.table', { count: filteredPosts.length }) },
         ]}
       />
 
@@ -342,10 +407,12 @@ export default function StudentCommunityPage() {
           ) : (
             <Card>
               <EmptyState
-                title="لا توجد منشورات"
-                description={posts.length ? 'جرّب تغيير الفلاتر أو البحث.' : 'كن أول من يشارك سؤالاً أو تجربة مع المجتمع.'}
+                title={t('student.empty.title')}
+                description={posts.length
+                  ? t('student.empty.filteredDescription')
+                  : t('student.empty.noPostsDescription')}
                 icon={MessageCircle}
-                actionLabel="منشور جديد"
+                actionLabel={t('student.newPost')}
                 onAction={() => setCreateOpen(true)}
               />
             </Card>
@@ -354,79 +421,49 @@ export default function StudentCommunityPage() {
       ) : (
         <Card>
           <div className="section-heading">
-            <h2><Table2 size={18} /> جدول المنشورات</h2>
-            <span className="muted-count">{filteredPosts.length} منشور</span>
+            <h2><Table2 size={18} /> {t('student.table.title')}</h2>
+            <span className="muted-count">{t('student.table.count', { count: filteredPosts.length })}</span>
           </div>
           <Table
             data={tableRows}
-            emptyTitle="لا توجد منشورات"
-            emptyDescription="لم يُعثر على منشورات مطابقة."
-            columns={[
-              { key: 'id', header: 'الرقم' },
-              { key: 'author', header: 'الكاتب' },
-              { key: 'title', header: 'العنوان' },
-              {
-                key: 'commentsCount',
-                header: 'التعليقات',
-                render: (row) => (
-                  <Badge variant={Number(row.commentsCount) > 0 ? 'success' : 'warning'}>
-                    {row.commentsCount}
-                  </Badge>
-                ),
-              },
-              {
-                key: 'status',
-                header: 'الحالة',
-                render: (row) => (
-                  <Badge variant={row.status === 'تم الرد' ? 'success' : 'warning'}>
-                    {row.status}
-                  </Badge>
-                ),
-              },
-              { key: 'createdAt', header: 'التاريخ' },
-              {
-                key: 'actions',
-                header: 'الإجراءات',
-                render: (row) => (
-                  <div className="table-actions">
-                    <Button size="sm" variant="secondary" icon={<LayoutGrid size={14} />} onClick={() => setDetailPost(row._raw)}>
-                      عرض
-                    </Button>
-                  </div>
-                ),
-              },
-            ]}
+            emptyTitle={t('student.empty.title')}
+            emptyDescription={t('student.table.emptyDescription')}
+            columns={tableColumns}
           />
         </Card>
       )}
 
-      <Modal isOpen={createOpen} title="منشور جديد" onClose={() => setCreateOpen(false)}>
+      <Modal isOpen={createOpen} title={t('student.newPost')} onClose={() => setCreateOpen(false)}>
         <form className="stack-sm" onSubmit={createPost}>
           <Input
-            label="العنوان"
+            label={t('student.form.titleLabel')}
             value={titleAr}
             onChange={(e) => setTitleAr(e.target.value)}
-            placeholder="مثال: كيف أستخدم المحفظة عند الشراء؟"
+            placeholder={t('student.form.titlePlaceholder')}
             required
           />
           <Textarea
-            label="المحتوى"
+            label={t('student.form.bodyLabel')}
             rows={5}
             value={bodyAr}
             onChange={(e) => setBodyAr(e.target.value)}
-            placeholder="اكتب سؤالك أو تجربتك بالتفصيل..."
+            placeholder={t('student.form.bodyPlaceholder')}
             required
           />
           <div className="card-actions">
-            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>إلغاء</Button>
-            <Button type="submit" loading={submitting} icon={<MessageCircle size={16} />}>نشر</Button>
+            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>
+              {tc('actions.cancel')}
+            </Button>
+            <Button type="submit" loading={submitting} icon={<MessageCircle size={16} />}>
+              {t('student.actions.publish')}
+            </Button>
           </div>
         </form>
       </Modal>
 
       <Modal
         isOpen={Boolean(detailPost)}
-        title={detailPost?.titleAr || 'تفاصيل المنشور'}
+        title={detailPost?.titleAr || t('student.detail.title')}
         onClose={() => { setDetailPost(null); setDetailReply(''); }}
       >
         {detailPost ? (
@@ -434,7 +471,7 @@ export default function StudentCommunityPage() {
             <header className="community-post-head">
               <span className="community-avatar" aria-hidden>{getInitial(detailPost.user?.fullName)}</span>
               <div className="community-post-meta">
-                <strong>{detailPost.user?.fullName || 'مستخدم'}</strong>
+                <strong>{detailPost.user?.fullName || t('student.userFallback')}</strong>
                 <span>{fmtDate(detailPost.createdAt)}</span>
               </div>
             </header>

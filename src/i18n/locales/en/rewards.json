@@ -121,5 +121,91 @@
     "resetTitle": "Reset points",
     "resetMessage": "Reset reward points for {{name}}? This action cannot be undone.",
     "resetConfirm": "Reset"
+  },
+  "student": {
+    "title": "Rewards & referrals",
+    "subtitle": "Invite friends at signup and earn reward points",
+    "stats": {
+      "available": "Available points",
+      "earned": "Points earned",
+      "spent": "Points redeemed",
+      "invited": "Invitees",
+      "successfulHint": "{{count}} successful referrals"
+    },
+    "referral": {
+      "label": "Your referral code",
+      "description": "Share the code with friends at signup — you earn reward points instantly.",
+      "disabledSuffix": " (code currently disabled)",
+      "infoFallback": "Referral codes are used at registration only — completely separate from discount coupons."
+    },
+    "actions": {
+      "exportExcel": "Export Excel",
+      "copy": "Copy",
+      "share": "Share"
+    },
+    "share": {
+      "title": "Referral code",
+      "message": "Join Bil-Alem using my referral code: {{code}}"
+    },
+    "tabs": {
+      "points": "Points history ({{count}})",
+      "referrals": "Invitees ({{count}})"
+    },
+    "filters": {
+      "txSearchPlaceholder": "Search by reason or points...",
+      "refSearchPlaceholder": "Search by name or email...",
+      "type": "Type",
+      "all": "All"
+    },
+    "labels": {
+      "referralStatus": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REWARDED": "Rewarded",
+        "REJECTED": "Rejected"
+      },
+      "txType": {
+        "EARNED": "Earned",
+        "SPENT": "Spent",
+        "REDEEMED": "Redeemed",
+        "ADJUSTMENT": "Adjustment"
+      }
+    },
+    "table": {
+      "pointsTitle": "Points history",
+      "pointsCount": "{{count}} transactions",
+      "pointsEmptyTitle": "No point transactions",
+      "pointsEmptyDescription": "Earned and redeemed points will appear here.",
+      "referralsTitle": "Invitees",
+      "referralsCount": "{{count}} invitees",
+      "referralsEmptyTitle": "No invitees",
+      "referralsEmptyDescription": "Share your referral code to invite friends at signup.",
+      "columns": {
+        "type": "Type",
+        "points": "Points",
+        "reason": "Reason",
+        "createdAt": "Date",
+        "user": "User",
+        "rewardStatus": "Status",
+        "registeredAt": "Registration date"
+      }
+    },
+    "empty": {
+      "noCodeTitle": "Referral code unavailable",
+      "noCodeDescription": "Contact support if your referral code does not appear."
+    },
+    "toast": {
+      "codeCopied": "Referral code copied.",
+      "shareCopied": "Share message copied."
+    },
+    "export": {
+      "sheetName": "Points history",
+      "columns": {
+        "type": "Type",
+        "points": "Points",
+        "reason": "Reason",
+        "createdAt": "Date"
+      }
+    }
   }
 }

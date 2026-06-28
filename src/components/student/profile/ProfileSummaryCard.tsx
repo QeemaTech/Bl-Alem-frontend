@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Award, CalendarDays, Copy, GraduationCap, Mail, Phone, Trophy, User, Wallet,
 } from '@/icons';
@@ -5,7 +6,8 @@ import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
 import { formatMoney } from '../../../utils/formatMoney';
-import { fmtProfileDate, type ProfileFormState } from './profileUtils';
+import { useStudentProfileLabels } from '../../../hooks/useStudentProfileLabels';
+import type { ProfileFormState } from './profileUtils';
 import { ProfileAvatar } from './ProfileAvatar';
 import { ProfileCompletion } from './ProfileCompletion';
 
@@ -32,6 +34,8 @@ export function ProfileSummaryCard({
   onRemoveAvatar,
   onCopyReferral,
 }: ProfileSummaryCardProps) {
+  const { t } = useTranslation('profile');
+  const { educationLabel, fmtProfileDate, lang } = useStudentProfileLabels();
   const hasBio = Boolean(profile.bio?.trim());
 
   return (
@@ -48,67 +52,67 @@ export function ProfileSummaryCard({
         <h2 className="student-profile-summary-name">
           {profile.fullName?.trim() || '—'}
         </h2>
-        <Badge variant="info">طالب</Badge>
+        <Badge variant="info">{t('student.roleBadge')}</Badge>
       </div>
 
       {!hasBio ? (
         <p className="student-profile-summary-empty" role="status">
-          أضف نبذة عنك في النموذج لتخصيص تجربتك التعليمية.
+          {t('student.emptyBio')}
         </p>
       ) : (
         <p className="student-profile-summary-bio">{profile.bio}</p>
       )}
 
-      <div className="student-profile-meta" aria-label="بيانات التواصل والحساب">
+      <div className="student-profile-meta" aria-label={t('student.metaAria')}>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><User size={18} /></span>
-          <span className="student-profile-meta-label">الاسم</span>
+          <span className="student-profile-meta-label">{t('student.meta.name')}</span>
           <span className="student-profile-meta-value">{profile.fullName?.trim() || '—'}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><Mail size={18} /></span>
-          <span className="student-profile-meta-label">البريد</span>
+          <span className="student-profile-meta-label">{t('student.meta.email')}</span>
           <span className="student-profile-meta-value" dir="ltr">{profile.email || '—'}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><Phone size={18} /></span>
-          <span className="student-profile-meta-label">الجوال</span>
+          <span className="student-profile-meta-label">{t('student.meta.phone')}</span>
           <span className="student-profile-meta-value" dir="ltr">{profile.phone?.trim() || '—'}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><GraduationCap size={18} /></span>
-          <span className="student-profile-meta-label">التعليم</span>
-          <span className="student-profile-meta-value">{profile.educationLevel?.trim() || '—'}</span>
+          <span className="student-profile-meta-label">{t('student.meta.education')}</span>
+          <span className="student-profile-meta-value">{educationLabel(profile.educationLevel)}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><CalendarDays size={18} /></span>
-          <span className="student-profile-meta-label">تاريخ الانضمام</span>
+          <span className="student-profile-meta-label">{t('student.meta.joinedAt')}</span>
           <span className="student-profile-meta-value">{fmtProfileDate(profile.createdAt)}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><Wallet size={18} /></span>
-          <span className="student-profile-meta-label">رصيد المحفظة</span>
-          <span className="student-profile-meta-value">{formatMoney(walletBalance)}</span>
+          <span className="student-profile-meta-label">{t('student.meta.wallet')}</span>
+          <span className="student-profile-meta-value">{formatMoney(walletBalance, undefined, lang)}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><Trophy size={18} /></span>
-          <span className="student-profile-meta-label">نقاط المكافآت</span>
-          <span className="student-profile-meta-value">{rewardPoints} نقطة</span>
+          <span className="student-profile-meta-label">{t('student.meta.points')}</span>
+          <span className="student-profile-meta-value">{t('student.meta.pointsUnit', { count: rewardPoints })}</span>
         </div>
         <div className="student-profile-meta-row">
           <span className="student-profile-meta-icon" aria-hidden><Award size={18} /></span>
-          <span className="student-profile-meta-label">الاهتمامات</span>
+          <span className="student-profile-meta-label">{t('student.meta.interests')}</span>
           <span className="student-profile-meta-value">
             {profile.interests?.length
-              ? `${profile.interests.length} اهتمام`
-              : 'لم تُضف بعد'}
+              ? t('student.meta.interestsCount', { count: profile.interests.length })
+              : t('student.meta.interestsEmpty')}
           </span>
         </div>
       </div>
 
       {referralCode ? (
         <div className="student-profile-referral">
-          <span className="student-profile-referral-label">كود الإحالة</span>
+          <span className="student-profile-referral-label">{t('student.meta.referralCode')}</span>
           <div className="student-profile-referral-row">
             <strong dir="ltr">{referralCode}</strong>
             <Button
@@ -117,9 +121,9 @@ export function ProfileSummaryCard({
               size="sm"
               icon={<Copy size={14} aria-hidden />}
               onClick={onCopyReferral}
-              aria-label="نسخ كود الإحالة"
+              aria-label={t('student.meta.copyReferral')}
             >
-              نسخ
+              {t('student.meta.copy')}
             </Button>
           </div>
         </div>

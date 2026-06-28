@@ -131,6 +131,11 @@ const SECTION_DEFS: SettingSectionDef[] = [
     id: 'certificates',
     fields: [
       { key: 'certificatePrefix', type: 'text' },
+    ],
+  },
+  {
+    id: 'rewards',
+    fields: [
       { key: 'referralRewardPoints', type: 'number', min: 0 },
       { key: 'pointsPerEgp', type: 'number', min: 0.01, step: 0.01 },
       { key: 'referralEnabled', type: 'toggle' },

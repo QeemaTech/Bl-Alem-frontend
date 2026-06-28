@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, Bell, BellOff, CalendarDays, TrendingUp } from '@/icons';
 import type { LucideIcon } from '@/icons';
 import { pctOfTotal } from './types';
@@ -42,33 +43,35 @@ function StatCard({
 }
 
 export function NotificationStats({ stats }: NotificationStatsProps) {
+  const { t } = useTranslation('notifications');
+
   return (
-    <section className="ntf-stats-grid" aria-label="إحصائيات الإشعارات">
+    <section className="ntf-stats-grid" aria-label={t('instructor.stats.ariaLabel')}>
       <StatCard
-        title="إجمالي الإشعارات"
+        title={t('instructor.stats.total')}
         value={String(stats.total)}
         trend="100%"
         icon={Bell}
         tone="total"
       />
       <StatCard
-        title="غير مقروء"
+        title={t('instructor.stats.unread')}
         value={String(stats.unread)}
-        trend={`${pctOfTotal(stats.unread, stats.total)} من الإجمالي`}
+        trend={t('instructor.stats.ofTotal', { pct: pctOfTotal(stats.unread, stats.total) })}
         icon={BellOff}
         tone="unread"
       />
       <StatCard
-        title="تحتاج متابعة"
+        title={t('instructor.stats.attention')}
         value={String(stats.attention)}
-        trend={stats.attention ? 'أولوية عالية' : 'لا يوجد'}
+        trend={stats.attention ? t('instructor.stats.highPriority') : t('instructor.stats.none')}
         icon={AlertCircle}
         tone="attention"
       />
       <StatCard
-        title="إشعارات اليوم"
+        title={t('instructor.stats.todayNotifications')}
         value={String(stats.today)}
-        trend={`${pctOfTotal(stats.today, stats.total)} من الإجمالي`}
+        trend={t('instructor.stats.ofTotal', { pct: pctOfTotal(stats.today, stats.total) })}
         icon={CalendarDays}
         tone="today"
       />

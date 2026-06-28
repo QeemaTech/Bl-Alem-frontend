@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Award, BadgeCheck, BookOpen, AlertTriangle, LiveTv, TrendingUp } from '@/icons';
 import { BrandMark } from '../components/ui/BrandMark';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useSiteSettings } from '../store/SiteSettingsContext';
 
 const fadeUp = {
@@ -33,6 +34,9 @@ export default function AuthLayout() {
 
   return (
     <div className="grid min-h-dvh w-full grid-cols-1 bg-surface lg:grid-cols-[52%_48%]">
+      <div className="auth-layout-lang-switch">
+        <LanguageSwitcher />
+      </div>
       <aside className="relative hidden overflow-hidden p-8 text-on-primary lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:justify-between lg:gap-8 lg:self-start xl:p-10">
         <div
           className="absolute inset-0"

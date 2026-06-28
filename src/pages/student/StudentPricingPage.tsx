@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   Calendar, Check, Crown, Sparkles, Star, Wallet, Zap,
 } from '@/icons';
@@ -25,7 +24,7 @@ export default function StudentPricingPage() {
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<number | null>(null);
-  const [confirmPlan, setConfirmPlan] = useState<{ id: number; gateway: string; name: string; price: number } | null>(null);
+  const [confirmPlan, setConfirmPlan] = useState<{ id: number; name: string; price: number } | null>(null);
 
   const load = async () => {
     const [pricing, wallet] = await Promise.all([
@@ -54,7 +53,7 @@ export default function StudentPricingPage() {
     if (!confirmPlan) return;
     setSubscribing(confirmPlan.id);
     try {
-      await studentApi.subscribePlan(confirmPlan.id, { gateway: confirmPlan.gateway });
+      await studentApi.subscribePlan(confirmPlan.id, { gateway: 'SIMULATED' });
       showToast('تم الاشتراك في الخطة بنجاح.', 'success');
       setConfirmPlan(null);
       await load();
@@ -66,18 +65,13 @@ export default function StudentPricingPage() {
     }
   };
 
-  const openConfirm = (plan: any, gateway: string) => {
+  const openConfirm = (plan: any) => {
     if (active?.planId === plan.id) {
       showToast('أنت مشترك في هذه الخطة حالياً.', 'info');
       return;
     }
-    if (gateway === 'WALLET' && walletBalance < Number(plan.price)) {
-      showToast('رصيد المحفظة غير كافٍ.', 'error');
-      return;
-    }
     setConfirmPlan({
       id: plan.id,
-      gateway,
       name: plan.nameAr,
       price: Number(plan.price),
     });
@@ -143,7 +137,6 @@ export default function StudentPricingPage() {
             const isFeatured = plan.isFeatured || index === Math.floor(plans.length / 2);
             const isCurrent = active?.planId === plan.id;
             const features = Array.isArray(plan.features) ? plan.features : [];
-            const canAffordWallet = walletBalance >= Number(plan.price);
 
             return (
               <Card
@@ -179,19 +172,9 @@ export default function StudentPricingPage() {
                     fullWidth
                     loading={subscribing === plan.id}
                     disabled={isCurrent}
-                    onClick={() => openConfirm(plan, 'SIMULATED')}
+                    onClick={() => openConfirm(plan)}
                   >
                     {isCurrent ? 'مشترك حالياً' : 'اشترك الآن'}
-                  </Button>
-                  <Button
-                    fullWidth
-                    variant="secondary"
-                    loading={subscribing === plan.id}
-                    disabled={isCurrent}
-                    icon={<Wallet size={16} />}
-                    onClick={() => openConfirm(plan, 'WALLET')}
-                  >
-                    {canAffordWallet ? 'من المحفظة' : 'رصيد غير كافٍ'}
                   </Button>
                 </div>
               </Card>
@@ -208,29 +191,12 @@ export default function StudentPricingPage() {
         </Card>
       )}
 
-      <Card className="student-pricing-wallet-hint">
-        <Wallet size={22} />
-        <div>
-          <strong>الدفع من المحفظة</strong>
-          <p>
-            رصيدك الحالي {formatMoney(walletBalance)} —
-            {' '}
-            <Link to="/student/wallet">عرض المحفظة</Link>
-            {' '}
-            أو
-            {' '}
-            <Link to="/student/rewards">المكافآت والإحالات</Link>
-            لزيادة الرصيد.
-          </p>
-        </div>
-      </Card>
-
       <ConfirmDialog
         isOpen={Boolean(confirmPlan)}
         title="تأكيد الاشتراك"
         message={
           confirmPlan
-            ? `هل تريد الاشتراك في "${confirmPlan.name}" بمبلغ ${formatMoney(confirmPlan.price)}${confirmPlan.gateway === 'WALLET' ? ' من المحفظة' : ''}؟`
+            ? `هل تريد الاشتراك في "${confirmPlan.name}" بمبلغ ${formatMoney(confirmPlan.price)}؟`
             : ''
         }
         confirmLabel="تأكيد الاشتراك"

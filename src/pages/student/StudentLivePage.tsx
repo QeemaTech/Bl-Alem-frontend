@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   Calendar, Clock, Copy, Download, ExternalLink, Radio, UserRound, Video,
@@ -17,14 +18,13 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { Tabs } from '../../components/ui/Tabs';
 import { useToast } from '../../components/ui/Toast';
+import {
+  localizedCourseTitle,
+  localizedSessionDescription,
+  localizedSessionTitle,
+} from '../../utils/localizedContent';
+import { formatDateTime } from '../../utils/localeFormat';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  SCHEDULED: 'مجدولة',
-  LIVE: 'مباشر الآن',
-  ENDED: 'منتهية',
-  CANCELLED: 'ملغاة',
-};
 
 const statusVariant = (status: string) => {
   if (status === 'LIVE') return 'live' as const;
@@ -34,26 +34,9 @@ const statusVariant = (status: string) => {
   return 'default' as const;
 };
 
-const fmtDate = (value?: string) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-  : '—');
-
-const exportColumns = [
-  { key: 'title', header: 'العنوان' },
-  { key: 'course', header: 'الكورس' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'startAt', header: 'موعد البدء' },
-  { key: 'duration', header: 'المدة (دقيقة)' },
-  { key: 'status', header: 'الحالة' },
-];
-
 export default function StudentLivePage() {
+  const { t, i18n } = useTranslation('liveSessions');
+  const lang = i18n.language;
   const { showToast } = useToast();
   const [tab, setTab] = useState('upcoming');
   const [viewMode, setViewMode] = useState('feed');
@@ -62,6 +45,29 @@ export default function StudentLivePage() {
   const [search, setSearch] = useState('');
   const [joiningId, setJoiningId] = useState<number | null>(null);
   const [selected, setSelected] = useState<any>(null);
+
+  const getStatusLabel = useCallback(
+    (status: string) => t(`labels.status.${status}`, { defaultValue: status }),
+    [t, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value?: string) => (value
+      ? formatDateTime(value, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }, lang)
+      : '—'),
+    [lang],
+  );
+
+  const fmtDuration = useCallback(
+    (minutes?: number) => t('durationMinutes', { count: minutes || 60 }),
+    [t, lang],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -82,10 +88,10 @@ export default function StudentLivePage() {
   }), [data]);
 
   const chartData = useMemo(() => [
-    { label: 'قادمة', value: stats.upcoming },
-    { label: 'مباشر', value: stats.live },
-    { label: 'سابقة', value: stats.ended },
-  ].filter((item) => item.value > 0), [stats]);
+    { label: t('student.charts.upcoming'), value: stats.upcoming },
+    { label: t('student.charts.live'), value: stats.live },
+    { label: t('student.charts.ended'), value: stats.ended },
+  ].filter((item) => item.value > 0), [t, lang, stats]);
 
   const tabSessions = useMemo(() => {
     if (tab === 'liveNow') return data.liveNow || [];
@@ -98,23 +104,37 @@ export default function StudentLivePage() {
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((s) =>
-        [s.titleAr, s.descriptionAr, s.course?.titleAr, s.instructor?.fullName, statusLabels[s.status]]
-          .some((v) => String(v || '').toLowerCase().includes(q)),
+        [
+          localizedSessionTitle(s, lang),
+          localizedSessionDescription(s, lang),
+          localizedCourseTitle(s.course, lang),
+          s.instructor?.fullName,
+          getStatusLabel(s.status),
+        ].some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result.sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-  }, [tabSessions, search]);
+  }, [tabSessions, search, lang, getStatusLabel]);
+
+  const exportColumns = useMemo(() => [
+    { key: 'title', header: t('export.columns.title') },
+    { key: 'course', header: t('export.columns.course') },
+    { key: 'instructor', header: t('export.columns.instructor') },
+    { key: 'startAt', header: t('export.columns.startAt') },
+    { key: 'duration', header: t('export.columns.duration') },
+    { key: 'status', header: t('export.columns.status') },
+  ], [t, lang]);
 
   const tableRows = useMemo(() => filtered.map((session) => ({
     id: session.id,
-    title: session.titleAr,
-    course: session.course?.titleAr || '—',
+    title: localizedSessionTitle(session, lang),
+    course: localizedCourseTitle(session.course, lang),
     instructor: session.instructor?.fullName || '—',
     startAt: fmtDate(session.startAt),
     duration: session.durationMinutes,
-    status: statusLabels[session.status] || session.status,
+    status: getStatusLabel(session.status),
     _raw: session,
-  })), [filtered]);
+  })), [filtered, fmtDate, getStatusLabel, lang]);
 
   const join = async (session: any) => {
     setJoiningId(session.id);
@@ -122,13 +142,13 @@ export default function StudentLivePage() {
       const result = await studentApi.joinLiveSession(session.id);
       if (result.meetingUrl) {
         window.open(result.meetingUrl, '_blank', 'noopener,noreferrer');
-        showToast('تم فتح رابط الجلسة.', 'success');
+        showToast(t('toast.linkOpened'), 'success');
       } else {
-        showToast('لا يوجد رابط اجتماع متاح.', 'error');
+        showToast(t('toast.noMeetingUrl'), 'error');
       }
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر الانضمام للجلسة.';
+        || t('toast.joinFailed');
       showToast(message, 'error');
     } finally {
       setJoiningId(null);
@@ -138,14 +158,56 @@ export default function StudentLivePage() {
   const copyLink = async (url: string) => {
     if (!url) return;
     await navigator.clipboard.writeText(url);
-    showToast('تم نسخ رابط الاجتماع.', 'success');
+    showToast(t('toast.linkCopied'), 'success');
   };
 
   const canJoin = (session: any) => session.status === 'LIVE' || session.status === 'SCHEDULED';
 
   const handleExport = () => {
-    exportTableToExcel('جلسات-الطالب', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('student.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, ...row }) => row),
+    );
   };
+
+  const tableColumns = useMemo(() => [
+    { key: 'title', header: t('table.columns.title') },
+    { key: 'course', header: t('table.columns.course') },
+    { key: 'instructor', header: t('table.columns.instructor') },
+    { key: 'startAt', header: t('table.columns.startAt') },
+    { key: 'duration', header: t('table.columns.duration') },
+    {
+      key: 'status',
+      header: t('table.columns.status'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={statusVariant(String(row._raw?.status))}>
+          {row.status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: t('table.columns.actions'),
+      render: (row: typeof tableRows[number]) => (
+        <div className="table-actions user-row-actions">
+          <Button size="sm" variant="secondary" onClick={() => setSelected(row._raw)}>
+            {t('actions.detail')}
+          </Button>
+          {canJoin(row._raw) ? (
+            <Button
+              size="sm"
+              loading={joiningId === row._raw.id}
+              onClick={() => join(row._raw)}
+              icon={<Video size={14} />}
+            >
+              {t('actions.join')}
+            </Button>
+          ) : null}
+        </div>
+      ),
+    },
+  ], [t, lang, joiningId]);
 
   const renderSessionCard = (session: any) => (
     <article
@@ -160,29 +222,29 @@ export default function StudentLivePage() {
         <div className="live-session-top">
           <div className="live-session-heading">
             <div className="live-session-title-row">
-              <h3>{session.titleAr}</h3>
+              <h3>{localizedSessionTitle(session, lang)}</h3>
               <Badge className="live-session-status" variant={statusVariant(session.status)}>
-                {statusLabels[session.status] || session.status}
+                {getStatusLabel(session.status)}
               </Badge>
             </div>
-            <p className="live-session-course">{session.course?.titleAr || '—'}</p>
+            <p className="live-session-course">{localizedCourseTitle(session.course, lang)}</p>
           </div>
         </div>
 
         <div className="live-session-meta">
           <span><UserRound size={14} /> {session.instructor?.fullName || '—'}</span>
           <span><Calendar size={14} /> {fmtDate(session.startAt)}</span>
-          <span><Clock size={14} /> {session.durationMinutes || 60} دقيقة</span>
+          <span><Clock size={14} /> {fmtDuration(session.durationMinutes)}</span>
         </div>
 
-        {session.descriptionAr ? (
-          <p className="live-session-desc">{session.descriptionAr}</p>
+        {localizedSessionDescription(session, lang) ? (
+          <p className="live-session-desc">{localizedSessionDescription(session, lang)}</p>
         ) : null}
       </div>
 
       <div className="live-session-actions">
         <Button variant="ghost" size="sm" onClick={() => setSelected(session)}>
-          التفاصيل
+          {t('actions.detail')}
         </Button>
         {canJoin(session) ? (
           <Button
@@ -191,7 +253,7 @@ export default function StudentLivePage() {
             onClick={() => join(session)}
             icon={<Video size={14} />}
           >
-            انضمام
+            {t('actions.join')}
           </Button>
         ) : null}
       </div>
@@ -204,12 +266,12 @@ export default function StudentLivePage() {
     <div className="page-grid student-live-page">
       <div className="reports-header">
         <PageHeader
-          title="الجلسات المباشرة"
-          subtitle="انضم للجلسات القادمة أو شاهد السجل السابق"
+          title={t('student.title')}
+          subtitle={t('student.subtitle')}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!filtered.length}>
-            تصدير Excel
+            {t('actions.exportExcel')}
           </Button>
         </div>
       </div>
@@ -219,29 +281,29 @@ export default function StudentLivePage() {
           <Radio size={32} />
         </div>
         <div className="student-live-hero-body">
-          <strong>جلسات دوراتك المسجّلة</strong>
+          <strong>{t('student.hero.title')}</strong>
           <p>
-            تظهر هنا الجلسات المباشرة للكورسات التي اشتركت بها.
-            {stats.live ? ' يوجد جلسة مباشرة الآن — انضم فوراً!' : ''}
+            {t('student.hero.body')}
+            {stats.live ? t('student.hero.liveNow') : ''}
           </p>
         </div>
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الجلسات" value={String(stats.total)} icon={Video} />
-        <StatCard title="قادمة" value={String(stats.upcoming)} icon={Calendar} />
+        <StatCard title={t('student.stats.total')} value={String(stats.total)} icon={Video} />
+        <StatCard title={t('student.stats.upcoming')} value={String(stats.upcoming)} icon={Calendar} />
         <StatCard
-          title="مباشر الآن"
+          title={t('student.stats.live')}
           value={String(stats.live)}
           icon={Radio}
-          hint={stats.live ? 'جلسة نشطة' : 'لا جلسة حية'}
+          hint={stats.live ? t('student.stats.liveHintActive') : t('student.stats.liveHintNone')}
         />
-        <StatCard title="سابقة" value={String(stats.ended)} icon={Clock} />
+        <StatCard title={t('student.stats.ended')} value={String(stats.ended)} icon={Clock} />
       </div>
 
       {chartData.length ? (
         <div className="reports-charts-grid student-live-charts">
-          <ReportChart title="توزيع الجلسات" type="pie" data={chartData} />
+          <ReportChart title={t('student.charts.distribution')} type="pie" data={chartData} />
         </div>
       ) : null}
 
@@ -250,15 +312,15 @@ export default function StudentLivePage() {
         activeTab={tab}
         onChange={setTab}
         tabs={[
-          { id: 'upcoming', label: `القادمة (${stats.upcoming})` },
-          { id: 'liveNow', label: `مباشر الآن (${stats.live})` },
-          { id: 'ended', label: `السابقة (${stats.ended})` },
+          { id: 'upcoming', label: t('student.tabs.upcoming', { count: stats.upcoming }) },
+          { id: 'liveNow', label: t('student.tabs.liveNow', { count: stats.live }) },
+          { id: 'ended', label: t('student.tabs.ended', { count: stats.ended }) },
         ]}
       />
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان، الكورس، أو المحاضر..."
+        searchPlaceholder={t('student.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => setSearch('')}
       />
@@ -268,8 +330,8 @@ export default function StudentLivePage() {
         activeTab={viewMode}
         onChange={setViewMode}
         tabs={[
-          { id: 'feed', label: 'البطاقات' },
-          { id: 'table', label: 'الجدول' },
+          { id: 'feed', label: t('student.view.feed') },
+          { id: 'table', label: t('student.view.table') },
         ]}
       />
 
@@ -281,14 +343,14 @@ export default function StudentLivePage() {
         ) : (
           <Card>
             <EmptyState
-              title="لا توجد جلسات"
+              title={t('student.empty.title')}
               description={
                 stats.total
-                  ? 'لا توجد جلسات مطابقة في هذا التصنيف.'
-                  : 'لا توجد جلسات مباشرة لدوراتك حالياً. اشترك في دورة تحتوي على جلسات مباشرة.'
+                  ? t('student.empty.filteredInTab')
+                  : t('student.empty.noSessions')
               }
               icon={Video}
-              actionLabel={stats.total ? undefined : 'كورساتي'}
+              actionLabel={stats.total ? undefined : t('student.myCoursesAction')}
               onAction={stats.total ? undefined : () => { window.location.href = '/student/my-courses'; }}
             />
           </Card>
@@ -297,82 +359,46 @@ export default function StudentLivePage() {
         <Card>
           <Table
             data={tableRows}
-            emptyTitle="لا توجد جلسات"
-            emptyDescription="لا توجد جلسات مطابقة للبحث أو التصنيف الحالي."
-            columns={[
-              { key: 'title', header: 'العنوان' },
-              { key: 'course', header: 'الكورس' },
-              { key: 'instructor', header: 'المحاضر' },
-              { key: 'startAt', header: 'الموعد' },
-              { key: 'duration', header: 'المدة' },
-              {
-                key: 'status',
-                header: 'الحالة',
-                render: (row) => (
-                  <Badge variant={statusVariant(String(row._raw?.status))}>
-                    {row.status}
-                  </Badge>
-                ),
-              },
-              {
-                key: 'actions',
-                header: 'الإجراءات',
-                render: (row) => (
-                  <div className="table-actions user-row-actions">
-                    <Button size="sm" variant="secondary" onClick={() => setSelected(row._raw)}>
-                      التفاصيل
-                    </Button>
-                    {canJoin(row._raw) ? (
-                      <Button
-                        size="sm"
-                        loading={joiningId === row._raw.id}
-                        onClick={() => join(row._raw)}
-                        icon={<Video size={14} />}
-                      >
-                        انضمام
-                      </Button>
-                    ) : null}
-                  </div>
-                ),
-              },
-            ]}
+            emptyTitle={t('student.empty.title')}
+            emptyDescription={t('student.empty.tableDescription')}
+            columns={tableColumns}
           />
         </Card>
       )}
 
       <Modal
         isOpen={Boolean(selected)}
-        title={selected?.titleAr || 'تفاصيل الجلسة'}
+        title={selected ? localizedSessionTitle(selected, lang) : t('detail.title')}
         onClose={() => setSelected(null)}
       >
         {selected ? (
           <div className="student-live-detail stack-sm">
             <div className="student-live-detail-meta">
               <Badge variant={statusVariant(selected.status)}>
-                {statusLabels[selected.status] || selected.status}
+                {getStatusLabel(selected.status)}
               </Badge>
               <span><Calendar size={14} /> {fmtDate(selected.startAt)}</span>
-              <span><Clock size={14} /> {selected.durationMinutes || 60} دقيقة</span>
+              <span><Clock size={14} /> {fmtDuration(selected.durationMinutes)}</span>
             </div>
             <div className="student-live-detail-row">
-              <strong>الكورس</strong>
-              <span>{selected.course?.titleAr || '—'}</span>
+              <strong>{t('detail.fields.course')}</strong>
+              <span>{localizedCourseTitle(selected.course, lang)}</span>
             </div>
             <div className="student-live-detail-row">
-              <strong>المحاضر</strong>
+              <strong>{t('detail.fields.instructor')}</strong>
               <span>{selected.instructor?.fullName || '—'}</span>
             </div>
-            {selected.descriptionAr ? (
+            {localizedSessionDescription(selected, lang) ? (
               <div className="student-live-detail-row block">
-                <strong>الوصف</strong>
-                <p>{selected.descriptionAr}</p>
+                <strong>{t('detail.fields.description')}</strong>
+                <p>{localizedSessionDescription(selected, lang)}</p>
               </div>
             ) : null}
             {selected.meetingUrl && canJoin(selected) ? (
               <div className="live-session-link">
                 <a href={selected.meetingUrl} target="_blank" rel="noreferrer">
                   <ExternalLink size={14} />
-                  فتح رابط الاجتماع
+                  {t('student.detail.openMeetingLink')}
                 </a>
                 <Button variant="ghost" size="sm" onClick={() => copyLink(selected.meetingUrl)}>
                   <Copy size={14} />
@@ -382,11 +408,11 @@ export default function StudentLivePage() {
             <div className="card-actions">
               {canJoin(selected) ? (
                 <Button loading={joiningId === selected.id} onClick={() => join(selected)} icon={<Video size={16} />}>
-                  انضمام للجلسة
+                  {t('actions.joinSession')}
                 </Button>
               ) : null}
               <Link to={`/student/courses/${selected.courseId}`}>
-                <Button variant="outline">عرض الدورة</Button>
+                <Button variant="outline">{t('student.detail.viewCourse')}</Button>
               </Link>
             </div>
           </div>

@@ -99,5 +99,124 @@
         "coursesSaved": "Path courses saved."
       }
     }
+  },
+  "student": {
+    "labels": {
+      "defaultDesc": "Structured learning path",
+      "coursesCount": "{{count}} courses",
+      "coursesCount_one": "{{count}} course",
+      "coursesCount_other": "{{count}} courses",
+      "stepAria": "Step {{number}}",
+      "pathProgress": "Path progress",
+      "completionRate": "Completion rate",
+      "enrolledShort": "{{count}} enrolled",
+      "completedShort": "{{count}} completed",
+      "totalShort": "{{count}} total",
+      "stepsCount": "{{count}} steps",
+      "stepsCount_one": "{{count}} step",
+      "stepsCount_other": "{{count}} steps",
+      "coursesInPath": "{{count}} courses",
+      "coursesInPath_one": "{{count}} course",
+      "coursesInPath_other": "{{count}} courses",
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started",
+        "notEnrolled": "Not enrolled"
+      },
+      "actions": {
+        "explore": "Explore path",
+        "reviewPath": "Review path",
+        "view": "View",
+        "backToPaths": "Back to paths",
+        "enrollNow": "Enroll now"
+      }
+    },
+    "list": {
+      "title": "Learning paths",
+      "subtitle": "Learn in a structured way through sequential paths",
+      "exportExcel": "Export Excel",
+      "heroTitle": "Organized learning plans",
+      "heroSummary": "{{paths}} paths available — {{courses}} courses across paths",
+      "heroEmpty": "Learning paths will be added soon.",
+      "stats": {
+        "paths": "Paths",
+        "inProgress": "In progress",
+        "completed": "Completed",
+        "totalCourses": "Total courses"
+      },
+      "charts": {
+        "statusDistribution": "Path status",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by path name or description...",
+        "status": "Status"
+      },
+      "tabs": {
+        "cards": "Cards ({{count}})",
+        "table": "Table ({{count}})"
+      },
+      "empty": {
+        "title": "No paths",
+        "filteredDesc": "No paths match the current filters.",
+        "defaultDesc": "Learning paths will be added soon."
+      },
+      "table": {
+        "emptyTitle": "No paths",
+        "emptyDescription": "No matching paths.",
+        "columns": {
+          "title": "Path",
+          "courses": "Courses",
+          "enrolled": "Enrolled",
+          "completed": "Completed",
+          "progress": "Progress",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "export": {
+        "sheetName": "Learning-paths",
+        "columns": {
+          "title": "Path",
+          "courses": "Course count",
+          "enrolled": "Enrolled",
+          "completed": "Completed",
+          "progress": "Progress %",
+          "status": "Status"
+        }
+      }
+    },
+    "detail": {
+      "breadcrumb": "Learning paths",
+      "stats": {
+        "pathCourses": "Path courses",
+        "enrolled": "Enrolled",
+        "completed": "Completed",
+        "progress": "Path progress"
+      },
+      "journey": {
+        "title": "Overall path progress",
+        "allComplete": "Well done! You completed all courses in this path.",
+        "partial": "{{completed}} of {{total}} courses completed — keep learning.",
+        "notStarted": "Enroll in path courses to start your learning journey."
+      },
+      "enroll": {
+        "title": "Enroll in all path courses",
+        "desc": "You will be enrolled in all available path courses at once."
+      },
+      "timeline": {
+        "title": "Course sequence"
+      },
+      "coursesSection": {
+        "title": "Path courses"
+      },
+      "toast": {
+        "enrollSuccess": "Successfully enrolled in path courses.",
+        "enrollError": "Could not enroll in path."
+      }
+    }
   }
 }

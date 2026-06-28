@@ -11,6 +11,7 @@
       "branding": "Branding",
       "financial": "Financial",
       "certificates": "Certificates",
+      "rewards": "Rewards",
       "contact": "Contact",
       "legal": "SEO",
       "system": "Technical"
@@ -55,10 +56,17 @@
       },
       "certificates": {
         "label": "Certificates",
-        "title": "Certificates & referrals",
-        "description": "Certificate prefix and referral program rewards.",
+        "title": "Certificates",
+        "description": "Certificate numbering and issuance settings.",
         "fields": {
-          "certificatePrefix": { "label": "Certificate prefix", "placeholder": "BI", "helper": "Example: BI-2026-00001" },
+          "certificatePrefix": { "label": "Certificate prefix", "placeholder": "BI", "helper": "Example: BI-2026-00001" }
+        }
+      },
+      "rewards": {
+        "label": "Rewards",
+        "title": "Rewards & referrals",
+        "description": "Referral reward points and point value when redeeming at course checkout.",
+        "fields": {
           "referralRewardPoints": { "label": "Referral reward points", "helper": "Awarded to referrer when a new student signs up with their code" },
           "pointsPerEgp": { "label": "Point value (EGP)", "helper": "Example: 1 = each point equals 1 EGP discount" },
           "referralEnabled": { "label": "Enable referral program" }

@@ -10,6 +10,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { StudentCourseCard } from '../../components/student/StudentCourseCard';
+import { DashboardBrowseCarousel } from '../../components/student/DashboardBrowseCarousel';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { DashboardSkeleton } from '../../components/ui/LoadingSkeleton';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -18,6 +19,13 @@ import { ReportChart } from '../../components/reports/ReportChart';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../store/AuthContext';
+import {
+  localizedCategoryName,
+  localizedCourseTitle,
+  localizedPathDescription,
+  localizedPathTitle,
+  localizedText,
+} from '../../utils/localizedContent';
 import { formatDateTime, formatRelativeTimeMinutes } from '../../utils/localeFormat';
 import { formatMoney } from '../../utils/formatMoney';
 
@@ -35,8 +43,9 @@ const fmtRelative = (value: string) => {
 };
 
 export default function StudentDashboardPage() {
-  const { t } = useTranslation('dashboard');
+  const { t, i18n } = useTranslation('dashboard');
   const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -44,14 +53,44 @@ export default function StudentDashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [browseCategory, setBrowseCategory] = useState('');
+  const [browseCourses, setBrowseCourses] = useState<any[]>([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [enrolledIds, setEnrolledIds] = useState<Set<number>>(new Set());
   const [welcomeReferral, setWelcomeReferral] = useState<string | null>(() => {
     const state = location.state as { welcomeReferral?: boolean; referralCode?: string } | null;
     return state?.welcomeReferral && state?.referralCode ? state.referralCode : null;
   });
 
   useEffect(() => {
-    studentApi.dashboard().then(setData).finally(() => setLoading(false));
+    setLoading(true);
+    Promise.all([
+      studentApi.dashboard(),
+      studentApi.courses({ sort: 'latest' }),
+      studentApi.myCourses('all').catch(() => []),
+    ]).then(([dashboardData, courses, myCourses]) => {
+      setData(dashboardData);
+      setBrowseCourses(courses);
+      setEnrolledIds(new Set(myCourses.map((entry: any) => entry.courseId)));
+    }).finally(() => setLoading(false));
   }, []);
+
+  const loadBrowseCourses = async (categorySlug = '') => {
+    setBrowseLoading(true);
+    try {
+      const params: Record<string, string> = { sort: 'latest' };
+      if (categorySlug) params.category = categorySlug;
+      const courses = await studentApi.courses(params);
+      setBrowseCourses(courses);
+    } finally {
+      setBrowseLoading(false);
+    }
+  };
+
+  const selectBrowseCategory = (slug: string) => {
+    setBrowseCategory(slug);
+    loadBrowseCourses(slug);
+  };
 
   useEffect(() => {
     if ((location.state as { welcomeReferral?: boolean } | null)?.welcomeReferral) {
@@ -177,19 +216,54 @@ export default function StudentDashboardPage() {
             <Button type="submit" size="sm">{tc('actions.search')}</Button>
           </form>
           <div className="category-chips">
-            <button type="button" className="category-chip active" onClick={() => navigate('/student/courses')}>
+            <button
+              type="button"
+              className={!browseCategory ? 'category-chip active' : 'category-chip'}
+              onClick={() => selectBrowseCategory('')}
+            >
               {tc('status.all')}
             </button>
             {(data?.categories || []).map((cat: any) => (
               <button
                 key={cat.id}
                 type="button"
-                className="category-chip"
-                onClick={() => navigate(`/student/courses?category=${cat.slug}`)}
+                className={browseCategory === cat.slug ? 'category-chip active' : 'category-chip'}
+                onClick={() => selectBrowseCategory(cat.slug)}
               >
-                {cat.nameAr} ({cat._count?.courses || 0})
+                {localizedCategoryName(cat, lang)} ({cat._count?.courses || 0})
               </button>
             ))}
+          </div>
+          <div className="student-dashboard-browse">
+            {browseLoading ? (
+              <div className="student-dashboard-browse-row">
+                <div className="student-dashboard-browse-carousel">
+                  <div className="student-dashboard-browse-slide">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div key={index} className="skeleton skeleton-card student-dashboard-browse-skeleton" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : browseCourses.length ? (
+              <DashboardBrowseCarousel
+                courses={browseCourses}
+                enrolledIds={enrolledIds}
+                viewAllHref={browseCategory ? `/student/courses?category=${browseCategory}` : '/student/courses'}
+                viewAllLabel={tc('actions.viewAll')}
+                onCourseAction={(courseId, isEnrolled) => navigate(
+                  isEnrolled ? `/student/player/${courseId}` : `/student/courses/${courseId}`,
+                )}
+              />
+            ) : (
+              <EmptyState
+                title={t('student.search.emptyTitle')}
+                description={t('student.search.emptyDesc')}
+                icon={BookOpen}
+                actionLabel={t('student.search.viewAll')}
+                onAction={() => navigate('/student/courses')}
+              />
+            )}
           </div>
         </Card>
 
@@ -223,8 +297,8 @@ export default function StudentDashboardPage() {
                   )}
                 </div>
                 <div className="student-continue-info">
-                  <Badge variant="info">{continueCourse.course?.category?.nameAr || t('student.continue.courseFallback')}</Badge>
-                  <h3>{continueCourse.course?.titleAr}</h3>
+                  <Badge variant="info">{localizedCategoryName(continueCourse.course?.category, lang) || t('student.continue.courseFallback')}</Badge>
+                  <h3>{localizedCourseTitle(continueCourse.course, lang)}</h3>
                   <p>{continueCourse.course?.instructor?.fullName}</p>
                   <ProgressBar
                     value={Number(continueCourse.progressPercentage || 0)}
@@ -298,14 +372,14 @@ export default function StudentDashboardPage() {
                   <div key={session.id} className={`session-card student-dashboard-session ${session.status === 'LIVE' ? 'is-live' : ''}`}>
                     <div className="session-card-info">
                       <div className="chip-row">
-                        <h4>{session.titleAr}</h4>
+                        <h4>{localizedText({ ar: session.titleAr, en: session.titleEn }, lang)}</h4>
                         {session.status === 'LIVE' ? (
                           <Badge variant="live">{t('student.sessions.liveNow')}</Badge>
                         ) : (
                           <Badge variant="info">{t('student.sessions.scheduled')}</Badge>
                         )}
                       </div>
-                      <p>{session.course?.titleAr}</p>
+                      <p>{localizedCourseTitle(session.course, lang)}</p>
                       <p><Calendar size={14} /> {fmtDate(session.startAt)}</p>
                     </div>
                     <Link to="/student/live">
@@ -315,18 +389,18 @@ export default function StudentDashboardPage() {
                 ))}
               </div>
             ) : (
-              <EmptyState title="لا توجد جلسات" description="لا توجد جلسات مباشرة قادمة حالياً." icon={Radio} />
+              <EmptyState title={t('student.sessions.emptyTitle')} description={t('student.sessions.emptyDesc')} icon={Radio} />
             )}
             <div className="dashboard-panel-footer">
-              <Link to="/student/live"><Button variant="ghost" size="sm">عرض كل الجلسات</Button></Link>
+              <Link to="/student/live"><Button variant="ghost" size="sm">{t('student.sessions.viewAll')}</Button></Link>
             </div>
           </div>
         </Card>
 
         <Card className="dashboard-panel">
           <div className="dashboard-panel-title-row">
-            <h2><Bell size={20} /> آخر الإشعارات</h2>
-            {unreadCount > 0 ? <Badge variant="warning">{unreadCount} جديد</Badge> : null}
+            <h2><Bell size={20} /> {t('student.notifications.title')}</h2>
+            {unreadCount > 0 ? <Badge variant="warning">{t('student.notifications.newBadge', { count: unreadCount })}</Badge> : null}
           </div>
           <div className="dashboard-panel-body">
             {(data?.latestNotifications || []).length ? (
@@ -335,7 +409,7 @@ export default function StudentDashboardPage() {
                   <div key={item.id} className={`student-dashboard-notification ${item.isRead ? 'read' : 'unread'}`}>
                     <Bell size={16} />
                     <div>
-                      <strong>{item.titleAr}</strong>
+                      <strong>{localizedText({ ar: item.titleAr, en: item.titleEn }, lang)}</strong>
                       <small>{fmtRelative(item.createdAt)}</small>
                     </div>
                     {!item.isRead ? <span className="notification-dot" aria-hidden /> : null}
@@ -343,10 +417,10 @@ export default function StudentDashboardPage() {
                 ))}
               </div>
             ) : (
-              <EmptyState title="لا توجد إشعارات" description="ستظهر تحديثاتك التعليمية هنا." icon={Bell} />
+              <EmptyState title={t('student.notifications.emptyTitle')} description={t('student.notifications.emptyDesc')} icon={Bell} />
             )}
             <div className="dashboard-panel-footer">
-              <Link to="/student/notifications"><Button variant="ghost" size="sm">عرض الكل</Button></Link>
+              <Link to="/student/notifications"><Button variant="ghost" size="sm">{tc('actions.viewAll')}</Button></Link>
             </div>
           </div>
         </Card>
@@ -354,8 +428,8 @@ export default function StudentDashboardPage() {
 
       <section className="dashboard-section">
         <div className="section-heading">
-          <h2><Route size={20} /> مسارات تعليمية</h2>
-          <Link to="/student/learning-paths">عرض الكل</Link>
+          <h2><Route size={20} /> {t('student.pathsSection.title')}</h2>
+          <Link to="/student/learning-paths">{t('student.pathsSection.viewAll')}</Link>
         </div>
         <div className="learning-paths-grid dashboard-paths">
           {(data?.learningPaths || []).length ? (
@@ -363,18 +437,18 @@ export default function StudentDashboardPage() {
               <Card key={path.id} className="learning-path-card student-learning-path-card">
                 <div className="learning-path-top">
                   <span className="learning-path-icon"><Route size={22} /></span>
-                  <span className="learning-path-count">{path._count?.courses || path.courses?.length || 0} دورات</span>
+                  <span className="learning-path-count">{t('student.pathsSection.coursesCount', { count: path._count?.courses || path.courses?.length || 0 })}</span>
                 </div>
-                <h3>{path.titleAr}</h3>
-                <p>{path.descriptionAr || 'مسار تعليمي منظم'}</p>
+                <h3>{localizedPathTitle(path, lang)}</h3>
+                <p>{localizedPathDescription(path, lang, t('student.pathsSection.defaultDesc'))}</p>
                 <Link to={`/student/learning-paths/${path.id}`} className="learning-path-action">
-                  <Button size="sm" variant="outline" fullWidth>استكشف المسار</Button>
+                  <Button size="sm" variant="outline" fullWidth>{t('student.pathsSection.explore')}</Button>
                 </Link>
               </Card>
             ))
           ) : (
             <Card className="dashboard-empty-card">
-              <EmptyState title="لا توجد مسارات" description="ستُضاف مسارات تعليمية قريباً." />
+              <EmptyState title={t('student.pathsSection.emptyTitle')} description={t('student.pathsSection.emptyDesc')} />
             </Card>
           )}
         </div>
@@ -382,8 +456,8 @@ export default function StudentDashboardPage() {
 
       <section className="dashboard-section">
         <div className="section-heading">
-          <h2><TrendingUp size={20} /> الأكثر شعبية</h2>
-          <Link to="/student/courses?sort=popular">عرض الكل</Link>
+          <h2><TrendingUp size={20} /> {t('student.popular.title')}</h2>
+          <Link to="/student/courses?sort=popular">{t('student.popular.viewAll')}</Link>
         </div>
         <div className="course-list-grid dashboard-courses">
           {(data?.popularCourses || []).length ? (
@@ -397,7 +471,7 @@ export default function StudentDashboardPage() {
             ))
           ) : (
             <Card className="dashboard-empty-card">
-              <EmptyState title="لا توجد دورات شائعة" description="ستظهر الدورات الأكثر اشتراكاً هنا." />
+              <EmptyState title={t('student.popular.emptyTitle')} description={t('student.popular.emptyDesc')} />
             </Card>
           )}
         </div>
@@ -405,8 +479,8 @@ export default function StudentDashboardPage() {
 
       <section className="dashboard-section">
         <div className="section-heading">
-          <h2><BookOpen size={20} /> دورات مقترحة لك</h2>
-          <Link to="/student/courses">عرض الكل</Link>
+          <h2><BookOpen size={20} /> {t('student.recommended.title')}</h2>
+          <Link to="/student/courses">{t('student.recommended.viewAll')}</Link>
         </div>
         <div className="course-list-grid dashboard-courses">
           {(data?.recommendedCourses || []).length ? (
@@ -420,7 +494,7 @@ export default function StudentDashboardPage() {
             ))
           ) : (
             <Card className="dashboard-empty-card">
-              <EmptyState title="لا توجد توصيات حالياً" description="ستظهر الدورات المقترحة هنا بعد توفرها." icon={Crown} />
+              <EmptyState title={t('student.recommended.emptyTitle')} description={t('student.recommended.emptyDesc')} icon={Crown} />
             </Card>
           )}
         </div>
@@ -429,11 +503,11 @@ export default function StudentDashboardPage() {
       <Card className="student-dashboard-community-cta">
         <MessageCircle size={24} />
         <div>
-          <strong>انضم للمجتمع</strong>
-          <p>شارك أسئلتك وتجاربك مع المتعلمين الآخرين.</p>
+          <strong>{t('student.community.title')}</strong>
+          <p>{t('student.community.desc')}</p>
         </div>
         <Link to="/student/community">
-          <Button variant="secondary" size="sm">زيارة المجتمع</Button>
+          <Button variant="secondary" size="sm">{t('student.community.cta')}</Button>
         </Link>
       </Card>
     </div>

@@ -15,6 +15,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { Tabs } from '../../components/ui/Tabs';
 import { useToast } from '../../components/ui/Toast';
 import { formatNumber } from '../../utils/localeFormat';
+import { localizedCategoryName, localizedCourseTitle } from '../../utils/localizedContent';
 import { mediaUrl } from '../../utils/mediaUrl';
 
 const courseVariant = (status: string) => {
@@ -28,8 +29,9 @@ const courseVariant = (status: string) => {
 const canSubmitForReview = (status: string) => status === 'DRAFT' || status === 'REJECTED';
 
 export default function InstructorCoursesPage() {
-  const { t } = useTranslation('courses');
+  const { t, i18n } = useTranslation('courses');
   const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [tab, setTab] = useState('all');
@@ -65,8 +67,10 @@ export default function InstructorCoursesPage() {
       await instructorApi.submitCourseReview(id);
       showToast(t('toast.submitted'), 'success');
       await load();
-    } catch {
-      showToast(t('toast.submitFailed'), 'error');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        || t('toast.submitFailed');
+      showToast(message, 'error');
     } finally {
       setSubmittingId(null);
     }
@@ -101,8 +105,8 @@ export default function InstructorCoursesPage() {
         <span className="instructor-courses-count muted-count">
           {loading ? '…' : (
             tab !== 'all'
-              ? t('countFiltered', { count: formatNumber(courses.length), status: tabLabel })
-              : t('count', { count: formatNumber(courses.length) })
+              ? t('countFiltered', { count: formatNumber(courses.length, {}, lang), status: tabLabel })
+              : t('count', { count: formatNumber(courses.length, {}, lang) })
           )}
         </span>
       </Card>
@@ -138,26 +142,26 @@ export default function InstructorCoursesPage() {
                       <Badge variant={courseVariant(course.status)} className="instructor-course-status-badge">
                         {t(`status.${course.status}`, { defaultValue: course.status })}
                       </Badge>
-                      <h3 className="instructor-course-card-title">{course.titleAr}</h3>
+                      <h3 className="instructor-course-card-title">{localizedCourseTitle(course, lang)}</h3>
                     </div>
                   </div>
 
                   <div className="instructor-course-card-meta">
-                    {course.category?.nameAr ? (
+                    {course.category ? (
                       <span className="instructor-course-meta-item">
                         <Tags size={15} aria-hidden />
-                        {course.category.nameAr}
+                        {localizedCategoryName(course.category, lang)}
                       </span>
                     ) : null}
                     <span className="instructor-course-meta-item">
                       <DollarSign size={15} aria-hidden />
-                      {formatNumber(Number(course.price || 0))}
+                      {formatNumber(Number(course.price || 0), {}, lang)}
                       {' '}
                       {tc('currency.egp')}
                     </span>
                     <span className="instructor-course-meta-item">
                       <Users size={15} aria-hidden />
-                      {formatNumber(Number(course._count?.enrollments || 0))}
+                      {formatNumber(Number(course._count?.enrollments || 0), {}, lang)}
                       {' '}
                       {tc('units.student')}
                     </span>

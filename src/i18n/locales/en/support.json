@@ -94,5 +94,170 @@
         "SUPER_ADMIN": "Admin"
       }
     }
+  },
+  "student": {
+    "title": "Technical support",
+    "subtitle": "Create a ticket or follow support team replies",
+    "exportExcel": "Export Excel",
+    "newTicket": "New ticket",
+    "heroTitle": "We are here to help",
+    "heroDesc": "Send your question or issue and our support team will respond as soon as possible.",
+    "stats": {
+      "total": "Total tickets",
+      "open": "Open",
+      "inProgress": "In progress",
+      "closed": "Closed"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by subject or message…",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "title": "Support tickets",
+      "ticketCount": "{{count}} ticket",
+      "ticketCount_other": "{{count}} tickets",
+      "emptyTitle": "No tickets",
+      "emptyDescription": "Create a ticket when you need help.",
+      "columns": {
+        "id": "Ticket ID",
+        "subject": "Subject",
+        "replies": "Replies",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      }
+    },
+    "export": {
+      "sheetName": "Support tickets",
+      "columns": {
+        "id": "Ticket ID",
+        "subject": "Subject",
+        "message": "Message",
+        "repliesCount": "Replies",
+        "status": "Status",
+        "createdAt": "Created at",
+        "updatedAt": "Last updated"
+      }
+    },
+    "actions": {
+      "view": "View",
+      "closeDetail": "Close details"
+    },
+    "detail": {
+      "loadingTitle": "Loading…",
+      "loadingDesc": "Fetching ticket details.",
+      "you": "You",
+      "supportTeam": "Support team",
+      "noReplies": "No replies yet — our support team will contact you soon.",
+      "replyLabel": "New reply",
+      "replyPlaceholder": "Write your reply or add details…",
+      "sendReply": "Send reply",
+      "closedNotice": "This ticket is closed. You can open a new ticket if you need more help."
+    },
+    "modal": {
+      "title": "New support ticket",
+      "subject": "Subject",
+      "subjectPlaceholder": "e.g. Payment issue or course access",
+      "message": "Message",
+      "messagePlaceholder": "Describe your issue or question in detail…",
+      "cancel": "Cancel",
+      "submit": "Submit ticket"
+    },
+    "toast": {
+      "created": "Ticket created successfully.",
+      "createFailed": "Could not create ticket.",
+      "replySent": "Reply sent.",
+      "replyFailed": "Could not send reply."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "Open",
+        "IN_PROGRESS": "In progress",
+        "CLOSED": "Closed"
+      }
+    }
+  },
+  "instructor": {
+    "title": "Technical support",
+    "subtitle": "Contact platform administration for help",
+    "newTicket": "New ticket",
+    "heroTitle": "Support team is ready to help",
+    "heroDesc": "Send your question about course reviews, payments, or technical issues and we will respond as soon as possible.",
+    "backToSupport": "Back to technical support",
+    "backToTickets": "Back to support tickets",
+    "stats": {
+      "total": "Total tickets",
+      "open": "Open",
+      "inProgress": "In progress",
+      "closed": "Closed"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by subject or message...",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "title": "Support tickets",
+      "ticketCount": "{{count}} ticket",
+      "ticketCount_other": "{{count}} tickets",
+      "emptyTitle": "No tickets",
+      "emptyDescription": "Create a ticket to get help from administration.",
+      "columns": {
+        "id": "Ticket ID",
+        "subject": "Subject",
+        "message": "Message",
+        "replies": "Replies",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      }
+    },
+    "actions": {
+      "details": "Details"
+    },
+    "detail": {
+      "notFoundTitle": "Ticket not found",
+      "notFoundDescription": "We could not find this ticket.",
+      "ticketInfo": "Ticket information",
+      "createdAt": "Created at",
+      "lastUpdated": "Last updated",
+      "repliesCount": "Replies",
+      "you": "You",
+      "supportTeam": "Support team",
+      "noReplies": "No replies yet — our support team will contact you soon.",
+      "replyLabel": "New reply",
+      "replyPlaceholder": "Write your reply or add details...",
+      "sendReply": "Send reply",
+      "closedNotice": "This ticket is closed. You can open a new ticket if you need more help."
+    },
+    "modal": {
+      "title": "New support ticket",
+      "subject": "Subject",
+      "subjectPlaceholder": "e.g. Delay in course review",
+      "message": "Message",
+      "messagePlaceholder": "Describe your issue or question in detail...",
+      "cancel": "Cancel",
+      "submit": "Submit ticket"
+    },
+    "toast": {
+      "created": "Ticket created.",
+      "createFailed": "Could not create ticket.",
+      "loadFailed": "Could not load ticket.",
+      "replySent": "Reply sent.",
+      "replyFailed": "Could not send reply."
+    },
+    "labels": {
+      "status": {
+        "OPEN": "Open",
+        "IN_PROGRESS": "In progress",
+        "CLOSED": "Closed"
+      },
+      "role": {
+        "STUDENT": "Student",
+        "INSTRUCTOR": "Instructor",
+        "SUPER_ADMIN": "Admin"
+      }
+    }
   }
 }

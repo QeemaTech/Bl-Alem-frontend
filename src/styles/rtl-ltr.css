@@ -4,7 +4,11 @@ html[dir="ltr"] {
 }
 
 html[dir="ltr"] .dashboard-shell {
-  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+}
+
+html[dir="ltr"] .dashboard-shell.is-collapsed {
+  grid-template-columns: var(--sidebar-collapsed-width) minmax(0, 1fr);
 }
 
 html[dir="ltr"] .sidebar {
@@ -35,8 +39,53 @@ html[dir="ltr"] .student-dashboard-hero-text,
 html[dir="ltr"] .student-community-detail,
 html[dir="ltr"] .student-live-detail,
 html[dir="ltr"] .review-item-body,
-html[dir="ltr"] .live-session-body {
+html[dir="ltr"] .live-session-body,
+html[dir="ltr"] .instructor-course-card-body,
+html[dir="ltr"] .instructor-course-card-title,
+html[dir="ltr"] .student-notification-body,
+html[dir="ltr"] .student-notification-title-wrap h3,
+html[dir="ltr"] .student-notification-text,
+html[dir="ltr"] .student-notification-time {
   text-align: start;
+}
+
+html[dir="ltr"] .student-notification-top {
+  justify-content: flex-start;
+}
+
+html[dir="ltr"] .student-notification-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+html[dir="ltr"] .student-notification-actions {
+  justify-content: flex-end;
+}
+
+html[dir="ltr"] .instructor-notifications-page .reports-table-head {
+  text-align: start;
+}
+
+html[dir="ltr"] .instructor-student-detail-page .admin-detail-back,
+html[dir="ltr"] .instructor-student-detail-page .admin-user-hero-copy,
+html[dir="ltr"] .instructor-student-detail-page .admin-user-hero-title-row,
+html[dir="ltr"] .instructor-student-detail-page .instructor-students-table-head {
+  text-align: start;
+}
+
+html[dir="ltr"] .instructor-student-detail-page .admin-user-hero-title-row,
+html[dir="ltr"] .instructor-student-detail-page .admin-user-hero-meta {
+  justify-content: flex-start;
+}
+
+html[dir="ltr"] .instructor-students-table .data-table-head th,
+html[dir="ltr"] .instructor-students-table .data-table-body td {
+  text-align: start;
+}
+
+html[dir="ltr"] .instructor-students-table .data-table-head th[align="center"],
+html[dir="ltr"] .instructor-students-table .data-table-body td[align="center"] {
+  text-align: center;
 }
 
 /* Language switcher */
@@ -88,4 +137,19 @@ html[dir="ltr"] .live-session-body {
 .language-switcher-option.is-active {
   background: var(--color-primary-container);
   color: var(--color-on-primary-container);
+}
+
+.auth-layout-lang-switch {
+  position: fixed;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 100;
+}
+
+.auth-layout-lang-switch .language-switcher-trigger,
+.auth-layout-lang-switch .language-switcher-toggle {
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container);
+  box-shadow: var(--shadow-1);
 }

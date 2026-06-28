@@ -1,0 +1,133 @@
+{
+  "student": {
+    "title": "Profile",
+    "subtitle": "Update your details and learning preferences",
+    "summaryAria": "Profile summary",
+    "statsAria": "Profile statistics",
+    "loadingProfile": "Loading profile…",
+    "loadingStats": "Loading statistics…",
+    "roleBadge": "Student",
+    "emptyBio": "Add a bio in the form to personalize your learning experience.",
+    "metaAria": "Contact and account details",
+    "meta": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "education": "Education",
+      "joinedAt": "Joined",
+      "wallet": "Wallet balance",
+      "points": "Reward points",
+      "pointsUnit": "{{count}} points",
+      "interests": "Interests",
+      "interestsCount": "{{count}} interest",
+      "interestsCount_other": "{{count}} interests",
+      "interestsEmpty": "Not added yet",
+      "referralCode": "Referral code",
+      "copyReferral": "Copy referral code",
+      "copy": "Copy"
+    },
+    "stats": {
+      "completedCourses": "Completed courses",
+      "completedHint": "Learning achievements",
+      "certificates": "Certificates",
+      "certificatesHint": "Verified certificates",
+      "achievements": "Achievements",
+      "achievementsHint": "Reward points",
+      "completion": "Profile completion",
+      "completionDone": "Profile complete",
+      "completionPending": "Complete your profile"
+    },
+    "completion": {
+      "label": "Profile completion",
+      "done": "Profile complete",
+      "almost": "Almost there",
+      "start": "Complete your profile for better recommendations",
+      "aria": "Profile completion"
+    },
+    "personal": {
+      "title": "Personal information",
+      "desc": "Used to personalize your learning experience and course recommendations.",
+      "fullName": "Full name",
+      "phone": "Phone",
+      "educationLevel": "Education level",
+      "preferredLanguage": "Preferred interface language",
+      "bio": "About you",
+      "bioPlaceholder": "Introduce yourself and your learning interests…",
+      "save": "Save changes"
+    },
+    "password": {
+      "title": "Change password",
+      "desc": "Use a strong password of at least 8 characters with numbers and symbols.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm password",
+      "submit": "Update password",
+      "show": "Show password",
+      "hide": "Hide password",
+      "strength": {
+        "weak": "Weak — at least 8 characters",
+        "fair": "Fair — add numbers or symbols",
+        "good": "Good",
+        "strong": "Very strong"
+      }
+    },
+    "interests": {
+      "title": "Interests",
+      "selectedAria": "Selected interests",
+      "removeAria": "Remove {{interest}}",
+      "empty": "No interests yet — add what matters to you for personalized recommendations.",
+      "placeholder": "Type an interest and press Enter",
+      "add": "Add",
+      "suggestions": "Suggestions:",
+      "hint": "Add your interests as chips — they power course recommendations.",
+      "suggested": {
+        "programming": "Programming",
+        "design": "Design",
+        "business": "Business",
+        "marketing": "Marketing",
+        "ai": "Artificial intelligence",
+        "languages": "Languages"
+      }
+    },
+    "avatar": {
+      "alt": "Profile photo for {{name}}",
+      "altFallback": "Profile photo",
+      "empty": "No profile photo",
+      "change": "Change photo",
+      "upload": "Upload photo",
+      "remove": "Remove"
+    },
+    "educationLevels": {
+      "_empty": "Select level",
+      "ثانوي": "High school",
+      "جامعي": "Undergraduate",
+      "دراسات عليا": "Postgraduate",
+      "مهني": "Vocational / technical",
+      "تعلم ذاتي": "Self-taught",
+      "أخرى": "Other"
+    },
+    "languages": {
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "validation": {
+      "fullName": "Enter your full name.",
+      "phone": "Enter your phone number.",
+      "reviewFields": "Please review the required fields.",
+      "currentPassword": "Enter your current password.",
+      "newPassword": "Enter a new password.",
+      "newPasswordMin": "At least 8 characters.",
+      "confirmPassword": "Confirm your new password.",
+      "passwordMismatch": "Passwords do not match."
+    },
+    "toast": {
+      "saved": "Profile updated.",
+      "saveFailed": "Could not save changes.",
+      "passwordChanged": "Password changed.",
+      "passwordFailed": "Could not change password. Check your current password.",
+      "avatarUploaded": "Photo uploaded.",
+      "avatarFailed": "Could not upload photo.",
+      "referralCopied": "Referral code copied."
+    }
+  }
+}

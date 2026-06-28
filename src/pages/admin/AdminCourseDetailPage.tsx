@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from '@/icons';
 import { adminApi } from '../../api/admin';
 import { CourseCurriculumSummary } from '../../components/admin/courses/CourseCurriculumSummary';
+import { AdminCourseQuizzesSummary } from '../../components/admin/courses/AdminCourseQuizzesSummary';
 import { CourseDetail } from '../../components/admin/courses/CourseDetail';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -14,9 +15,16 @@ import { Modal } from '../../components/ui/Modal';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { mediaUrl } from '../../utils/mediaUrl';
+import {
+  localizedCourseDescription,
+  localizedCourseList,
+  localizedCourseTitle,
+  localizedResourceTitle,
+} from '../../utils/localizedContent';
 
 export default function AdminCourseDetailPage() {
-  const { t } = useTranslation(['courses', 'common']);
+  const { t, i18n } = useTranslation(['courses', 'common']);
+  const lang = i18n.language;
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -108,6 +116,10 @@ export default function AdminCourseDetailPage() {
     );
   }
 
+  const courseTitle = localizedCourseTitle(course, lang);
+  const courseDescription = localizedCourseDescription(course, lang);
+  const learningPoints = localizedCourseList(course.whatYouWillLearn, course.whatYouWillLearnEn, lang);
+
   return (
     <div className="page-grid admin-course-detail-page">
       <Link to="/admin/courses" className="support-ticket-back">
@@ -127,10 +139,10 @@ export default function AdminCourseDetailPage() {
         />
       </Card>
 
-      {course.descriptionAr ? (
+      {courseDescription ? (
         <Card className="admin-course-description-card">
           <h3>{t('admin.courses.detail.description')}</h3>
-          <p className="course-review-description">{course.descriptionAr}</p>
+          <p className="course-review-description">{courseDescription}</p>
         </Card>
       ) : null}
 
@@ -141,37 +153,35 @@ export default function AdminCourseDetailPage() {
         </Card>
       ) : null}
 
-      {course.whatYouWillLearn?.length ? (
+      {learningPoints.length ? (
         <Card>
           <h3>{t('admin.courses.detail.whatYouWillLearn')}</h3>
           <ul className="list-style">
-            {course.whatYouWillLearn.map((item: string, index: number) => (
+            {learningPoints.map((item: string, index: number) => (
               <li key={`${item}-${index}`}>{item}</li>
             ))}
           </ul>
         </Card>
       ) : null}
 
-      <CourseCurriculumSummary course={course} />
+      <CourseCurriculumSummary key={course.id} course={course} />
 
-      {course.quizzes?.length ? (
-        <Card>
-          <h3>{t('admin.courses.detail.quizzes', { count: course.quizzes.length })}</h3>
-          <div className="admin-course-quizzes">
-            {course.quizzes.map((quiz: any) => (
-              <div key={quiz.id} className="admin-course-quiz-item">
-                <strong>{quiz.titleAr}</strong>
-                <span className="muted-count">
-                  {t('admin.courses.detail.quizMeta', {
-                    questions: quiz.questions?.length || 0,
-                    minutes: quiz.durationMinutes,
-                  })}
-                </span>
-              </div>
+      {course.courseResources?.length ? (
+        <Card className="admin-course-resources-card">
+          <h3>{t('admin.courses.detail.courseResources', { count: course.courseResources.length })}</h3>
+          <ul className="admin-course-resources-list">
+            {course.courseResources.map((resource: any) => (
+              <li key={resource.id}>
+                <a href={mediaUrl(resource.fileUrl)} target="_blank" rel="noreferrer" className="admin-course-lesson-link">
+                  {localizedResourceTitle(resource, lang)}
+                </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </Card>
       ) : null}
+
+      <AdminCourseQuizzesSummary key={course.id} quizzes={course.quizzes || []} />
 
       <Modal
         isOpen={rejectOpen}
@@ -179,7 +189,7 @@ export default function AdminCourseDetailPage() {
         onClose={() => { setRejectOpen(false); setRejectReason(''); }}
       >
         <form className="stack-sm" onSubmit={submitReject}>
-          <p>{t('admin.courses.detail.rejectPrompt')} <strong>{course.titleAr}</strong></p>
+          <p>{t('admin.courses.detail.rejectPrompt')} <strong>{courseTitle}</strong></p>
           <Textarea
             label={t('admin.courses.detail.rejectReason')}
             value={rejectReason}
@@ -193,7 +203,7 @@ export default function AdminCourseDetailPage() {
       <ConfirmDialog
         isOpen={suspendOpen}
         title={t('admin.courses.detail.suspendTitle')}
-        message={t('admin.courses.detail.suspendMessage', { name: course.titleAr })}
+        message={t('admin.courses.detail.suspendMessage', { name: courseTitle })}
         confirmLabel={t('admin.actions.confirmSuspend')}
         onConfirm={() => runAction('suspend', t('admin.courses.toast.suspended'))}
         onCancel={() => setSuspendOpen(false)}
@@ -202,7 +212,7 @@ export default function AdminCourseDetailPage() {
       <ConfirmDialog
         isOpen={deleteOpen}
         title={t('admin.courses.detail.deleteTitle')}
-        message={t('admin.courses.detail.deleteMessage', { name: course.titleAr })}
+        message={t('admin.courses.detail.deleteMessage', { name: courseTitle })}
         confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}

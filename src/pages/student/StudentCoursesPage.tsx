@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   BookOpen, Download, GraduationCap, LayoutGrid, Search, Star, Users,
@@ -16,14 +17,10 @@ import { Select } from '../../components/ui/Select';
 import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { Tabs } from '../../components/ui/Tabs';
+import { useStudentCourseLabels } from '../../hooks/useStudentCourseLabels';
+import { localizedCategoryName, localizedCourseTitle } from '../../utils/localizedContent';
 import { formatMoney } from '../../utils/formatMoney';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const levelLabels: Record<string, string> = {
-  BEGINNER: 'مبتدئ',
-  INTERMEDIATE: 'متوسط',
-  ADVANCED: 'متقدم',
-};
 
 function StudentCoursesGridSkeleton() {
   return (
@@ -35,20 +32,19 @@ function StudentCoursesGridSkeleton() {
   );
 }
 
-const exportColumns = [
-  { key: 'title', header: 'الدورة' },
-  { key: 'category', header: 'التصنيف' },
-  { key: 'instructor', header: 'المحاضر' },
-  { key: 'level', header: 'المستوى' },
-  { key: 'price', header: 'السعر' },
-  { key: 'rating', header: 'التقييم' },
-  { key: 'lessons', header: 'الدروس' },
-  { key: 'enrolled', header: 'الحالة' },
-];
-
 export default function StudentCoursesPage() {
+  const { t, i18n } = useTranslation('courses');
+  const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const {
+    getLevelLabel,
+    getEnrollmentLabel,
+    getPrimaryActionLabel,
+    typeLabels,
+    otherCategory,
+  } = useStudentCourseLabels();
   const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [enrolledIds, setEnrolledIds] = useState<Set<number>>(new Set());
@@ -62,6 +58,17 @@ export default function StudentCoursesPage() {
     type: '',
     price: '',
   }));
+
+  const exportColumns = useMemo(() => [
+    { key: 'title', header: t('student.browse.export.columns.title') },
+    { key: 'category', header: t('student.browse.export.columns.category') },
+    { key: 'instructor', header: t('student.browse.export.columns.instructor') },
+    { key: 'level', header: t('student.browse.export.columns.level') },
+    { key: 'price', header: t('student.browse.export.columns.price') },
+    { key: 'rating', header: t('student.browse.export.columns.rating') },
+    { key: 'lessons', header: t('student.browse.export.columns.lessons') },
+    { key: 'enrolled', header: t('student.browse.export.columns.enrolled') },
+  ], [t, lang]);
 
   const load = async (nextFilters = filters) => {
     setLoading(true);
@@ -107,27 +114,69 @@ export default function StudentCoursesPage() {
   const categoryChart = useMemo(() => {
     const counts: Record<string, number> = {};
     courses.forEach((c) => {
-      const name = c.category?.nameAr || 'أخرى';
+      const name = localizedCategoryName(c.category, lang) || otherCategory;
       counts[name] = (counts[name] || 0) + 1;
     });
     return Object.entries(counts).map(([label, value]) => ({ label, value }));
-  }, [courses]);
+  }, [courses, lang, otherCategory]);
 
-  const tableRows = useMemo(() => courses.map((course) => ({
-    id: course.id,
-    title: course.titleAr,
-    category: course.category?.nameAr || '—',
-    instructor: course.instructor?.fullName || '—',
-    level: levelLabels[course.level] || course.level || '—',
-    price: formatMoney(Number(course.discountPrice ?? course.price ?? 0)),
-    rating: Number(course.ratingAverage || 0).toFixed(1),
-    lessons: course._count?.lessons || 0,
-    enrolled: enrolledIds.has(course.id) ? 'مسجّل' : 'متاح',
-    _raw: course,
-  })), [courses, enrolledIds]);
+  const tableRows = useMemo(() => courses.map((course) => {
+    const isEnrolled = enrolledIds.has(course.id);
+    const price = Number(course.discountPrice ?? course.price ?? 0);
+    return {
+      id: course.id,
+      title: localizedCourseTitle(course, lang),
+      category: localizedCategoryName(course.category, lang) || '—',
+      instructor: course.instructor?.fullName || '—',
+      level: getLevelLabel(course.level) || course.level || '—',
+      price: formatMoney(price),
+      rating: Number(course.ratingAverage || 0).toFixed(1),
+      lessons: course._count?.lessons || 0,
+      enrolled: getEnrollmentLabel(isEnrolled),
+      isEnrolled,
+      isFree: price === 0,
+      _raw: course,
+    };
+  }), [courses, enrolledIds, lang, getLevelLabel, getEnrollmentLabel]);
+
+  const tableColumns = useMemo(() => [
+    { key: 'title', header: t('student.browse.table.columns.title') },
+    { key: 'category', header: t('student.browse.table.columns.category') },
+    { key: 'instructor', header: t('student.browse.table.columns.instructor') },
+    { key: 'level', header: t('student.browse.table.columns.level') },
+    { key: 'price', header: t('student.browse.table.columns.price') },
+    { key: 'rating', header: t('student.browse.table.columns.rating') },
+    {
+      key: 'enrolled',
+      header: t('student.browse.table.columns.enrolled'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={row.isEnrolled ? 'success' : 'default'}>{row.enrolled}</Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: t('student.browse.table.columns.actions'),
+      render: (row: typeof tableRows[number]) => (
+        <Button
+          size="sm"
+          onClick={() => navigate(
+            row.isEnrolled
+              ? `/student/player/${row.id}`
+              : `/student/courses/${row.id}`,
+          )}
+        >
+          {getPrimaryActionLabel(row.isEnrolled, row.isFree)}
+        </Button>
+      ),
+    },
+  ], [t, lang, navigate, getPrimaryActionLabel]);
 
   const handleExport = () => {
-    exportTableToExcel('الكورسات-المتاحة', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('student.browse.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, isEnrolled, isFree, ...row }) => row),
+    );
   };
 
   const selectCategory = (slug: string) => {
@@ -140,15 +189,15 @@ export default function StudentCoursesPage() {
     <div className="page-grid student-courses-page">
       <div className="reports-header">
         <PageHeader
-          title="الكورسات المتاحة"
-          subtitle="اختر الدورة المناسبة لك وابدأ رحلة التعلم"
+          title={t('student.browse.title')}
+          subtitle={t('student.browse.subtitle')}
         />
         <div className="reports-header-actions">
           <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!courses.length}>
-            تصدير Excel
+            {t('student.browse.exportExcel')}
           </Button>
           <Button variant="outline" icon={<GraduationCap size={18} />} onClick={() => navigate('/student/my-courses')}>
-            كورساتي
+            {t('student.browse.myCourses')}
           </Button>
         </div>
       </div>
@@ -158,81 +207,90 @@ export default function StudentCoursesPage() {
           <Search size={32} />
         </div>
         <div className="student-courses-hero-body">
-          <strong>اكتشف دورات جديدة</strong>
+          <strong>{t('student.browse.heroTitle')}</strong>
           <p>
             {stats.total
-              ? `${stats.total} دورة متاحة — ${stats.free} مجانية — متوسط التقييم ${stats.avgRating}`
-              : 'استخدم الفلاتر للعثور على الدورة المناسبة.'}
+              ? t('student.browse.heroSummary', {
+                total: stats.total,
+                free: stats.free,
+                rating: stats.avgRating,
+              })
+              : t('student.browse.heroEmpty')}
           </p>
         </div>
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="الدورات المعروضة" value={String(stats.total)} icon={BookOpen} />
-        <StatCard title="مجانية" value={String(stats.free)} icon={Star} />
-        <StatCard title="عليها خصم" value={String(stats.discounted)} icon={LayoutGrid} />
-        <StatCard title="مسجّل بها" value={String(stats.enrolled)} icon={Users} hint={`من ${stats.total}`} />
+        <StatCard title={t('student.browse.stats.displayed')} value={String(stats.total)} icon={BookOpen} />
+        <StatCard title={t('student.browse.stats.free')} value={String(stats.free)} icon={Star} />
+        <StatCard title={t('student.browse.stats.discounted')} value={String(stats.discounted)} icon={LayoutGrid} />
+        <StatCard
+          title={t('student.browse.stats.enrolled')}
+          value={String(stats.enrolled)}
+          icon={Users}
+          hint={t('student.browse.stats.enrolledHint', { total: stats.total })}
+        />
       </div>
 
       {categoryChart.length > 1 ? (
         <div className="reports-charts-grid student-courses-charts">
-          <ReportChart title="توزيع التصنيفات" type="pie" data={categoryChart} />
+          <ReportChart title={t('student.browse.charts.categoryDistribution')} type="pie" data={categoryChart} />
         </div>
       ) : null}
 
       <FilterBar
         searchValue={filters.search || ''}
-        searchPlaceholder="ابحث باسم الدورة أو المحاضر"
+        searchPlaceholder={t('student.browse.filters.searchPlaceholder')}
         onSearchChange={(v) => updateFilter('search', v)}
         onReset={resetFilters}
         className="student-courses-filter"
       >
         <Select
-          label="المستوى"
+          label={t('student.browse.filters.level')}
           value={filters.level || ''}
           onChange={(e) => updateFilter('level', e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'مبتدئ', value: 'BEGINNER' },
-            { label: 'متوسط', value: 'INTERMEDIATE' },
-            { label: 'متقدم', value: 'ADVANCED' },
+            { label: tc('status.all'), value: '' },
+            { label: getLevelLabel('BEGINNER'), value: 'BEGINNER' },
+            { label: getLevelLabel('INTERMEDIATE'), value: 'INTERMEDIATE' },
+            { label: getLevelLabel('ADVANCED'), value: 'ADVANCED' },
           ]}
         />
         <Select
-          label="النوع"
+          label={t('student.browse.filters.type')}
           value={filters.type || ''}
           onChange={(e) => updateFilter('type', e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'مسجلة', value: 'RECORDED' },
-            { label: 'مباشرة', value: 'LIVE' },
-            { label: 'مختلطة', value: 'MIXED' },
+            { label: tc('status.all'), value: '' },
+            { label: typeLabels.RECORDED, value: 'RECORDED' },
+            { label: typeLabels.LIVE, value: 'LIVE' },
+            { label: typeLabels.MIXED, value: 'MIXED' },
           ]}
         />
         <Select
-          label="السعر"
+          label={t('student.browse.filters.price')}
           value={filters.price || ''}
           onChange={(e) => updateFilter('price', e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'مجانية', value: 'free' },
-            { label: 'مدفوعة', value: 'paid' },
-            { label: 'عليها خصم', value: 'discounted' },
+            { label: tc('status.all'), value: '' },
+            { label: t('student.browse.filters.priceFree'), value: 'free' },
+            { label: t('student.browse.filters.pricePaid'), value: 'paid' },
+            { label: t('student.browse.filters.priceDiscounted'), value: 'discounted' },
           ]}
         />
         <Select
-          label="الترتيب"
+          label={t('student.browse.filters.sort')}
           value={filters.sort || 'latest'}
           onChange={(e) => updateFilter('sort', e.target.value)}
           options={[
-            { label: 'الأحدث', value: 'latest' },
-            { label: 'الأعلى تقييماً', value: 'rating' },
-            { label: 'الأكثر شعبية', value: 'popular' },
-            { label: 'الأقل سعراً', value: 'price_asc' },
-            { label: 'الأعلى سعراً', value: 'price_desc' },
+            { label: t('student.browse.filters.sortLatest'), value: 'latest' },
+            { label: t('student.browse.filters.sortRating'), value: 'rating' },
+            { label: t('student.browse.filters.sortPopular'), value: 'popular' },
+            { label: t('student.browse.filters.sortPriceAsc'), value: 'price_asc' },
+            { label: t('student.browse.filters.sortPriceDesc'), value: 'price_desc' },
           ]}
         />
-        <Button onClick={applyFilters}>تطبيق</Button>
+        <Button onClick={applyFilters}>{t('student.browse.filters.apply')}</Button>
       </FilterBar>
 
       <div className="chip-row student-courses-categories">
@@ -241,7 +299,7 @@ export default function StudentCoursesPage() {
           className={!filters.category ? 'chip active' : 'chip'}
           onClick={() => selectCategory('')}
         >
-          الكل
+          {tc('status.all')}
         </button>
         {categories.map((category) => (
           <button
@@ -250,7 +308,7 @@ export default function StudentCoursesPage() {
             className={filters.category === category.slug ? 'chip active' : 'chip'}
             onClick={() => selectCategory(category.slug)}
           >
-            {category.nameAr}
+            {localizedCategoryName(category, lang)}
             {category._count?.courses ? ` (${category._count.courses})` : ''}
           </button>
         ))}
@@ -261,8 +319,8 @@ export default function StudentCoursesPage() {
         activeTab={viewMode}
         onChange={setViewMode}
         tabs={[
-          { id: 'cards', label: `البطاقات (${courses.length})` },
-          { id: 'table', label: `الجدول (${courses.length})` },
+          { id: 'cards', label: t('student.browse.tabs.cards', { count: courses.length }) },
+          { id: 'table', label: t('student.browse.tabs.table', { count: courses.length }) },
         ]}
       />
 
@@ -290,53 +348,19 @@ export default function StudentCoursesPage() {
           <Card className="student-courses-table-wrap">
             <Table
               data={tableRows}
-              emptyTitle="لا توجد دورات"
-              emptyDescription="جرّب تغيير الفلاتر."
-              columns={[
-                { key: 'title', header: 'الدورة' },
-                { key: 'category', header: 'التصنيف' },
-                { key: 'instructor', header: 'المحاضر' },
-                { key: 'level', header: 'المستوى' },
-                { key: 'price', header: 'السعر' },
-                { key: 'rating', header: 'التقييم' },
-                {
-                  key: 'enrolled',
-                  header: 'الحالة',
-                  render: (row) => (
-                    <Badge variant={row.enrolled === 'مسجّل' ? 'success' : 'default'}>{row.enrolled}</Badge>
-                  ),
-                },
-                {
-                  key: 'actions',
-                  header: 'الإجراءات',
-                  render: (row) => (
-                    <Button
-                      size="sm"
-                      onClick={() => navigate(
-                        enrolledIds.has(row.id)
-                          ? `/student/player/${row.id}`
-                          : `/student/courses/${row.id}`,
-                      )}
-                    >
-                      {enrolledIds.has(row.id)
-                        ? 'استكمال'
-                        : Number(row._raw?.discountPrice ?? row._raw?.price ?? 0) === 0
-                          ? 'اشتراك'
-                          : 'عرض الدورة'}
-                    </Button>
-                  ),
-                },
-              ]}
+              emptyTitle={t('student.browse.table.emptyTitle')}
+              emptyDescription={t('student.browse.table.emptyDescription')}
+              columns={tableColumns}
             />
           </Card>
         )
       ) : (
         <Card>
           <EmptyState
-            title="لا توجد دورات"
-            description="جرّب تغيير الفلاتر أو البحث بكلمة أخرى."
+            title={t('student.browse.empty.title')}
+            description={t('student.browse.empty.description')}
             icon={BookOpen}
-            actionLabel="إعادة تعيين"
+            actionLabel={t('student.browse.empty.reset')}
             onAction={resetFilters}
           />
         </Card>

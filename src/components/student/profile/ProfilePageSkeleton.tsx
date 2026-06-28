@@ -1,21 +1,19 @@
+import { useTranslation } from 'react-i18next';
 import { LoadingSkeleton } from '../../ui/LoadingSkeleton';
 
 export function ProfilePageSkeleton() {
+  const { t } = useTranslation('profile');
+
   return (
-    <div className="page-grid student-profile-page" aria-busy="true" aria-label="جاري تحميل الملف الشخصي">
-      <div className="skeleton skeleton-block student-profile-skeleton-header" />
+    <div className="page-grid student-profile-page" aria-busy="true" aria-label={t('student.loadingProfile')}>
+      <LoadingSkeleton variant="block" />
       <div className="stats-grid student-profile-stats">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <LoadingSkeleton key={index} variant="stat" />
-        ))}
+        <LoadingSkeleton variant="stat" count={4} />
       </div>
       <div className="student-profile-layout">
-        <div className="student-profile-summary">
-          <div className="skeleton skeleton-block student-profile-skeleton-summary" />
-        </div>
-        <div className="student-profile-main">
-          <div className="skeleton skeleton-block student-profile-skeleton-form" />
-          <div className="skeleton skeleton-block student-profile-skeleton-password" />
+        <LoadingSkeleton variant="card" />
+        <div className="student-profile-main stack-md">
+          <LoadingSkeleton variant="card" count={2} />
         </div>
       </div>
     </div>

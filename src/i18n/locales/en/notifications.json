@@ -117,5 +117,190 @@
         "unread": "Unread"
       }
     }
+  },
+  "student": {
+    "title": "Notifications",
+    "subtitle": "Stay updated on courses, support, rewards, and community",
+    "stats": {
+      "total": "Total notifications",
+      "unread": "Unread",
+      "unreadHintActive": "Needs attention",
+      "unreadHintClear": "Nothing new",
+      "today": "Today"
+    },
+    "actions": {
+      "markAllRead": "Mark all as read",
+      "markRead": "Mark as read",
+      "read": "Read"
+    },
+    "filters": {
+      "ariaLabel": "Notification filters",
+      "searchPlaceholder": "Search by title or body...",
+      "readStatus": "Read status",
+      "type": "Type",
+      "all": "All",
+      "allTypes": "All types",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "Welcome",
+        "LIVE_SESSION": "Live session",
+        "CERTIFICATE": "Certificate",
+        "REWARD": "Reward",
+        "PAYMENT": "Payment",
+        "COMMUNITY": "Community",
+        "SUBSCRIPTION": "Subscription",
+        "COURSE": "Course",
+        "SUPPORT": "Support",
+        "REFERRAL": "Referral",
+        "QUIZ": "Quiz",
+        "ADMIN": "Admin"
+      },
+      "readStatus": {
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "fallbackType": "Notification"
+    },
+    "table": {
+      "title": "Notification list",
+      "count": "{{count}} notifications",
+      "noResultsTitle": "No results",
+      "noResultsDescription": "Try changing filters or search.",
+      "emptyTitle": "No notifications",
+      "emptyDescription": "Course, support, and reward notifications will appear here."
+    },
+    "time": {
+      "now": "Now",
+      "minutesAgo": "{{count}}m ago",
+      "minutesAgo_one": "{{count}} minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo": "{{count}}h ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "daysAgo": "{{count}}d ago",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
+    },
+    "toast": {
+      "markedRead": "Notification marked as read.",
+      "markReadFailed": "Could not update notification.",
+      "markedAllRead": "{{count}} notification(s) marked as read.",
+      "markAllReadFailed": "Could not mark all as read."
+    }
+  },
+  "instructor": {
+    "title": "Notifications",
+    "subtitle": "Stay updated on courses, earnings, sessions, and reviews",
+    "header": {
+      "title": "Notification Center",
+      "subtitle": "Stay updated with your latest activity."
+    },
+    "toolbar": {
+      "totalShort": "Total",
+      "unreadShort": "Unread"
+    },
+    "stats": {
+      "total": "Total notifications",
+      "unread": "Unread",
+      "read": "Read",
+      "unreadHintActive": "Needs attention",
+      "unreadHintClear": "Nothing new",
+      "today": "Today",
+      "attention": "Needs attention",
+      "todayNotifications": "Today's notifications",
+      "ofTotal": "{{pct}} of total",
+      "highPriority": "High priority",
+      "none": "None",
+      "ariaLabel": "Notification statistics"
+    },
+    "actions": {
+      "markAllRead": "Mark all as read",
+      "markRead": "Mark as read",
+      "read": "Read",
+      "readDone": "Read"
+    },
+    "filters": {
+      "ariaLabel": "Notification filters",
+      "search": "Search",
+      "searchPlaceholder": "Search by title or body...",
+      "readStatus": "Read status",
+      "type": "Type",
+      "date": "Date",
+      "all": "All",
+      "allTypes": "All types",
+      "allPeriods": "All periods",
+      "unread": "Unread",
+      "read": "Read",
+      "today": "Today",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "reset": "Reset"
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "Welcome",
+        "LIVE_SESSION": "Live session",
+        "CERTIFICATE": "Certificate",
+        "REWARD": "Reward",
+        "PAYMENT": "Payment",
+        "COMMUNITY": "Community",
+        "SUBSCRIPTION": "Subscription",
+        "EARNING": "Earnings",
+        "REVIEW": "Review",
+        "WITHDRAWAL": "Withdrawal",
+        "COURSE": "Course",
+        "INSTRUCTOR_REQUEST": "Instructor request",
+        "COURSE_REVIEW": "Course review",
+        "SUPPORT": "Support",
+        "ADMIN": "Admin"
+      },
+      "readStatus": {
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "badge": {
+        "important": "Important",
+        "new": "New"
+      },
+      "fallbackType": "Notification"
+    },
+    "table": {
+      "title": "Notification list",
+      "count": "{{count}} notifications",
+      "noResultsTitle": "No results",
+      "noResultsDescription": "Try changing filters or search.",
+      "emptyTitle": "No notifications",
+      "emptyDescription": "Course, earnings, and session updates will appear here.",
+      "columns": {
+        "id": "ID",
+        "title": "Title",
+        "body": "Message",
+        "type": "Type",
+        "status": "Status",
+        "createdAt": "Date",
+        "actions": "Actions"
+      }
+    },
+    "time": {
+      "now": "Now",
+      "minutesAgo": "{{count}}m ago",
+      "minutesAgo_one": "{{count}} minute ago",
+      "minutesAgo_other": "{{count}} minutes ago",
+      "hoursAgo": "{{count}}h ago",
+      "hoursAgo_one": "{{count}} hour ago",
+      "hoursAgo_other": "{{count}} hours ago",
+      "daysAgo": "{{count}}d ago",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
+    },
+    "toast": {
+      "markedRead": "Notification marked as read.",
+      "markReadFailed": "Could not update notification.",
+      "markedAllRead": "{{count}} notification(s) marked as read.",
+      "markAllReadFailed": "Could not mark all as read."
+    }
   }
 }

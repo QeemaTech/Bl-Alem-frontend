@@ -117,5 +117,190 @@
         "unread": "غير مقروء"
       }
     }
+  },
+  "student": {
+    "title": "الإشعارات",
+    "subtitle": "تابع تحديثات الدورات والدعم والمكافآت والمجتمع",
+    "stats": {
+      "total": "إجمالي الإشعارات",
+      "unread": "غير مقروء",
+      "unreadHintActive": "تحتاج متابعة",
+      "unreadHintClear": "لا جديد",
+      "today": "اليوم"
+    },
+    "actions": {
+      "markAllRead": "تعليم الكل كمقروء",
+      "markRead": "تعليم كمقروء",
+      "read": "مقروء"
+    },
+    "filters": {
+      "ariaLabel": "فلاتر الإشعارات",
+      "searchPlaceholder": "بحث بالعنوان أو النص...",
+      "readStatus": "حالة القراءة",
+      "type": "النوع",
+      "all": "الكل",
+      "allTypes": "كل الأنواع",
+      "unread": "غير مقروء",
+      "read": "مقروء"
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "ترحيب",
+        "LIVE_SESSION": "جلسة مباشرة",
+        "CERTIFICATE": "شهادة",
+        "REWARD": "مكافأة",
+        "PAYMENT": "دفع",
+        "COMMUNITY": "مجتمع",
+        "SUBSCRIPTION": "اشتراك",
+        "COURSE": "كورس",
+        "SUPPORT": "دعم فني",
+        "REFERRAL": "إحالة",
+        "QUIZ": "اختبار",
+        "ADMIN": "إداري"
+      },
+      "readStatus": {
+        "read": "مقروء",
+        "unread": "غير مقروء"
+      },
+      "fallbackType": "إشعار"
+    },
+    "table": {
+      "title": "قائمة الإشعارات",
+      "count": "{{count}} إشعار",
+      "noResultsTitle": "لا نتائج",
+      "noResultsDescription": "جرّب تغيير الفلاتر أو البحث.",
+      "emptyTitle": "لا توجد إشعارات",
+      "emptyDescription": "ستظهر إشعارات الدورات والدعم والمكافآت هنا."
+    },
+    "time": {
+      "now": "الآن",
+      "minutesAgo": "منذ {{count}} د",
+      "minutesAgo_one": "منذ {{count}} دقيقة",
+      "minutesAgo_other": "منذ {{count}} دقيقة",
+      "hoursAgo": "منذ {{count}} س",
+      "hoursAgo_one": "منذ {{count}} ساعة",
+      "hoursAgo_other": "منذ {{count}} ساعة",
+      "daysAgo": "منذ {{count}} ي",
+      "daysAgo_one": "منذ {{count}} يوم",
+      "daysAgo_other": "منذ {{count}} يوم"
+    },
+    "toast": {
+      "markedRead": "تم تعليم الإشعار كمقروء.",
+      "markReadFailed": "تعذّر تحديث الإشعار.",
+      "markedAllRead": "تم تعليم {{count}} إشعار كمقروء.",
+      "markAllReadFailed": "تعذّر تعليم الكل كمقروء."
+    }
+  },
+  "instructor": {
+    "title": "الإشعارات",
+    "subtitle": "تابع تحديثات الكورسات والأرباح والجلسات والتقييمات",
+    "header": {
+      "title": "مركز الإشعارات",
+      "subtitle": "ابقَ على اطلاع بآخر نشاطاتك."
+    },
+    "toolbar": {
+      "totalShort": "الإجمالي",
+      "unreadShort": "غير مقروء"
+    },
+    "stats": {
+      "total": "إجمالي الإشعارات",
+      "unread": "غير مقروء",
+      "read": "مقروء",
+      "unreadHintActive": "تحتاج متابعة",
+      "unreadHintClear": "لا جديد",
+      "today": "اليوم",
+      "attention": "تحتاج متابعة",
+      "todayNotifications": "إشعارات اليوم",
+      "ofTotal": "{{pct}} من الإجمالي",
+      "highPriority": "أولوية عالية",
+      "none": "لا يوجد",
+      "ariaLabel": "إحصائيات الإشعارات"
+    },
+    "actions": {
+      "markAllRead": "تعليم الكل كمقروء",
+      "markRead": "تعليم كمقروء",
+      "read": "مقروء",
+      "readDone": "تمت القراءة"
+    },
+    "filters": {
+      "ariaLabel": "فلاتر الإشعارات",
+      "search": "بحث",
+      "searchPlaceholder": "بحث في العنوان أو النص...",
+      "readStatus": "حالة القراءة",
+      "type": "النوع",
+      "date": "التاريخ",
+      "all": "الكل",
+      "allTypes": "كل الأنواع",
+      "allPeriods": "كل الفترات",
+      "unread": "غير مقروء",
+      "read": "مقروء",
+      "today": "اليوم",
+      "last7Days": "آخر 7 أيام",
+      "last30Days": "آخر 30 يوماً",
+      "reset": "إعادة تعيين"
+    },
+    "labels": {
+      "type": {
+        "WELCOME": "ترحيب",
+        "LIVE_SESSION": "جلسة مباشرة",
+        "CERTIFICATE": "شهادة",
+        "REWARD": "مكافأة",
+        "PAYMENT": "دفع",
+        "COMMUNITY": "مجتمع",
+        "SUBSCRIPTION": "اشتراك",
+        "EARNING": "أرباح",
+        "REVIEW": "تقييم",
+        "WITHDRAWAL": "سحب",
+        "COURSE": "كورس",
+        "INSTRUCTOR_REQUEST": "طلب محاضر",
+        "COURSE_REVIEW": "مراجعة كورس",
+        "SUPPORT": "دعم فني",
+        "ADMIN": "إداري"
+      },
+      "readStatus": {
+        "read": "مقروء",
+        "unread": "غير مقروء"
+      },
+      "badge": {
+        "important": "مهم",
+        "new": "جديد"
+      },
+      "fallbackType": "إشعار"
+    },
+    "table": {
+      "title": "قائمة الإشعارات",
+      "count": "{{count}} إشعار",
+      "noResultsTitle": "لا نتائج",
+      "noResultsDescription": "جرّب تغيير الفلاتر أو البحث.",
+      "emptyTitle": "لا توجد إشعارات",
+      "emptyDescription": "ستظهر تحديثات الكورسات والأرباح والجلسات هنا.",
+      "columns": {
+        "id": "الرقم",
+        "title": "العنوان",
+        "body": "الرسالة",
+        "type": "النوع",
+        "status": "الحالة",
+        "createdAt": "التاريخ",
+        "actions": "الإجراءات"
+      }
+    },
+    "time": {
+      "now": "الآن",
+      "minutesAgo": "منذ {{count}} د",
+      "minutesAgo_one": "منذ {{count}} دقيقة",
+      "minutesAgo_other": "منذ {{count}} دقيقة",
+      "hoursAgo": "منذ {{count}} س",
+      "hoursAgo_one": "منذ {{count}} ساعة",
+      "hoursAgo_other": "منذ {{count}} ساعة",
+      "daysAgo": "منذ {{count}} ي",
+      "daysAgo_one": "منذ {{count}} يوم",
+      "daysAgo_other": "منذ {{count}} يوم"
+    },
+    "toast": {
+      "markedRead": "تم تعليم الإشعار كمقروء.",
+      "markReadFailed": "تعذّر تحديث الإشعار.",
+      "markedAllRead": "تم تعليم {{count}} إشعار كمقروء.",
+      "markAllReadFailed": "تعذّر تعليم الكل كمقروء."
+    }
   }
 }

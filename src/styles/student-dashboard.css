@@ -31,6 +31,147 @@
   font-size: 0.8rem;
 }
 
+.student-dashboard-browse {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.student-dashboard-browse-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-width: 0;
+}
+
+.student-dashboard-browse-carousel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.student-dashboard-browse-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.student-dashboard-browse-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s ease;
+}
+
+.student-dashboard-browse-slide {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.student-dashboard-browse-slide .student-course-card {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: calc((100% - 32px) / 5);
+}
+
+.student-dashboard-browse-more {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  align-self: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary-dark);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.student-dashboard-browse-more:hover {
+  background: var(--primary-50);
+  border-color: rgba(0, 104, 116, 0.25);
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+.student-dashboard-browse-skeleton {
+  min-height: 148px;
+  border-radius: 10px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .course-cover {
+  max-height: 72px;
+  min-height: 56px;
+  aspect-ratio: 16 / 10;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-card-body {
+  padding: 6px 8px 8px;
+  gap: 4px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-category {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact h3 {
+  font-size: 0.74rem;
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-instructor {
+  display: none;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-meta {
+  font-size: 0.62rem;
+  gap: 2px 6px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-meta span svg {
+  width: 10px;
+  height: 10px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-price,
+.student-dashboard-browse .student-course-card.is-compact .student-course-price-free {
+  font-size: 0.74rem;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-price-old {
+  font-size: 0.64rem;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-actions .btn,
+.student-dashboard-browse .student-course-card.is-compact .student-course-cta {
+  min-height: 28px;
+  padding-inline: 8px;
+  font-size: 0.68rem;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-status-badge {
+  font-size: 0.6rem;
+  top: 4px;
+  inset-inline-start: 4px;
+}
+
+.student-dashboard-browse .student-course-card.is-compact .student-course-category-icon {
+  display: none;
+}
+
+.student-dashboard-browse .empty-state {
+  padding: 12px 0;
+}
+
+.student-dashboard-browse .empty-state p {
+  margin-bottom: 8px;
+}
+
 .student-dashboard-chart-card {
   padding: 10px 12px !important;
   min-width: 0;
@@ -86,11 +227,25 @@
   .student-dashboard .dashboard-courses {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .student-dashboard-browse-slide .student-course-card {
+    max-width: calc((100% - 40px) / 6);
+  }
+}
+
+@media (max-width: 1200px) {
+  .student-dashboard-browse-slide .student-course-card {
+    max-width: calc((100% - 24px) / 4);
+  }
 }
 
 @media (max-width: 900px) {
   .student-dashboard-overview {
     grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-browse-slide .student-course-card {
+    max-width: calc((100% - 16px) / 3);
   }
 
   .student-dashboard-chart-card .chart-pie-layout {
@@ -101,5 +256,9 @@
 @media (max-width: 640px) {
   .student-dashboard .dashboard-courses {
     grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-browse-slide .student-course-card {
+    max-width: calc((100% - 8px) / 2);
   }
 }

@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BookOpen } from '@/icons';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
@@ -31,6 +32,7 @@ export function CourseGrid({
   tableView,
   viewMode,
 }: CourseGridProps) {
+  const { t } = useTranslation(['courses', 'common']);
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageItems = items.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
@@ -57,7 +59,7 @@ export function CourseGrid({
           title={emptyTitle}
           description={emptyDescription}
           icon={BookOpen}
-          actionLabel={showBrowseAction ? 'تصفح الكورسات' : undefined}
+          actionLabel={showBrowseAction ? t('courses:student.myCourses.actions.browseCourses') : undefined}
           onAction={showBrowseAction ? onBrowse : undefined}
         />
       </Card>
@@ -92,6 +94,8 @@ function CoursePagination({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) {
+  const { t } = useTranslation('common');
+
   return (
     <div className="student-my-courses-pagination">
       <Button
@@ -101,7 +105,7 @@ function CoursePagination({
         disabled={currentPage <= 1}
         onClick={() => onPageChange(currentPage - 1)}
       >
-        السابق
+        {t('actions.previous')}
       </Button>
       <span>{currentPage} / {totalPages}</span>
       <Button
@@ -111,7 +115,7 @@ function CoursePagination({
         disabled={currentPage >= totalPages}
         onClick={() => onPageChange(currentPage + 1)}
       >
-        التالي
+        {t('actions.next')}
       </Button>
     </div>
   );

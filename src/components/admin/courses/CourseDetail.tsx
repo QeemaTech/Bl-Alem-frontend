@@ -17,6 +17,11 @@ import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { mediaUrl } from '../../../utils/mediaUrl';
 import {
+  localizedCategoryName,
+  localizedCourseShortDescription,
+  localizedCourseTitle,
+} from '../../../utils/localizedContent';
+import {
   canApproveCourse,
   canPublishCourse,
   canRejectCourse,
@@ -43,7 +48,8 @@ export function CourseDetail({
   onDelete,
   submitting,
 }: CourseDetailProps) {
-  const { t } = useTranslation('courses');
+  const { t, i18n } = useTranslation('courses');
+  const lang = i18n.language;
   const {
     statusLabels,
     levelLabels,
@@ -55,6 +61,22 @@ export function CourseDetail({
   } = useAdminCourseLabels();
   const stats = getCourseStats(course);
   const status = String(course.status || '');
+  const courseTitle = localizedCourseTitle(course, lang);
+  const alternateTitle = lang.startsWith('en')
+    ? course.titleAr?.trim()
+    : course.titleEn?.trim();
+  const showAlternateTitle = Boolean(alternateTitle && alternateTitle !== courseTitle);
+  const categoryName = localizedCategoryName(course.category, lang);
+  const shortDescription = localizedCourseShortDescription(
+    course,
+    lang,
+    t('admin.courses.detail.noShortDesc'),
+  );
+  const courseLanguageLabel = course.language === 'en'
+    ? t('form.languages.en')
+    : course.language === 'ar-en'
+      ? t('form.languages.ar-en')
+      : t('form.languages.ar');
 
   return (
     <div className="support-ticket-detail admin-course-detail admin-entity-detail">
@@ -65,9 +87,9 @@ export function CourseDetail({
             <span className="admin-entity-detail-icon" aria-hidden="true">
               <BookOpen size={24} />
             </span>
-            <h2>{course.titleAr}</h2>
+            <h2>{courseTitle}</h2>
           </div>
-          {course.titleEn ? <p className="admin-course-subtitle">{course.titleEn}</p> : null}
+          {showAlternateTitle ? <p className="admin-course-subtitle">{alternateTitle}</p> : null}
           <p className="admin-course-instructor">
             {t('admin.courses.detail.instructor')}: <strong>{course.instructor?.fullName || empty}</strong>
             {course.instructor?.email ? (
@@ -86,7 +108,7 @@ export function CourseDetail({
             {course.coverImage ? (
               <img
                 src={mediaUrl(course.coverImage)}
-                alt={course.titleAr}
+                alt={courseTitle}
                 className="admin-course-overview-cover"
               />
             ) : (
@@ -100,12 +122,12 @@ export function CourseDetail({
             <div className="admin-course-tags">
               <Badge variant="info">{levelLabels[course.level] || course.level}</Badge>
               <Badge variant="default">{typeLabels[course.type] || course.type}</Badge>
-              {course.category?.nameAr ? (
-                <Badge variant="default">{course.category.nameAr}</Badge>
+              {categoryName ? (
+                <Badge variant="default">{categoryName}</Badge>
               ) : null}
             </div>
             <p className="admin-course-short-desc">
-              {course.shortDescriptionAr || t('admin.courses.detail.noShortDesc')}
+              {shortDescription}
             </p>
           </div>
         </div>
@@ -140,7 +162,7 @@ export function CourseDetail({
         <div className="admin-entity-meta-grid">
           <div className="detail-row">
             <span className="detail-row-label">{t('admin.courses.detail.category')}</span>
-            <div className="detail-row-value">{course.category?.nameAr || empty}</div>
+            <div className="detail-row-value">{categoryName || empty}</div>
           </div>
           <div className="detail-row">
             <span className="detail-row-label">{t('admin.courses.detail.level')}</span>
@@ -153,7 +175,7 @@ export function CourseDetail({
           <div className="detail-row">
             <span className="detail-row-label">{t('admin.courses.detail.language')}</span>
             <div className="detail-row-value">
-              {course.language === 'ar' ? t('form.languages.ar') : course.language || empty}
+              {courseLanguageLabel}
             </div>
           </div>
           <div className="detail-row">

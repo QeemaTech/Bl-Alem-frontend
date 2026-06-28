@@ -1,8 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { Clock3, Flame, GraduationCap, Target } from '@/icons';
 import { Card } from '../../ui/Card';
 import { ProgressBar } from '../../ui/ProgressBar';
+import { useStudentMyCourseLabels } from '../../../hooks/useStudentMyCourseLabels';
 import type { MyCoursesStats } from './types';
-import { getJourneyMessage } from './utils';
 
 interface LearningProgressCardProps {
   stats: MyCoursesStats;
@@ -10,6 +11,8 @@ interface LearningProgressCardProps {
 }
 
 export function LearningProgressCard({ stats, streak }: LearningProgressCardProps) {
+  const { t } = useTranslation('courses');
+  const { getJourneyMessage } = useStudentMyCourseLabels();
   const message = getJourneyMessage(stats);
 
   return (
@@ -19,7 +22,7 @@ export function LearningProgressCard({ stats, streak }: LearningProgressCardProp
           <GraduationCap size={22} />
         </span>
         <div className="student-learning-progress-copy">
-          <strong>تقدّم التعلّم</strong>
+          <strong>{t('student.myCourses.learningProgress.title')}</strong>
           <p>{message}</p>
         </div>
         <span className="student-learning-progress-percent">{stats.avgProgress}%</span>
@@ -31,16 +34,16 @@ export function LearningProgressCard({ stats, streak }: LearningProgressCardProp
         <div className="student-learning-progress-metrics">
           <span>
             <Clock3 size={15} aria-hidden />
-            {stats.hoursLearned} ساعة تعلّم
+            {t('student.myCourses.learningProgress.hoursLearned', { count: stats.hoursLearned })}
           </span>
           <span>
             <Target size={15} aria-hidden />
-            {stats.completed} دورة مكتملة
+            {t('student.myCourses.learningProgress.coursesCompleted', { count: stats.completed })}
           </span>
           {streak != null && streak > 0 ? (
             <span>
               <Flame size={15} aria-hidden />
-              {streak} يوم متتالي
+              {t('student.myCourses.learningProgress.streakDays', { count: streak })}
             </span>
           ) : null}
         </div>

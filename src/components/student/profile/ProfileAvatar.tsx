@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Upload, UserRound } from '@/icons';
 import { Button } from '../../ui/Button';
 import { mediaUrl } from '../../../utils/mediaUrl';
@@ -18,6 +19,7 @@ export function ProfileAvatar({
   onUpload,
   onRemove,
 }: ProfileAvatarProps) {
+  const { t } = useTranslation('profile');
   const inputRef = useRef<HTMLInputElement>(null);
   const previewSrc = mediaUrl(value);
 
@@ -26,7 +28,11 @@ export function ProfileAvatar({
       <div
         className="student-profile-avatar"
         role="img"
-        aria-label={previewSrc ? `صورة ${name || 'الملف الشخصي'}` : 'لا توجد صورة شخصية'}
+        aria-label={
+          previewSrc
+            ? t('student.avatar.alt', { name: name || t('student.avatar.altFallback') })
+            : t('student.avatar.empty')
+        }
       >
         {previewSrc ? (
           <img src={previewSrc} alt="" />
@@ -56,11 +62,11 @@ export function ProfileAvatar({
           icon={<Upload size={14} aria-hidden />}
           onClick={() => inputRef.current?.click()}
         >
-          {previewSrc ? 'تغيير الصورة' : 'رفع صورة'}
+          {previewSrc ? t('student.avatar.change') : t('student.avatar.upload')}
         </Button>
         {previewSrc ? (
           <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-            إزالة
+            {t('student.avatar.remove')}
           </Button>
         ) : null}
       </div>

@@ -3,6 +3,7 @@ import {
   Award, CheckCircle, ChevronLeft, ChevronRight, Clock, Download, FileText,
   PlayCircle, Video,
 } from '@/icons';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { studentApi } from '../../api/student';
 import { Badge } from '../../components/ui/Badge';
@@ -14,10 +15,13 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { StatCard } from '../../components/ui/StatCard';
 import { useToast } from '../../components/ui/Toast';
+import { localizedResourceTitle } from '../../utils/localizedContent';
 import { buildSectionCurriculum, getCourseProgress } from './player/buildCurriculum';
 import { StudentPlayerSidebar } from './player/StudentPlayerSidebar';
 
 export default function StudentPlayerPage() {
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -279,9 +283,31 @@ export default function StudentPlayerPage() {
 
           <Card className="student-player-resources">
             <div className="section-heading">
-              <h3><FileText size={18} /> الموارد</h3>
-              <span className="muted-count">{activeLesson?.resources?.length || 0} ملف</span>
+              <h3><FileText size={18} /> {data.course?.courseResources?.length ? 'موارد الكورس' : 'الموارد'}</h3>
+              <span className="muted-count">
+                {(data.course?.courseResources?.length || 0) + (activeLesson?.resources?.length || 0)} ملف
+              </span>
             </div>
+            {data.course?.courseResources?.length ? (
+              <div className="student-resource-list student-resource-list--course">
+                {data.course.courseResources.map((resource: any) => (
+                  <a
+                    key={`course-${resource.id}`}
+                    className="student-resource-item"
+                    href={resource.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileText size={18} />
+                    <div>
+                      <strong>{localizedResourceTitle(resource, lang)}</strong>
+                      <span>{resource.type || 'ملف'} · كورس</span>
+                    </div>
+                    <Download size={16} />
+                  </a>
+                ))}
+              </div>
+            ) : null}
             {activeLesson?.resources?.length ? (
               <div className="student-resource-list">
                 {activeLesson.resources.map((resource: any) => (
@@ -294,20 +320,20 @@ export default function StudentPlayerPage() {
                   >
                     <FileText size={18} />
                     <div>
-                      <strong>{resource.title}</strong>
+                      <strong>{localizedResourceTitle(resource, lang)}</strong>
                       <span>{resource.type || 'ملف'}</span>
                     </div>
                     <Download size={16} />
                   </a>
                 ))}
               </div>
-            ) : (
+            ) : !data.course?.courseResources?.length ? (
               <EmptyState
                 title="لا توجد موارد"
-                description="لا توجد ملفات مرفقة بهذا الدرس."
+                description="لا توجد ملفات مرفقة بهذا الدرس أو الكورس."
                 icon={FileText}
               />
-            )}
+            ) : null}
           </Card>
 
           {progress >= 100 ? (

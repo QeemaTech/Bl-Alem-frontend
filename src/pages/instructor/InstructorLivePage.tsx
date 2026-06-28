@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Calendar, Clock, Copy, Download, ExternalLink, Plus, Radio, Video,
 } from '@/icons';
@@ -19,13 +20,12 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Textarea } from '../../components/ui/Textarea';
 import { useToast } from '../../components/ui/Toast';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const statusLabels: Record<string, string> = {
-  SCHEDULED: 'مجدولة',
-  LIVE: 'مباشر الآن',
-  ENDED: 'منتهية',
-  CANCELLED: 'ملغاة',
-};
+import { formatDateTime } from '../../utils/localeFormat';
+import {
+  localizedCourseTitle,
+  localizedSessionDescription,
+  localizedSessionTitle,
+} from '../../utils/localizedContent';
 
 const statusVariant = (status: string) => {
   if (status === 'LIVE') return 'live' as const;
@@ -34,16 +34,6 @@ const statusVariant = (status: string) => {
   if (status === 'CANCELLED') return 'rejected' as const;
   return 'default' as const;
 };
-
-const fmtDate = (value?: string) => (value
-  ? new Date(value).toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-  : '—');
 
 const emptyForm = {
   courseId: '',
@@ -54,16 +44,10 @@ const emptyForm = {
   meetingUrl: '',
 };
 
-const exportColumns = [
-  { key: 'title', header: 'العنوان' },
-  { key: 'course', header: 'الكورس' },
-  { key: 'startAt', header: 'موعد البدء' },
-  { key: 'duration', header: 'المدة (دقيقة)' },
-  { key: 'status', header: 'الحالة' },
-  { key: 'meetingUrl', header: 'رابط الاجتماع' },
-];
-
 export default function InstructorLivePage() {
+  const { t, i18n } = useTranslation('liveSessions');
+  const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { showToast } = useToast();
   const [tab, setTab] = useState('SCHEDULED');
   const [sessions, setSessions] = useState<any[]>([]);
@@ -77,6 +61,43 @@ export default function InstructorLivePage() {
   const [actionBusy, setActionBusy] = useState<number | null>(null);
   const [selected, setSelected] = useState<any>(null);
   const [confirmAction, setConfirmAction] = useState<{ id: number; type: 'cancel' | 'end' } | null>(null);
+
+  const empty = t('empty');
+
+  const getStatusLabel = useCallback(
+    (status: string) => t(`labels.status.${status}`, { defaultValue: status }),
+    [t, lang],
+  );
+
+  const fmtDate = useCallback(
+    (value?: string) => (value
+      ? formatDateTime(value, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }, lang)
+      : empty),
+    [lang, empty],
+  );
+
+  const fmtDuration = useCallback(
+    (minutes?: number) => t('durationMinutes', { count: minutes || 60 }),
+    [t, lang],
+  );
+
+  const exportColumns = useMemo(() => {
+    const cols = t('instructor.exportColumns', { returnObjects: true }) as Record<string, string>;
+    return [
+      { key: 'title', header: cols.title },
+      { key: 'course', header: cols.course },
+      { key: 'startAt', header: cols.startAt },
+      { key: 'duration', header: cols.duration },
+      { key: 'status', header: cols.status },
+      { key: 'meetingUrl', header: cols.meetingUrl },
+    ];
+  }, [t, lang]);
 
   const load = async () => {
     setLoading(true);
@@ -108,12 +129,16 @@ export default function InstructorLivePage() {
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((s) =>
-        [s.titleAr, s.descriptionAr, s.course?.titleAr, statusLabels[s.status]]
-          .some((v) => String(v || '').toLowerCase().includes(q)),
+        [
+          localizedSessionTitle(s, lang),
+          localizedSessionDescription(s, lang),
+          localizedCourseTitle(s.course, lang),
+          getStatusLabel(s.status),
+        ].some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result.sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-  }, [sessions, tab, search]);
+  }, [sessions, tab, search, lang, getStatusLabel]);
 
   const openCreate = () => {
     setEditing(null);
@@ -139,7 +164,7 @@ export default function InstructorLivePage() {
   const save = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.courseId || !form.titleAr?.trim() || !form.startAt) {
-      showToast('يرجى إكمال الكورس والعنوان وموعد البدء.', 'error');
+      showToast(t('instructor.toast.validation'), 'error');
       return;
     }
     setSubmitting(true);
@@ -151,10 +176,10 @@ export default function InstructorLivePage() {
       };
       if (editing) {
         await instructorApi.updateLiveSession(editing.id, payload);
-        showToast('تم تحديث الجلسة.', 'success');
+        showToast(t('toast.updated'), 'success');
       } else {
         await instructorApi.createLiveSession(payload);
-        showToast('تم إنشاء الجلسة.', 'success');
+        showToast(t('instructor.toast.created'), 'success');
       }
       setFormOpen(false);
       setForm(emptyForm);
@@ -162,7 +187,7 @@ export default function InstructorLivePage() {
       await load();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر حفظ الجلسة.';
+        || t('instructor.toast.saveFailed');
       showToast(message, 'error');
     } finally {
       setSubmitting(false);
@@ -176,13 +201,13 @@ export default function InstructorLivePage() {
       if (action === 'end') await instructorApi.endLiveSession(id);
       if (action === 'cancel') await instructorApi.cancelLiveSession(id);
       showToast(
-        action === 'start' ? 'تم بدء الجلسة.' : action === 'end' ? 'تم إنهاء الجلسة.' : 'تم إلغاء الجلسة.',
+        action === 'start' ? t('toast.started') : action === 'end' ? t('toast.ended') : t('toast.cancelled'),
         'success',
       );
       await load();
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        || 'تعذّر تنفيذ الإجراء.';
+        || t('instructor.toast.actionFailed');
       showToast(message, 'error');
     } finally {
       setActionBusy(null);
@@ -192,17 +217,17 @@ export default function InstructorLivePage() {
 
   const copyLink = async (url: string) => {
     await navigator.clipboard.writeText(url);
-    showToast('تم نسخ رابط الاجتماع.', 'success');
+    showToast(t('toast.linkCopied'), 'success');
   };
 
   const handleExport = () => {
-    exportTableToExcel('جلسات-المحاضر', exportColumns, filtered.map((s) => ({
-      title: s.titleAr,
-      course: s.course?.titleAr || '—',
+    exportTableToExcel(t('instructor.exportSheet'), exportColumns, filtered.map((s) => ({
+      title: localizedSessionTitle(s, lang),
+      course: localizedCourseTitle(s.course, lang) || empty,
       startAt: fmtDate(s.startAt),
       duration: s.durationMinutes,
-      status: statusLabels[s.status] || s.status,
-      meetingUrl: s.meetingUrl || '—',
+      status: getStatusLabel(s.status),
+      meetingUrl: s.meetingUrl || empty,
     })));
   };
 
@@ -210,24 +235,29 @@ export default function InstructorLivePage() {
     <div className="page-grid">
       <div className="reports-header">
         <PageHeader
-          title="الجلسات المباشرة"
-          subtitle="جدولة وإدارة جلسات البث المباشر لطلابك"
+          title={t('instructor.title')}
+          subtitle={t('instructor.subtitle')}
         />
         <div className="reports-actions">
           <Button variant="outline" icon={<Download size={16} />} onClick={handleExport} disabled={!filtered.length}>
-            تصدير
+            {t('instructor.export')}
           </Button>
           <Button icon={<Plus size={16} />} onClick={openCreate} disabled={!courses.length}>
-            إنشاء جلسة
+            {t('instructor.createSession')}
           </Button>
         </div>
       </div>
 
       <div className="stats-grid">
-        <StatCard title="إجمالي الجلسات" value={String(stats.total)} icon={Video} />
-        <StatCard title="مجدولة" value={String(stats.scheduled)} icon={Calendar} />
-        <StatCard title="مباشر الآن" value={String(stats.live)} icon={Radio} hint={stats.live ? 'جلسة نشطة' : 'لا جلسة حية'} />
-        <StatCard title="منتهية" value={String(stats.ended)} icon={Clock} />
+        <StatCard title={t('stats.total')} value={String(stats.total)} icon={Video} />
+        <StatCard title={t('stats.scheduled')} value={String(stats.scheduled)} icon={Calendar} />
+        <StatCard
+          title={t('stats.live')}
+          value={String(stats.live)}
+          icon={Radio}
+          hint={stats.live ? t('instructor.stats.liveHintActive') : t('instructor.stats.liveHintNone')}
+        />
+        <StatCard title={t('stats.ended')} value={String(stats.ended)} icon={Clock} />
       </div>
 
       <Tabs
@@ -235,16 +265,16 @@ export default function InstructorLivePage() {
         activeTab={tab}
         onChange={setTab}
         tabs={[
-          { id: 'SCHEDULED', label: `القادمة (${stats.scheduled})` },
-          { id: 'LIVE', label: `مباشر (${stats.live})` },
-          { id: 'ENDED', label: `السابقة (${stats.ended})` },
-          { id: 'CANCELLED', label: `الملغية (${stats.cancelled})` },
+          { id: 'SCHEDULED', label: t('instructor.tabs.scheduled', { count: stats.scheduled }) },
+          { id: 'LIVE', label: t('instructor.tabs.live', { count: stats.live }) },
+          { id: 'ENDED', label: t('instructor.tabs.ended', { count: stats.ended }) },
+          { id: 'CANCELLED', label: t('instructor.tabs.cancelled', { count: stats.cancelled }) },
         ]}
       />
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث بالعنوان أو الكورس..."
+        searchPlaceholder={t('instructor.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => setSearch('')}
       />
@@ -265,28 +295,28 @@ export default function InstructorLivePage() {
               <div className="live-session-body">
                 <div className="live-session-top">
                   <div>
-                    <h3>{session.titleAr}</h3>
-                    <p className="live-session-course">{session.course?.titleAr || '—'}</p>
+                    <h3>{localizedSessionTitle(session, lang)}</h3>
+                    <p className="live-session-course">{localizedCourseTitle(session.course, lang) || empty}</p>
                   </div>
                   <Badge variant={statusVariant(session.status)}>
-                    {statusLabels[session.status] || session.status}
+                    {getStatusLabel(session.status)}
                   </Badge>
                 </div>
 
                 <div className="live-session-meta">
                   <span><Calendar size={14} /> {fmtDate(session.startAt)}</span>
-                  <span><Clock size={14} /> {session.durationMinutes} دقيقة</span>
+                  <span><Clock size={14} /> {fmtDuration(session.durationMinutes)}</span>
                 </div>
 
-                {session.descriptionAr ? (
-                  <p className="live-session-desc">{session.descriptionAr}</p>
+                {localizedSessionDescription(session, lang) ? (
+                  <p className="live-session-desc">{localizedSessionDescription(session, lang)}</p>
                 ) : null}
 
                 {session.meetingUrl ? (
                   <div className="live-session-link">
                     <a href={session.meetingUrl} target="_blank" rel="noreferrer">
                       <ExternalLink size={14} />
-                      فتح رابط الاجتماع
+                      {t('instructor.openMeetingLink')}
                     </a>
                     <Button variant="ghost" size="sm" onClick={() => copyLink(session.meetingUrl)}>
                       <Copy size={14} />
@@ -297,24 +327,24 @@ export default function InstructorLivePage() {
 
               <div className="live-session-actions">
                 <Button variant="ghost" size="sm" onClick={() => setSelected(session)}>
-                  التفاصيل
+                  {t('actions.detail')}
                 </Button>
                 {session.status === 'SCHEDULED' ? (
                   <>
                     <Button variant="outline" size="sm" loading={actionBusy === session.id} onClick={() => runAction(session.id, 'start')}>
-                      بدء
+                      {t('actions.start')}
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => openEdit(session)}>
-                      تعديل
+                      {t('actions.edit')}
                     </Button>
                     <Button variant="danger" size="sm" onClick={() => setConfirmAction({ id: session.id, type: 'cancel' })}>
-                      إلغاء
+                      {t('actions.cancel')}
                     </Button>
                   </>
                 ) : null}
                 {session.status === 'LIVE' ? (
                   <Button variant="danger" size="sm" loading={actionBusy === session.id} onClick={() => setConfirmAction({ id: session.id, type: 'end' })}>
-                    إنهاء
+                    {t('actions.end')}
                   </Button>
                 ) : null}
               </div>
@@ -324,44 +354,44 @@ export default function InstructorLivePage() {
       ) : (
         <Card>
           <EmptyState
-            title="لا توجد جلسات"
-            description={tab === 'SCHEDULED' ? 'أنشئ جلسة مباشرة جديدة للبدء.' : 'لا توجد جلسات في هذا التبويب.'}
+            title={t('table.emptyTitle')}
+            description={tab === 'SCHEDULED' ? t('instructor.empty.createNew') : t('instructor.empty.noInTab')}
             icon={Video}
-            {...(tab === 'SCHEDULED' && courses.length ? { actionLabel: 'إنشاء جلسة', onAction: openCreate } : {})}
+            {...(tab === 'SCHEDULED' && courses.length ? { actionLabel: t('instructor.createSession'), onAction: openCreate } : {})}
           />
         </Card>
       )}
 
       <Modal
         isOpen={formOpen}
-        title={editing ? 'تعديل الجلسة' : 'جلسة مباشرة جديدة'}
+        title={editing ? t('form.editTitle') : t('instructor.form.createTitle')}
         onClose={() => !submitting && setFormOpen(false)}
       >
         <form className="stack-sm live-session-form" onSubmit={save}>
           <Select
-            label="الكورس"
+            label={t('instructor.form.courseLabel')}
             value={form.courseId}
             onChange={(e) => setForm({ ...form, courseId: e.target.value })}
-            options={courses.map((c) => ({ label: c.titleAr, value: String(c.id) }))}
+            options={courses.map((c) => ({ label: localizedCourseTitle(c, lang), value: String(c.id) }))}
             required
           />
           <Input
-            label="عنوان الجلسة"
+            label={t('instructor.form.titleLabel')}
             value={form.titleAr}
             onChange={(e) => setForm({ ...form, titleAr: e.target.value })}
-            placeholder="مثال: مراجعة الوحدة الأولى"
+            placeholder={t('instructor.form.titlePlaceholder')}
             required
           />
           <Input
-            label="التاريخ والوقت"
+            label={t('instructor.form.startAtLabel')}
             type="datetime-local"
             value={form.startAt}
-            helper="اختر موعد بدء الجلسة"
+            helper={t('instructor.form.startAtHelper')}
             onChange={(e) => setForm({ ...form, startAt: e.target.value })}
             required
           />
           <Input
-            label="المدة (دقيقة)"
+            label={t('instructor.form.durationLabel')}
             type="number"
             min={15}
             max={480}
@@ -371,51 +401,51 @@ export default function InstructorLivePage() {
             required
           />
           <Input
-            label="رابط الاجتماع"
+            label={t('form.meetingUrlLabel')}
             value={form.meetingUrl}
-            placeholder="https://zoom.us/j/..."
+            placeholder={t('form.meetingUrlPlaceholder')}
             dir="ltr"
-            helper="Zoom أو Google Meet أو أي منصة"
+            helper={t('instructor.form.meetingUrlHelper')}
             onChange={(e) => setForm({ ...form, meetingUrl: e.target.value })}
           />
           <Textarea
-            label="الوصف (اختياري)"
+            label={t('instructor.form.descriptionLabel')}
             rows={3}
             value={form.descriptionAr}
             onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
           />
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={() => setFormOpen(false)} disabled={submitting}>
-              إلغاء
+              {tc('actions.cancel')}
             </Button>
             <Button type="submit" loading={submitting}>
-              {editing ? 'حفظ التعديلات' : 'إنشاء الجلسة'}
+              {editing ? t('actions.saveChanges') : t('instructor.form.create')}
             </Button>
           </div>
         </form>
       </Modal>
 
-      <Modal isOpen={Boolean(selected)} title="تفاصيل الجلسة" onClose={() => setSelected(null)}>
+      <Modal isOpen={Boolean(selected)} title={t('detail.title')} onClose={() => setSelected(null)}>
         {selected ? (
           <div className="stack-sm withdrawal-detail">
-            <div className="detail-row"><span>العنوان</span><strong>{selected.titleAr}</strong></div>
-            <div className="detail-row"><span>الكورس</span><strong>{selected.course?.titleAr || '—'}</strong></div>
-            <div className="detail-row"><span>الموعد</span><strong>{fmtDate(selected.startAt)}</strong></div>
-            <div className="detail-row"><span>المدة</span><strong>{selected.durationMinutes} دقيقة</strong></div>
+            <div className="detail-row"><span>{t('detail.fields.title')}</span><strong>{localizedSessionTitle(selected, lang)}</strong></div>
+            <div className="detail-row"><span>{t('detail.fields.course')}</span><strong>{localizedCourseTitle(selected.course, lang) || empty}</strong></div>
+            <div className="detail-row"><span>{t('instructor.detailFields.startAt')}</span><strong>{fmtDate(selected.startAt)}</strong></div>
+            <div className="detail-row"><span>{t('detail.fields.duration')}</span><strong>{fmtDuration(selected.durationMinutes)}</strong></div>
             <div className="detail-row">
-              <span>الحالة</span>
-              <Badge variant={statusVariant(selected.status)}>{statusLabels[selected.status]}</Badge>
+              <span>{t('detail.fields.status')}</span>
+              <Badge variant={statusVariant(selected.status)}>{getStatusLabel(selected.status)}</Badge>
             </div>
             {selected.meetingUrl ? (
               <div className="detail-row">
-                <span>الرابط</span>
+                <span>{t('instructor.detailFields.url')}</span>
                 <a href={selected.meetingUrl} target="_blank" rel="noreferrer" dir="ltr">{selected.meetingUrl}</a>
               </div>
             ) : null}
-            {selected.descriptionAr ? (
+            {localizedSessionDescription(selected, lang) ? (
               <div className="admin-notification-body">
-                <strong>الوصف</strong>
-                <p>{selected.descriptionAr}</p>
+                <strong>{t('detail.fields.description')}</strong>
+                <p>{localizedSessionDescription(selected, lang)}</p>
               </div>
             ) : null}
           </div>
@@ -424,11 +454,11 @@ export default function InstructorLivePage() {
 
       <ConfirmDialog
         isOpen={Boolean(confirmAction)}
-        title={confirmAction?.type === 'end' ? 'إنهاء الجلسة؟' : 'إلغاء الجلسة؟'}
+        title={confirmAction?.type === 'end' ? t('instructor.confirm.endTitle') : t('instructor.confirm.cancelTitle')}
         message={confirmAction?.type === 'end'
-          ? 'سيتم إنهاء البث وتحويل الجلسة إلى منتهية.'
-          : 'سيتم إلغاء الجلسة ولن يتمكن الطلاب من حضورها.'}
-        confirmLabel={confirmAction?.type === 'end' ? 'إنهاء' : 'إلغاء الجلسة'}
+          ? t('instructor.confirm.endMessage')
+          : t('instructor.confirm.cancelMessage')}
+        confirmLabel={confirmAction?.type === 'end' ? t('actions.end') : t('instructor.confirm.cancelConfirm')}
         variant="danger"
         onConfirm={() => confirmAction && runAction(confirmAction.id, confirmAction.type === 'end' ? 'end' : 'cancel')}
         onCancel={() => setConfirmAction(null)}

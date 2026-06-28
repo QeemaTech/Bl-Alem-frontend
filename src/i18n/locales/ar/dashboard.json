@@ -17,12 +17,6 @@
       "certificates": "الشهادات",
       "support": "الدعم"
     },
-    "stats": {
-      "inProgress": "قيد التعلم",
-      "completed": "مكتملة",
-      "enrolled": "مسجل",
-      "completionRate": "نسبة الإكمال"
-    },
     "time": {
       "now": "الآن",
       "minutesAgo": "منذ {{count}} د",
@@ -34,16 +28,22 @@
       "copyAria": "نسخ كود الإحالة"
     },
     "stats": {
+      "inProgress": "قيد التعلم",
+      "completed": "مكتملة",
+      "enrolled": "مسجل",
+      "completionRate": "نسبة الإكمال",
       "myCourses": "كورساتي",
       "activeHint": "{{count}} نشطة",
-      "completed": "مكتملة",
       "completionHint": "{{rate}}% إنجاز",
       "certificates": "شهاداتي",
       "walletBalance": "رصيد المحفظة"
     },
     "search": {
       "placeholder": "ابحث عن دورة أو مهارة...",
-      "chartTitle": "حالة التعلم"
+      "chartTitle": "حالة التعلم",
+      "emptyTitle": "لا توجد دورات",
+      "emptyDesc": "لا توجد دورات في هذا التصنيف حالياً.",
+      "viewAll": "عرض كل الدورات"
     },
     "continue": {
       "title": "استكمال التعلم",
@@ -66,7 +66,42 @@
       "title": "الجلسات القادمة",
       "liveNow": "مباشر الآن",
       "scheduled": "مجدولة",
-      "join": "انضمام"
+      "join": "انضمام",
+      "emptyTitle": "لا توجد جلسات",
+      "emptyDesc": "لا توجد جلسات مباشرة قادمة حالياً.",
+      "viewAll": "عرض كل الجلسات"
+    },
+    "notifications": {
+      "title": "آخر الإشعارات",
+      "newBadge": "{{count}} جديد",
+      "emptyTitle": "لا توجد إشعارات",
+      "emptyDesc": "ستظهر تحديثاتك التعليمية هنا."
+    },
+    "pathsSection": {
+      "title": "مسارات تعليمية",
+      "viewAll": "عرض الكل",
+      "coursesCount": "{{count}} دورات",
+      "defaultDesc": "مسار تعليمي منظم",
+      "explore": "استكشف المسار",
+      "emptyTitle": "لا توجد مسارات",
+      "emptyDesc": "ستُضاف مسارات تعليمية قريباً."
+    },
+    "popular": {
+      "title": "الأكثر شعبية",
+      "viewAll": "عرض الكل",
+      "emptyTitle": "لا توجد دورات شائعة",
+      "emptyDesc": "ستظهر الدورات الأكثر اشتراكاً هنا."
+    },
+    "recommended": {
+      "title": "دورات مقترحة لك",
+      "viewAll": "عرض الكل",
+      "emptyTitle": "لا توجد توصيات حالياً",
+      "emptyDesc": "ستظهر الدورات المقترحة هنا بعد توفرها."
+    },
+    "community": {
+      "title": "انضم للمجتمع",
+      "desc": "شارك أسئلتك وتجاربك مع المتعلمين الآخرين.",
+      "cta": "زيارة المجتمع"
     }
   },
   "instructor": {
@@ -123,6 +158,184 @@
     },
     "reviews": {
       "starsAria": "{{rating}} من 5"
+    },
+    "students": {
+      "title": "طلابي",
+      "subtitle": "تابع تقدم الطلاب المشتركين في كورساتك",
+      "stats": {
+        "totalEnrollments": "إجمالي الاشتراكات",
+        "uniqueStudents": "طلاب فريدون",
+        "active": "نشط",
+        "completed": "مكتمل",
+        "avgProgressHint": "متوسط التقدم {{percent}}%"
+      },
+      "tooltips": {
+        "uniqueStudents": "عدد الطلاب المميزين — كل طالب يُحسب مرة واحدة حتى لو اشترك في أكثر من كورس.",
+        "totalEnrollments": "إجمالي الاشتراكات — كل اشتراك في كورس يُحسب كسجل منفصل، لذا قد يتجاوز عدد الطلاب الفريدين."
+      },
+      "chart": {
+        "title": "الاشتراكات حسب الكورس"
+      },
+      "filters": {
+        "searchPlaceholder": "بحث بالطالب، البريد، أو الكورس...",
+        "course": "الكورس",
+        "allCourses": "كل الكورسات",
+        "enrollmentStatus": "حالة الاشتراك"
+      },
+      "enrollmentStatus": {
+        "ACTIVE": "نشط",
+        "COMPLETED": "مكتمل",
+        "CANCELLED": "ملغي",
+        "PENDING": "معلق"
+      },
+      "table": {
+        "title": "قائمة الطلاب",
+        "countAria": "العدد: {{value}}",
+        "columns": {
+          "student": "الطالب",
+          "course": "الكورس",
+          "enrolledAt": "تاريخ الاشتراك",
+          "progress": "التقدم",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        },
+        "details": "التفاصيل",
+        "noResultsTitle": "لا توجد نتائج مطابقة",
+        "noResultsDesc": "جرّب تغيير البحث أو حالة الاشتراك أو الكورس.",
+        "emptyTitle": "لا يوجد طلاب",
+        "emptyDesc": "سيظهر الطلاب بعد الاشتراك في كورساتك."
+      },
+      "export": {
+        "sheetName": "طلاب-المحاضر",
+        "columns": {
+          "student": "الطالب",
+          "email": "البريد",
+          "course": "الكورس",
+          "enrolledAt": "تاريخ الاشتراك",
+          "progress": "التقدم %",
+          "status": "الحالة"
+        }
+      },
+      "detail": {
+        "backToList": "العودة لقائمة الطلاب",
+        "badgeStudent": "طالب",
+        "enrollmentsCount": "{{count}} اشتراك في كورساتك",
+        "enrollmentsCount_one": "{{count}} اشتراك في كورساتك",
+        "enrollmentsCount_other": "{{count}} اشتراك في كورساتك",
+        "stats": {
+          "totalEnrollments": "إجمالي الاشتراكات",
+          "active": "نشط",
+          "completed": "مكتمل",
+          "avgProgress": "متوسط التقدم"
+        },
+        "chart": {
+          "title": "التقدم حسب الكورس"
+        },
+        "table": {
+          "title": "كورسات الطالب",
+          "emptyTitle": "لا توجد اشتراكات"
+        },
+        "countAria": "العدد: {{value}}",
+        "toast": {
+          "notFound": "لم يتم العثور على الطالب.",
+          "loadFailed": "تعذّر تحميل بيانات الطالب."
+        }
+      }
+    },
+    "earnings": {
+      "title": "الأرباح",
+      "subtitle": "تابع إيراداتك، مبيعاتك، وطلبات سحب الرصيد",
+      "requestWithdrawal": "طلب سحب",
+      "pendingNotice": {
+        "title": "لديك طلب سحب قيد المراجعة",
+        "body": "طلب بمبلغ {{amount}} بانتظار موافقة الإدارة. المبلغ لم يُخصم من رصيدك بعد — سيُخصم عند الاعتماد."
+      },
+      "minBalanceNotice": {
+        "title": "الرصيد أقل من الحد الأدنى للسحب",
+        "body": "الحد الأدنى {{min}} — رصيدك المتاح حالياً {{available}}."
+      },
+      "stats": {
+        "totalEarnings": "إجمالي الأرباح",
+        "totalEarningsHint": "بعد خصم عمولة المنصة",
+        "availableBalance": "الرصيد المتاح",
+        "withdrawableNow": "{{amount}} قابل للسحب الآن",
+        "readyToWithdraw": "جاهز للسحب",
+        "minWithdrawal": "الحد الأدنى {{amount}}",
+        "noBalance": "لا يوجد رصيد",
+        "pendingBalance": "الرصيد المعلق",
+        "pendingRequests": "{{count}} طلب قيد المراجعة",
+        "noPendingRequests": "لا طلبات معلقة",
+        "platformCommission": "عمولة المنصة"
+      },
+      "charts": {
+        "courseEarnings": "أرباح الكورسات (صافي)"
+      },
+      "filters": {
+        "searchPlaceholder": "بحث بالبنك، الحساب، IBAN، المبلغ، أو الحالة...",
+        "withdrawalStatus": "حالة السحب"
+      },
+      "withdrawals": {
+        "title": "السحوبات",
+        "countFiltered": "{{filtered}} من {{total}} طلب",
+        "count": "{{count}} طلب",
+        "emptyFilteredTitle": "لا توجد نتائج مطابقة",
+        "emptyFilteredDesc": "جرّب تغيير كلمة البحث أو حالة السحب.",
+        "emptyTitle": "لا توجد سحوبات",
+        "emptyDesc": "اطلب سحب الرصيد المتاح عند الحاجة."
+      },
+      "sales": {
+        "title": "آخر المبيعات",
+        "count": "{{count}} عملية",
+        "emptyTitle": "لا توجد عمليات",
+        "emptyDesc": "ستظهر المبيعات هنا عند اشتراك الطلاب.",
+        "columns": {
+          "course": "الكورس",
+          "student": "الطالب",
+          "amount": "المبلغ",
+          "net": "صافي ربحك",
+          "date": "التاريخ"
+        }
+      },
+      "withdrawModal": {
+        "title": "طلب سحب",
+        "availableBalance": "الرصيد المتاح",
+        "withdrawableHelper": "يمكنك سحب حتى {{withdrawable}} — الطلب المعلق ({{pending}}) لم يُخصم بعد.",
+        "cannotSubmitTitle": "لا يمكن إرسال طلب جديد الآن",
+        "cannotSubmitBody": "لديك طلب سحب بمبلغ {{amount}} قيد المراجعة. انتظر حتى تعالج الإدارة الطلب الحالي ثم أعد المحاولة.",
+        "minAmount": "الحد الأدنى للسحب: {{amount}}",
+        "belowMin": "الرصيد الحالي أقل من الحد الأدنى للسحب.",
+        "amountLabel": "المبلغ (ج.م)",
+        "amountHelper": "الحد الأدنى: {{min}} • الحد الأقصى: {{max}}",
+        "bankLabel": "البنك",
+        "bankPlaceholder": "مثال: الراجحي",
+        "accountNameLabel": "اسم الحساب",
+        "notesLabel": "ملاحظات (اختياري)",
+        "submit": "إرسال الطلب"
+      },
+      "detail": {
+        "title": "تفاصيل طلب السحب",
+        "transferProof": "صورة التحويل",
+        "transferProofAlt": "صورة التحويل"
+      },
+      "toast": {
+        "invalidAmount": "أدخل مبلغاً صالحاً.",
+        "amountExceedsBalance": "المبلغ أكبر من الرصيد المتاح.",
+        "minAmount": "الحد الأدنى للسحب {{amount}}.",
+        "submitted": "تم إرسال طلب السحب بنجاح.",
+        "submitFailed": "تعذّر إرسال طلب السحب."
+      },
+      "export": {
+        "sheetName": "سحوبات-المحاضر",
+        "columns": {
+          "amount": "المبلغ (ج.م)",
+          "status": "الحالة",
+          "bankName": "البنك",
+          "accountName": "اسم الحساب",
+          "iban": "IBAN",
+          "createdAt": "التاريخ",
+          "notes": "ملاحظات"
+        }
+      }
     },
     "approval": {
       "pendingTitle": "حسابك قيد المراجعة",

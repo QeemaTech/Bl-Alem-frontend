@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { studentApi } from '../../api/student';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { useToast } from '../../components/ui/Toast';
@@ -13,6 +14,7 @@ import {
 } from '../../components/student/profile';
 
 export default function StudentProfilePage() {
+  const { t } = useTranslation('profile');
   const { showToast } = useToast();
   const [profile, setProfile] = useState<ProfileFormState>({ interests: [] });
   const [stats, setStats] = useState<any>(null);
@@ -57,8 +59,8 @@ export default function StudentProfilePage() {
 
   const validateProfile = () => {
     const next: Record<string, string> = {};
-    if (!profile.fullName?.trim()) next.fullName = 'أدخل الاسم الكامل.';
-    if (!profile.phone?.trim()) next.phone = 'أدخل رقم الجوال.';
+    if (!profile.fullName?.trim()) next.fullName = t('student.validation.fullName');
+    if (!profile.phone?.trim()) next.phone = t('student.validation.phone');
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -66,7 +68,7 @@ export default function StudentProfilePage() {
   const save = async (event: FormEvent) => {
     event.preventDefault();
     if (!validateProfile()) {
-      showToast('راجع الحقول المطلوبة.', 'error');
+      showToast(t('student.validation.reviewFields'), 'error');
       return;
     }
     setSaving(true);
@@ -86,9 +88,9 @@ export default function StudentProfilePage() {
         educationLevel: updated.studentProfile?.educationLevel || '',
         interests: updated.studentProfile?.interests || [],
       });
-      showToast('تم تحديث الملف الشخصي.', 'success');
+      showToast(t('student.toast.saved'), 'success');
     } catch {
-      showToast('تعذّر حفظ التعديلات.', 'error');
+      showToast(t('student.toast.saveFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -98,9 +100,9 @@ export default function StudentProfilePage() {
     setPasswordSaving(true);
     try {
       await studentApi.changePassword(payload);
-      showToast('تم تغيير كلمة المرور.', 'success');
+      showToast(t('student.toast.passwordChanged'), 'success');
     } catch {
-      showToast('تعذّر تغيير كلمة المرور. تحقق من كلمة المرور الحالية.', 'error');
+      showToast(t('student.toast.passwordFailed'), 'error');
       throw new Error('password-change-failed');
     } finally {
       setPasswordSaving(false);
@@ -112,9 +114,9 @@ export default function StudentProfilePage() {
     try {
       const uploaded = await studentApi.upload('image', file);
       update('avatar', uploaded.url);
-      showToast('تم رفع الصورة.', 'success');
+      showToast(t('student.toast.avatarUploaded'), 'success');
     } catch {
-      showToast('تعذّر رفع الصورة.', 'error');
+      showToast(t('student.toast.avatarFailed'), 'error');
     } finally {
       setUploadingAvatar(false);
     }
@@ -124,7 +126,7 @@ export default function StudentProfilePage() {
     const code = stats?.rewardsSummary?.referralCode;
     if (!code) return;
     await navigator.clipboard.writeText(code);
-    showToast('تم نسخ كود الإحالة.', 'success');
+    showToast(t('student.toast.referralCopied'), 'success');
   };
 
   if (loading) return <ProfilePageSkeleton />;
@@ -135,14 +137,14 @@ export default function StudentProfilePage() {
   return (
     <div className="page-grid student-profile-page">
       <PageHeader
-        title="الملف الشخصي"
-        subtitle="حدّث بياناتك وتفضيلات التعلم"
+        title={t('student.title')}
+        subtitle={t('student.subtitle')}
       />
 
       <ProfileStatisticsCards stats={stats} completion={completion} />
 
       <div className="student-profile-layout">
-        <aside className="student-profile-summary" aria-label="ملخص الملف الشخصي">
+        <aside className="student-profile-summary" aria-label={t('student.summaryAria')}>
           <ProfileSummaryCard
             profile={profile}
             completion={completion}

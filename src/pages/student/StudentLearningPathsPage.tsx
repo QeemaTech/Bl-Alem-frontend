@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowRight, BookOpen, CheckCircle2, Download, GraduationCap, PlayCircle, Route, Target,
@@ -20,16 +21,12 @@ import { StatCard } from '../../components/ui/StatCard';
 import { Table } from '../../components/ui/Table';
 import { Tabs } from '../../components/ui/Tabs';
 import { useToast } from '../../components/ui/Toast';
+import {
+  localizedCourseTitle,
+  localizedPathDescription,
+  localizedPathTitle,
+} from '../../utils/localizedContent';
 import { exportTableToExcel } from '../../utils/exportExcel';
-
-const exportColumns = [
-  { key: 'title', header: 'المسار' },
-  { key: 'courses', header: 'عدد الدورات' },
-  { key: 'enrolled', header: 'مسجّلة' },
-  { key: 'completed', header: 'مكتملة' },
-  { key: 'progress', header: 'التقدم %' },
-  { key: 'status', header: 'الحالة' },
-];
 
 type EnrollmentMap = Map<number, { status: string; progressPercentage: number }>;
 
@@ -55,19 +52,10 @@ const getPathStats = (path: any, enrollmentMap: EnrollmentMap) => {
   return { total, enrolled, completed, progress, status };
 };
 
-const pathStatusLabel = (status: string) => {
-  if (status === 'completed') return 'مكتمل';
-  if (status === 'in_progress') return 'قيد التعلم';
-  return 'لم يبدأ';
-};
-
-const pathStatusVariant = (status: string) => {
-  if (status === 'completed') return 'success' as const;
-  if (status === 'in_progress') return 'info' as const;
-  return 'default' as const;
-};
-
 export default function StudentLearningPathsPage() {
+  const { t, i18n } = useTranslation('learningPaths');
+  const { t: tc } = useTranslation('common');
+  const lang = i18n.language;
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -80,6 +68,18 @@ export default function StudentLearningPathsPage() {
   const [viewMode, setViewMode] = useState('cards');
   const [enrolling, setEnrolling] = useState(false);
 
+  const pathStatusLabel = (status: string) => {
+    if (status === 'completed') return t('student.labels.status.completed');
+    if (status === 'in_progress') return t('student.labels.status.inProgress');
+    return t('student.labels.status.notStarted');
+  };
+
+  const pathStatusVariant = (status: string) => {
+    if (status === 'completed') return 'success' as const;
+    if (status === 'in_progress') return 'info' as const;
+    return 'default' as const;
+  };
+
   const enrollmentMap = useMemo(() => {
     const map: EnrollmentMap = new Map();
     enrollments.forEach((e) => {
@@ -90,6 +90,15 @@ export default function StudentLearningPathsPage() {
     });
     return map;
   }, [enrollments]);
+
+  const exportColumns = useMemo(() => [
+    { key: 'title', header: t('student.list.export.columns.title') },
+    { key: 'courses', header: t('student.list.export.columns.courses') },
+    { key: 'enrolled', header: t('student.list.export.columns.enrolled') },
+    { key: 'completed', header: t('student.list.export.columns.completed') },
+    { key: 'progress', header: t('student.list.export.columns.progress') },
+    { key: 'status', header: t('student.list.export.columns.status') },
+  ], [t, lang]);
 
   useEffect(() => {
     setLoading(true);
@@ -124,10 +133,10 @@ export default function StudentLearningPathsPage() {
   }, [paths, enrollmentMap]);
 
   const chartData = useMemo(() => [
-    { label: 'مكتملة', value: listStats.completed },
-    { label: 'قيد التعلم', value: listStats.started },
-    { label: 'لم تبدأ', value: Math.max(0, listStats.paths - listStats.completed - listStats.started) },
-  ].filter((d) => d.value > 0), [listStats]);
+    { label: t('student.list.charts.completed'), value: listStats.completed },
+    { label: t('student.list.charts.inProgress'), value: listStats.started },
+    { label: t('student.list.charts.notStarted'), value: Math.max(0, listStats.paths - listStats.completed - listStats.started) },
+  ].filter((d) => d.value > 0), [listStats, t, lang]);
 
   const filteredPaths = useMemo(() => {
     let result = paths.map((p) => ({ ...p, stats: getPathStats(p, enrollmentMap) }));
@@ -135,7 +144,12 @@ export default function StudentLearningPathsPage() {
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((p) =>
-        [p.titleAr, p.descriptionAr].some((v) => String(v || '').toLowerCase().includes(q)),
+        [
+          p.titleAr,
+          p.titleEn,
+          p.descriptionAr,
+          p.descriptionEn,
+        ].some((v) => String(v || '').toLowerCase().includes(q)),
       );
     }
     return result;
@@ -143,17 +157,50 @@ export default function StudentLearningPathsPage() {
 
   const tableRows = useMemo(() => filteredPaths.map((p) => ({
     id: p.id,
-    title: p.titleAr,
+    title: localizedPathTitle(p, lang),
     courses: p.stats.total,
     enrolled: p.stats.enrolled,
     completed: p.stats.completed,
     progress: p.stats.progress,
     status: pathStatusLabel(p.stats.status),
+    statusKey: p.stats.status,
     _raw: p,
-  })), [filteredPaths]);
+  })), [filteredPaths, lang, t]);
+
+  const tableColumns = useMemo(() => [
+    { key: 'title', header: t('student.list.table.columns.title') },
+    { key: 'courses', header: t('student.list.table.columns.courses') },
+    { key: 'enrolled', header: t('student.list.table.columns.enrolled') },
+    { key: 'completed', header: t('student.list.table.columns.completed') },
+    {
+      key: 'progress',
+      header: t('student.list.table.columns.progress'),
+      render: (row: typeof tableRows[number]) => `${row.progress}%`,
+    },
+    {
+      key: 'status',
+      header: t('student.list.table.columns.status'),
+      render: (row: typeof tableRows[number]) => (
+        <Badge variant={pathStatusVariant(row.statusKey)}>{row.status}</Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: t('student.list.table.columns.actions'),
+      render: (row: typeof tableRows[number]) => (
+        <Button size="sm" onClick={() => navigate(`/student/learning-paths/${row.id}`)}>
+          {t('student.labels.actions.view')}
+        </Button>
+      ),
+    },
+  ], [t, lang, navigate]);
 
   const handleExport = () => {
-    exportTableToExcel('المسارات-التعليمية', exportColumns, tableRows.map(({ _raw, ...row }) => row));
+    exportTableToExcel(
+      t('student.list.export.sheetName'),
+      exportColumns,
+      tableRows.map(({ _raw, statusKey, ...row }) => row),
+    );
   };
 
   const renderPathCard = (item: any) => {
@@ -162,21 +209,23 @@ export default function StudentLearningPathsPage() {
       <Card key={item.id} className="learning-path-card student-learning-path-card">
         <div className="learning-path-top">
           <span className="learning-path-icon"><Route size={22} /></span>
-          <span className="learning-path-count">{s.total} دورات</span>
+          <span className="learning-path-count">{t('student.labels.coursesCount', { count: s.total })}</span>
         </div>
         <Badge variant={pathStatusVariant(s.status)}>{pathStatusLabel(s.status)}</Badge>
-        <h3>{item.titleAr}</h3>
-        <p>{item.descriptionAr || 'مسار تعليمي منظم'}</p>
+        <h3>{localizedPathTitle(item, lang)}</h3>
+        <p>{localizedPathDescription(item, lang, t('student.labels.defaultDesc'))}</p>
         {s.enrolled > 0 ? (
-          <ProgressBar value={s.progress} label="تقدم المسار" size="sm" />
+          <ProgressBar value={s.progress} label={t('student.labels.pathProgress')} size="sm" />
         ) : null}
         <div className="student-learning-path-meta">
-          <span>{s.enrolled} مسجّلة</span>
-          <span>{s.completed} مكتملة</span>
+          <span>{t('student.labels.enrolledShort', { count: s.enrolled })}</span>
+          <span>{t('student.labels.completedShort', { count: s.completed })}</span>
         </div>
         <Link to={`/student/learning-paths/${item.id}`} className="learning-path-action">
           <Button size="sm" fullWidth variant={s.status === 'completed' ? 'secondary' : 'primary'}>
-            {s.status === 'completed' ? 'مراجعة المسار' : 'استكشف المسار'}
+            {s.status === 'completed'
+              ? t('student.labels.actions.reviewPath')
+              : t('student.labels.actions.explore')}
           </Button>
         </Link>
       </Card>
@@ -188,12 +237,14 @@ export default function StudentLearningPathsPage() {
   if (id && path) {
     const pathStats = getPathStats(path, enrollmentMap);
     const courses = path.courses || [];
+    const pathTitle = localizedPathTitle(path, lang);
+    const pathDescription = localizedPathDescription(path, lang, t('student.labels.defaultDesc'));
 
     const enrollAll = async () => {
       setEnrolling(true);
       try {
         await studentApi.enrollLearningPath(path.id, { gateway: 'SIMULATED' });
-        showToast('تم الاشتراك في دورات المسار بنجاح.', 'success');
+        showToast(t('student.detail.toast.enrollSuccess'), 'success');
         const [updatedPath, updatedEnrollments] = await Promise.all([
           studentApi.learningPath(path.id),
           studentApi.myCourses('all'),
@@ -201,37 +252,46 @@ export default function StudentLearningPathsPage() {
         setPath(updatedPath);
         setEnrollments(updatedEnrollments);
       } catch {
-        showToast('تعذّر الاشتراك في المسار.', 'error');
+        showToast(t('student.detail.toast.enrollError'), 'error');
       } finally {
         setEnrolling(false);
       }
     };
 
+    const journeyMessage = pathStats.completed === pathStats.total && pathStats.total > 0
+      ? t('student.detail.journey.allComplete')
+      : pathStats.enrolled > 0
+        ? t('student.detail.journey.partial', {
+          completed: pathStats.completed,
+          total: pathStats.total,
+        })
+        : t('student.detail.journey.notStarted');
+
     return (
       <div className="page-grid student-learning-path-detail">
         <div className="reports-header student-learning-path-detail-header">
           <PageHeader
-            title={path.titleAr}
-            subtitle={path.descriptionAr || 'مسار تعليمي منظم'}
+            title={pathTitle}
+            subtitle={pathDescription}
             breadcrumb={[
-              { label: 'المسارات التعليمية', to: '/student/learning-paths' },
-              { label: path.titleAr },
+              { label: t('student.detail.breadcrumb'), to: '/student/learning-paths' },
+              { label: pathTitle },
             ]}
           />
           <div className="reports-header-actions">
             <Link to="/student/learning-paths">
               <Button variant="outline" size="sm" icon={<ArrowRight size={16} />}>
-                العودة للمسارات
+                {t('student.labels.actions.backToPaths')}
               </Button>
             </Link>
           </div>
         </div>
 
         <div className="stats-grid student-learning-path-detail-stats">
-          <StatCard title="دورات المسار" value={String(pathStats.total)} icon={BookOpen} />
-          <StatCard title="مسجّلة" value={String(pathStats.enrolled)} icon={PlayCircle} />
-          <StatCard title="مكتملة" value={String(pathStats.completed)} icon={CheckCircle2} />
-          <StatCard title="تقدم المسار" value={`${pathStats.progress}%`} icon={Target} />
+          <StatCard title={t('student.detail.stats.pathCourses')} value={String(pathStats.total)} icon={BookOpen} />
+          <StatCard title={t('student.detail.stats.enrolled')} value={String(pathStats.enrolled)} icon={PlayCircle} />
+          <StatCard title={t('student.detail.stats.completed')} value={String(pathStats.completed)} icon={CheckCircle2} />
+          <StatCard title={t('student.detail.stats.progress')} value={`${pathStats.progress}%`} icon={Target} />
         </div>
 
         <div className="student-learning-path-detail-insights">
@@ -239,21 +299,19 @@ export default function StudentLearningPathsPage() {
             <div className="student-path-journey-head">
               <span className="student-path-journey-icon"><Route size={22} /></span>
               <div className="student-path-journey-copy">
-                <strong>التقدم الكلي للمسار</strong>
-                <p>
-                  {pathStats.completed === pathStats.total && pathStats.total > 0
-                    ? 'أحسنت! أكملت جميع دورات هذا المسار.'
-                    : pathStats.enrolled > 0
-                      ? `${pathStats.completed} من ${pathStats.total} دورات مكتملة — استمر في التعلّم.`
-                      : 'اشترك في دورات المسار لبدء رحلتك التعليمية.'}
-                </p>
+                <strong>{t('student.detail.journey.title')}</strong>
+                <p>{journeyMessage}</p>
               </div>
               <span className="student-path-journey-percent">{pathStats.progress}%</span>
             </div>
-            <ProgressBar value={pathStats.progress} label="نسبة الإكمال" size="md" />
+            <ProgressBar value={pathStats.progress} label={t('student.labels.completionRate')} size="md" />
             {pathStats.total ? (
               <p className="student-path-journey-foot">
-                {pathStats.enrolled} مسجّلة · {pathStats.completed} مكتملة · {pathStats.total} إجمالاً
+                {t('student.labels.enrolledShort', { count: pathStats.enrolled })}
+                {' · '}
+                {t('student.labels.completedShort', { count: pathStats.completed })}
+                {' · '}
+                {t('student.labels.totalShort', { count: pathStats.total })}
               </p>
             ) : null}
           </Card>
@@ -264,8 +322,8 @@ export default function StudentLearningPathsPage() {
                 <GraduationCap size={26} />
               </div>
               <div className="student-path-enroll-copy">
-                <strong>اشترك في جميع دورات المسار</strong>
-                <p>سيتم تسجيلك في كل دورات المسار المتاحة دفعة واحدة.</p>
+                <strong>{t('student.detail.enroll.title')}</strong>
+                <p>{t('student.detail.enroll.desc')}</p>
               </div>
               <Button
                 loading={enrolling}
@@ -273,7 +331,7 @@ export default function StudentLearningPathsPage() {
                 icon={<GraduationCap size={16} />}
                 className="student-path-enroll-btn"
               >
-                اشترك الآن
+                {t('student.labels.actions.enrollNow')}
               </Button>
             </Card>
           ) : null}
@@ -281,14 +339,15 @@ export default function StudentLearningPathsPage() {
 
         <Card className="student-path-timeline">
           <div className="section-heading student-path-timeline-heading">
-            <h2><Route size={18} /> مسار الدورات</h2>
-            <span className="muted-count">{courses.length} خطوة</span>
+            <h2><Route size={18} /> {t('student.detail.timeline.title')}</h2>
+            <span className="muted-count">{t('student.labels.stepsCount', { count: courses.length })}</span>
           </div>
           <div className="student-path-steps">
             {courses.map((item: any, index: number) => {
               const enrollment = enrollmentMap.get(item.courseId);
               const done = enrollment && (enrollment.status === 'COMPLETED' || enrollment.progressPercentage >= 100);
               const enrolled = Boolean(enrollment);
+              const stepStatusKey = done ? 'completed' : enrolled ? 'inProgress' : 'notEnrolled';
               return (
                 <div
                   key={item.id}
@@ -298,14 +357,14 @@ export default function StudentLearningPathsPage() {
                     {done ? <CheckCircle2 size={18} /> : index + 1}
                   </span>
                   <div className="student-path-step-body">
-                    <strong>{item.course?.titleAr}</strong>
+                    <strong>{localizedCourseTitle(item.course, lang)}</strong>
                     <span><UserRound size={12} /> {item.course?.instructor?.fullName || '—'}</span>
                     {enrolled ? (
                       <ProgressBar value={enrollment?.progressPercentage || 0} size="sm" />
                     ) : null}
                   </div>
-                  <Badge variant={done ? 'success' : enrolled ? 'info' : 'default'}>
-                    {done ? 'مكتمل' : enrolled ? 'قيد التعلم' : 'غير مسجّل'}
+                  <Badge variant={pathStatusVariant(done ? 'completed' : enrolled ? 'in_progress' : 'not_started')}>
+                    {t(`student.labels.status.${stepStatusKey}`)}
                   </Badge>
                 </div>
               );
@@ -315,8 +374,8 @@ export default function StudentLearningPathsPage() {
 
         <section className="student-learning-path-courses-section">
           <div className="section-heading student-learning-path-courses-heading">
-            <h2><BookOpen size={18} /> دورات المسار</h2>
-            <span className="muted-count">{courses.length} دورة</span>
+            <h2><BookOpen size={18} /> {t('student.detail.coursesSection.title')}</h2>
+            <span className="muted-count">{t('student.labels.coursesInPath', { count: courses.length })}</span>
           </div>
           <div className="course-list-grid student-learning-path-courses-grid">
             {courses.map((item: any, index: number) => {
@@ -346,11 +405,11 @@ export default function StudentLearningPathsPage() {
     <div className="page-grid student-learning-paths-page">
       <div className="reports-header">
         <PageHeader
-          title="المسارات التعليمية"
-          subtitle="تعلّم بشكل منظم عبر مسارات متسلسلة"
+          title={t('student.list.title')}
+          subtitle={t('student.list.subtitle')}
         />
         <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!filteredPaths.length}>
-          تصدير Excel
+          {t('student.list.exportExcel')}
         </Button>
       </div>
 
@@ -359,43 +418,46 @@ export default function StudentLearningPathsPage() {
           <GraduationCap size={32} />
         </div>
         <div className="student-learning-paths-hero-body">
-          <strong>خطط تعلم منظّمة</strong>
+          <strong>{t('student.list.heroTitle')}</strong>
           <p>
             {listStats.paths
-              ? `${listStats.paths} مسارات متاحة — ${listStats.totalCourses} دورة ضمن المسارات`
-              : 'ستُضاف مسارات تعليمية قريباً.'}
+              ? t('student.list.heroSummary', {
+                paths: listStats.paths,
+                courses: listStats.totalCourses,
+              })
+              : t('student.list.heroEmpty')}
           </p>
         </div>
       </Card>
 
       <div className="stats-grid">
-        <StatCard title="المسارات" value={String(listStats.paths)} icon={Route} />
-        <StatCard title="قيد التعلم" value={String(listStats.started)} icon={PlayCircle} />
-        <StatCard title="مكتملة" value={String(listStats.completed)} icon={CheckCircle2} />
-        <StatCard title="إجمالي الدورات" value={String(listStats.totalCourses)} icon={BookOpen} />
+        <StatCard title={t('student.list.stats.paths')} value={String(listStats.paths)} icon={Route} />
+        <StatCard title={t('student.list.stats.inProgress')} value={String(listStats.started)} icon={PlayCircle} />
+        <StatCard title={t('student.list.stats.completed')} value={String(listStats.completed)} icon={CheckCircle2} />
+        <StatCard title={t('student.list.stats.totalCourses')} value={String(listStats.totalCourses)} icon={BookOpen} />
       </div>
 
       {chartData.length ? (
         <div className="reports-charts-grid student-learning-paths-charts">
-          <ReportChart title="حالة المسارات" type="pie" data={chartData} />
+          <ReportChart title={t('student.list.charts.statusDistribution')} type="pie" data={chartData} />
         </div>
       ) : null}
 
       <FilterBar
         searchValue={search}
-        searchPlaceholder="بحث باسم المسار أو الوصف..."
+        searchPlaceholder={t('student.list.filters.searchPlaceholder')}
         onSearchChange={setSearch}
         onReset={() => { setSearch(''); setStatusFilter(''); }}
       >
         <Select
-          label="الحالة"
+          label={t('student.list.filters.status')}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           options={[
-            { label: 'الكل', value: '' },
-            { label: 'لم يبدأ', value: 'not_started' },
-            { label: 'قيد التعلم', value: 'in_progress' },
-            { label: 'مكتمل', value: 'completed' },
+            { label: tc('status.all'), value: '' },
+            { label: t('student.labels.status.notStarted'), value: 'not_started' },
+            { label: t('student.labels.status.inProgress'), value: 'in_progress' },
+            { label: t('student.labels.status.completed'), value: 'completed' },
           ]}
         />
       </FilterBar>
@@ -405,8 +467,8 @@ export default function StudentLearningPathsPage() {
         activeTab={viewMode}
         onChange={setViewMode}
         tabs={[
-          { id: 'cards', label: `البطاقات (${filteredPaths.length})` },
-          { id: 'table', label: `الجدول (${filteredPaths.length})` },
+          { id: 'cards', label: t('student.list.tabs.cards', { count: filteredPaths.length }) },
+          { id: 'table', label: t('student.list.tabs.table', { count: filteredPaths.length }) },
         ]}
       />
 
@@ -418,8 +480,10 @@ export default function StudentLearningPathsPage() {
         ) : (
           <Card>
             <EmptyState
-              title="لا توجد مسارات"
-              description={paths.length ? 'لا توجد مسارات مطابقة للفلاتر.' : 'ستُضاف مسارات تعليمية قريباً.'}
+              title={t('student.list.empty.title')}
+              description={paths.length
+                ? t('student.list.empty.filteredDesc')
+                : t('student.list.empty.defaultDesc')}
               icon={Route}
             />
           </Card>
@@ -428,35 +492,9 @@ export default function StudentLearningPathsPage() {
         <Card>
           <Table
             data={tableRows}
-            emptyTitle="لا توجد مسارات"
-            emptyDescription="لا توجد مسارات مطابقة."
-            columns={[
-              { key: 'title', header: 'المسار' },
-              { key: 'courses', header: 'الدورات' },
-              { key: 'enrolled', header: 'مسجّلة' },
-              { key: 'completed', header: 'مكتملة' },
-              {
-                key: 'progress',
-                header: 'التقدم',
-                render: (row) => `${row.progress}%`,
-              },
-              {
-                key: 'status',
-                header: 'الحالة',
-                render: (row) => (
-                  <Badge variant={pathStatusVariant(String(row._raw?.stats?.status))}>{row.status}</Badge>
-                ),
-              },
-              {
-                key: 'actions',
-                header: 'الإجراءات',
-                render: (row) => (
-                  <Button size="sm" onClick={() => navigate(`/student/learning-paths/${row.id}`)}>
-                    عرض
-                  </Button>
-                ),
-              },
-            ]}
+            emptyTitle={t('student.list.table.emptyTitle')}
+            emptyDescription={t('student.list.table.emptyDescription')}
+            columns={tableColumns}
           />
         </Card>
       )}
