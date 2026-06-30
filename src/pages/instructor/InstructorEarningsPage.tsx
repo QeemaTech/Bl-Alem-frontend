@@ -23,6 +23,7 @@ import { formatMoney, roundMoney } from '../../utils/formatMoney';
 import { exportTableToExcel } from '../../utils/exportExcel';
 import { formatDateTime } from '../../utils/localeFormat';
 import { localizedCourseTitle } from '../../utils/localizedContent';
+import { mediaUrl } from '../../utils/mediaUrl';
 import { isValidPayoutPhone, normalizePayoutPhone } from '../../utils/payoutPhone';
 import { WITHDRAWAL_TRANSFER_TYPES } from '../../utils/withdrawalTransferTypes';
 
