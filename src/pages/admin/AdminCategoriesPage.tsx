@@ -162,12 +162,20 @@ export default function AdminCategoriesPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await adminApi.deleteCategory(deleteTarget.id);
-      showToast(t('admin.categories.toast.deleted'), 'success');
+      const result = await adminApi.deleteCategory(deleteTarget.id);
+      const reassigned = Number(result?.reassignedCourses || 0);
+      if (reassigned > 0) {
+        const fallbackName = result?.fallbackCategory?.nameAr || result?.fallbackCategory?.nameEn || '';
+        showToast(t('admin.categories.toast.deletedWithReassign', { count: reassigned, fallback: fallbackName }), 'success');
+      } else {
+        showToast(t('admin.categories.toast.deleted'), 'success');
+      }
       setDeleteTarget(null);
       await load();
-    } catch {
-      showToast(t('admin.categories.toast.deleteError'), 'error');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        || t('admin.categories.toast.deleteError');
+      showToast(message, 'error');
       setDeleteTarget(null);
     }
   };
@@ -245,7 +253,14 @@ export default function AdminCategoriesPage() {
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         title={t('admin.categories.deleteTitle')}
-        message={t('admin.categories.deleteMessage', { name: deleteTarget?.nameAr })}
+        message={
+          Number(deleteTarget?._count?.courses || 0) > 0
+            ? t('admin.categories.deleteMessageWithCourses', {
+              name: deleteTarget?.nameAr,
+              count: deleteTarget?._count?.courses || 0,
+            })
+            : t('admin.categories.deleteMessage', { name: deleteTarget?.nameAr })
+        }
         confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}

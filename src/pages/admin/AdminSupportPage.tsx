@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
-  CheckCircle2, Download, Eye, Headphones, MessageSquare, MessageSquarePlus, Table2,
+  CheckCircle2, Download, Eye, Headphones, HelpCircle, MessageSquare, MessageSquarePlus, Table2,
 } from '@/icons';
 import { adminApi } from '../../api/admin';
+import { AdminSupportFaqPanel } from '../../components/admin/support/AdminSupportFaqPanel';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -32,6 +33,7 @@ export default function AdminSupportPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [tab, setTab] = useState<'tickets' | 'faq'>('tickets');
 
   const exportColumns = useMemo(() => {
     const cols = t('admin.export.columns', { returnObjects: true, ns: 'support' }) as Record<string, string>;
@@ -119,13 +121,42 @@ export default function AdminSupportPage() {
           title={t('admin.title', { ns: 'support' })}
           subtitle={t('admin.subtitle', { ns: 'support' })}
         />
-        <div className="reports-header-actions">
-          <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
-            {t('admin.exportExcel', { ns: 'support' })}
-          </Button>
-        </div>
+        {tab === 'tickets' ? (
+          <div className="reports-header-actions">
+            <Button variant="outline" icon={<Download size={18} />} onClick={handleExport} disabled={!items.length}>
+              {t('admin.exportExcel', { ns: 'support' })}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
+      <div className="support-admin-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          className={tab === 'tickets' ? 'is-active' : ''}
+          aria-selected={tab === 'tickets'}
+          onClick={() => setTab('tickets')}
+        >
+          <Headphones size={18} />
+          {t('admin.tabs.tickets', { ns: 'support' })}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={tab === 'faq' ? 'is-active' : ''}
+          aria-selected={tab === 'faq'}
+          onClick={() => setTab('faq')}
+        >
+          <HelpCircle size={18} />
+          {t('admin.tabs.faq', { ns: 'support' })}
+        </button>
+      </div>
+
+      {tab === 'faq' ? (
+        <AdminSupportFaqPanel />
+      ) : (
+        <>
       <div className="stats-grid admin-support-stats">
         <StatCard title={t('admin.stats.total', { ns: 'support' })} value={String(stats.total)} icon={Headphones} />
         <StatCard title={t('admin.stats.open', { ns: 'support' })} value={String(stats.open)} icon={MessageSquarePlus} />
@@ -203,6 +234,8 @@ export default function AdminSupportPage() {
           ]}
         />
       </Card>
+        </>
+      )}
     </div>
   );
 }

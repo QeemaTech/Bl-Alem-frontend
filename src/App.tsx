@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './routes/ProtectedRoute';
+import { GuestRoute } from './routes/GuestRoute';
 import { RootRedirect } from './routes/RootRedirect';
 import AuthLayout from './layouts/AuthLayout';
 import StudentLayout from './layouts/StudentLayout';
@@ -79,10 +80,12 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/otp" element={<OtpPlaceholderPage />} />
+      <Route element={<GuestRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/otp" element={<OtpPlaceholderPage />} />
+        </Route>
       </Route>
       <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
         <Route element={<StudentLayout />}>

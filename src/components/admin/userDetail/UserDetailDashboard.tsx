@@ -705,14 +705,16 @@ export function UserDetailDashboard({
             data={data.withdrawals.map((w: any) => ({
               id: w.id,
               amount: fmtMoney(Number(w.amount)),
-              bank: w.bankName || empty,
+              phone: w.phone || empty,
+              transferType: t(`admin.labels.transferTypes.${w.transferType}`, { ns: 'withdrawals', defaultValue: w.transferType || empty }),
               status: getWithdrawalStatusLabel(w.status),
               date: fmtDate(w.createdAt),
             }))}
-            searchKeys={['bank', 'status']}
+            searchKeys={['phone', 'transferType', 'status']}
             columns={[
               { key: 'amount', header: t(`${cols}.amount`) },
-              { key: 'bank', header: t(`${cols}.bank`) },
+              { key: 'phone', header: t(`${cols}.phone`) },
+              { key: 'transferType', header: t(`${cols}.transferType`) },
               { key: 'status', header: t(`${cols}.status`) },
               { key: 'date', header: t(`${cols}.date`) },
             ]}

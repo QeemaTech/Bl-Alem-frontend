@@ -42,9 +42,8 @@
         "instructor": "Instructor",
         "email": "Email",
         "amount": "Amount (EGP)",
-        "bankName": "Bank",
-        "accountName": "Account name",
-        "iban": "IBAN",
+        "phone": "Phone number",
+        "transferType": "Transfer type",
         "status": "Status",
         "createdAt": "Request date",
         "notes": "Notes"
@@ -61,11 +60,9 @@
       "requestId": "Request ID",
       "instructor": "Instructor",
       "email": "Email",
-      "phone": "Phone",
+      "payoutPhone": "Payout phone",
+      "transferType": "Transfer type",
       "amount": "Amount",
-      "bank": "Bank",
-      "accountName": "Account name",
-      "iban": "IBAN",
       "status": "Status",
       "requestDate": "Request date",
       "notes": "Notes",
@@ -81,15 +78,14 @@
     },
     "approveDialog": {
       "title": "Approve withdrawal request",
-      "message": "Approve a withdrawal of {{amount}} for instructor {{name}}? The amount will be deducted from their available balance.",
+      "message": "Approve a withdrawal of {{amount}} for instructor {{name}}?",
       "confirm": "Approve"
     },
     "transferModal": {
       "title": "Confirm transfer",
       "lead": "Confirm transfer of {{amount}} to instructor {{name}}",
-      "bank": "Bank",
-      "accountName": "Account name",
-      "iban": "IBAN",
+      "phone": "Payout phone",
+      "transferType": "Transfer type",
       "previewAlt": "Transfer receipt preview",
       "replaceImage": "Replace image",
       "remove": "Remove",
@@ -112,6 +108,14 @@
         "APPROVED": "Approved",
         "PAID": "Paid",
         "REJECTED": "Rejected"
+      },
+      "transferTypes": {
+        "VODAFONE_CASH": "Vodafone Cash",
+        "INSTAPAY": "InstaPay",
+        "ORANGE_CASH": "Orange Cash",
+        "ETISALAT_CASH": "Etisalat Cash",
+        "BANK_WALLET": "Bank wallet",
+        "OTHER": "Other"
       }
     }
   }

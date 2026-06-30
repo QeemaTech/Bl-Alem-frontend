@@ -488,7 +488,7 @@ export default function AdminCouponsPage() {
               { label: statusLabels.INACTIVE, value: 'INACTIVE' },
             ]}
           />
-          <Button loading={submitting}>
+          <Button type="submit" loading={submitting}>
             {editing ? t('actions.saveChanges', { ns: 'coupons' }) : t('actions.create', { ns: 'coupons' })}
           </Button>
         </form>

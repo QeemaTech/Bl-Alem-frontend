@@ -281,7 +281,7 @@ export function AdminAccountDetailView({
             value={editForm.password}
             onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
           />
-          <Button loading={submitting}>{t('actions.saveChanges')}</Button>
+          <Button type="submit" loading={submitting}>{t('actions.saveChanges')}</Button>
         </form>
       </Modal>
 
@@ -294,7 +294,7 @@ export function AdminAccountDetailView({
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
-          <Button loading={submitting}>{t('admin.detail.modals.resetPassword.submit')}</Button>
+          <Button type="submit" loading={submitting}>{t('admin.detail.modals.resetPassword.submit')}</Button>
         </form>
       </Modal>
 
@@ -308,7 +308,7 @@ export function AdminAccountDetailView({
           />
           <Input label={t('admin.detail.modals.notify.titleField')} value={notifyForm.titleAr} onChange={(e) => setNotifyForm({ ...notifyForm, titleAr: e.target.value })} required />
           <Textarea label={t('admin.detail.modals.notify.body')} value={notifyForm.bodyAr} onChange={(e) => setNotifyForm({ ...notifyForm, bodyAr: e.target.value })} required />
-          <Button loading={submitting}>{t('admin.detail.modals.notify.submit')}</Button>
+          <Button type="submit" loading={submitting}>{t('admin.detail.modals.notify.submit')}</Button>
         </form>
       </Modal>
 

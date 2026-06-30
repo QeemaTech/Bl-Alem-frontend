@@ -24,6 +24,7 @@
       "saveChanges": "حفظ التعديلات",
       "deleteTitle": "حذف التصنيف",
       "deleteMessage": "هل أنت متأكد من حذف تصنيف \"{{name}}\"؟",
+      "deleteMessageWithCourses": "هذا التصنيف مرتبط بـ {{count}} دورة. سيتم نقلها لتصنيف آخر تلقائياً. هل تريد حذف \"{{name}}\"؟",
       "backToCategories": "العودة للتصنيفات",
       "notFound": {
         "title": "التصنيف غير موجود",
@@ -118,7 +119,8 @@
         "activated": "تم تفعيل التصنيف.",
         "deactivated": "تم إيقاف التصنيف.",
         "deleted": "تم حذف التصنيف.",
-        "deleteError": "لا يمكن حذف تصنيف مرتبط بدورات.",
+        "deletedWithReassign": "تم حذف التصنيف ونقل {{count}} دورة إلى «{{fallback}}».",
+        "deleteError": "تعذّر حذف التصنيف.",
         "loadError": "تعذّر تحميل التصنيف.",
         "statusError": "تعذّر تحديث الحالة."
       }

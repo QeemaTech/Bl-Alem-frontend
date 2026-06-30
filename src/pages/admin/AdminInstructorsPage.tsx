@@ -371,7 +371,7 @@ export default function AdminInstructorsPage() {
               { label: approvalLabels.SUSPENDED, value: 'SUSPENDED' },
             ]}
           />
-          <Button loading={submitting}>
+          <Button type="submit" loading={submitting}>
             {editing ? t('actions.saveChanges') : t('admin.instructors.createInstructor')}
           </Button>
         </form>

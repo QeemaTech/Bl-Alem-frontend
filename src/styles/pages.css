@@ -4666,6 +4666,191 @@ html[dir="rtl"] .instructor-notifications-feed .student-notification-item {
   }
 }
 
+.support-faq-card {
+  padding: 20px 22px;
+}
+.support-faq-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--color-primary);
+}
+.support-faq-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  color: var(--color-on-surface);
+}
+.support-faq-header p {
+  margin: 0;
+  color: var(--color-on-surface-variant);
+  font-size: 0.92rem;
+}
+.support-faq-list {
+  display: grid;
+  gap: 10px;
+}
+.support-faq-item {
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-container);
+}
+.support-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  text-align: start;
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  cursor: pointer;
+}
+.support-faq-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.support-faq-chevron.is-open {
+  transform: rotate(180deg);
+}
+.support-faq-answer {
+  padding: 0 16px 14px;
+  color: var(--color-on-surface-variant);
+  line-height: 1.7;
+}
+.support-faq-answer p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.support-faq-need-help {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+.support-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.support-admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-outline);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  font-weight: 700;
+  cursor: pointer;
+}
+.support-admin-tabs button.is-active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+.support-faq-admin-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.saved-payment-methods-card {
+  padding: 20px 22px;
+}
+.saved-payment-methods-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.saved-payment-methods-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+.saved-payment-methods-head p {
+  margin: 0;
+  color: var(--color-on-surface-variant);
+  font-size: 0.92rem;
+}
+.saved-payment-methods-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.saved-payment-method-item {
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-container)), var(--color-surface-container));
+}
+.saved-payment-method-item.is-default {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-outline));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+.saved-payment-method-item.is-visa { --card-accent: #1a1f71; }
+.saved-payment-method-item.is-mastercard { --card-accent: #eb001b; }
+.saved-payment-method-item.is-mada { --card-accent: #0f7b6c; }
+.saved-payment-method-item.is-amex { --card-accent: #006fcf; }
+.saved-payment-method-item.is-other { --card-accent: var(--color-primary); }
+.saved-payment-method-brand {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--card-accent, var(--color-primary));
+}
+.saved-payment-method-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.saved-payment-method-top strong {
+  display: block;
+  font-size: 1.05rem;
+}
+.saved-payment-method-top small {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-on-surface-variant);
+}
+.saved-payment-method-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  color: var(--color-on-surface-variant);
+  font-size: 0.88rem;
+}
+.saved-payment-method-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
 .admin-notification-body {
   margin-top: 8px;
   padding: 16px;

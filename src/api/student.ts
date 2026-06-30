@@ -46,6 +46,17 @@ export const studentApi = {
   createSupportTicket: (payload: { subject: string; message: string }) => unwrap<any>(apiClient.post('/student/support-tickets', payload)),
   supportTicket: (id: string | number) => unwrap<any>(apiClient.get(`/student/support-tickets/${id}`)),
   replySupportTicket: (id: string | number, message: string) => unwrap<any>(apiClient.post(`/student/support-tickets/${id}/reply`, { message })),
+  supportFaqs: () => unwrap<any[]>(apiClient.get('/student/support-faqs')),
+  paymentMethods: () => unwrap<any[]>(apiClient.get('/student/payment-methods')),
+  createPaymentMethod: (payload: {
+    cardNumber: string;
+    expMonth: number;
+    expYear: number;
+    label?: string;
+    isDefault?: boolean;
+  }) => unwrap<any>(apiClient.post('/student/payment-methods', payload)),
+  deletePaymentMethod: (id: number | string) => unwrap<any>(apiClient.delete(`/student/payment-methods/${id}`)),
+  setDefaultPaymentMethod: (id: number | string) => unwrap<any>(apiClient.patch(`/student/payment-methods/${id}/default`)),
   profile: () => unwrap<any>(apiClient.get('/student/profile')),
   updateProfile: (payload: Record<string, unknown>) => unwrap<any>(apiClient.put('/student/profile', payload)),
   changePassword: (payload: { currentPassword: string; newPassword: string }) => unwrap<any>(apiClient.put('/student/change-password', payload)),

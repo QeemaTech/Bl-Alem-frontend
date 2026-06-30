@@ -99,11 +99,19 @@ export default function AdminCategoryDetailPage() {
   const handleDelete = async () => {
     if (!category) return;
     try {
-      await adminApi.deleteCategory(category.id);
-      showToast(t('admin.categories.toast.deleted'), 'success');
+      const result = await adminApi.deleteCategory(category.id);
+      const reassigned = Number(result?.reassignedCourses || 0);
+      if (reassigned > 0) {
+        const fallbackName = result?.fallbackCategory?.nameAr || result?.fallbackCategory?.nameEn || '';
+        showToast(t('admin.categories.toast.deletedWithReassign', { count: reassigned, fallback: fallbackName }), 'success');
+      } else {
+        showToast(t('admin.categories.toast.deleted'), 'success');
+      }
       navigate('/admin/categories');
-    } catch {
-      showToast(t('admin.categories.toast.deleteError'), 'error');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        || t('admin.categories.toast.deleteError');
+      showToast(message, 'error');
       setDeleteOpen(false);
     }
   };
@@ -139,7 +147,6 @@ export default function AdminCategoryDetailPage() {
           onEdit={openEdit}
           onToggleStatus={toggleStatus}
           onDelete={() => setDeleteOpen(true)}
-          deleteDisabled={courseCount > 0}
           submitting={submitting}
         />
       </Card>
@@ -159,7 +166,11 @@ export default function AdminCategoryDetailPage() {
       <ConfirmDialog
         isOpen={deleteOpen}
         title={t('admin.categories.deleteTitle')}
-        message={t('admin.categories.deleteMessage', { name: category.nameAr })}
+        message={
+          courseCount > 0
+            ? t('admin.categories.deleteMessageWithCourses', { name: category.nameAr, count: courseCount })
+            : t('admin.categories.deleteMessage', { name: category.nameAr })
+        }
         confirmLabel={t('common:actions.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}

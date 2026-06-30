@@ -6,9 +6,8 @@ export interface WithdrawalItem {
   id: number;
   amount: number | string;
   status: WithdrawalStatus;
-  bankName?: string | null;
-  accountName?: string | null;
-  iban?: string | null;
+  phone?: string | null;
+  transferType?: string | null;
   notes?: string | null;
   transferProofImage?: string | null;
   createdAt: string;

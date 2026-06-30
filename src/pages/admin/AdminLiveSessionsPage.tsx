@@ -433,7 +433,7 @@ export default function AdminLiveSessionsPage() {
             value={form.descriptionAr}
             onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })}
           />
-          <Button loading={submitting}>{t('actions.saveChanges')}</Button>
+          <Button type="submit" loading={submitting}>{t('actions.saveChanges')}</Button>
         </form>
       </Modal>
 

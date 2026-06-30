@@ -259,6 +259,7 @@
         "totalEarningsHint": "After platform commission",
         "availableBalance": "Available balance",
         "withdrawableNow": "{{amount}} withdrawable now",
+        "approvedAwaitingTransfer": "{{amount}} approved, awaiting transfer",
         "readyToWithdraw": "Ready to withdraw",
         "minWithdrawal": "Minimum {{amount}}",
         "noBalance": "No balance",
@@ -298,7 +299,8 @@
       },
       "withdrawModal": {
         "title": "Withdrawal request",
-        "availableBalance": "Available balance",
+        "availableBalance": "Available balance (after completed payouts)",
+        "withdrawableNow": "You can withdraw now",
         "withdrawableHelper": "You can withdraw up to {{withdrawable}} — the pending request ({{pending}}) has not been deducted yet.",
         "cannotSubmitTitle": "Cannot submit a new request now",
         "cannotSubmitBody": "You have a withdrawal request for {{amount}} under review. Wait until admin processes the current request, then try again.",
@@ -306,9 +308,8 @@
         "belowMin": "Current balance is below the minimum withdrawal amount.",
         "amountLabel": "Amount (EGP)",
         "amountHelper": "Minimum: {{min}} • Maximum: {{max}}",
-        "bankLabel": "Bank",
-        "bankPlaceholder": "e.g. Al Rajhi",
-        "accountNameLabel": "Account name",
+        "phoneLabel": "Phone number",
+        "transferTypeLabel": "Transfer type",
         "notesLabel": "Notes (optional)",
         "submit": "Submit request"
       },
@@ -319,8 +320,11 @@
       },
       "toast": {
         "invalidAmount": "Enter a valid amount.",
-        "amountExceedsBalance": "Amount exceeds available balance.",
+        "amountExceedsBalance": "Amount exceeds withdrawable balance (max: {{max}}).",
         "minAmount": "Minimum withdrawal is {{amount}}.",
+        "phoneRequired": "Please enter a phone number.",
+        "invalidPhone": "Invalid phone number. Use an Egyptian number like 01xxxxxxxxx.",
+        "invalidTransferType": "Please select a valid transfer type.",
         "submitted": "Withdrawal request submitted successfully.",
         "submitFailed": "Could not submit withdrawal request."
       },
@@ -329,9 +333,8 @@
         "columns": {
           "amount": "Amount (EGP)",
           "status": "Status",
-          "bankName": "Bank",
-          "accountName": "Account name",
-          "iban": "IBAN",
+          "phone": "Phone",
+          "transferType": "Transfer type",
           "createdAt": "Date",
           "notes": "Notes"
         }

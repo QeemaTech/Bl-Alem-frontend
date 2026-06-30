@@ -4,6 +4,7 @@ import {
   CheckCircle2, Download, Eye, Headphones, MessageSquare, MessageSquarePlus, Plus, Send, Table2, X,
 } from '@/icons';
 import { studentApi } from '../../api/student';
+import { SupportFaqSection } from '../../components/support/SupportFaqSection';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -42,6 +43,8 @@ export default function StudentSupportPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [reply, setReply] = useState('');
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
 
   const statusLabel = useCallback(
     (status: string) => t(`student.labels.status.${status}`, { defaultValue: status }),
@@ -66,7 +69,16 @@ export default function StudentSupportPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  const loadFaqs = async () => {
+    setFaqsLoading(true);
+    try {
+      setFaqs(await studentApi.supportFaqs());
+    } finally {
+      setFaqsLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); loadFaqs(); }, []);
 
   const filteredTickets = useMemo(() => {
     let result = tickets;
@@ -354,6 +366,12 @@ export default function StudentSupportPage() {
           ) : null}
         </Card>
       ) : null}
+
+      <SupportFaqSection
+        items={faqs}
+        loading={faqsLoading}
+        onNeedHelp={() => setIsOpen(true)}
+      />
 
       <Modal isOpen={isOpen} title={t('student.modal.title')} onClose={() => setIsOpen(false)}>
         <form className="stack-sm" onSubmit={createTicket}>

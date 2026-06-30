@@ -45,24 +45,18 @@ export function WithdrawTransferForm({
             name: item?.instructor?.fullName || empty,
           })}
         </p>
-        {item?.bankName || item?.iban ? (
+        {item?.phone || item?.transferType ? (
           <dl className="withdraw-transfer-meta">
-            {item.bankName ? (
+            {item.phone ? (
               <div>
-                <dt>{t('admin.transferModal.bank')}</dt>
-                <dd>{item.bankName}</dd>
+                <dt>{t('admin.transferModal.phone')}</dt>
+                <dd dir="ltr">{item.phone}</dd>
               </div>
             ) : null}
-            {item.accountName ? (
+            {item.transferType ? (
               <div>
-                <dt>{t('admin.transferModal.accountName')}</dt>
-                <dd>{item.accountName}</dd>
-              </div>
-            ) : null}
-            {item.iban ? (
-              <div>
-                <dt>{t('admin.transferModal.iban')}</dt>
-                <dd dir="ltr">{item.iban}</dd>
+                <dt>{t('admin.transferModal.transferType')}</dt>
+                <dd>{t(`admin.labels.transferTypes.${item.transferType}`, { defaultValue: item.transferType })}</dd>
               </div>
             ) : null}
           </dl>

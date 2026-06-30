@@ -181,8 +181,10 @@ export default function AdminUsersPage() {
       setEditing(null);
       setForm(emptyForm);
       await load();
-    } catch {
-      showToast(t('admin.users.toast.saveError'), 'error');
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        || t('admin.users.toast.saveError');
+      showToast(message, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -328,7 +330,7 @@ export default function AdminUsersPage() {
               { label: statusLabels.REJECTED, value: 'REJECTED' },
             ]}
           />
-          <Button loading={submitting}>
+          <Button type="submit" loading={submitting}>
             {editing ? t('actions.saveChanges') : t('admin.users.createUser')}
           </Button>
         </form>

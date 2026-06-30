@@ -108,7 +108,7 @@
   },
   "student": {
     "title": "Payments",
-    "subtitle": "Payment and course enrollment history",
+    "subtitle": "Invoice history and saved payment methods",
     "stats": {
       "total": "Total transactions",
       "paid": "Paid",
@@ -184,6 +184,49 @@
         "gateway": "Gateway",
         "status": "Status",
         "createdAt": "Date"
+      }
+    },
+    "paymentMethods": {
+      "title": "Saved payment methods",
+      "subtitle": "Cards saved for faster checkout — we only store the last 4 digits.",
+      "loading": "Loading payment methods...",
+      "add": "Add card",
+      "default": "Default",
+      "setDefault": "Set as default",
+      "remove": "Remove",
+      "emptyTitle": "No saved cards",
+      "emptyDescription": "Add a card to speed up future payments.",
+      "brands": {
+        "VISA": "Visa",
+        "MASTERCARD": "Mastercard",
+        "MADA": "Mada",
+        "AMEX": "Amex",
+        "OTHER": "Card"
+      },
+      "modal": {
+        "title": "Add card",
+        "label": "Card label (optional)",
+        "labelPlaceholder": "e.g. Personal card",
+        "cardNumber": "Card number",
+        "expMonth": "Expiry month",
+        "expYear": "Expiry year",
+        "makeDefault": "Set as default payment method",
+        "securityNote": "For your security, we never store the full card number — only the last 4 digits.",
+        "cancel": "Cancel",
+        "save": "Save card"
+      },
+      "delete": {
+        "title": "Remove card",
+        "message": "Remove the card ending in {{last4}}?",
+        "confirm": "Remove"
+      },
+      "toast": {
+        "added": "Card saved.",
+        "addFailed": "Could not save card.",
+        "deleted": "Card removed.",
+        "deleteFailed": "Could not remove card.",
+        "defaultUpdated": "Default card updated.",
+        "defaultFailed": "Could not update default card."
       }
     }
   }

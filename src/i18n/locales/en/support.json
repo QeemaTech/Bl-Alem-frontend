@@ -9,7 +9,11 @@
   },
   "admin": {
     "title": "Technical support",
-    "subtitle": "Manage support tickets and reply to users",
+    "subtitle": "Manage support tickets, FAQ articles, and user replies",
+    "tabs": {
+      "tickets": "Tickets",
+      "faq": "FAQ"
+    },
     "exportExcel": "Export Excel",
     "backToList": "Back to support tickets",
     "backToSupport": "Back to technical support",
@@ -93,7 +97,79 @@
         "INSTRUCTOR": "Instructor",
         "SUPER_ADMIN": "Admin"
       }
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "subtitle": "Add and edit questions shown to students and instructors before they open a ticket.",
+      "add": "Add question",
+      "searchPlaceholder": "Search questions and answers...",
+      "emptyTitle": "No FAQ items",
+      "emptyDescription": "Add your first question to help users before they contact support.",
+      "filters": {
+        "status": "Status",
+        "audience": "Audience",
+        "allStatuses": "All statuses",
+        "allAudiences": "All audiences"
+      },
+      "columns": {
+        "question": "Question",
+        "audience": "Audience",
+        "order": "Order",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "audience": {
+        "ALL": "Everyone",
+        "STUDENT": "Students",
+        "INSTRUCTOR": "Instructors"
+      },
+      "status": {
+        "ACTIVE": "Published",
+        "INACTIVE": "Hidden"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "activate": "Publish",
+        "deactivate": "Hide"
+      },
+      "form": {
+        "questionAr": "Question (Arabic)",
+        "questionEn": "Question (English)",
+        "answerAr": "Answer (Arabic)",
+        "answerEn": "Answer (English)",
+        "audience": "Visible to",
+        "sortOrder": "Display order",
+        "status": "Status"
+      },
+      "modal": {
+        "createTitle": "Add FAQ item",
+        "editTitle": "Edit FAQ item",
+        "create": "Add",
+        "save": "Save"
+      },
+      "delete": {
+        "title": "Delete question",
+        "message": "Delete “{{question}}”?",
+        "confirm": "Delete"
+      },
+      "toast": {
+        "created": "Question added.",
+        "updated": "Question updated.",
+        "deleted": "Question deleted.",
+        "statusUpdated": "Question status updated.",
+        "saveFailed": "Could not save question.",
+        "deleteFailed": "Could not delete question."
+      }
     }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "subtitle": "Quick answers to common questions — you may find your solution here before opening a ticket.",
+    "loading": "Loading FAQ...",
+    "emptyTitle": "No FAQ items yet",
+    "emptyDescription": "No help articles have been added yet. You can open a support ticket and we will help you.",
+    "stillNeedHelp": "Still need help? Open a support ticket"
   },
   "student": {
     "title": "Technical support",

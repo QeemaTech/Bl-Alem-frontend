@@ -36,11 +36,16 @@ export function useAdminWithdrawalLabels() {
       statusLabels[status as WithdrawalStatus] || status
     );
 
+    const getTransferTypeLabel = (type: string) => (
+      t(`admin.labels.transferTypes.${type}`, { defaultValue: type })
+    );
+
     return {
       statusLabels,
       fmtWithdrawalDate,
       fmtWithdrawalMoney,
       getStatusLabel,
+      getTransferTypeLabel,
       withdrawalStatusVariant,
       empty: t('empty'),
       lang,

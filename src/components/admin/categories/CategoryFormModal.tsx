@@ -82,7 +82,7 @@ export function CategoryFormModal({
             { label: statusLabels.INACTIVE, value: 'INACTIVE' },
           ]}
         />
-        <Button loading={submitting}>
+        <Button type="submit" loading={submitting}>
           {editing ? t('admin.categories.saveChanges') : t('admin.categories.createCategory')}
         </Button>
       </form>

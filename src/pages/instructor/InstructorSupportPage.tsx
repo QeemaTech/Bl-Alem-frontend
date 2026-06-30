@@ -5,6 +5,7 @@ import {
   CheckCircle2, ChevronLeft, Headphones, MessageSquare, MessageSquarePlus, Plus, Table2,
 } from '@/icons';
 import { instructorApi } from '../../api/instructor';
+import { SupportFaqSection } from '../../components/support/SupportFaqSection';
 import { statusVariant } from '../../components/admin/support/supportTicketShared';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -34,6 +35,8 @@ export default function InstructorSupportPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [faqsLoading, setFaqsLoading] = useState(true);
 
   const statusLabel = useCallback(
     (status: string) => t(`instructor.labels.status.${status}`, { defaultValue: status }),
@@ -58,7 +61,12 @@ export default function InstructorSupportPage() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    instructorApi.supportFaqs()
+      .then(setFaqs)
+      .finally(() => setFaqsLoading(false));
+  }, []);
 
   const filteredTickets = useMemo(() => {
     let result = tickets;
@@ -219,6 +227,12 @@ export default function InstructorSupportPage() {
           ]}
         />
       </Card>
+
+      <SupportFaqSection
+        items={faqs}
+        loading={faqsLoading}
+        onNeedHelp={() => setOpen(true)}
+      />
 
       <Modal isOpen={open} title={t('instructor.modal.title')} onClose={() => setOpen(false)}>
         <form className="stack-sm" onSubmit={create}>

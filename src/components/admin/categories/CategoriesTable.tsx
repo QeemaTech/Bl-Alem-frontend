@@ -151,7 +151,6 @@ export function CategoriesTable({
                 onToggleStatus={() => onToggleStatus(row._raw)}
                 isActive={row._raw?.status === 'ACTIVE'}
                 onDelete={() => onDelete(row._raw)}
-                deleteDisabled={Number(row._raw?._count?.courses || 0) > 0}
               />
             ),
           },

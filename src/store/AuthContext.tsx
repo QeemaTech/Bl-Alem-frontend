@@ -1,5 +1,13 @@
-﻿import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+﻿import axios from 'axios';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { authApi } from '../api/auth';
+import {
+  clearAuthSession,
+  persistAuthSession,
+  readStoredToken,
+  readStoredUser,
+  SESSION_EXPIRED_EVENT,
+} from '../utils/authStorage';
 import type { LoginInput, OtpVerifyInput, RegisterInput, SocialLoginInput, User } from '../utils/types';
 
 interface AuthContextValue {
@@ -16,34 +24,66 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const getErrorStatus = (error: unknown): number | undefined => {
+  if (axios.isAxiosError(error)) return error.response?.status;
+  return undefined;
+};
+
+const shouldClearSession = (error: unknown) => {
+  const status = getErrorStatus(error);
+  return status === 401 || status === 403;
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('bi_alem_token'));
-  const [isLoading, setIsLoading] = useState(Boolean(token));
+  const [user, setUser] = useState<User | null>(() => readStoredUser());
+  const [token, setToken] = useState<string | null>(() => readStoredToken());
+  const [isLoading, setIsLoading] = useState(() => Boolean(readStoredToken()));
 
   const persistSession = (nextToken: string, nextUser: User) => {
-    localStorage.setItem('bi_alem_token', nextToken);
+    persistAuthSession(nextToken, nextUser);
     setToken(nextToken);
     setUser(nextUser);
   };
 
+  const clearSession = useCallback(() => {
+    clearAuthSession();
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  useEffect(() => {
+    const onSessionExpired = () => clearSession();
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+  }, [clearSession]);
+
   useEffect(() => {
     let mounted = true;
+
     const loadUser = async () => {
-      if (!token) { setIsLoading(false); return; }
+      if (!token) {
+        if (mounted) setIsLoading(false);
+        return;
+      }
+
       try {
         const currentUser = await authApi.me();
-        if (mounted) setUser(currentUser);
-      } catch {
-        localStorage.removeItem('bi_alem_token');
-        if (mounted) { setToken(null); setUser(null); }
+        if (!mounted) return;
+        persistAuthSession(token, currentUser);
+        setUser(currentUser);
+      } catch (error) {
+        if (!mounted) return;
+        if (shouldClearSession(error)) {
+          clearSession();
+        }
       } finally {
         if (mounted) setIsLoading(false);
       }
     };
+
     loadUser();
     return () => { mounted = false; };
-  }, [token]);
+  }, [token, clearSession]);
 
   const login = useCallback(async (payload: LoginInput) => {
     const data = await authApi.login(payload);
@@ -70,11 +110,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try { if (token) await authApi.logout(); }
-    finally { localStorage.removeItem('bi_alem_token'); setToken(null); setUser(null); }
-  }, [token]);
+    try {
+      if (token) await authApi.logout();
+    } finally {
+      clearSession();
+    }
+  }, [token, clearSession]);
 
-  const value = useMemo(() => ({ user, token, isAuthenticated: Boolean(user && token), isLoading, login, register, verifyOtp, socialLogin, logout }), [user, token, isLoading, login, register, verifyOtp, socialLogin, logout]);
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      isAuthenticated: Boolean(user && token),
+      isLoading,
+      login,
+      register,
+      verifyOtp,
+      socialLogin,
+      logout,
+    }),
+    [user, token, isLoading, login, register, verifyOtp, socialLogin, logout],
+  );
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

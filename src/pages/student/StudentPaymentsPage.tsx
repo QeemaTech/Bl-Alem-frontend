@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreditCard, Download, Receipt, Table2, TrendingUp, Wallet } from '@/icons';
 import { studentApi } from '../../api/student';
+import { SavedPaymentMethodsSection } from '../../components/payments/SavedPaymentMethodsSection';
 import { ReportChart } from '../../components/reports/ReportChart';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -37,6 +38,8 @@ export default function StudentPaymentsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [gatewayFilter, setGatewayFilter] = useState('');
   const [selected, setSelected] = useState<any>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [methodsLoading, setMethodsLoading] = useState(true);
 
   const fmtDate = (value: string) => formatDateTime(value, {
     year: 'numeric',
@@ -70,8 +73,26 @@ export default function StudentPaymentsPage() {
   ], [t, lang]);
 
   useEffect(() => {
-    studentApi.payments().then(setItems).finally(() => setLoading(false));
+    Promise.all([
+      studentApi.payments(),
+      studentApi.paymentMethods(),
+    ]).then(([payments, methods]) => {
+      setItems(payments);
+      setPaymentMethods(methods);
+    }).finally(() => {
+      setLoading(false);
+      setMethodsLoading(false);
+    });
   }, []);
+
+  const reloadPaymentMethods = async () => {
+    setMethodsLoading(true);
+    try {
+      setPaymentMethods(await studentApi.paymentMethods());
+    } finally {
+      setMethodsLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = items;
@@ -270,6 +291,23 @@ export default function StudentPaymentsPage() {
           ]}
         />
       </Card>
+
+      <SavedPaymentMethodsSection
+        methods={paymentMethods}
+        loading={methodsLoading}
+        onCreate={async (payload) => {
+          await studentApi.createPaymentMethod(payload);
+          await reloadPaymentMethods();
+        }}
+        onDelete={async (id) => {
+          await studentApi.deletePaymentMethod(id);
+          await reloadPaymentMethods();
+        }}
+        onSetDefault={async (id) => {
+          await studentApi.setDefaultPaymentMethod(id);
+          await reloadPaymentMethods();
+        }}
+      />
 
       <Modal isOpen={Boolean(selected)} title={t('student.modal.detailTitle')} onClose={() => setSelected(null)}>
         {selected ? (

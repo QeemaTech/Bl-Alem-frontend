@@ -35,6 +35,7 @@ export default function AdminWithdrawalsPage() {
     fmtWithdrawalDate,
     fmtWithdrawalMoney,
     getStatusLabel,
+    getTransferTypeLabel,
     empty,
   } = useAdminWithdrawalLabels();
 
@@ -60,9 +61,8 @@ export default function AdminWithdrawalsPage() {
       { key: 'instructor', header: cols.instructor },
       { key: 'email', header: cols.email },
       { key: 'amount', header: cols.amount },
-      { key: 'bankName', header: cols.bankName },
-      { key: 'accountName', header: cols.accountName },
-      { key: 'iban', header: cols.iban },
+      { key: 'phone', header: cols.phone },
+      { key: 'transferType', header: cols.transferType },
       { key: 'status', header: cols.status },
       { key: 'createdAt', header: cols.createdAt },
       { key: 'notes', header: cols.notes },
@@ -115,9 +115,8 @@ export default function AdminWithdrawalsPage() {
         instructor: row.instructor?.fullName || empty,
         email: row.instructor?.email || empty,
         amount: fmtWithdrawalMoney(row.amount),
-        bankName: row.bankName || empty,
-        accountName: row.accountName || empty,
-        iban: row.iban || empty,
+        phone: row.phone || empty,
+        transferType: getTransferTypeLabel(String(row.transferType || '')),
         status: getStatusLabel(row.status),
         createdAt: fmtWithdrawalDate(row.createdAt),
         notes: row.notes || empty,
@@ -257,11 +256,9 @@ export default function AdminWithdrawalsPage() {
             <div className="detail-row"><span>{t('admin.detail.requestId', { ns: 'withdrawals' })}</span><strong>#{selected.id}</strong></div>
             <div className="detail-row"><span>{t('admin.detail.instructor', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.fullName}</strong></div>
             <div className="detail-row"><span>{t('admin.detail.email', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.email}</strong></div>
-            <div className="detail-row"><span>{t('admin.detail.phone', { ns: 'withdrawals' })}</span><strong>{selected.instructor?.phone || empty}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.payoutPhone', { ns: 'withdrawals' })}</span><strong dir="ltr">{selected.phone || empty}</strong></div>
+            <div className="detail-row"><span>{t('admin.detail.transferType', { ns: 'withdrawals' })}</span><strong>{getTransferTypeLabel(String(selected.transferType || ''))}</strong></div>
             <div className="detail-row"><span>{t('admin.detail.amount', { ns: 'withdrawals' })}</span><strong>{fmtWithdrawalMoney(selected.amount)}</strong></div>
-            <div className="detail-row"><span>{t('admin.detail.bank', { ns: 'withdrawals' })}</span><strong>{selected.bankName || empty}</strong></div>
-            <div className="detail-row"><span>{t('admin.detail.accountName', { ns: 'withdrawals' })}</span><strong>{selected.accountName || empty}</strong></div>
-            <div className="detail-row"><span>{t('admin.detail.iban', { ns: 'withdrawals' })}</span><strong dir="ltr">{selected.iban || empty}</strong></div>
             <div className="detail-row">
               <span>{t('admin.detail.status', { ns: 'withdrawals' })}</span>
               <WithdrawalStatusBadge status={selected.status} />

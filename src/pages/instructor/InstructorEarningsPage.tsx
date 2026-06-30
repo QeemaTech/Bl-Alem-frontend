@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowDownToLine, Banknote, Clock, Download, TrendingUp, Wallet,
@@ -23,15 +23,15 @@ import { formatMoney, roundMoney } from '../../utils/formatMoney';
 import { exportTableToExcel } from '../../utils/exportExcel';
 import { formatDateTime } from '../../utils/localeFormat';
 import { localizedCourseTitle } from '../../utils/localizedContent';
-import { mediaUrl } from '../../utils/mediaUrl';
+import { isValidPayoutPhone, normalizePayoutPhone } from '../../utils/payoutPhone';
+import { WITHDRAWAL_TRANSFER_TYPES } from '../../utils/withdrawalTransferTypes';
 
 const WITHDRAWAL_STATUSES = ['PENDING', 'APPROVED', 'PAID', 'REJECTED'] as const;
 
 const emptyWithdrawForm = {
   amount: '',
-  bankName: '',
-  accountName: '',
-  iban: '',
+  phone: '',
+  transferType: 'VODAFONE_CASH',
   notes: '',
 };
 
@@ -47,6 +47,7 @@ export default function InstructorEarningsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyWithdrawForm);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selected, setSelected] = useState<any>(null);
@@ -79,9 +80,8 @@ export default function InstructorEarningsPage() {
     return [
       { key: 'amount', header: cols.amount },
       { key: 'status', header: cols.status },
-      { key: 'bankName', header: cols.bankName },
-      { key: 'accountName', header: cols.accountName },
-      { key: 'iban', header: cols.iban },
+      { key: 'phone', header: cols.phone },
+      { key: 'transferType', header: cols.transferType },
       { key: 'createdAt', header: cols.createdAt },
       { key: 'notes', header: cols.notes },
     ];
@@ -118,18 +118,29 @@ export default function InstructorEarningsPage() {
 
   const normalizeSearchText = (value: unknown) => String(value ?? '').toLowerCase().trim();
 
+  const transferTypeOptions = useMemo(
+    () => WITHDRAWAL_TRANSFER_TYPES.map((value) => ({
+      value,
+      label: tw(`admin.labels.transferTypes.${value}`),
+    })),
+    [tw],
+  );
+
+  const getTransferTypeLabel = useCallback(
+    (type: string) => tw(`admin.labels.transferTypes.${type}`, { defaultValue: type }),
+    [tw],
+  );
   const withdrawalSearchText = useCallback((item: any) => normalizeSearchText([
     item.id,
-    item.bankName,
-    item.accountName,
-    item.iban,
+    item.phone,
+    getTransferTypeLabel(String(item.transferType || '')),
     item.notes,
     item.adminNotes,
     item.amount,
     fmtDate(String(item.createdAt || '')),
     getStatusLabel(item.status),
     item.status,
-  ].join(' ')), [fmtDate, getStatusLabel, lang]);
+  ].join(' ')), [fmtDate, getStatusLabel, getTransferTypeLabel]);
 
   const filteredWithdrawals = useMemo(() => {
     let result = withdrawals as any[];
@@ -172,24 +183,51 @@ export default function InstructorEarningsPage() {
 
   const withdraw = async (e: FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+
     const amount = roundMoney(form.amount);
-    const available = roundMoney(data?.withdrawableBalance ?? data?.availableBalance ?? 0);
+    const withdrawableNow = roundMoney(data?.withdrawableBalance ?? 0);
     const minAmount = roundMoney(data?.minWithdrawalAmount || 0);
+    const phone = normalizePayoutPhone(form.phone);
+    const transferType = form.transferType.trim();
+
     if (amount <= 0) {
       showToast(t('instructor.earnings.toast.invalidAmount'), 'error');
       return;
     }
-    if (amount > available) {
-      showToast(t('instructor.earnings.toast.amountExceedsBalance'), 'error');
+    if (amount > withdrawableNow) {
+      showToast(
+        t('instructor.earnings.toast.amountExceedsBalance', { max: fmtMoney(withdrawableNow) }),
+        'error',
+      );
       return;
     }
     if (minAmount > 0 && amount < minAmount) {
       showToast(t('instructor.earnings.toast.minAmount', { amount: fmtMoney(minAmount) }), 'error');
       return;
     }
+    if (!phone) {
+      showToast(t('instructor.earnings.toast.phoneRequired'), 'error');
+      return;
+    }
+    if (!isValidPayoutPhone(phone)) {
+      showToast(t('instructor.earnings.toast.invalidPhone'), 'error');
+      return;
+    }
+    if (!WITHDRAWAL_TRANSFER_TYPES.includes(transferType as typeof WITHDRAWAL_TRANSFER_TYPES[number])) {
+      showToast(t('instructor.earnings.toast.invalidTransferType'), 'error');
+      return;
+    }
+
+    submittingRef.current = true;
     setSubmitting(true);
     try {
-      await instructorApi.requestWithdrawal(form);
+      await instructorApi.requestWithdrawal({
+        amount,
+        phone,
+        transferType,
+        notes: form.notes.trim() || undefined,
+      });
       setOpen(false);
       setForm(emptyWithdrawForm);
       showToast(t('instructor.earnings.toast.submitted'), 'success');
@@ -198,7 +236,9 @@ export default function InstructorEarningsPage() {
       const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message
         || t('instructor.earnings.toast.submitFailed');
       showToast(message, 'error');
+      await load();
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -207,9 +247,8 @@ export default function InstructorEarningsPage() {
     exportTableToExcel(t('instructor.earnings.export.sheetName'), exportColumns, filteredWithdrawals.map((row: any) => ({
       amount: fmtMoney(row.amount),
       status: getStatusLabel(row.status),
-      bankName: row.bankName || dash,
-      accountName: row.accountName || dash,
-      iban: row.iban || dash,
+      phone: row.phone || dash,
+      transferType: getTransferTypeLabel(String(row.transferType || '')),
       createdAt: fmtDate(row.createdAt),
       notes: row.notes || dash,
     })));
@@ -279,16 +318,18 @@ export default function InstructorEarningsPage() {
         />
         <StatCard
           title={t('instructor.earnings.stats.availableBalance')}
-          value={fmtMoney(data?.availableBalance)}
+          value={fmtMoney(withdrawable)}
           icon={Wallet}
           hint={
             hasPending
               ? t('instructor.earnings.stats.withdrawableNow', { amount: fmtMoney(withdrawable) })
-              : available >= minWithdrawalAmount
-                ? t('instructor.earnings.stats.readyToWithdraw')
-                : available > 0
-                  ? t('instructor.earnings.stats.minWithdrawal', { amount: fmtMoney(minWithdrawalAmount) })
-                  : t('instructor.earnings.stats.noBalance')
+              : data?.approvedBalance > 0
+                ? t('instructor.earnings.stats.approvedAwaitingTransfer', { amount: fmtMoney(data.approvedBalance) })
+                : available >= minWithdrawalAmount
+                  ? t('instructor.earnings.stats.readyToWithdraw')
+                  : available > 0
+                    ? t('instructor.earnings.stats.minWithdrawal', { amount: fmtMoney(minWithdrawalAmount) })
+                    : t('instructor.earnings.stats.noBalance')
           }
         />
         <StatCard
@@ -376,7 +417,8 @@ export default function InstructorEarningsPage() {
                 </Badge>
               ),
             },
-            { key: 'bankName', header: tw('admin.detail.bank'), render: (row) => String(row.bankName || dash) },
+            { key: 'phone', header: t('instructor.earnings.withdrawModal.phoneLabel'), render: (row) => <span dir="ltr">{String(row.phone || dash)}</span> },
+            { key: 'transferType', header: t('instructor.earnings.withdrawModal.transferTypeLabel'), render: (row) => getTransferTypeLabel(String(row.transferType || '')) },
             {
               key: 'createdAt',
               header: tw('admin.detail.requestDate'),
@@ -437,6 +479,10 @@ export default function InstructorEarningsPage() {
       <Modal isOpen={open} title={t('instructor.earnings.withdrawModal.title')} onClose={() => !submitting && setOpen(false)}>
         <div className="withdraw-modal-summary">
           <div>
+            <span>{t('instructor.earnings.withdrawModal.withdrawableNow')}</span>
+            <strong>{fmtMoney(withdrawable)}</strong>
+          </div>
+          <div>
             <span>{t('instructor.earnings.withdrawModal.availableBalance')}</span>
             <strong>{fmtMoney(available)}</strong>
           </div>
@@ -481,27 +527,20 @@ export default function InstructorEarningsPage() {
             disabled={!canSubmitWithdrawal}
             required
           />
-          <Input
-            label={t('instructor.earnings.withdrawModal.bankLabel')}
-            value={form.bankName}
-            placeholder={t('instructor.earnings.withdrawModal.bankPlaceholder')}
-            onChange={(e) => setForm({ ...form, bankName: e.target.value })}
+          <Select
+            label={t('instructor.earnings.withdrawModal.transferTypeLabel')}
+            value={form.transferType}
+            onChange={(e) => setForm({ ...form, transferType: e.target.value })}
+            options={transferTypeOptions}
             disabled={!canSubmitWithdrawal}
             required
           />
           <Input
-            label={t('instructor.earnings.withdrawModal.accountNameLabel')}
-            value={form.accountName}
-            onChange={(e) => setForm({ ...form, accountName: e.target.value })}
-            disabled={!canSubmitWithdrawal}
-            required
-          />
-          <Input
-            label="IBAN"
-            value={form.iban}
-            placeholder="SA..."
+            label={t('instructor.earnings.withdrawModal.phoneLabel')}
+            value={form.phone}
+            placeholder="01xxxxxxxxx"
             dir="ltr"
-            onChange={(e) => setForm({ ...form, iban: e.target.value.toUpperCase() })}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
             disabled={!canSubmitWithdrawal}
             required
           />
@@ -531,9 +570,8 @@ export default function InstructorEarningsPage() {
               <span>{tw('admin.detail.status')}</span>
               <Badge variant={withdrawalStatusVariant[selected.status as keyof typeof withdrawalStatusVariant] || 'default'}>{getStatusLabel(selected.status)}</Badge>
             </div>
-            <div className="detail-row"><span>{tw('admin.detail.bank')}</span><strong>{selected.bankName || dash}</strong></div>
-            <div className="detail-row"><span>{tw('admin.detail.accountName')}</span><strong>{selected.accountName || dash}</strong></div>
-            <div className="detail-row"><span>IBAN</span><strong dir="ltr">{selected.iban || dash}</strong></div>
+            <div className="detail-row"><span>{t('instructor.earnings.withdrawModal.phoneLabel')}</span><strong dir="ltr">{selected.phone || dash}</strong></div>
+            <div className="detail-row"><span>{t('instructor.earnings.withdrawModal.transferTypeLabel')}</span><strong>{getTransferTypeLabel(String(selected.transferType || ''))}</strong></div>
             <div className="detail-row"><span>{tw('admin.detail.requestDate')}</span><strong>{fmtDate(selected.createdAt)}</strong></div>
             {selected.notes ? (
               <div className="detail-row"><span>{tw('admin.detail.notes')}</span><strong>{selected.notes}</strong></div>

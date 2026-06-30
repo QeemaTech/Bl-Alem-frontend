@@ -259,6 +259,7 @@
         "totalEarningsHint": "بعد خصم عمولة المنصة",
         "availableBalance": "الرصيد المتاح",
         "withdrawableNow": "{{amount}} قابل للسحب الآن",
+        "approvedAwaitingTransfer": "{{amount}} معتمد وبانتظار التحويل",
         "readyToWithdraw": "جاهز للسحب",
         "minWithdrawal": "الحد الأدنى {{amount}}",
         "noBalance": "لا يوجد رصيد",
@@ -298,7 +299,8 @@
       },
       "withdrawModal": {
         "title": "طلب سحب",
-        "availableBalance": "الرصيد المتاح",
+        "availableBalance": "الرصيد المتاح (بعد التحويلات المكتملة)",
+        "withdrawableNow": "يمكنك سحب الآن",
         "withdrawableHelper": "يمكنك سحب حتى {{withdrawable}} — الطلب المعلق ({{pending}}) لم يُخصم بعد.",
         "cannotSubmitTitle": "لا يمكن إرسال طلب جديد الآن",
         "cannotSubmitBody": "لديك طلب سحب بمبلغ {{amount}} قيد المراجعة. انتظر حتى تعالج الإدارة الطلب الحالي ثم أعد المحاولة.",
@@ -306,9 +308,8 @@
         "belowMin": "الرصيد الحالي أقل من الحد الأدنى للسحب.",
         "amountLabel": "المبلغ (ج.م)",
         "amountHelper": "الحد الأدنى: {{min}} • الحد الأقصى: {{max}}",
-        "bankLabel": "البنك",
-        "bankPlaceholder": "مثال: الراجحي",
-        "accountNameLabel": "اسم الحساب",
+        "phoneLabel": "رقم الهاتف",
+        "transferTypeLabel": "نوع التحويل",
         "notesLabel": "ملاحظات (اختياري)",
         "submit": "إرسال الطلب"
       },
@@ -319,8 +320,11 @@
       },
       "toast": {
         "invalidAmount": "أدخل مبلغاً صالحاً.",
-        "amountExceedsBalance": "المبلغ أكبر من الرصيد المتاح.",
+        "amountExceedsBalance": "المبلغ أكبر من الرصيد المتاح للسحب (الحد الأقصى: {{max}}).",
         "minAmount": "الحد الأدنى للسحب {{amount}}.",
+        "phoneRequired": "يرجى إدخال رقم الهاتف.",
+        "invalidPhone": "رقم الهاتف غير صالح. استخدم رقم مصري مثل 01xxxxxxxxx.",
+        "invalidTransferType": "يرجى اختيار نوع تحويل صالح.",
         "submitted": "تم إرسال طلب السحب بنجاح.",
         "submitFailed": "تعذّر إرسال طلب السحب."
       },
@@ -329,9 +333,8 @@
         "columns": {
           "amount": "المبلغ (ج.م)",
           "status": "الحالة",
-          "bankName": "البنك",
-          "accountName": "اسم الحساب",
-          "iban": "IBAN",
+          "phone": "رقم الهاتف",
+          "transferType": "نوع التحويل",
           "createdAt": "التاريخ",
           "notes": "ملاحظات"
         }

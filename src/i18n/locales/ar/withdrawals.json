@@ -42,9 +42,8 @@
         "instructor": "المحاضر",
         "email": "البريد",
         "amount": "المبلغ (ج.م)",
-        "bankName": "البنك",
-        "accountName": "اسم الحساب",
-        "iban": "IBAN",
+        "phone": "رقم الهاتف",
+        "transferType": "نوع التحويل",
         "status": "الحالة",
         "createdAt": "تاريخ الطلب",
         "notes": "ملاحظات"
@@ -61,11 +60,9 @@
       "requestId": "رقم الطلب",
       "instructor": "المحاضر",
       "email": "البريد",
-      "phone": "الهاتف",
+      "payoutPhone": "رقم التحويل",
+      "transferType": "نوع التحويل",
       "amount": "المبلغ",
-      "bank": "البنك",
-      "accountName": "اسم الحساب",
-      "iban": "IBAN",
       "status": "الحالة",
       "requestDate": "تاريخ الطلب",
       "notes": "ملاحظات",
@@ -81,15 +78,14 @@
     },
     "approveDialog": {
       "title": "اعتماد طلب السحب",
-      "message": "هل تريد اعتماد طلب سحب بمبلغ {{amount}} للمحاضر {{name}}؟ سيتم خصم المبلغ من رصيده المتاح.",
+      "message": "هل تريد اعتماد طلب سحب بمبلغ {{amount}} للمحاضر {{name}}؟",
       "confirm": "اعتماد"
     },
     "transferModal": {
       "title": "تأكيد التحويل",
       "lead": "أكّد تحويل مبلغ {{amount}} إلى المحاضر {{name}}",
-      "bank": "البنك",
-      "accountName": "اسم الحساب",
-      "iban": "IBAN",
+      "phone": "رقم التحويل",
+      "transferType": "نوع التحويل",
       "previewAlt": "معاينة إيصال التحويل",
       "replaceImage": "استبدال الصورة",
       "remove": "إزالة",
@@ -112,6 +108,14 @@
         "APPROVED": "معتمد",
         "PAID": "مدفوع",
         "REJECTED": "مرفوض"
+      },
+      "transferTypes": {
+        "VODAFONE_CASH": "فودافون كاش",
+        "INSTAPAY": "إنستاباي",
+        "ORANGE_CASH": "أورانج كاش",
+        "ETISALAT_CASH": "اتصالات كاش",
+        "BANK_WALLET": "محفظة بنكية",
+        "OTHER": "أخرى"
       }
     }
   }

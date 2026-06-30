@@ -311,7 +311,7 @@ export default function AdminStudentsPage() {
               { label: statusLabels.REJECTED, value: 'REJECTED' },
             ]}
           />
-          <Button loading={submitting}>
+          <Button type="submit" loading={submitting}>
             {editing ? t('actions.saveChanges') : t('admin.students.createStudent')}
           </Button>
         </form>

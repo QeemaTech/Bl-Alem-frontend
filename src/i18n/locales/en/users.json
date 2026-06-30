@@ -523,6 +523,8 @@
           "subject": "Subject",
           "replies": "Replies",
           "bank": "Bank",
+          "phone": "Phone",
+          "transferType": "Transfer type",
           "plan": "Plan",
           "coupon": "Coupon",
           "payment": "Payment",

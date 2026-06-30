@@ -24,6 +24,7 @@
       "saveChanges": "Save changes",
       "deleteTitle": "Delete category",
       "deleteMessage": "Are you sure you want to delete category \"{{name}}\"?",
+      "deleteMessageWithCourses": "This category has {{count}} linked course(s). They will be moved to another category automatically. Delete \"{{name}}\"?",
       "backToCategories": "Back to categories",
       "notFound": {
         "title": "Category not found",
@@ -118,7 +119,8 @@
         "activated": "Category activated.",
         "deactivated": "Category deactivated.",
         "deleted": "Category deleted.",
-        "deleteError": "Cannot delete a category linked to courses.",
+        "deletedWithReassign": "Category deleted. {{count}} course(s) moved to \"{{fallback}}\".",
+        "deleteError": "Could not delete category.",
         "loadError": "Could not load category.",
         "statusError": "Could not update status."
       }

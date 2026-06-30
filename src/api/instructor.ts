@@ -59,6 +59,7 @@ export const instructorApi = {
   createSupportTicket: (payload: { subject: string; message: string }) => unwrap<any>(apiClient.post('/instructor/support-tickets', payload)),
   supportTicket: (id: string | number) => unwrap<any>(apiClient.get(`/instructor/support-tickets/${id}`)),
   replySupportTicket: (id: string | number, message: string) => unwrap<any>(apiClient.post(`/instructor/support-tickets/${id}/reply`, { message })),
+  supportFaqs: () => unwrap<any[]>(apiClient.get('/instructor/support-faqs')),
   upload: (kind: 'image' | 'video' | 'file', file: File) => {
     const form = new FormData();
     form.append('file', file);

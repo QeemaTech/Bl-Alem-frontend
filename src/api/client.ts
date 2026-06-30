@@ -1,4 +1,9 @@
 import axios from 'axios';
+import {
+  AUTH_TOKEN_KEY,
+  clearAuthSession,
+  notifySessionExpired,
+} from '../utils/authStorage';
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -17,7 +22,7 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('bi_alem_token');
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
@@ -28,7 +33,11 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) localStorage.removeItem('bi_alem_token');
+    const status = error.response?.status;
+    if (status === 401 || status === 403) {
+      clearAuthSession();
+      notifySessionExpired();
+    }
     return Promise.reject(error);
   },
 );
