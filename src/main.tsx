@@ -8,6 +8,7 @@ import { ThemeProvider } from './store/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
 import './i18n';
 import './styles/index.css';
+import './styles/landing.css';
 import './styles/rtl-ltr.css';
 import './styles/theme-bridge.css';
 import './styles/pages.css';

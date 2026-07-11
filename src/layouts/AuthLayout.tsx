@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Award, BadgeCheck, BookOpen, AlertTriangle, LiveTv, TrendingUp } from '@/icons';
+import { Award, BadgeCheck, BookOpen, AlertTriangle, Home, LiveTv, TrendingUp } from '@/icons';
+import { Link } from 'react-router-dom';
 import { BrandMark } from '../components/ui/BrandMark';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { useSiteSettings } from '../store/SiteSettingsContext';
@@ -34,9 +35,6 @@ export default function AuthLayout() {
 
   return (
     <div className="grid min-h-dvh w-full grid-cols-1 bg-surface lg:grid-cols-[52%_48%]">
-      <div className="auth-layout-lang-switch">
-        <LanguageSwitcher />
-      </div>
       <aside className="relative hidden overflow-hidden p-8 text-on-primary lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:justify-between lg:gap-8 lg:self-start xl:p-10">
         <div
           className="absolute inset-0"
@@ -139,7 +137,16 @@ export default function AuthLayout() {
         </motion.div>
       </aside>
 
-      <main className="flex flex-col items-center justify-center px-4 py-8 sm:px-8 sm:py-10 lg:min-h-dvh lg:px-10">
+      <main className="relative flex min-h-dvh flex-col px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-8">
+        <div className="auth-panel-toolbar">
+          <Link to="/" className="auth-layout-back-home">
+            <Home size={18} />
+            <span>{t('layout.backToHome')}</span>
+          </Link>
+          <LanguageSwitcher />
+        </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center">
         {loaded && platform.maintenanceMode ? (
           <div className="mb-5 w-full max-w-[500px] flex items-start gap-3 rounded-2xl border border-warning/50 bg-warning-container/35 p-4">
             <AlertTriangle size={22} className="mt-0.5 shrink-0 text-warning" />
@@ -150,6 +157,7 @@ export default function AuthLayout() {
           </div>
         ) : null}
         <Outlet />
+        </div>
       </main>
     </div>
   );

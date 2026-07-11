@@ -173,19 +173,46 @@ button, input, select, textarea { font: inherit; }
 .brand-mark-auth {
   color: #fff;
 }
+.brand-mark-auth-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
 .brand-mark-auth .brand-mark-text small {
   color: rgba(255, 255, 255, 0.75);
 }
 .brand-mark-auth .brand-mark-logo {
-  max-height: 56px;
-  max-width: 160px;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+  height: auto !important;
+  max-height: 78px;
+  max-width: 240px;
+  width: auto;
+  object-fit: contain;
+  filter: none;
 }
 .brand-mark-sidebar .brand-mark-text span {
   font-size: 1.05rem;
   line-height: 1.2;
 }
 .brand-mark-compact .brand-mark-text span { font-size: 0.95rem; }
+
+.platform-logo-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+.platform-logo-shell-landing {
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  border: 1px solid #E6EEF2;
+}
 
 /* ── Auth Layout ── */
 .auth-layout {

@@ -1817,6 +1817,7 @@
   /* Brand */
   .brand-mark { @apply flex min-w-0 items-center gap-2.5 font-extrabold text-primary; }
   .brand-mark img { @apply h-9 w-auto max-w-full object-contain; }
+  .brand-mark-auth img { @apply h-auto max-h-[4.875rem] w-auto max-w-[15rem]; }
   .brand-mark-sidebar {
     @apply w-full justify-center;
   }

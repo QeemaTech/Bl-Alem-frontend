@@ -1,5 +1,4 @@
-import { mediaUrl } from '../../utils/mediaUrl';
-import { splitPlatformName } from '../../utils/theme';
+import { resolvePlatformLogo } from '../../utils/branding';
 import { useSiteSettings } from '../../store/SiteSettingsContext';
 
 interface BrandMarkProps {
@@ -8,18 +7,16 @@ interface BrandMarkProps {
 
 export function BrandMark({ variant = 'sidebar' }: BrandMarkProps) {
   const { settings } = useSiteSettings();
-  const logoSrc = mediaUrl(settings.logo);
-  const { title, subtitle } = splitPlatformName(settings.platformName);
+  const logoSrc = resolvePlatformLogo(settings.logo);
 
   return (
     <div className={`brand brand-mark brand-mark-${variant}`}>
-      {logoSrc ? (
-        <img src={logoSrc} alt={settings.platformName} className="brand-mark-logo" />
-      ) : (
-        <div className="brand-mark-text">
-          <span>{title}</span>
-          <small>{subtitle}</small>
+      {variant === 'auth' ? (
+        <div className="brand-mark-auth-shell">
+          <img src={logoSrc} alt={settings.platformName} className="brand-mark-logo" />
         </div>
+      ) : (
+        <img src={logoSrc} alt={settings.platformName} className="brand-mark-logo" />
       )}
     </div>
   );

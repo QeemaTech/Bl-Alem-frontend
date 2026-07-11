@@ -1,8 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { GuestRoute } from './routes/GuestRoute';
-import { RootRedirect } from './routes/RootRedirect';
 import AuthLayout from './layouts/AuthLayout';
+import LandingPage from './pages/landing/LandingPage';
 import StudentLayout from './layouts/StudentLayout';
 import InstructorLayout from './layouts/InstructorLayout';
 import AdminLayout from './layouts/AdminLayout';
@@ -79,7 +79,7 @@ import CertificateVerifyPage from './pages/shared/CertificateVerifyPage';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<RootRedirect />} />
+      <Route path="/" element={<LandingPage />} />
       <Route element={<GuestRoute />}>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />

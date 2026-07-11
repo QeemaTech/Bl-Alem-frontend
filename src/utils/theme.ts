@@ -1,3 +1,4 @@
+import { DEFAULT_PLATFORM_LOGO } from './branding';
 import { mediaUrl, normalizeHexColor, normalizeStoredMediaPath } from './mediaUrl';
 
 export interface BrandingSettings {
@@ -58,17 +59,15 @@ export function applyBrandingTheme(settings: BrandingSettings) {
   root.style.setProperty('--shadow', `0 8px 30px ${primary}14`);
   root.style.setProperty('--shadow-lg', `0 18px 45px ${primary}1A`);
 
-  const faviconHref = mediaUrl(normalizeStoredMediaPath(settings.favicon || settings.logo));
-  if (faviconHref) {
-    let link = document.querySelector<HTMLLinkElement>('link[data-brand-favicon="true"]');
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'icon';
-      link.setAttribute('data-brand-favicon', 'true');
-      document.head.appendChild(link);
-    }
-    link.href = faviconHref;
+  const faviconHref = mediaUrl(normalizeStoredMediaPath(settings.favicon || settings.logo)) || DEFAULT_PLATFORM_LOGO;
+  let link = document.querySelector<HTMLLinkElement>('link[data-brand-favicon="true"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    link.setAttribute('data-brand-favicon', 'true');
+    document.head.appendChild(link);
   }
+  link.href = faviconHref;
 
   if (settings.metaTitle?.trim()) {
     document.title = settings.metaTitle.trim();

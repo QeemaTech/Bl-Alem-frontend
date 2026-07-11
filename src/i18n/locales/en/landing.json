@@ -1,0 +1,418 @@
+{
+  "brand": {
+    "name": "BI-ALEM",
+    "tagline": "بالعِلم"
+  },
+  "header": {
+    "openMenu": "Open menu",
+    "nav": {
+      "home": "Home",
+      "features": "Features",
+      "courses": "Courses",
+      "students": "For Students",
+      "instructors": "For Instructors",
+      "faq": "FAQ"
+    },
+    "login": "Sign In",
+    "register": "Create Account",
+    "registerFree": "Create Free Account",
+    "dashboard": "Dashboard"
+  },
+  "hero": {
+    "badge": "Complete Arabic-first learning platform",
+    "titlePrefix": "An all-in-one learning platform",
+    "titleHighlight": "that creates a smarter",
+    "titleSuffix": "and more organized learning experience",
+    "subtitle": "Learn from expert instructors, track your progress, join live sessions, test your skills, and earn digital certificates — all in one place.",
+    "ctaStudent": "Start Learning Now",
+    "ctaInstructor": "Join as Instructor",
+    "trustText": "An Arabic-first platform built for students and instructors with a simple, organized, and professional experience.",
+    "miniCards": [
+      "+10,000 students",
+      "+500 courses",
+      "Live sessions",
+      "Digital certificates"
+    ],
+    "floatProgress": "Progress tracking",
+    "floatCertificate": "Verified certificate",
+    "mockup": {
+      "title": "Student Dashboard — BI-ALEM",
+      "myCourses": "My courses",
+      "myCertificates": "My certificates",
+      "currentCourse": "Current course",
+      "courseTitle": "Mobile App Development",
+      "instructor": "Instructor: Mr. Mohammed Al-Omar",
+      "progress": "Progress",
+      "lessonProgress": "Lesson 14 of 21",
+      "liveToday": "Live session today",
+      "liveTime": "8:00 PM",
+      "live": "Live"
+    }
+  },
+  "stats": {
+    "items": [
+      { "value": "+10,000", "label": "Active students" },
+      { "value": "+500", "label": "Available courses" },
+      { "value": "+120", "label": "Expert instructors" },
+      { "value": "+95%", "label": "Learner satisfaction" }
+    ]
+  },
+  "features": {
+    "badge": "Features",
+    "title": "Everything you need for a complete learning experience",
+    "desc": "BI-ALEM is designed to meet all your educational needs from start to certificate.",
+    "items": [
+      {
+        "title": "Structured courses",
+        "desc": "Browse courses organized by field and level, and start learning with clear, guided steps."
+      },
+      {
+        "title": "Live lectures",
+        "desc": "Join interactive live sessions with instructors and stay on top of your schedule with reminders."
+      },
+      {
+        "title": "Quizzes & assessments",
+        "desc": "Test your understanding after lessons and track your level with clear, detailed results."
+      },
+      {
+        "title": "Digital certificates",
+        "desc": "Earn a completion certificate after finishing the course and meeting requirements — verifiable and shareable."
+      },
+      {
+        "title": "Smart student dashboard",
+        "desc": "Track your courses, progress, certificates, sessions, and payments from one easy dashboard."
+      },
+      {
+        "title": "Professional instructor dashboard",
+        "desc": "Create courses, add lessons and quizzes, and manage students and earnings with ease."
+      }
+    ]
+  },
+  "student": {
+    "badge": "Student experience",
+    "titlePrefix": "An experience designed for students",
+    "titleHighlight": "from start to certificate",
+    "desc": "A complete learning journey that starts with choosing a course and ends with a verified digital certificate.",
+    "steps": [
+      "Browse available courses after signing in",
+      "Enroll in the course that fits your level and interests",
+      "Watch lessons and track your progress lesson by lesson",
+      "Join live streaming sessions with your instructor",
+      "Take quizzes and measure your understanding",
+      "Earn your verified digital certificate"
+    ],
+    "cta": "Start as a Student",
+    "preview": {
+      "liveNow": "Live now",
+      "courseTitle": "Mobile App Development with Flutter",
+      "category": "Programming",
+      "instructor": "Ms. Sarah Al-Mohammed",
+      "progressLabel": "Course progress",
+      "lessonProgress": "Lesson 18 of 24",
+      "nextSession": "Next session",
+      "nextSessionTime": "Tomorrow — 9:00 PM",
+      "registerAttendance": "Register attendance",
+      "certificateReady": "Certificate ready"
+    }
+  },
+  "instructor": {
+    "badge": "Instructor experience",
+    "titlePrefix": "An instructor dashboard that helps you turn",
+    "titleHighlight": "your expertise into professional content",
+    "desc": "Everything you need to create courses, manage students, and track earnings from one integrated dashboard.",
+    "steps": [
+      "Create your courses with simple, organized steps",
+      "Add sections, lessons, and attached files",
+      "Build interactive quizzes to measure student understanding",
+      "Schedule live sessions with defined dates",
+      "Track enrolled students and reviews",
+      "Monitor earnings and withdrawal requests easily"
+    ],
+    "cta": "Join as Instructor",
+    "preview": {
+      "title": "Instructor Dashboard",
+      "currentMonth": "This month",
+      "totalEarnings": "Total earnings",
+      "currency": "SAR",
+      "growth": "+18% vs last month",
+      "students": "Students",
+      "courses": "Courses",
+      "courseItems": [
+        { "name": "Flutter for Beginners", "students": "89", "status": "Published" },
+        { "name": "Advanced React Native", "students": "54", "status": "Under review" }
+      ],
+      "statusPublished": "Published",
+      "statusReview": "Under review"
+    }
+  },
+  "courses": {
+    "badge": "Courses",
+    "title": "Courses that help you grow your skills",
+    "desc": "Explore a diverse collection of specialized courses covering the most in-demand fields.",
+    "loginHint": "Sign in to access all available courses",
+    "discount": "Sale",
+    "lessons": "lessons",
+    "details": "Details",
+    "currency": "SAR",
+    "ctaLogin": "Sign In",
+    "ctaRegister": "Start Learning Free",
+    "items": [
+      {
+        "title": "Mobile App Development with Flutter",
+        "instructorName": "Mr. Mohammed Al-Omar",
+        "category": "Programming"
+      },
+      {
+        "title": "UI/UX Design",
+        "instructorName": "Ms. Sarah Al-Mohammed",
+        "category": "Design"
+      },
+      {
+        "title": "Data Analysis with Python",
+        "instructorName": "Mr. Ahmed Al-Rashid",
+        "category": "Data"
+      },
+      {
+        "title": "Integrated Digital Marketing",
+        "instructorName": "Ms. Noura Al-Saeed",
+        "category": "Marketing"
+      },
+      {
+        "title": "AI Fundamentals",
+        "instructorName": "Mr. Khalid Al-Zahrani",
+        "category": "AI"
+      },
+      {
+        "title": "Professional Project Management",
+        "instructorName": "Mr. Fahad Al-Otaibi",
+        "category": "Management"
+      }
+    ]
+  },
+  "howItWorks": {
+    "badge": "How it works",
+    "title": "How do you start your learning journey?",
+    "desc": "Four simple steps stand between you and an organized, complete learning experience.",
+    "steps": [
+      {
+        "title": "Create your account",
+        "desc": "Register your details and choose your role (student or instructor) in one minute."
+      },
+      {
+        "title": "Choose the right course",
+        "desc": "Browse available courses and filter by field, level, and price."
+      },
+      {
+        "title": "Start learning and tracking",
+        "desc": "Watch lessons, join live sessions, and take quizzes at your own pace."
+      },
+      {
+        "title": "Earn your certificate",
+        "desc": "Complete the course and pass the requirements to receive a verified digital certificate."
+      }
+    ]
+  },
+  "live": {
+    "badge": "Live sessions",
+    "titlePrefix": "Live learning with",
+    "titleHighlight": "real interaction",
+    "desc": "Connect directly with your instructors in live interactive sessions and get instant answers to your questions.",
+    "benefits": [
+      "Organized and scheduled sessions",
+      "Reminders right before each session",
+      "Join link for enrolled students",
+      "Direct communication with the instructor"
+    ],
+    "cta": "Explore sessions",
+    "preview": {
+      "upcoming": "Upcoming live session",
+      "live": "Live now",
+      "title": "Final Flutter Project Review",
+      "instructor": "Mr. Mohammed Al-Omar",
+      "dateLabel": "Date",
+      "date": "Wednesday, July 9",
+      "timeLabel": "Time",
+      "time": "8:00 PM (UTC+3)",
+      "enrolled": "+48 enrolled students",
+      "freeForSubscribers": "Free for subscribers",
+      "cta": "Explore sessions after signing in",
+      "upcomingCount": "3 upcoming sessions this week",
+      "upcomingHint": "Across different courses"
+    }
+  },
+  "certificates": {
+    "badge": "Certificates & rewards",
+    "title": "Certificates and rewards that keep you motivated",
+    "desc": "Every achievement deserves recognition, and our rewards system makes learning even more engaging.",
+    "certTitle": "Digital certificates",
+    "certDesc": "Complete the course and pass the requirements to earn a verified digital certificate you can share.",
+    "certFeatures": [
+      "Official completion certificate",
+      "Unique verification number for each certificate",
+      "Shareable verification link",
+      "Shareable on LinkedIn"
+    ],
+    "certPreviewLabel": "Completion certificate",
+    "certPreviewTitle": "Mobile App Development",
+    "certPreviewNumber": "#CERT-2025-00142",
+    "rewardTitle": "Rewards & referrals",
+    "rewardDesc": "Invite friends to join the platform and earn balance and rewards with every successful referral.",
+    "rewardFeatures": [
+      "Your personal referral code",
+      "Exclusive coupons and discounts",
+      "Usable reward balance",
+      "Earn when you invite friends"
+    ],
+    "referralLabel": "Your referral code",
+    "copy": "Copy"
+  },
+  "admin": {
+    "badge": "Admin dashboard",
+    "titlePrefix": "Complete platform management",
+    "titleHighlight": "from one dashboard",
+    "desc": "BI-ALEM includes a full admin system that gives you complete visibility and control over every part of the platform.",
+    "features": [
+      {
+        "title": "Manage students and instructors",
+        "desc": "Approve or reject accounts and monitor full user activity."
+      },
+      {
+        "title": "Review courses before publishing",
+        "desc": "Review course content and approve it before it becomes available to students."
+      },
+      {
+        "title": "Manage categories and payments",
+        "desc": "Organize course categories and manage financial transactions and withdrawals."
+      },
+      {
+        "title": "Manage coupons and certificates",
+        "desc": "Create discount coupons and track and issue student certificates."
+      },
+      {
+        "title": "Reports and analytics",
+        "desc": "A comprehensive analytics dashboard showing platform growth, revenue, and activity."
+      },
+      {
+        "title": "Notifications and support",
+        "desc": "Manage support tickets, send notifications, and communicate with users."
+      }
+    ],
+    "preview": {
+      "title": "Admin Dashboard",
+      "live": "Live",
+      "students": "Students",
+      "courses": "Courses",
+      "instructors": "Instructors",
+      "monthlyRevenue": "Monthly revenue",
+      "growth": "↑ 23%",
+      "pendingCourses": "5 courses pending review",
+      "pendingWithdrawals": "8 withdrawal requests pending approval"
+    }
+  },
+  "testimonials": {
+    "badge": "User reviews",
+    "title": "What learners and instructors say",
+    "desc": "Real experiences from students and instructors who use BI-ALEM every day.",
+    "items": [
+      {
+        "name": "Salma Al-Harbi",
+        "role": "Student — Programming",
+        "tag": "Student",
+        "text": "The experience is very organized. I can track my course, sessions, and certificate from one place. The platform is clear and easy to use, and the instructors are professional and responsive."
+      },
+      {
+        "name": "Mr. Khalid Al-Mansour",
+        "role": "Instructor — Web Development",
+        "tag": "Instructor",
+        "text": "As an instructor, the platform gave me all the tools I need to create my courses and follow my students. The content creation interface is easy, and my earnings are tracked transparently."
+      },
+      {
+        "name": "Noura Al-Shammari",
+        "role": "Student — UI/UX Design",
+        "tag": "Student",
+        "text": "I received my certificate just two weeks after completion, and it was easy to share on LinkedIn. I recommend it to every student looking for an organized learning experience."
+      }
+    ],
+    "bannerTitle": "Join thousands of learners on BI-ALEM",
+    "bannerDesc": "Start your learning journey today and become part of a growing educational community",
+    "satisfaction": "Learner satisfaction",
+    "activeStudents": "Active students"
+  },
+  "faq": {
+    "badge": "FAQ",
+    "title": "Frequently asked questions",
+    "desc": "Clear answers to the most common questions about BI-ALEM.",
+    "items": [
+      {
+        "q": "Can I register as a student or instructor?",
+        "a": "Yes. You can register on BI-ALEM as a student or instructor depending on your needs. Students can enroll in courses and track progress, while instructors can create and publish courses for all students."
+      },
+      {
+        "q": "Are courses free or paid?",
+        "a": "Courses are available at different prices. Instructors set course pricing, and discount coupons and seasonal offers are also available. Students can use the rewards and referral system to get discounts."
+      },
+      {
+        "q": "Are certificates available after course completion?",
+        "a": "Yes. Students receive a verified digital certificate once they complete the course and meet the requirements. Each certificate includes a unique verification number and link, and can be shared on LinkedIn and elsewhere."
+      },
+      {
+        "q": "How do live sessions work?",
+        "a": "Instructors schedule live sessions in advance and set the date and time. Enrolled students receive a reminder before the session and can join through a private link. Meeting links are never shared publicly for security."
+      },
+      {
+        "q": "Can instructors upload courses on their own?",
+        "a": "Yes. Instructors can independently create courses through the instructor dashboard. They can add sections, lessons, files, quizzes, and schedule live sessions with ease."
+      },
+      {
+        "q": "Are courses reviewed before publishing?",
+        "a": "Yes. All courses are reviewed by the admin team before becoming available to students to ensure quality and platform standards. Review usually takes 1 to 3 business days."
+      },
+      {
+        "q": "Is there a rewards or referral system?",
+        "a": "Yes. BI-ALEM includes a full rewards and referral system. You can share your referral code with friends to earn reward balance for course purchases. Periodic discount coupons are also available."
+      },
+      {
+        "q": "How do I contact support?",
+        "a": "You can contact support through the support section inside your dashboard or by email at support@bialem.com. The support team is available throughout the week."
+      }
+    ],
+    "supportTitle": "Still have questions?",
+    "supportDesc": "Our support team is ready to help you anytime",
+    "supportCta": "Contact support"
+  },
+  "cta": {
+    "title": "Start now and make learning more organized and professional",
+    "desc": "Whether you are a student looking to grow your skills or an instructor ready to share your expertise, BI-ALEM gives you a complete experience from start to finish.",
+    "register": "Create Free Account",
+    "login": "Sign In",
+    "goDashboard": "Go to Dashboard",
+    "trust": [
+      "No registration fees",
+      "Secure encrypted data",
+      "Continuous technical support"
+    ]
+  },
+  "footer": {
+    "desc": "A complete Arabic-first learning platform that brings students and instructors together in an organized, professional environment.",
+    "quickLinks": "Quick links",
+    "account": "Account",
+    "contact": "Contact us",
+    "supportHours": "Support available\nthroughout the week",
+    "trusted": "Trusted learning platform",
+    "students": "Students",
+    "courses": "Courses",
+    "copyright": "© 2026 BI-ALEM. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "accountLinks": {
+      "login": "Sign In",
+      "registerStudent": "Create student account",
+      "registerInstructor": "Create instructor account",
+      "verifyCertificate": "Verify certificates"
+    },
+    "social": {
+      "website": "Website",
+      "email": "Email"
+    }
+  }
+}

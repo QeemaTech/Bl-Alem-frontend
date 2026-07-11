@@ -31,6 +31,7 @@ import arCertificates from './locales/ar/certificates.json';
 import arReviews from './locales/ar/reviews.json';
 import arCommunity from './locales/ar/community.json';
 import arProfile from './locales/ar/profile.json';
+import arLanding from './locales/ar/landing.json';
 
 import enCommon from './locales/en/common.json';
 import enNav from './locales/en/nav.json';
@@ -55,6 +56,7 @@ import enCertificates from './locales/en/certificates.json';
 import enReviews from './locales/en/reviews.json';
 import enCommunity from './locales/en/community.json';
 import enProfile from './locales/en/profile.json';
+import enLanding from './locales/en/landing.json';
 
 export { applyDocumentDirection, supportedLanguages, STORAGE_KEY } from './config';
 export type { SupportedLanguage } from './config';
@@ -89,6 +91,7 @@ void i18n
         reviews: arReviews,
         community: arCommunity,
         profile: arProfile,
+        landing: arLanding,
       },
       en: {
         common: enCommon,
@@ -114,6 +117,7 @@ void i18n
         reviews: enReviews,
         community: enCommunity,
         profile: enProfile,
+        landing: enLanding,
       },
     },
     lng: initialLanguage,
@@ -143,6 +147,7 @@ void i18n
       'reviews',
       'community',
       'profile',
+      'landing',
     ],
     interpolation: { escapeValue: false },
     react: {
