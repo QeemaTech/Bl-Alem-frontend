@@ -6,7 +6,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import type { MaterialIcon } from '@/icons';
 
-import { PoweredByQeema } from '../components/branding/PoweredByQeema';
+import { DashboardFooter } from '../components/branding/DashboardFooter';
 
 import { PlatformStatusBanner } from '../components/platform/PlatformStatusBanner';
 
@@ -201,7 +201,7 @@ export default function DashboardLayout({
           <Outlet />
 
           {sidebarVariant === 'student' || sidebarVariant === 'instructor' ? (
-            <PoweredByQeema />
+            <DashboardFooter />
           ) : null}
 
         </div>

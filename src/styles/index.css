@@ -3133,32 +3133,7 @@
     @apply mb-2;
   }
 
-  /* Qeema Tech attribution footer (student + instructor) */
-  .powered-by-qeema {
-    @apply mt-auto flex justify-center pt-8 pb-2;
-  }
-  .powered-by-qeema-link {
-    @apply inline-flex items-center gap-2 rounded-xl px-3 py-2 text-on-surface-variant no-underline transition-opacity duration-200;
-  }
-  .powered-by-qeema-link:hover {
-    @apply opacity-80;
-  }
-  .powered-by-qeema-link:focus-visible {
-    @apply outline-2 outline-offset-2 outline-primary;
-  }
-  .powered-by-qeema-text {
-    @apply text-xs font-semibold tracking-wide;
-  }
-  .powered-by-qeema-logo {
-    @apply h-8 w-auto object-contain;
-  }
-  .powered-by-qeema-landing {
-    @apply mt-0 pt-0 pb-0;
-  }
-  .powered-by-qeema-landing .powered-by-qeema-text {
-    color: #94A3B8;
-  }
-  .powered-by-qeema-landing .powered-by-qeema-link:hover {
-    @apply opacity-90;
+  .dashboard-qeema-footer {
+    @apply mt-auto;
   }
 }

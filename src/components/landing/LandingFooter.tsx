@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLandingLocale } from '../../hooks/useLandingLocale';
-import { PoweredByQeema } from '../branding/PoweredByQeema';
+import { DashboardFooter } from '../branding/DashboardFooter';
 import { PlatformLogo } from '../ui/PlatformLogo';
 import { Icon } from '../ui/Icon';
 
@@ -179,11 +179,9 @@ export default function LandingFooter() {
             ))}
           </div>
         </div>
-
-        <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center' }}>
-          <PoweredByQeema variant="landing" />
-        </div>
       </div>
+
+      <DashboardFooter />
     </footer>
   );
 }
