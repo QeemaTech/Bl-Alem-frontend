@@ -163,7 +163,12 @@ export default function LandingFooter() {
 
         <div className="lp-footer-bottom">
           <p className="lp-footer-copy">{t('footer.copyright')}</p>
-          <QeemaBrandLink className="qeema-brand-link-landing" />
+          <div className="lp-footer-qeema">
+            <QeemaBrandLink className="qeema-brand-link-landing" />
+            <p className="lp-footer-powered">
+              Powered by <span>قيمة تك</span>
+            </p>
+          </div>
           <div className="lp-footer-legal">
             {[t('footer.privacy'), t('footer.terms')].map(item => (
               <span key={item} className="lp-footer-legal-item">

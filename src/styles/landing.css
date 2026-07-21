@@ -702,6 +702,24 @@ html[dir="ltr"] .lp-mobile-drawer {
   color: #64748B;
   justify-self: start;
 }
+.lp-footer-qeema {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  justify-self: center;
+}
+.lp-footer-powered {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #94A3B8;
+}
+.lp-footer-powered span {
+  color: #E2E8F0;
+  font-weight: 600;
+}
 .lp-footer-legal {
   display: flex;
   gap: 20px;
