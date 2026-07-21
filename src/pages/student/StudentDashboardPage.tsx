@@ -127,6 +127,7 @@ export default function StudentDashboardPage() {
   );
 
   const completionRate = useMemo(() => {
+    if (data?.overallProgressPercentage != null) return data.overallProgressPercentage;
     const total = data?.totalEnrolledCourses ?? 0;
     const done = data?.completedCourses ?? 0;
     return total ? Math.round((done / total) * 100) : 0;

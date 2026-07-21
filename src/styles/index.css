@@ -158,7 +158,7 @@
     @apply flex min-h-screen min-w-0 flex-col overflow-x-clip bg-surface;
   }
   .dashboard-content {
-    @apply min-w-0 w-full flex-1 overflow-x-clip overflow-y-auto p-4 md:p-6;
+    @apply flex min-w-0 w-full flex-1 flex-col overflow-x-clip overflow-y-auto p-4 md:p-6;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -3131,5 +3131,25 @@
   }
   .student-learning-path-detail .breadcrumb {
     @apply mb-2;
+  }
+
+  /* Qeema Tech attribution footer (student + instructor) */
+  .powered-by-qeema {
+    @apply mt-auto flex justify-center pt-8 pb-2;
+  }
+  .powered-by-qeema-link {
+    @apply inline-flex items-center gap-2 rounded-xl px-3 py-2 text-on-surface-variant no-underline transition-opacity duration-200;
+  }
+  .powered-by-qeema-link:hover {
+    @apply opacity-80;
+  }
+  .powered-by-qeema-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+  .powered-by-qeema-text {
+    @apply text-xs font-semibold tracking-wide;
+  }
+  .powered-by-qeema-logo {
+    @apply h-8 w-auto object-contain;
   }
 }

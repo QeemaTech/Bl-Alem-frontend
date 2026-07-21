@@ -126,5 +126,11 @@
     "student": "student",
     "students": "students",
     "sale": "sale"
+  },
+  "poweredBy": {
+    "aria": "Attribution",
+    "label": "Powered by",
+    "title": "Qeema Tech — Visit website",
+    "logoAlt": "Qeema Tech"
   }
 }

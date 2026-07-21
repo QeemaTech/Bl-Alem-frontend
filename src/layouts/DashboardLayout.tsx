@@ -6,6 +6,8 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import type { MaterialIcon } from '@/icons';
 
+import { PoweredByQeema } from '../components/branding/PoweredByQeema';
+
 import { PlatformStatusBanner } from '../components/platform/PlatformStatusBanner';
 
 import { Header } from '../components/dashboard/Header';
@@ -197,6 +199,10 @@ export default function DashboardLayout({
           {platformBanner ? <PlatformStatusBanner variant={platformBanner} /> : null}
 
           <Outlet />
+
+          {sidebarVariant === 'student' || sidebarVariant === 'instructor' ? (
+            <PoweredByQeema />
+          ) : null}
 
         </div>
 
