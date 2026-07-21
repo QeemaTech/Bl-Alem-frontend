@@ -1,5 +1,24 @@
 const QEEMA_SITE = 'https://www.qeematech.net/';
 
+export function QeemaBrandLink({ className = '' }: { className?: string }) {
+  return (
+    <a
+      href={QEEMA_SITE}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`qeema-brand-link ${className}`.trim()}
+      aria-label="Qeema Tech - قيمة تك"
+    >
+      <img
+        src="/qeema-logo.svg"
+        alt=""
+        className="qeema-brand-logo"
+      />
+      <span className="qeema-brand-name">Qeema Tech</span>
+    </a>
+  );
+}
+
 export function DashboardFooter() {
   return (
     <footer
@@ -11,22 +30,7 @@ export function DashboardFooter() {
           Copyright © {new Date().getFullYear()} · All Rights Reserved
         </p>
 
-        <a
-          href={QEEMA_SITE}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="order-1 flex items-center gap-2 rounded-full border border-outline bg-surface-container-low/80 px-4 py-2 shadow-sm transition-all hover:border-primary/30 hover:bg-primary-container/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:order-2"
-          aria-label="Qeema Tech - قيمة تك"
-        >
-          <img
-            src="/qeema-logo.svg"
-            alt=""
-            className="h-7 w-auto object-contain"
-          />
-          <span className="text-sm font-semibold tracking-tight text-on-surface">
-            Qeema Tech
-          </span>
-        </a>
+        <QeemaBrandLink className="order-1 sm:order-2" />
 
         <p className="order-3 hidden text-end text-xs font-medium tracking-wide sm:block">
           Powered by <span className="text-on-surface">قيمة تك</span>

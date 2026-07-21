@@ -3136,4 +3136,19 @@
   .dashboard-qeema-footer {
     @apply mt-auto;
   }
+  .qeema-brand-link {
+    @apply inline-flex items-center gap-2 rounded-full border border-outline bg-surface-container-low/80 px-4 py-2 no-underline shadow-sm transition-all;
+  }
+  .qeema-brand-link:hover {
+    @apply border-primary/30 bg-primary-container/40 shadow-md;
+  }
+  .qeema-brand-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+  .qeema-brand-logo {
+    @apply h-7 w-auto object-contain;
+  }
+  .qeema-brand-name {
+    @apply text-sm font-semibold tracking-tight text-on-surface;
+  }
 }

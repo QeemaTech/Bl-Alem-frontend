@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLandingLocale } from '../../hooks/useLandingLocale';
-import { DashboardFooter } from '../branding/DashboardFooter';
+import { QeemaBrandLink } from '../branding/DashboardFooter';
 import { PlatformLogo } from '../ui/PlatformLogo';
 import { Icon } from '../ui/Icon';
 
@@ -161,27 +161,18 @@ export default function LandingFooter() {
 
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', marginBottom: 24 }} />
 
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}>
-          <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
-            {t('footer.copyright')}
-          </p>
-          <div style={{ display: 'flex', gap: 20 }}>
+        <div className="lp-footer-bottom">
+          <p className="lp-footer-copy">{t('footer.copyright')}</p>
+          <QeemaBrandLink className="qeema-brand-link-landing" />
+          <div className="lp-footer-legal">
             {[t('footer.privacy'), t('footer.terms')].map(item => (
-              <span key={item} style={{ fontSize: '0.78rem', color: '#64748B', cursor: 'pointer', transition: 'color 0.2s ease' }}>
+              <span key={item} className="lp-footer-legal-item">
                 {item}
               </span>
             ))}
           </div>
         </div>
       </div>
-
-      <DashboardFooter />
     </footer>
   );
 }
