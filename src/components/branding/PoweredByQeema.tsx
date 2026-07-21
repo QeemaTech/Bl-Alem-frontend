@@ -3,11 +3,19 @@ import { useTranslation } from 'react-i18next';
 const QEEMA_URL = 'https://www.qeematech.net/';
 const QEEMA_LOGO = '/branding/qeema-tech.png';
 
-export function PoweredByQeema() {
+interface PoweredByQeemaProps {
+  variant?: 'default' | 'landing';
+}
+
+export function PoweredByQeema({ variant = 'default' }: PoweredByQeemaProps) {
   const { t } = useTranslation('common');
+  const isLanding = variant === 'landing';
 
   return (
-    <footer className="powered-by-qeema" aria-label={t('poweredBy.aria')}>
+    <div
+      className={isLanding ? 'powered-by-qeema powered-by-qeema-landing' : 'powered-by-qeema'}
+      aria-label={t('poweredBy.aria')}
+    >
       <a
         href={QEEMA_URL}
         target="_blank"
@@ -25,6 +33,6 @@ export function PoweredByQeema() {
           loading="lazy"
         />
       </a>
-    </footer>
+    </div>
   );
 }

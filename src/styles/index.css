@@ -3152,4 +3152,13 @@
   .powered-by-qeema-logo {
     @apply h-8 w-auto object-contain;
   }
+  .powered-by-qeema-landing {
+    @apply mt-0 pt-0 pb-0;
+  }
+  .powered-by-qeema-landing .powered-by-qeema-text {
+    color: #94A3B8;
+  }
+  .powered-by-qeema-landing .powered-by-qeema-link:hover {
+    @apply opacity-90;
+  }
 }
